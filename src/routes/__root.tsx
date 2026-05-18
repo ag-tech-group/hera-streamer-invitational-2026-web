@@ -28,15 +28,6 @@ const ReactQueryDevtools = import.meta.env.PROD
 
 interface RouterContext {
   queryClient: QueryClient
-  auth: {
-    isAuthenticated: boolean
-    isLoading: boolean
-    email: string | null
-    userId: string | null
-    login: (email: string) => void
-    logout: () => Promise<void>
-    checkAuth: () => Promise<void>
-  }
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
