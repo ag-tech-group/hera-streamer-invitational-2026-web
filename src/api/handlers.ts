@@ -1,14 +1,11 @@
-import { http, HttpResponse, type HttpHandler } from "msw"
+import { type HttpHandler } from "msw"
 
 /**
- * Import generated MSW handlers after running `pnpm generate-api`
- * Example:
- *  import { getDefaultMock } from "@/api/generated/hooks/default/default.msw"
- *  import { getNotesMock } from "@/api/generated/hooks/notes/notes.msw"
- *  export const handlers: HttpHandler[] = [...getDefaultMock(), ...getNotesMock()]
+ * MSW handler aggregator for tests.
+ *
+ * Test-specific handlers (e.g., simulating error responses) can be added here
+ * or registered per-test via `server.use(...)`. We don't author fake-data
+ * handlers for product features — the frontend consumes real endpoints from
+ * the sibling API.
  */
-
-export const handlers: HttpHandler[] = [
-  // Return 401 for /v1/auth/me by default (unauthenticated)
-  http.get("*/v1/auth/me", () => HttpResponse.json(null, { status: 401 })),
-]
+export const handlers: HttpHandler[] = []
