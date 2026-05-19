@@ -7,6 +7,8 @@ import { RouterProvider, createRouter } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { toast } from "sonner"
+import { ErrorBoundary } from "./components/error-boundary"
+import { NotFound } from "./components/not-found"
 import { ThemeProvider } from "./components/theme-provider"
 import "./index.css"
 import { AnalyticsProvider } from "./lib/analytics"
@@ -38,6 +40,8 @@ const router = createRouter({
   },
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
+  defaultNotFoundComponent: NotFound,
+  defaultErrorComponent: ErrorBoundary,
 })
 
 declare module "@tanstack/react-router" {
