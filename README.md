@@ -59,24 +59,28 @@ pnpm generate-routes   # Regenerate TanStack Router route tree
 
 ```
 src/
-├── api/                  # ky client + orval adapter; generated/ is auto-written by orval
+├── api/                  # ky client, orval mutator, DTO→UI adapters; generated/ is orval output
 ├── components/
 │   ├── ui/               # shadcn/ui primitives
 │   └── ...               # Theme provider, error boundary, 404 page
+├── config/               # Build-time tournament config registry
+├── hooks/                # Data hooks (useStandings) over the generated client
 ├── lib/                  # Analytics, feature flags, logger, error message helpers
 ├── pages/                # Page components
 ├── routes/               # TanStack Router file-based routes
 ├── test/                 # Vitest setup + test renderers
+├── types/                # UI-facing domain types
 └── main.tsx              # Entry point (providers, router, mutation cache)
 ```
 
 ## Environment Variables
 
-| Variable         | Description                               | Default                              |
-| ---------------- | ----------------------------------------- | ------------------------------------ |
-| `VITE_API_URL`   | Backend API URL                           | `/api`                               |
-| `VITE_LOG_LEVEL` | Minimum log level (debug/info/warn/error) | `debug` (dev), `warn` (prod)         |
-| `OPENAPI_URL`    | OpenAPI spec URL for `pnpm generate-api`  | `http://localhost:8000/openapi.json` |
+| Variable               | Description                               | Default                              |
+| ---------------------- | ----------------------------------------- | ------------------------------------ |
+| `VITE_API_URL`         | Backend API URL                           | `/api`                               |
+| `VITE_TOURNAMENT_SLUG` | Tournament config this build serves       | `hera-streamer-invitational-2026`    |
+| `VITE_LOG_LEVEL`       | Minimum log level (debug/info/warn/error) | `debug` (dev), `warn` (prod)         |
+| `OPENAPI_URL`          | OpenAPI spec URL for `pnpm generate-api`  | `http://localhost:8000/openapi.json` |
 
 ## License
 
