@@ -5,7 +5,10 @@ import reactRefresh from "eslint-plugin-react-refresh"
 import tseslint from "typescript-eslint"
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  // `dist` is the build output; `src/api/generated` is orval output (zod
+  // schemas in particular have regex escapes that trip no-useless-escape
+  // even though they're correct in the generated regexes).
+  { ignores: ["dist", "src/api/generated/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

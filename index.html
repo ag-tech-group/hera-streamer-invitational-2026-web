@@ -4,9 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      connect-src includes the deployed standings API origin so the browser
+      lets the generated client reach it (fetch now, EventSource/SSE later).
+      http://localhost:* stays for running the API locally during dev.
+    -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:*; img-src 'self' data: https:; object-src 'none'; frame-src 'none'; form-action 'self'; upgrade-insecure-requests; base-uri 'self'"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:* https://aoe2-live-standings-api.criticalbit.gg; img-src 'self' data: https:; object-src 'none'; frame-src 'none'; form-action 'self'; upgrade-insecure-requests; base-uri 'self'"
     />
     <title>Live Standings</title>
   </head>

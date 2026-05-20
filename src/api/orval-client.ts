@@ -48,9 +48,18 @@ export const orvalClient = async <T>(
     signal: options?.signal,
   })
 
-  // 204 No Content - orval types these responses as void
+  // orval v8 with `httpClient: "fetch"` expects the mutator to return the
+  // full `{ data, status, headers }` shape — the generated response types
+  // are declared that way and the hooks read `.data` off it. Returning the
+  // bare parsed body (the older orval convention) leaves every `.data`
+  // access undefined.
   if (response.status === 204) {
-    return undefined as T
+    // 204 No Content — no body to parse.
+    return {
+      data: undefined,
+      status: response.status,
+      headers: response.headers,
+    } as T
   }
 
   // Ensure we have JSON content
@@ -61,7 +70,8 @@ export const orvalClient = async <T>(
     )
   }
 
-  return response.json()
+  const data = await response.json()
+  return { data, status: response.status, headers: response.headers } as T
 }
 
 export default orvalClient
