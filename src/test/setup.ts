@@ -4,9 +4,15 @@ import { cleanup } from "@testing-library/react"
 import { setupServer } from "msw/node"
 import { afterAll, afterEach, beforeAll, vi } from "vitest"
 
-const server = setupServer(...handlers)
+/**
+ * Shared MSW server. Tests register per-scenario handlers with `server.use(...)`
+ * (cleared after each test); see `src/api/handlers.ts` for the convention.
+ */
+export const server = setupServer(...handlers)
 
-beforeAll(() => server.listen())
+// Fail tests that hit an unmocked endpoint rather than letting them reach the
+// real network — keeps the suite deterministic and offline.
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }))
 afterAll(() => server.close())
 afterEach(() => {
   server.resetHandlers()

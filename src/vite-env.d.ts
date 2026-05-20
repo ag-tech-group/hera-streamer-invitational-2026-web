@@ -3,6 +3,7 @@
 interface ImportMetaEnv {
   readonly VITE_API_URL?: string
   readonly VITE_LOG_LEVEL?: string
+  readonly VITE_TOURNAMENT_SLUG?: string
 }
 
 interface ImportMeta {
