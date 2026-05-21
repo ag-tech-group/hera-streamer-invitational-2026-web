@@ -19,11 +19,16 @@ export function HomePage() {
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-4xl flex-col gap-6 p-8">
       <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight">Live Standings</h1>
-          <p className="text-muted-foreground text-sm">
-            {activeTournament.name}
-          </p>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="" className="size-16 shrink-0" />
+          <div className="flex flex-col gap-1">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Live Standings
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {activeTournament.name}
+            </p>
+          </div>
         </div>
         {data ? <LastUpdatedBadge lastPolledAt={data.lastPolledAt} /> : null}
       </header>
