@@ -67,9 +67,7 @@ describe("HomePage", () => {
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
-    expect(
-      await screen.findByText(/no standings to show yet/i)
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/no standings yet/i)).toBeInTheDocument()
   })
 
   it("shows an error state when the standings request fails", async () => {

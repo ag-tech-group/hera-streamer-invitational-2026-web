@@ -1,10 +1,14 @@
 import { activeTournament } from "@/config/tournaments"
 import { useStandings } from "@/hooks/use-standings"
-import { StandingsTable } from "@/pages/home/standings-table"
+import { StandingsEmpty, StandingsError } from "@/pages/home/standings-states"
+import {
+  StandingsTable,
+  StandingsTableSkeleton,
+} from "@/pages/home/standings-table"
 import type { StandingsSnapshot } from "@/types"
 
 export function HomePage() {
-  const { data, isPending, isError } = useStandings()
+  const { data, isPending, isError, refetch } = useStandings()
 
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-4xl flex-col gap-6 p-8">
@@ -16,39 +20,38 @@ export function HomePage() {
         snapshot={data}
         isPending={isPending}
         isError={isError}
+        onRetry={() => void refetch()}
       />
     </div>
   )
 }
 
 /**
- * Picks the standings view for the current query state. The loading skeleton
- * and the polished empty/error states land in later commits of issue #3 — for
- * now those branches stay as plain text.
+ * Picks the standings view that matches the current query state. Order matters:
+ * a request still in flight must not surface as empty or error, and a failed
+ * request must not be mistaken for an empty leaderboard.
  */
 function StandingsSection({
   snapshot,
   isPending,
   isError,
+  onRetry,
 }: {
   snapshot: StandingsSnapshot | undefined
   isPending: boolean
   isError: boolean
+  onRetry: () => void
 }) {
   if (isPending) {
-    return <p className="text-muted-foreground text-sm">Loading standings…</p>
+    return <StandingsTableSkeleton />
   }
 
   if (isError || !snapshot) {
-    return (
-      <p className="text-muted-foreground text-sm">Couldn't load standings.</p>
-    )
+    return <StandingsError onRetry={onRetry} />
   }
 
   if (snapshot.rows.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">No standings to show yet.</p>
-    )
+    return <StandingsEmpty />
   }
 
   return <StandingsTable rows={snapshot.rows} />

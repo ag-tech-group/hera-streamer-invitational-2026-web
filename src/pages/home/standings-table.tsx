@@ -1,11 +1,16 @@
 import { Globe } from "lucide-react"
+import type { ReactNode } from "react"
 
+import { Skeleton } from "@/components/ui/skeleton"
 import { countryFlagEmoji, formatRelativeTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { StandingsRow } from "@/types"
 
 /** A player's last match counts as "active" if it landed within this window. */
 const ACTIVE_WITHIN_MS = 24 * 60 * 60 * 1000
+
+/** Placeholder row count rendered while the standings request is in flight. */
+const SKELETON_ROW_COUNT = 6
 
 /**
  * The polished standings table. A pure presentation component: it renders the
@@ -18,9 +23,88 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
   const now = new Date()
 
   return (
+    <TableShell caption="Live tournament standings">
+      {rows.map((row) => (
+        <tr
+          key={row.profileId}
+          className="hover:bg-muted/40 border-b transition-colors last:border-b-0"
+        >
+          <td className="px-4 py-3">
+            <RankCell rank={row.rank} />
+          </td>
+          <td className="px-4 py-3">
+            <PlayerCell alias={row.alias} country={row.country} />
+          </td>
+          <td className="px-4 py-3 text-right font-medium tabular-nums">
+            {row.currentRating}
+          </td>
+          <td className="text-muted-foreground px-4 py-3 text-right tabular-nums">
+            {row.maxRating}
+          </td>
+          <td className="px-4 py-3 text-center">
+            <StreakCell streak={row.streak} />
+          </td>
+          <td className="px-4 py-3">
+            <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
+          </td>
+        </tr>
+      ))}
+    </TableShell>
+  )
+}
+
+/**
+ * Loading placeholder for the standings table. Renders through the same
+ * `TableShell` and column count as the real table, so data arriving causes no
+ * layout shift.
+ */
+export function StandingsTableSkeleton() {
+  return (
+    <TableShell caption="Loading standings">
+      {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
+        <tr key={index} className="border-b last:border-b-0">
+          <td className="px-4 py-3">
+            <Skeleton className="h-4 w-5" />
+          </td>
+          <td className="px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-4 rounded-full" />
+              <Skeleton className="h-4 w-28" />
+            </div>
+          </td>
+          <td className="px-4 py-3">
+            <Skeleton className="ml-auto h-4 w-12" />
+          </td>
+          <td className="px-4 py-3">
+            <Skeleton className="ml-auto h-4 w-12" />
+          </td>
+          <td className="px-4 py-3">
+            <Skeleton className="mx-auto h-5 w-10" />
+          </td>
+          <td className="px-4 py-3">
+            <Skeleton className="h-5 w-24 rounded-full" />
+          </td>
+        </tr>
+      ))}
+    </TableShell>
+  )
+}
+
+/**
+ * Shared chrome — bordered container, table element, column header — so the
+ * populated table and its loading skeleton can never drift out of alignment.
+ */
+function TableShell({
+  caption,
+  children,
+}: {
+  caption: string
+  children: ReactNode
+}) {
+  return (
     <div className="overflow-hidden rounded-lg border">
       <table className="w-full border-collapse text-sm">
-        <caption className="sr-only">Live tournament standings</caption>
+        <caption className="sr-only">{caption}</caption>
         <thead>
           <tr className="text-muted-foreground border-b text-left text-xs tracking-wide uppercase">
             <th className="px-4 py-3 font-medium">Rank</th>
@@ -31,33 +115,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             <th className="px-4 py-3 font-medium">Activity</th>
           </tr>
         </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr
-              key={row.profileId}
-              className="hover:bg-muted/40 border-b transition-colors last:border-b-0"
-            >
-              <td className="px-4 py-3">
-                <RankCell rank={row.rank} />
-              </td>
-              <td className="px-4 py-3">
-                <PlayerCell alias={row.alias} country={row.country} />
-              </td>
-              <td className="px-4 py-3 text-right font-medium tabular-nums">
-                {row.currentRating}
-              </td>
-              <td className="text-muted-foreground px-4 py-3 text-right tabular-nums">
-                {row.maxRating}
-              </td>
-              <td className="px-4 py-3 text-center">
-                <StreakCell streak={row.streak} />
-              </td>
-              <td className="px-4 py-3">
-                <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
+        <tbody>{children}</tbody>
       </table>
     </div>
   )
