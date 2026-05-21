@@ -30,13 +30,16 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
 
   return (
     <TableShell caption="Live tournament standings" bodyRef={containerRef}>
-      {rows.map((row) => (
+      {rows.map((row, index) => (
         <tr
           key={row.profileId}
           data-flip-id={row.profileId}
           ref={registerRow}
           className="hover:bg-muted/40 border-b transition-colors last:border-b-0"
         >
+          <td className="px-4 py-3">
+            <PositionCell position={index + 1} />
+          </td>
           <td className="px-4 py-3">
             <RankCell rank={row.rank} />
           </td>
@@ -71,6 +74,9 @@ export function StandingsTableSkeleton() {
     <TableShell caption="Loading standings">
       {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
         <tr key={index} className="border-b last:border-b-0">
+          <td className="px-4 py-3">
+            <Skeleton className="h-4 w-5" />
+          </td>
           <td className="px-4 py-3">
             <Skeleton className="h-4 w-5" />
           </td>
@@ -117,7 +123,8 @@ function TableShell({
         <caption className="sr-only">{caption}</caption>
         <thead>
           <tr className="text-muted-foreground border-b text-left text-xs tracking-wide uppercase">
-            <th className="px-4 py-3 font-medium">Rank</th>
+            <th className="px-4 py-3 font-medium">Position</th>
+            <th className="px-4 py-3 font-medium">Ladder</th>
             <th className="px-4 py-3 font-medium">Player</th>
             <th className="px-4 py-3 text-right font-medium">Rating</th>
             <th className="px-4 py-3 text-right font-medium">Peak</th>
@@ -131,7 +138,16 @@ function TableShell({
   )
 }
 
-/** Rank number, with the top three given a touch more weight. */
+/** Tournament position — the row's 1-based place in the standings. */
+function PositionCell({ position }: { position: number }) {
+  return (
+    <span className={cn("tabular-nums", position <= 3 && "font-semibold")}>
+      {position}
+    </span>
+  )
+}
+
+/** Global ladder rank, with the top three given a touch more weight. */
 function RankCell({ rank }: { rank: number | null }) {
   if (rank === null) {
     return <span className="text-muted-foreground">—</span>
