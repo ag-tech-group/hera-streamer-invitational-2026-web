@@ -62,6 +62,14 @@ describe("HomePage", () => {
     expect(await screen.findByText("Player Two")).toBeInTheDocument()
   })
 
+  it("shows how recently the standings were last updated", async () => {
+    server.use(standingsHandler(standings))
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/" })
+
+    expect(await screen.findByText(/updated/i)).toBeInTheDocument()
+  })
+
   it("shows an empty state when the standings are empty", async () => {
     server.use(standingsHandler({ last_polled_at: null, items: [] }))
 

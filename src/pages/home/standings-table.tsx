@@ -1,9 +1,10 @@
 import { Globe } from "lucide-react"
-import type { ReactNode } from "react"
+import type { ReactNode, Ref } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { countryFlagEmoji, formatRelativeTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
+import { useFlipRows } from "@/pages/home/use-flip-rows"
 import type { StandingsRow } from "@/types"
 
 /** A player's last match counts as "active" if it landed within this window. */
@@ -22,11 +23,18 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
   // Activity column is measured against the same clock.
   const now = new Date()
 
+  // FLIP animation: rows slide to their new spots whenever the order changes.
+  // `orderKey` changes iff the ranked order does.
+  const orderKey = rows.map((row) => row.profileId).join(",")
+  const { containerRef, registerRow } = useFlipRows(orderKey)
+
   return (
-    <TableShell caption="Live tournament standings">
+    <TableShell caption="Live tournament standings" bodyRef={containerRef}>
       {rows.map((row) => (
         <tr
           key={row.profileId}
+          data-flip-id={row.profileId}
+          ref={registerRow}
           className="hover:bg-muted/40 border-b transition-colors last:border-b-0"
         >
           <td className="px-4 py-3">
@@ -96,9 +104,11 @@ export function StandingsTableSkeleton() {
  */
 function TableShell({
   caption,
+  bodyRef,
   children,
 }: {
   caption: string
+  bodyRef?: Ref<HTMLTableSectionElement>
   children: ReactNode
 }) {
   return (
@@ -115,7 +125,7 @@ function TableShell({
             <th className="px-4 py-3 font-medium">Activity</th>
           </tr>
         </thead>
-        <tbody>{children}</tbody>
+        <tbody ref={bodyRef}>{children}</tbody>
       </table>
     </div>
   )

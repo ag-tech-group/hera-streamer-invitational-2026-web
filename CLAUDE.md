@@ -17,7 +17,7 @@ Build sequence and current status live in [GitHub Issues](../../issues). Each up
 ## Architecture
 
 - **Single root route `/`.** The tournament slug never reaches the SPA; it's stripped by [criticalbit-router](https://github.com/ag-tech-group/criticalbit-router) before proxying. Tournament-specific config is selected by a build-time env var.
-- **Real-time via SSE.** REST endpoint for initial snapshot, SSE stream for live updates. Stream events are piped into the TanStack Query cache via `queryClient.setQueryData()`, so components stay simple `useQuery()` consumers.
+- **Real-time via SSE.** REST endpoints are the single source of truth for data. A single global SSE stream (`GET /v1/stream`) carries lightweight _nudge_ events — each just signals which resource changed via the SSE `event:` field (`standings` | `live` | `matches`), with a `{ polled_at }` payload and no data. On each nudge the consumer (`useLiveUpdates`) calls `queryClient.invalidateQueries()` for the matching query key, and the orval-generated REST hook refetches. Components stay simple `useQuery()` consumers; the cache is never written directly from the stream.
 - **Adapter at the network boundary.** Generated API DTOs are mapped to UI-facing types via a thin adapter. Components never import generated API types directly — keeps API drift contained to one mapping file.
 - **No auth.** The standings page is fully public; the template's auth wiring was stripped in #1.
 

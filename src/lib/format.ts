@@ -41,3 +41,23 @@ export function formatRelativeTime(
   if (hours < 24) return `${hours}h`
   return `${Math.floor(hours / 24)}d`
 }
+
+/**
+ * Formats an ISO-8601 timestamp as a human "time ago" phrase with
+ * second-level granularity — `"just now"`, `"8s ago"`, `"3m ago"`,
+ * `"2h ago"`, `"5d ago"`. Future timestamps (clock skew) collapse to
+ * `"just now"`.
+ *
+ * Distinct from `formatRelativeTime`: this one surfaces seconds, because it
+ * drives the live "last updated" badge where freshness is the whole point.
+ */
+export function formatTimeAgo(iso: string, now: Date = new Date()): string {
+  const seconds = Math.floor((now.getTime() - new Date(iso).getTime()) / 1000)
+  if (seconds < 5) return "just now"
+  if (seconds < 60) return `${seconds}s ago`
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}

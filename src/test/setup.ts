@@ -1,4 +1,5 @@
 import { handlers } from "@/api/handlers"
+import { MockEventSource } from "@/test/mock-event-source"
 import "@testing-library/jest-dom/vitest"
 import { cleanup } from "@testing-library/react"
 import { setupServer } from "msw/node"
@@ -17,6 +18,7 @@ afterAll(() => server.close())
 afterEach(() => {
   server.resetHandlers()
   cleanup()
+  MockEventSource.reset()
 })
 
 // Mock window.scrollTo
@@ -63,3 +65,7 @@ global.IntersectionObserver = IntersectionObserverMock
 // Mock URL.createObjectURL and URL.revokeObjectURL
 URL.createObjectURL = vi.fn(() => "blob:mock-url")
 URL.revokeObjectURL = vi.fn()
+
+// Mock EventSource — jsdom has none, and the SSE hook (useLiveUpdates) would
+// otherwise open a real connection. See src/test/mock-event-source.ts.
+global.EventSource = MockEventSource as unknown as typeof EventSource
