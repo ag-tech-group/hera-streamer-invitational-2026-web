@@ -1,5 +1,7 @@
 import { activeTournament } from "@/config/tournaments"
+import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
+import { LastUpdatedBadge } from "@/pages/home/last-updated-badge"
 import { StandingsEmpty, StandingsError } from "@/pages/home/standings-states"
 import {
   StandingsTable,
@@ -10,11 +12,20 @@ import type { StandingsSnapshot } from "@/types"
 export function HomePage() {
   const { data, isPending, isError, refetch } = useStandings()
 
+  // Subscribe to the SSE nudge stream: each nudge invalidates the matching
+  // query so this page's standings refetch without a manual reload.
+  useLiveUpdates()
+
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-4xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">Live Standings</h1>
-        <p className="text-muted-foreground text-sm">{activeTournament.name}</p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-bold tracking-tight">Live Standings</h1>
+          <p className="text-muted-foreground text-sm">
+            {activeTournament.name}
+          </p>
+        </div>
+        {data ? <LastUpdatedBadge lastPolledAt={data.lastPolledAt} /> : null}
       </header>
       <StandingsSection
         snapshot={data}

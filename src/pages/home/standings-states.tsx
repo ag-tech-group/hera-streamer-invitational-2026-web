@@ -22,8 +22,8 @@ export function StandingsEmpty() {
 }
 
 /**
- * Shown when the standings request fails. Offers a manual retry; automatic
- * live refresh lands in a later issue.
+ * Shown when the standings request fails. Offers a manual retry; live SSE
+ * nudges also re-trigger the request automatically as new data lands.
  */
 export function StandingsError({ onRetry }: { onRetry: () => void }) {
   return (
