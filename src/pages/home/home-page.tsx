@@ -1,12 +1,13 @@
 import { activeTournament } from "@/config/tournaments"
 import { useStandings } from "@/hooks/use-standings"
-import type { StandingsRow, StandingsSnapshot } from "@/types"
+import { StandingsTable } from "@/pages/home/standings-table"
+import type { StandingsSnapshot } from "@/types"
 
 export function HomePage() {
   const { data, isPending, isError } = useStandings()
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-6 p-8">
+    <div className="mx-auto flex min-h-svh w-full max-w-4xl flex-col gap-6 p-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold tracking-tight">Live Standings</h1>
         <p className="text-muted-foreground text-sm">{activeTournament.name}</p>
@@ -21,9 +22,9 @@ export function HomePage() {
 }
 
 /**
- * Picks the standings view for the current query state. The treatment here is
- * deliberately plain — the polished table, skeleton, and states land in the
- * static-standings-table PR (issue #3).
+ * Picks the standings view for the current query state. The loading skeleton
+ * and the polished empty/error states land in later commits of issue #3 — for
+ * now those branches stay as plain text.
  */
 function StandingsSection({
   snapshot,
@@ -51,29 +52,4 @@ function StandingsSection({
   }
 
   return <StandingsTable rows={snapshot.rows} />
-}
-
-function StandingsTable({ rows }: { rows: StandingsRow[] }) {
-  return (
-    <table className="w-full border-collapse text-sm">
-      <thead>
-        <tr className="text-muted-foreground border-b text-left">
-          <th className="py-2 pr-4 font-medium">Rank</th>
-          <th className="py-2 pr-4 font-medium">Player</th>
-          <th className="py-2 text-right font-medium">Rating</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={row.profileId} className="border-b">
-            <td className="py-2 pr-4 tabular-nums">{row.rank ?? "—"}</td>
-            <td className="py-2 pr-4">{row.alias}</td>
-            <td className="py-2 text-right tabular-nums">
-              {row.currentRating}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )
 }
