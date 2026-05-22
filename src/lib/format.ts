@@ -6,23 +6,17 @@
  * so relative time is plain `Date` arithmetic.
  */
 
-/** Distance from ASCII `A` to the Unicode regional-indicator symbol `🇦`. */
-const REGIONAL_INDICATOR_OFFSET = 0x1f1e6 - "A".charCodeAt(0)
-
 /**
- * Renders an ISO 3166-1 alpha-2 country code as its flag emoji (e.g. `"ca"`
- * → 🇨🇦). Each letter maps to its Unicode regional-indicator symbol; the pair
- * renders as a flag on every modern platform with zero assets or libraries.
- * Returns `null` for a missing or malformed code so callers can fall back.
+ * Normalizes a country code to a lowercase ISO 3166-1 alpha-2 string, or
+ * `null` when it is missing or malformed.
+ *
+ * Lowercase is the form `flag-icons` expects for its `fi-<code>` class; a
+ * `null` result is the signal for callers to fall back to a generic icon.
  */
-export function countryFlagEmoji(country: string | null): string | null {
+export function normalizeCountryCode(country: string | null): string | null {
   if (!country) return null
-  const code = country.toUpperCase()
-  if (!/^[A-Z]{2}$/.test(code)) return null
-  return String.fromCodePoint(
-    code.charCodeAt(0) + REGIONAL_INDICATOR_OFFSET,
-    code.charCodeAt(1) + REGIONAL_INDICATOR_OFFSET
-  )
+  const code = country.trim().toLowerCase()
+  return /^[a-z]{2}$/.test(code) ? code : null
 }
 
 /**

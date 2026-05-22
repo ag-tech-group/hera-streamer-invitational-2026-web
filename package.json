@@ -29,6 +29,7 @@
     "@tanstack/react-router": "^1.167.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "flag-icons": "^7.5.0",
     "ky": "^1.14.3",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",

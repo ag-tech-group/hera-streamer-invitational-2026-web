@@ -2,7 +2,7 @@ import { Globe } from "lucide-react"
 import type { ReactNode, Ref } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
-import { countryFlagEmoji, formatRelativeTime } from "@/lib/format"
+import { formatRelativeTime, normalizeCountryCode } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
 import type { MatchResult, StandingsRow } from "@/types"
@@ -92,7 +92,7 @@ export function StandingsTableSkeleton() {
           </td>
           <td className="px-4 py-3">
             <div className="flex items-center gap-2">
-              <Skeleton className="size-4 rounded-full" />
+              <Skeleton className="h-4 w-[1.333rem] rounded-[2px]" />
               <Skeleton className="h-4 w-28" />
             </div>
           </td>
@@ -195,15 +195,17 @@ function PlayerCell({
   country: string | null
   inMatch: boolean
 }) {
-  const flag = countryFlagEmoji(country)
+  const countryCode = normalizeCountryCode(country)
   return (
     <span className="flex items-center gap-2">
-      {flag ? (
-        <span className="text-base leading-none" title={country ?? undefined}>
-          {flag}
-        </span>
+      {countryCode ? (
+        <span
+          className={`fi fi-${countryCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
+          title={countryCode.toUpperCase()}
+          aria-hidden
+        />
       ) : (
-        <Globe className="text-muted-foreground size-4" aria-hidden />
+        <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
       )}
       <span className="font-medium whitespace-nowrap">{alias}</span>
       {inMatch && <LiveBadge />}

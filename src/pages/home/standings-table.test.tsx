@@ -133,3 +133,23 @@ describe("StandingsTable — games played", () => {
     expect(cells[6]).toHaveTextContent("14")
   })
 })
+
+describe("StandingsTable — country flag", () => {
+  it("renders a country flag for a player with a country", () => {
+    render(
+      <StandingsTable
+        rows={[row({ profileId: 1, alias: "Alpha", country: "ca" })]}
+      />
+    )
+    expect(screen.getByTitle("CA")).toHaveClass("fi", "fi-ca")
+  })
+
+  it("falls back to a generic icon when a player has no country", () => {
+    const { container } = render(
+      <StandingsTable
+        rows={[row({ profileId: 1, alias: "Alpha", country: null })]}
+      />
+    )
+    expect(container.querySelector(".fi")).not.toBeInTheDocument()
+  })
+})
