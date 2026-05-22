@@ -7,15 +7,19 @@
  */
 
 export * from './getPlayerV1PlayersProfileIdGetParams';
+export * from './getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams';
 export * from './hTTPValidationError';
 export * from './leaderboardRead';
 export * from './listEnvelopeLeaderboardRead';
 export * from './listEnvelopeMatchRead';
 export * from './listEnvelopePlayerRead';
 export * from './listEnvelopeStandingRow';
+export * from './listEnvelopeTeamStandingRow';
 export * from './listFlagsV1FlagsGet200';
 export * from './listMatchesV1MatchesGetParams';
+export * from './listMatchesV1TournamentsTournamentSlugMatchesGetParams';
 export * from './listPlayersV1PlayersGetParams';
+export * from './listPlayersV1TournamentsTournamentSlugPlayersGetParams';
 export * from './matchDetail';
 export * from './matchOutcome';
 export * from './matchPlayerRead';
@@ -25,5 +29,9 @@ export * from './playerDetail';
 export * from './playerRatingRead';
 export * from './playerRead';
 export * from './standingRow';
+export * from './teamMemberRead';
+export * from './teamStandingRow';
+export * from './tournamentRead';
+export * from './tournamentRecord';
 export * from './validationError';
 export * from './validationErrorCtx';

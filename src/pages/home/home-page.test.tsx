@@ -1,4 +1,4 @@
-import { getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetMockHandler as standingsHandler } from "@/api/generated/hooks/leaderboards/leaderboards.msw"
+import { getGetStandingsV1TournamentsTournamentSlugStandingsGetMockHandler as standingsHandler } from "@/api/generated/hooks/tournaments/tournaments.msw"
 import type { ListEnvelopeStandingRow } from "@/api/generated/types"
 import { renderWithFileRoutes } from "@/test/renderers"
 import { server } from "@/test/setup"
@@ -20,8 +20,12 @@ const standings: ListEnvelopeStandingRow = {
       wins: 4964,
       losses: 1701,
       streak: 33,
+      recent_results: ["win", "win", "loss", "win", "win"],
+      tournament_record: { games_played: 12, wins: 9, losses: 3, streak: 2 },
       rank: 1,
       rank_total: 47834,
+      in_match: false,
+      live_match_id: null,
       last_match_at: "2026-05-20T04:54:36Z",
       updated_at: "2026-05-20T17:26:34Z",
     },
@@ -34,8 +38,12 @@ const standings: ListEnvelopeStandingRow = {
       wins: 3001,
       losses: 1315,
       streak: 7,
+      recent_results: ["loss", "win", "loss"],
+      tournament_record: { games_played: 7, wins: 3, losses: 4, streak: -1 },
       rank: 2,
       rank_total: 47834,
+      in_match: false,
+      live_match_id: null,
       last_match_at: "2026-05-05T02:02:27Z",
       updated_at: "2026-05-20T17:26:34Z",
     },
@@ -80,7 +88,7 @@ describe("HomePage", () => {
 
   it("shows an error state when the standings request fails", async () => {
     server.use(
-      http.get("*/v1/leaderboards/:leaderboardId/standings", () =>
+      http.get("*/v1/tournaments/:tournamentSlug/standings", () =>
         HttpResponse.json({ detail: "boom" }, { status: 500 })
       )
     )

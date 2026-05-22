@@ -12,8 +12,8 @@ import * as zod from 'zod';
  * Available leaderboards, sourced from the in-memory cache.
 
 The polling worker fills the cache at startup from upstream
-``getAvailableLeaderboards`` and refreshes daily. Until that worker
-lands, this endpoint returns an empty list with ``last_polled_at: null``.
+``getAvailableLeaderboards``. Each tournament tracks one of these by
+``leaderboard_id``.
  * @summary List Leaderboards
  */
 export const ListLeaderboardsV1LeaderboardsGetResponse = zod.object({
@@ -23,36 +23,5 @@ export const ListLeaderboardsV1LeaderboardsGetResponse = zod.object({
   "name": zod.string(),
   "is_ranked": zod.boolean()
 }).describe('Leaderboard metadata, sourced from upstream ``getAvailableLeaderboards``.\n\nUntil the polling worker fills the in-memory cache (see\n``app.leaderboards_cache``), the ``\/v1\/leaderboards`` endpoint returns\nan empty list. The minimal shape here — id, name, ranked flag — is\nenough for the consumer to render a leaderboard picker; richer\nmetadata (matchtype mappings, etc.) gets added as needed.'))
-})
-
-/**
- * Tracked players' ratings on one leaderboard, sorted by current rating desc.
-
-Joins ``PlayerRating`` with ``Player`` so each row contains both the
-rating numbers and the player identity (alias, country). The
-``(leaderboard_id, current_rating)`` composite index on
-``player_ratings`` covers this query.
- * @summary Get Standings
- */
-export const GetStandingsV1LeaderboardsLeaderboardIdStandingsGetParams = zod.object({
-  "leaderboard_id": zod.number()
-})
-
-export const GetStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse = zod.object({
-  "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
-  "items": zod.array(zod.object({
-  "profile_id": zod.number(),
-  "alias": zod.string(),
-  "country": zod.union([zod.string(),zod.null()]),
-  "current_rating": zod.number(),
-  "max_rating": zod.number(),
-  "wins": zod.number(),
-  "losses": zod.number(),
-  "streak": zod.number(),
-  "rank": zod.union([zod.number(),zod.null()]),
-  "rank_total": zod.union([zod.number(),zod.null()]),
-  "last_match_at": zod.union([zod.iso.datetime({}),zod.null()]),
-  "updated_at": zod.iso.datetime({})
-}).describe('One row in the standings list for a given leaderboard.\n\nDenormalized join of ``Player`` and ``PlayerRating`` so consumers get\neverything they need to render a standings table in one row, without\nan extra ``ratings[]`` indirection. Sorted by ``current_rating`` desc\non the endpoint.'))
 })
 
