@@ -1,3 +1,6 @@
+/** Outcome of a single completed match, used for a player's recent form. */
+export type MatchResult = "win" | "loss"
+
 /**
  * One player's row in the standings, ready for display.
  *
@@ -16,10 +19,19 @@ export interface StandingsRow {
   losses: number
   /** Current win/loss streak as reported by the upstream ladder. */
   streak: number
+  /**
+   * Outcomes of the player's most recent completed matches, most-recent
+   * first, capped at 10 by the API. Empty when they have no completed match.
+   */
+  recentResults: MatchResult[]
+  /** Matches the player has completed within the tournament's date window. */
+  gamesPlayed: number
   /** Position on the leaderboard, or null if unranked. */
   rank: number | null
   /** Total tracked players on the leaderboard, or null if unknown. */
   rankTotal: number | null
+  /** Whether the player is in a live match right now. */
+  inMatch: boolean
   /** ISO-8601 timestamp of the player's most recent match, or null. */
   lastMatchAt: string | null
   /** ISO-8601 timestamp of when this row was last refreshed upstream. */

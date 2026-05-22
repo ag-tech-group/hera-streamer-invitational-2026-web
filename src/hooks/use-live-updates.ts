@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useEffect } from "react"
 
 import { baseUrl } from "@/api/api"
-import { getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey } from "@/api/generated/hooks/live/live"
 import { getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey } from "@/api/generated/hooks/matches/matches"
 import { getStreamV1StreamGetUrl } from "@/api/generated/hooks/stream/stream"
 import { getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey } from "@/api/generated/hooks/tournaments/tournaments"
@@ -35,20 +34,21 @@ export function useLiveUpdates(): void {
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    // The query key invalidated for each nudge type. `live` and `matches`
-    // have no consumer yet, so those invalidations are currently no-ops —
-    // wiring them now keeps the stream layer complete for when those views
-    // land, with no change needed here. All three endpoints are scoped to
-    // the active tournament.
     const tournamentSlug = activeTournament.apiTournamentSlug
-    const queryKeyFor: Record<NudgeEvent, QueryKey> = {
-      standings:
-        getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
-          tournamentSlug
-        ),
-      live: getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey(
+    const standingsKey =
+      getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
         tournamentSlug
-      ),
+      )
+
+    // The query key invalidated for each nudge type. A `standings` nudge is
+    // the periodic standings poll; a `live` nudge means a player's live-match
+    // status changed, which the standings endpoint folds into each row's
+    // `in_match` — so both refresh the standings. `matches` has no consumer
+    // yet, so that invalidation is a no-op; it is wired anyway to keep the
+    // stream layer complete for when a matches view lands.
+    const queryKeyFor: Record<NudgeEvent, QueryKey> = {
+      standings: standingsKey,
+      live: standingsKey,
       matches:
         getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey(
           tournamentSlug

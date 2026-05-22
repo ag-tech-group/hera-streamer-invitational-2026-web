@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { countryFlagEmoji, formatRelativeTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
-import type { StandingsRow } from "@/types"
+import type { MatchResult, StandingsRow } from "@/types"
 
 /** A player's last match counts as "active" if it landed within this window. */
 const ACTIVE_WITHIN_MS = 24 * 60 * 60 * 1000
@@ -44,7 +44,11 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             <RankCell rank={row.rank} />
           </td>
           <td className="px-4 py-3">
-            <PlayerCell alias={row.alias} country={row.country} />
+            <PlayerCell
+              alias={row.alias}
+              country={row.country}
+              inMatch={row.inMatch}
+            />
           </td>
           <td className="px-4 py-3 text-right font-medium tabular-nums">
             {row.currentRating}
@@ -54,6 +58,12 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
           </td>
           <td className="px-4 py-3 text-center">
             <StreakCell streak={row.streak} />
+          </td>
+          <td className="text-muted-foreground px-4 py-3 text-right tabular-nums">
+            {row.gamesPlayed}
+          </td>
+          <td className="px-4 py-3">
+            <RecentResultsCell results={row.recentResults} />
           </td>
           <td className="px-4 py-3">
             <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
@@ -96,6 +106,12 @@ export function StandingsTableSkeleton() {
             <Skeleton className="mx-auto h-5 w-10" />
           </td>
           <td className="px-4 py-3">
+            <Skeleton className="ml-auto h-4 w-8" />
+          </td>
+          <td className="px-4 py-3">
+            <Skeleton className="h-4 w-20" />
+          </td>
+          <td className="px-4 py-3">
             <Skeleton className="h-5 w-24 rounded-full" />
           </td>
         </tr>
@@ -129,6 +145,8 @@ function TableShell({
             <th className="px-4 py-3 text-right font-medium">Rating</th>
             <th className="px-4 py-3 text-right font-medium">Peak</th>
             <th className="px-4 py-3 text-center font-medium">Streak</th>
+            <th className="px-4 py-3 text-right font-medium">Games</th>
+            <th className="px-4 py-3 font-medium">Recent</th>
             <th className="px-4 py-3 font-medium">Activity</th>
           </tr>
         </thead>
@@ -164,13 +182,18 @@ function RankCell({ rank }: { rank: number | null }) {
   )
 }
 
-/** Player identity: country flag (or a globe fallback) plus alias. */
+/**
+ * Player identity: country flag (or a globe fallback) and alias, plus a
+ * pulsing "Live" badge when the player is in a match right now.
+ */
 function PlayerCell({
   alias,
   country,
+  inMatch,
 }: {
   alias: string
   country: string | null
+  inMatch: boolean
 }) {
   const flag = countryFlagEmoji(country)
   return (
@@ -182,7 +205,28 @@ function PlayerCell({
       ) : (
         <Globe className="text-muted-foreground size-4" aria-hidden />
       )}
-      <span className="font-medium">{alias}</span>
+      <span className="font-medium whitespace-nowrap">{alias}</span>
+      {inMatch && <LiveBadge />}
+    </span>
+  )
+}
+
+/**
+ * "Live" badge for a player currently in a match. The ping ring is the table's
+ * focal moment — who to go watch right now. Driven by `in_match`, which a
+ * `live` SSE nudge keeps fresh (see `useLiveUpdates`).
+ */
+function LiveBadge() {
+  return (
+    <span
+      className="bg-destructive/10 text-destructive inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
+      aria-label="In a live match"
+    >
+      <span className="relative flex size-1.5" aria-hidden>
+        <span className="bg-destructive absolute inline-flex size-full animate-ping rounded-full opacity-75" />
+        <span className="bg-destructive relative inline-flex size-1.5 rounded-full" />
+      </span>
+      Live
     </span>
   )
 }
@@ -207,6 +251,35 @@ function StreakCell({ streak }: { streak: number }) {
     >
       {winning ? "W" : "L"}
       {Math.abs(streak)}
+    </span>
+  )
+}
+
+/**
+ * Recent form: a compact row of win/loss pips, most-recent first. Greens are
+ * wins and reds losses — the same colour language as the streak badge. A
+ * player with no completed match shows a neutral placeholder.
+ */
+function RecentResultsCell({ results }: { results: MatchResult[] }) {
+  if (results.length === 0) {
+    return <span className="text-muted-foreground text-xs">—</span>
+  }
+  return (
+    <span
+      className="flex items-center gap-1"
+      aria-label={`Recent results, most recent first: ${results.join(", ")}`}
+    >
+      {results.map((result, index) => (
+        <span
+          key={index}
+          aria-hidden
+          title={result === "win" ? "Win" : "Loss"}
+          className={cn(
+            "size-2 rounded-[2px]",
+            result === "win" ? "bg-chart-2" : "bg-destructive"
+          )}
+        />
+      ))}
     </span>
   )
 }

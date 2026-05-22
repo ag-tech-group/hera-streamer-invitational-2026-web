@@ -1,2 +1,2 @@
 export type { Tournament } from "./tournament"
-export type { StandingsRow, StandingsSnapshot } from "./standings"
+export type { MatchResult, StandingsRow, StandingsSnapshot } from "./standings"
