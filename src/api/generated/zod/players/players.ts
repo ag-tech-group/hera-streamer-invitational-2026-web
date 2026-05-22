@@ -56,6 +56,26 @@ export const ListPlayersV1TournamentsTournamentSlugPlayersGetResponse = zod.obje
 })
 
 /**
+ * Add a profile to the tournament's roster — owner-gated.
+
+409 if the profile is already on the roster. The polling worker picks
+the new profile up on its next cycle, so the edit takes effect without
+a redeploy.
+ * @summary Add Roster Player
+ */
+export const AddRosterPlayerV1TournamentsTournamentSlugPlayersPostParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyProfileIdExclusiveMin = 0;
+
+
+
+export const AddRosterPlayerV1TournamentsTournamentSlugPlayersPostBody = zod.object({
+  "profile_id": zod.number().gt(addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyProfileIdExclusiveMin)
+}).describe('Request body for adding a profile to a tournament\'s roster.')
+
+/**
  * A roster player's profile + ratings + most recent matches.
 
 404 if the profile isn't on this tournament's roster. Matches are
@@ -125,4 +145,17 @@ export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse = z
 }).describe('One MatchPlayer row, embedded inside MatchRead.\n\n`outcome`, `old_rating`, `new_rating` are null while the match is in\nprogress; the upstream fills them in on completion.'))
 }).describe('A match plus all of its MatchPlayer rows.\n\nPlayers are always included — even in list views — so a tournament UI\ncan render a full match card (both sides, outcome, Elo delta) without a\nsecond round-trip. 1v1 ranked is two rows, team games top out at eight.')).default(getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseRecentMatchesDefault)
 }).describe('Single-player response (``GET \/v1\/players\/{profile_id}``).\n\nExtends ``PlayerRead`` with ``last_polled_at`` and the player\'s recent\nmatches. ``recent_matches`` is set by the router (not via SQLAlchemy\nrelationship) because matches are joined through ``MatchPlayer.profile_id``,\nwhich intentionally has no foreign key back to ``Player`` (opponents\ndon\'t need to be tracked).')
+
+/**
+ * Remove a profile from the tournament's roster — owner-gated.
+
+404 if the profile isn't on the roster. The polled ``Player`` and
+rating rows are left untouched: the profile may still belong to
+another tournament's roster.
+ * @summary Remove Roster Player
+ */
+export const RemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDeleteParams = zod.object({
+  "profile_id": zod.number(),
+  "tournament_slug": zod.string()
+})
 

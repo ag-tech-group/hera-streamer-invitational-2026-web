@@ -6,16 +6,20 @@
  * OpenAPI spec version: 0.0.1
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -24,7 +28,8 @@ import type {
   HTTPValidationError,
   ListEnvelopeStandingRow,
   ListEnvelopeTeamStandingRow,
-  TournamentRead
+  TournamentRead,
+  TournamentUpdate
 } from '../../types';
 
 import { orvalClient } from '../../../orval-client';
@@ -267,6 +272,102 @@ export function useGetTournamentDetailV1TournamentsTournamentSlugGet<TData = Awa
 
 
 /**
+ * Edit a tournament's metadata — owner-gated.
+
+PATCH semantics: only the fields present in the request body change.
+``start_date`` / ``end_date`` accept ``null`` to clear a bound; a
+competition window whose start falls after its end is rejected with
+422. ``slug`` is immutable — it is the key consumer URLs are built on.
+ * @summary Update Tournament
+ */
+export type updateTournamentV1TournamentsTournamentSlugPatchResponse200 = {
+  data: TournamentRead
+  status: 200
+}
+
+export type updateTournamentV1TournamentsTournamentSlugPatchResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type updateTournamentV1TournamentsTournamentSlugPatchResponseSuccess = (updateTournamentV1TournamentsTournamentSlugPatchResponse200) & {
+  headers: Headers;
+};
+export type updateTournamentV1TournamentsTournamentSlugPatchResponseError = (updateTournamentV1TournamentsTournamentSlugPatchResponse422) & {
+  headers: Headers;
+};
+
+export type updateTournamentV1TournamentsTournamentSlugPatchResponse = (updateTournamentV1TournamentsTournamentSlugPatchResponseSuccess | updateTournamentV1TournamentsTournamentSlugPatchResponseError)
+
+export const getUpdateTournamentV1TournamentsTournamentSlugPatchUrl = (tournamentSlug: string,) => {
+
+
+  
+
+  return `/v1/tournaments/${tournamentSlug}`
+}
+
+export const updateTournamentV1TournamentsTournamentSlugPatch = async (tournamentSlug: string,
+    tournamentUpdate: TournamentUpdate, options?: RequestInit): Promise<updateTournamentV1TournamentsTournamentSlugPatchResponse> => {
+  
+  return orvalClient<updateTournamentV1TournamentsTournamentSlugPatchResponse>(getUpdateTournamentV1TournamentsTournamentSlugPatchUrl(tournamentSlug),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      tournamentUpdate,)
+  }
+);}
+  
+
+
+
+export const getUpdateTournamentV1TournamentsTournamentSlugPatchMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTournamentV1TournamentsTournamentSlugPatch>>, TError,{tournamentSlug: string;data: TournamentUpdate}, TContext>, request?: SecondParameter<typeof orvalClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTournamentV1TournamentsTournamentSlugPatch>>, TError,{tournamentSlug: string;data: TournamentUpdate}, TContext> => {
+
+const mutationKey = ['updateTournamentV1TournamentsTournamentSlugPatch'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTournamentV1TournamentsTournamentSlugPatch>>, {tournamentSlug: string;data: TournamentUpdate}> = (props) => {
+          const {tournamentSlug,data} = props ?? {};
+
+          return  updateTournamentV1TournamentsTournamentSlugPatch(tournamentSlug,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTournamentV1TournamentsTournamentSlugPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateTournamentV1TournamentsTournamentSlugPatch>>>
+    export type UpdateTournamentV1TournamentsTournamentSlugPatchMutationBody = TournamentUpdate
+    export type UpdateTournamentV1TournamentsTournamentSlugPatchMutationError = HTTPValidationError
+
+    /**
+ * @summary Update Tournament
+ */
+export const useUpdateTournamentV1TournamentsTournamentSlugPatch = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTournamentV1TournamentsTournamentSlugPatch>>, TError,{tournamentSlug: string;data: TournamentUpdate}, TContext>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateTournamentV1TournamentsTournamentSlugPatch>>,
+        TError,
+        {tournamentSlug: string;data: TournamentUpdate},
+        TContext
+      > => {
+      return useMutation(getUpdateTournamentV1TournamentsTournamentSlugPatchMutationOptions(options), queryClient);
+    }
+    /**
  * The tournament's players, ranked by current rating on its leaderboard.
 
 Scoped two ways: to the tournament's roster (``TournamentPlayer``) and

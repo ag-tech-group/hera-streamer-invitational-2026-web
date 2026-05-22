@@ -45,6 +45,42 @@ export const GetTournamentDetailV1TournamentsTournamentSlugGetResponse = zod.obj
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
 
 /**
+ * Edit a tournament's metadata — owner-gated.
+
+PATCH semantics: only the fields present in the request body change.
+``start_date`` / ``end_date`` accept ``null`` to clear a bound; a
+competition window whose start falls after its end is rejected with
+422. ``slug`` is immutable — it is the key consumer URLs are built on.
+ * @summary Update Tournament
+ */
+export const UpdateTournamentV1TournamentsTournamentSlugPatchParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const updateTournamentV1TournamentsTournamentSlugPatchBodyNameOneMax = 200;
+
+export const updateTournamentV1TournamentsTournamentSlugPatchBodyLeaderboardIdOneExclusiveMin = 0;
+
+
+
+export const UpdateTournamentV1TournamentsTournamentSlugPatchBody = zod.object({
+  "name": zod.union([zod.string().min(1).max(updateTournamentV1TournamentsTournamentSlugPatchBodyNameOneMax),zod.null()]).optional(),
+  "leaderboard_id": zod.union([zod.number().gt(updateTournamentV1TournamentsTournamentSlugPatchBodyLeaderboardIdOneExclusiveMin),zod.null()]).optional(),
+  "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]).optional()
+}).describe('Partial update for a tournament\'s metadata (``PATCH``).\n\nEvery field is optional; only the fields present in the request body\nare applied. ``start_date`` \/ ``end_date`` may be set to ``null`` to\nclear the bound. ``name`` and ``leaderboard_id`` back non-nullable\ncolumns, so an explicit ``null`` for either is rejected with 422.\n\n``slug`` is intentionally not updatable — it is the routing key\nconsumers\' URLs are built from.')
+
+export const UpdateTournamentV1TournamentsTournamentSlugPatchResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "leaderboard_id": zod.number(),
+  "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "created_at": zod.iso.datetime({})
+}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
+
+/**
  * The tournament's players, ranked by current rating on its leaderboard.
 
 Scoped two ways: to the tournament's roster (``TournamentPlayer``) and
