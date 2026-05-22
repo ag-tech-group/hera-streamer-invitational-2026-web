@@ -17,7 +17,7 @@ export function HomePage() {
   useLiveUpdates()
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-4xl flex-col gap-6 p-8">
+    <div className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-6 p-8">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <img src="/logo.png" alt="" className="size-16 shrink-0" />

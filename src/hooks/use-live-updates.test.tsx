@@ -3,7 +3,6 @@ import { renderHook } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey } from "@/api/generated/hooks/live/live"
 import { getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey } from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
@@ -40,13 +39,15 @@ describe("useLiveUpdates", () => {
     })
   })
 
-  it("invalidates the live query on a 'live' nudge", () => {
+  it("invalidates the standings query on a 'live' nudge", () => {
     const { invalidateSpy } = renderUseLiveUpdates()
 
     MockEventSource.last().emit("live", { polled_at: "2026-05-21T00:00:00Z" })
 
+    // A `live` nudge changes a player's `in_match`, which the standings
+    // endpoint folds into each row — so it refreshes the standings query.
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey(
+      queryKey: getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
         activeTournament.apiTournamentSlug
       ),
     })

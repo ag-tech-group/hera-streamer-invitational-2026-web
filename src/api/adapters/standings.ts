@@ -22,8 +22,11 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     wins: dto.wins,
     losses: dto.losses,
     streak: dto.streak,
+    recentResults: dto.recent_results,
+    gamesPlayed: dto.tournament_record.games_played,
     rank: dto.rank,
     rankTotal: dto.rank_total,
+    inMatch: dto.in_match,
     lastMatchAt: dto.last_match_at,
     updatedAt: dto.updated_at,
   }
