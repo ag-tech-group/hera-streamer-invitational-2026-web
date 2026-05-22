@@ -44,6 +44,16 @@ export const getListPlayersV1TournamentsTournamentSlugPlayersGetMockHandler = (o
   }, options)
 }
 
+export const getAddRosterPlayerV1TournamentsTournamentSlugPlayersPostMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.post('*/v1/tournaments/:tournamentSlug/players', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+  
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
 export const getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetMockHandler = (overrideResponse?: PlayerDetail | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PlayerDetail> | PlayerDetail), options?: RequestHandlerOptions) => {
   return http.get('*/v1/tournaments/:tournamentSlug/players/:profileId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
   
@@ -55,7 +65,19 @@ export const getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetMockHandl
       })
   }, options)
 }
+
+export const getRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDeleteMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/v1/tournaments/:tournamentSlug/players/:profileId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+  
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
 export const getPlayersMock = () => [
   getListPlayersV1TournamentsTournamentSlugPlayersGetMockHandler(),
-  getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetMockHandler()
+  getAddRosterPlayerV1TournamentsTournamentSlugPlayersPostMockHandler(),
+  getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetMockHandler(),
+  getRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDeleteMockHandler()
 ]
