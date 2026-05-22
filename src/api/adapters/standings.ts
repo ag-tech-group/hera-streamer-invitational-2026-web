@@ -4,8 +4,8 @@ import type { StandingsRow, StandingsSnapshot } from "@/types"
 
 /**
  * Adapter at the network boundary: maps generated standings DTOs to the
- * UI-facing `StandingsSnapshot`. This is the *only* file allowed to import
- * generated API types — drift in the API shape stops here (see CLAUDE.md).
+ * UI-facing `StandingsSnapshot`. Adapter files are the only place generated
+ * API types may be imported — drift in the API shape stops here (CLAUDE.md).
  */
 
 /** Full response shape returned by the generated standings query hook. */

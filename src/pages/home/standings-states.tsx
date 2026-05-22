@@ -1,4 +1,4 @@
-import { TriangleAlert, Users } from "lucide-react"
+import { Shield, TriangleAlert, Users } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
@@ -33,6 +33,46 @@ export function StandingsError({ onRetry }: { onRetry: () => void }) {
         <p className="font-medium">Couldn't load standings</p>
         <p className="text-muted-foreground text-sm">
           Something went wrong reaching the leaderboard.
+        </p>
+      </div>
+      <Button variant="outline" size="sm" onClick={onRetry}>
+        Try again
+      </Button>
+    </div>
+  )
+}
+
+/**
+ * Shown when the team standings request succeeds but no teams are set up for
+ * this tournament. Teams are optional, so an empty list is an expected state —
+ * hence the same softer, dashed treatment as the empty player standings.
+ */
+export function TeamsEmpty() {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed px-6 py-16 text-center">
+      <Shield className="text-muted-foreground size-8" aria-hidden />
+      <div className="space-y-1">
+        <p className="font-medium">No teams yet</p>
+        <p className="text-muted-foreground text-sm">
+          Teams will appear here once they are set up for this tournament.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Shown when the team standings request fails. Offers a manual retry; live SSE
+ * nudges also re-trigger the request automatically as new data lands.
+ */
+export function TeamsError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-lg border px-6 py-16 text-center">
+      <TriangleAlert className="text-destructive size-8" aria-hidden />
+      <div className="space-y-1">
+        <p className="font-medium">Couldn't load teams</p>
+        <p className="text-muted-foreground text-sm">
+          Something went wrong reaching the team standings.
         </p>
       </div>
       <Button variant="outline" size="sm" onClick={onRetry}>

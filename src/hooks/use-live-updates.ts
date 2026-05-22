@@ -5,7 +5,10 @@ import { useEffect } from "react"
 import { baseUrl } from "@/api/api"
 import { getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey } from "@/api/generated/hooks/matches/matches"
 import { getStreamV1StreamGetUrl } from "@/api/generated/hooks/stream/stream"
-import { getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey } from "@/api/generated/hooks/tournaments/tournaments"
+import {
+  getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey,
+  getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey,
+} from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
 import { logger } from "@/lib/logger"
 
@@ -18,12 +21,12 @@ type NudgeEvent = (typeof NUDGE_EVENTS)[number]
 
 /**
  * Subscribes to the API's global Server-Sent Events stream and turns each
- * nudge into a TanStack Query invalidation.
+ * nudge into one or more TanStack Query invalidations.
  *
  * The stream carries no data: every event is a lightweight "something
  * changed" nudge (`{ polled_at }`), with the changed resource named by the
- * SSE `event:` field. On each nudge we invalidate the matching query key —
- * the orval-generated REST hook then refetches, so REST stays the single
+ * SSE `event:` field. On each nudge we invalidate the matching query keys —
+ * the orval-generated REST hooks then refetch, so REST stays the single
  * source of truth (see CLAUDE.md -> Architecture). `:` heartbeat comments are
  * dropped by `EventSource` itself and never reach a handler.
  *
@@ -39,20 +42,26 @@ export function useLiveUpdates(): void {
       getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
         tournamentSlug
       )
+    const teamStandingsKey =
+      getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey(
+        tournamentSlug
+      )
 
-    // The query key invalidated for each nudge type. A `standings` nudge is
-    // the periodic standings poll; a `live` nudge means a player's live-match
-    // status changed, which the standings endpoint folds into each row's
-    // `in_match` — so both refresh the standings. `matches` has no consumer
-    // yet, so that invalidation is a no-op; it is wired anyway to keep the
-    // stream layer complete for when a matches view lands.
-    const queryKeyFor: Record<NudgeEvent, QueryKey> = {
-      standings: standingsKey,
-      live: standingsKey,
-      matches:
+    // The query keys invalidated for each nudge type. A `standings` nudge is
+    // the standings poll — it refreshes both the player standings and the
+    // team standings, whose combined ratings derive from player ratings. A
+    // `live` nudge changes a player's `in_match`, which the standings
+    // endpoint folds into each row. `matches` has no consumer yet, so that
+    // invalidation is a no-op; it is wired anyway to keep the stream layer
+    // complete for when a matches view lands.
+    const queryKeysFor: Record<NudgeEvent, QueryKey[]> = {
+      standings: [standingsKey, teamStandingsKey],
+      live: [standingsKey],
+      matches: [
         getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey(
           tournamentSlug
         ),
+      ],
     }
 
     const source = new EventSource(`${baseUrl}${getStreamV1StreamGetUrl()}`)
@@ -60,7 +69,9 @@ export function useLiveUpdates(): void {
     const subscriptions = NUDGE_EVENTS.map((event) => {
       const handler = (): void => {
         logger.debug("SSE nudge received", { event })
-        void queryClient.invalidateQueries({ queryKey: queryKeyFor[event] })
+        for (const queryKey of queryKeysFor[event]) {
+          void queryClient.invalidateQueries({ queryKey })
+        }
       }
       source.addEventListener(event, handler)
       return { event, handler }

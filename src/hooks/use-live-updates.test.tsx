@@ -3,7 +3,10 @@ import { renderHook } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey } from "@/api/generated/hooks/tournaments/tournaments"
+import {
+  getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey,
+  getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey,
+} from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { MockEventSource } from "@/test/mock-event-source"
@@ -36,6 +39,23 @@ describe("useLiveUpdates", () => {
       queryKey: getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
         activeTournament.apiTournamentSlug
       ),
+    })
+  })
+
+  it("invalidates the team standings query on a 'standings' nudge", () => {
+    const { invalidateSpy } = renderUseLiveUpdates()
+
+    MockEventSource.last().emit("standings", {
+      polled_at: "2026-05-21T00:00:00Z",
+    })
+
+    // Team combined ratings derive from player ratings, so a standings poll
+    // refreshes the team standings too.
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey:
+        getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey(
+          activeTournament.apiTournamentSlug
+        ),
     })
   })
 
