@@ -1,6 +1,31 @@
 import { describe, expect, it } from "vitest"
 
-import { formatTimeAgo } from "@/lib/format"
+import { formatTimeAgo, normalizeCountryCode } from "@/lib/format"
+
+describe("normalizeCountryCode", () => {
+  it("returns a well-formed alpha-2 code unchanged", () => {
+    expect(normalizeCountryCode("ca")).toBe("ca")
+  })
+
+  it("lowercases an uppercase code", () => {
+    expect(normalizeCountryCode("KR")).toBe("kr")
+  })
+
+  it("trims surrounding whitespace", () => {
+    expect(normalizeCountryCode("  us  ")).toBe("us")
+  })
+
+  it("returns null for a missing code", () => {
+    expect(normalizeCountryCode(null)).toBeNull()
+    expect(normalizeCountryCode("")).toBeNull()
+  })
+
+  it("returns null for a malformed code", () => {
+    expect(normalizeCountryCode("usa")).toBeNull()
+    expect(normalizeCountryCode("x")).toBeNull()
+    expect(normalizeCountryCode("12")).toBeNull()
+  })
+})
 
 describe("formatTimeAgo", () => {
   const now = new Date("2026-05-21T12:00:00.000Z")
