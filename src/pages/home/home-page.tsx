@@ -1,20 +1,37 @@
+import { useState } from "react"
+
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
+import { useTeamStandings } from "@/hooks/use-team-standings"
 import { LastUpdatedBadge } from "@/pages/home/last-updated-badge"
-import { StandingsEmpty, StandingsError } from "@/pages/home/standings-states"
+import {
+  StandingsEmpty,
+  StandingsError,
+  TeamsEmpty,
+  TeamsError,
+} from "@/pages/home/standings-states"
 import {
   StandingsTable,
   StandingsTableSkeleton,
 } from "@/pages/home/standings-table"
-import type { StandingsSnapshot } from "@/types"
+import { TeamsTable, TeamsTableSkeleton } from "@/pages/home/teams-table"
+import { ViewTabs, type StandingsView } from "@/pages/home/view-tabs"
+import type { StandingsSnapshot, TeamStandingsSnapshot } from "@/types"
 
 export function HomePage() {
-  const { data, isPending, isError, refetch } = useStandings()
+  const [view, setView] = useState<StandingsView>("players")
+
+  const standings = useStandings()
+  // The team standings load lazily — only once the Teams view is opened.
+  const teams = useTeamStandings(view === "teams")
 
   // Subscribe to the SSE nudge stream: each nudge invalidates the matching
-  // query so this page's standings refetch without a manual reload.
+  // query so the visible table refetches without a manual reload.
   useLiveUpdates()
+
+  // The "last updated" badge reflects whichever view is on screen.
+  const activeData = view === "players" ? standings.data : teams.data
 
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-6 p-8">
@@ -30,22 +47,36 @@ export function HomePage() {
             </p>
           </div>
         </div>
-        {data ? <LastUpdatedBadge lastPolledAt={data.lastPolledAt} /> : null}
+        {activeData ? (
+          <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
+        ) : null}
       </header>
-      <StandingsSection
-        snapshot={data}
-        isPending={isPending}
-        isError={isError}
-        onRetry={() => void refetch()}
-      />
+
+      <ViewTabs value={view} onChange={setView} />
+
+      {view === "players" ? (
+        <StandingsSection
+          snapshot={standings.data}
+          isPending={standings.isPending}
+          isError={standings.isError}
+          onRetry={() => void standings.refetch()}
+        />
+      ) : (
+        <TeamsSection
+          snapshot={teams.data}
+          isPending={teams.isPending}
+          isError={teams.isError}
+          onRetry={() => void teams.refetch()}
+        />
+      )}
     </div>
   )
 }
 
 /**
- * Picks the standings view that matches the current query state. Order matters:
- * a request still in flight must not surface as empty or error, and a failed
- * request must not be mistaken for an empty leaderboard.
+ * Picks the players standings view that matches the current query state.
+ * Order matters: a request still in flight must not surface as empty or
+ * error, and a failed request must not be mistaken for an empty leaderboard.
  */
 function StandingsSection({
   snapshot,
@@ -71,4 +102,31 @@ function StandingsSection({
   }
 
   return <StandingsTable rows={snapshot.rows} />
+}
+
+/** The teams counterpart of `StandingsSection`, with the same state precedence. */
+function TeamsSection({
+  snapshot,
+  isPending,
+  isError,
+  onRetry,
+}: {
+  snapshot: TeamStandingsSnapshot | undefined
+  isPending: boolean
+  isError: boolean
+  onRetry: () => void
+}) {
+  if (isPending) {
+    return <TeamsTableSkeleton />
+  }
+
+  if (isError || !snapshot) {
+    return <TeamsError onRetry={onRetry} />
+  }
+
+  if (snapshot.rows.length === 0) {
+    return <TeamsEmpty />
+  }
+
+  return <TeamsTable rows={snapshot.rows} />
 }
