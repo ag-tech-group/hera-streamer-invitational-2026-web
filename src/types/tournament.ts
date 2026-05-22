@@ -14,9 +14,12 @@ export interface Tournament {
    */
   name: string
   /**
-   * AoE2 leaderboard the standings are drawn from. The API serves standings
-   * per leaderboard (`GET /v1/leaderboards/{id}/standings`), not per
-   * tournament — `3` is the 1v1 Random Map ranked ladder (`SOLO_RM_RANKED`).
+   * Tournament slug used in the API path (`GET /v1/tournaments/{slug}/...`).
+   *
+   * Distinct from `slug` above: `slug` selects this build's config, while
+   * this is the server-side tournament identifier the standings, live, and
+   * matches queries are scoped to. The API is multi-tournament; this build
+   * tracks the tournament with slug `"default"`.
    */
-  leaderboardId: number
+  apiTournamentSlug: string
 }

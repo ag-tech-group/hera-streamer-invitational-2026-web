@@ -27,35 +27,35 @@ import type {
 } from '../../types';
 
 
-export const getListMatchesV1MatchesGetResponseMock = (overrideResponse: Partial<Extract<ListEnvelopeMatchRead, object>> = {}): ListEnvelopeMatchRead => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({match_id: faker.number.int(), map_name: faker.string.alpha({length: {min: 10, max: 20}}), matchtype_id: faker.number.int(), leaderboard_id: faker.helpers.arrayElement([faker.number.int(),null,]), started_at: faker.date.past().toISOString().slice(0, 19) + 'Z', completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), state: faker.helpers.arrayElement(Object.values(MatchState)), updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z', players: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({profile_id: faker.number.int(), civilization_id: faker.number.int(), team_id: faker.number.int(), outcome: faker.helpers.arrayElement([faker.helpers.arrayElement(Object.values(MatchOutcome)),null,]), old_rating: faker.helpers.arrayElement([faker.number.int(),null,]), new_rating: faker.helpers.arrayElement([faker.number.int(),null,]), xp_gained: faker.number.int()}))})), ...overrideResponse})
+export const getListMatchesV1TournamentsTournamentSlugMatchesGetResponseMock = (overrideResponse: Partial<Extract<ListEnvelopeMatchRead, object>> = {}): ListEnvelopeMatchRead => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({match_id: faker.number.int(), map_name: faker.string.alpha({length: {min: 10, max: 20}}), matchtype_id: faker.number.int(), leaderboard_id: faker.helpers.arrayElement([faker.number.int(),null,]), started_at: faker.date.past().toISOString().slice(0, 19) + 'Z', completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), state: faker.helpers.arrayElement(Object.values(MatchState)), updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z', players: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({profile_id: faker.number.int(), civilization_id: faker.number.int(), team_id: faker.number.int(), outcome: faker.helpers.arrayElement([faker.helpers.arrayElement(Object.values(MatchOutcome)),null,]), old_rating: faker.helpers.arrayElement([faker.number.int(),null,]), new_rating: faker.helpers.arrayElement([faker.number.int(),null,]), xp_gained: faker.number.int()}))})), ...overrideResponse})
 
-export const getGetMatchV1MatchesMatchIdGetResponseMock = (overrideResponse: Partial<Extract<MatchDetail, object>> = {}): MatchDetail => ({match_id: faker.number.int(), map_name: faker.string.alpha({length: {min: 10, max: 20}}), matchtype_id: faker.number.int(), leaderboard_id: faker.helpers.arrayElement([faker.number.int(),null,]), started_at: faker.date.past().toISOString().slice(0, 19) + 'Z', completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), state: faker.helpers.arrayElement(Object.values(MatchState)), updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z', players: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({profile_id: faker.number.int(), civilization_id: faker.number.int(), team_id: faker.number.int(), outcome: faker.helpers.arrayElement([faker.helpers.arrayElement(Object.values(MatchOutcome)),null,]), old_rating: faker.helpers.arrayElement([faker.number.int(),null,]), new_rating: faker.helpers.arrayElement([faker.number.int(),null,]), xp_gained: faker.number.int()})), last_polled_at: faker.helpers.arrayElement([faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), undefined]), ...overrideResponse})
+export const getGetMatchV1TournamentsTournamentSlugMatchesMatchIdGetResponseMock = (overrideResponse: Partial<Extract<MatchDetail, object>> = {}): MatchDetail => ({match_id: faker.number.int(), map_name: faker.string.alpha({length: {min: 10, max: 20}}), matchtype_id: faker.number.int(), leaderboard_id: faker.helpers.arrayElement([faker.number.int(),null,]), started_at: faker.date.past().toISOString().slice(0, 19) + 'Z', completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), state: faker.helpers.arrayElement(Object.values(MatchState)), updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z', players: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({profile_id: faker.number.int(), civilization_id: faker.number.int(), team_id: faker.number.int(), outcome: faker.helpers.arrayElement([faker.helpers.arrayElement(Object.values(MatchOutcome)),null,]), old_rating: faker.helpers.arrayElement([faker.number.int(),null,]), new_rating: faker.helpers.arrayElement([faker.number.int(),null,]), xp_gained: faker.number.int()})), last_polled_at: faker.helpers.arrayElement([faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), undefined]), ...overrideResponse})
 
 
-export const getListMatchesV1MatchesGetMockHandler = (overrideResponse?: ListEnvelopeMatchRead | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ListEnvelopeMatchRead> | ListEnvelopeMatchRead), options?: RequestHandlerOptions) => {
-  return http.get('*/v1/matches', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+export const getListMatchesV1TournamentsTournamentSlugMatchesGetMockHandler = (overrideResponse?: ListEnvelopeMatchRead | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ListEnvelopeMatchRead> | ListEnvelopeMatchRead), options?: RequestHandlerOptions) => {
+  return http.get('*/v1/tournaments/:tournamentSlug/matches', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
   
   
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListMatchesV1MatchesGetResponseMock(),
+    : getListMatchesV1TournamentsTournamentSlugMatchesGetResponseMock(),
       { status: 200
       })
   }, options)
 }
 
-export const getGetMatchV1MatchesMatchIdGetMockHandler = (overrideResponse?: MatchDetail | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MatchDetail> | MatchDetail), options?: RequestHandlerOptions) => {
-  return http.get('*/v1/matches/:matchId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+export const getGetMatchV1TournamentsTournamentSlugMatchesMatchIdGetMockHandler = (overrideResponse?: MatchDetail | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MatchDetail> | MatchDetail), options?: RequestHandlerOptions) => {
+  return http.get('*/v1/tournaments/:tournamentSlug/matches/:matchId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
   
   
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetMatchV1MatchesMatchIdGetResponseMock(),
+    : getGetMatchV1TournamentsTournamentSlugMatchesMatchIdGetResponseMock(),
       { status: 200
       })
   }, options)
 }
 export const getMatchesMock = () => [
-  getListMatchesV1MatchesGetMockHandler(),
-  getGetMatchV1MatchesMatchIdGetMockHandler()
+  getListMatchesV1TournamentsTournamentSlugMatchesGetMockHandler(),
+  getGetMatchV1TournamentsTournamentSlugMatchesMatchIdGetMockHandler()
 ]

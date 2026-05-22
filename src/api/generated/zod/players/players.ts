@@ -9,7 +9,7 @@ import * as zod from 'zod';
 
 
 /**
- * Tracked players with embedded ratings, alphabetical by alias.
+ * The tournament's roster, with embedded ratings, alphabetical by alias.
 
 Players are returned regardless of whether they have a rating on the
 requested leaderboard (their ``ratings`` list may be empty). That keeps
@@ -17,11 +17,15 @@ the response shape stable as a player's leaderboard participation
 changes.
  * @summary List Players
  */
-export const ListPlayersV1PlayersGetQueryParams = zod.object({
+export const ListPlayersV1TournamentsTournamentSlugPlayersGetParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const ListPlayersV1TournamentsTournamentSlugPlayersGetQueryParams = zod.object({
   "leaderboard_id": zod.union([zod.number(),zod.null()]).optional().describe('If set, each player\'s ratings are filtered to this leaderboard only.')
 })
 
-export const ListPlayersV1PlayersGetResponse = zod.object({
+export const ListPlayersV1TournamentsTournamentSlugPlayersGetResponse = zod.object({
   "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "items": zod.array(zod.object({
   "profile_id": zod.number(),
@@ -52,29 +56,29 @@ export const ListPlayersV1PlayersGetResponse = zod.object({
 })
 
 /**
- * A single player's profile + ratings + most recent matches.
+ * A roster player's profile + ratings + most recent matches.
 
-Matches are joined via ``MatchPlayer.profile_id``; ``MatchPlayer`` has no
-foreign key back to ``Player`` (opponents needn't be tracked), so the
-join is explicit rather than a SQLAlchemy relationship.
+404 if the profile isn't on this tournament's roster. Matches are
+joined via ``MatchPlayer.profile_id`` (no FK back to ``Player``).
  * @summary Get Player
  */
-export const GetPlayerV1PlayersProfileIdGetParams = zod.object({
-  "profile_id": zod.number()
+export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams = zod.object({
+  "profile_id": zod.number(),
+  "tournament_slug": zod.string()
 })
 
-export const getPlayerV1PlayersProfileIdGetQueryMatchLimitDefault = 20;
-export const getPlayerV1PlayersProfileIdGetQueryMatchLimitMax = 100;
+export const getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryMatchLimitDefault = 20;
+export const getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryMatchLimitMax = 100;
 
 
 
-export const GetPlayerV1PlayersProfileIdGetQueryParams = zod.object({
-  "match_limit": zod.number().min(1).max(getPlayerV1PlayersProfileIdGetQueryMatchLimitMax).default(getPlayerV1PlayersProfileIdGetQueryMatchLimitDefault).describe('Max recent matches to include (1-100, default 20).')
+export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryParams = zod.object({
+  "match_limit": zod.number().min(1).max(getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryMatchLimitMax).default(getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryMatchLimitDefault).describe('Max recent matches to include (1-100, default 20).')
 })
 
-export const getPlayerV1PlayersProfileIdGetResponseRecentMatchesDefault = [];
+export const getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseRecentMatchesDefault = [];
 
-export const GetPlayerV1PlayersProfileIdGetResponse = zod.object({
+export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse = zod.object({
   "profile_id": zod.number(),
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),
@@ -119,6 +123,6 @@ export const GetPlayerV1PlayersProfileIdGetResponse = zod.object({
   "new_rating": zod.union([zod.number(),zod.null()]),
   "xp_gained": zod.number()
 }).describe('One MatchPlayer row, embedded inside MatchRead.\n\n`outcome`, `old_rating`, `new_rating` are null while the match is in\nprogress; the upstream fills them in on completion.'))
-}).describe('A match plus all of its MatchPlayer rows.\n\nPlayers are always included — even in list views — so a tournament UI\ncan render a full match card (both sides, outcome, Elo delta) without a\nsecond round-trip. 1v1 ranked is two rows, team games top out at eight.')).default(getPlayerV1PlayersProfileIdGetResponseRecentMatchesDefault)
+}).describe('A match plus all of its MatchPlayer rows.\n\nPlayers are always included — even in list views — so a tournament UI\ncan render a full match card (both sides, outcome, Elo delta) without a\nsecond round-trip. 1v1 ranked is two rows, team games top out at eight.')).default(getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseRecentMatchesDefault)
 }).describe('Single-player response (``GET \/v1\/players\/{profile_id}``).\n\nExtends ``PlayerRead`` with ``last_polled_at`` and the player\'s recent\nmatches. ``recent_matches`` is set by the router (not via SQLAlchemy\nrelationship) because matches are joined through ``MatchPlayer.profile_id``,\nwhich intentionally has no foreign key back to ``Player`` (opponents\ndon\'t need to be tracked).')
 

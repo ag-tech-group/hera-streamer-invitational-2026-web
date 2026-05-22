@@ -21,10 +21,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GetPlayerV1PlayersProfileIdGetParams,
+  GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams,
   HTTPValidationError,
   ListEnvelopePlayerRead,
-  ListPlayersV1PlayersGetParams,
+  ListPlayersV1TournamentsTournamentSlugPlayersGetParams,
   PlayerDetail
 } from '../../types';
 
@@ -36,7 +36,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * Tracked players with embedded ratings, alphabetical by alias.
+ * The tournament's roster, with embedded ratings, alphabetical by alias.
 
 Players are returned regardless of whether they have a rating on the
 requested leaderboard (their ``ratings`` list may be empty). That keeps
@@ -44,26 +44,27 @@ the response shape stable as a player's leaderboard participation
 changes.
  * @summary List Players
  */
-export type listPlayersV1PlayersGetResponse200 = {
+export type listPlayersV1TournamentsTournamentSlugPlayersGetResponse200 = {
   data: ListEnvelopePlayerRead
   status: 200
 }
 
-export type listPlayersV1PlayersGetResponse422 = {
+export type listPlayersV1TournamentsTournamentSlugPlayersGetResponse422 = {
   data: HTTPValidationError
   status: 422
 }
 
-export type listPlayersV1PlayersGetResponseSuccess = (listPlayersV1PlayersGetResponse200) & {
+export type listPlayersV1TournamentsTournamentSlugPlayersGetResponseSuccess = (listPlayersV1TournamentsTournamentSlugPlayersGetResponse200) & {
   headers: Headers;
 };
-export type listPlayersV1PlayersGetResponseError = (listPlayersV1PlayersGetResponse422) & {
+export type listPlayersV1TournamentsTournamentSlugPlayersGetResponseError = (listPlayersV1TournamentsTournamentSlugPlayersGetResponse422) & {
   headers: Headers;
 };
 
-export type listPlayersV1PlayersGetResponse = (listPlayersV1PlayersGetResponseSuccess | listPlayersV1PlayersGetResponseError)
+export type listPlayersV1TournamentsTournamentSlugPlayersGetResponse = (listPlayersV1TournamentsTournamentSlugPlayersGetResponseSuccess | listPlayersV1TournamentsTournamentSlugPlayersGetResponseError)
 
-export const getListPlayersV1PlayersGetUrl = (params?: ListPlayersV1PlayersGetParams,) => {
+export const getListPlayersV1TournamentsTournamentSlugPlayersGetUrl = (tournamentSlug: string,
+    params?: ListPlayersV1TournamentsTournamentSlugPlayersGetParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -75,12 +76,13 @@ export const getListPlayersV1PlayersGetUrl = (params?: ListPlayersV1PlayersGetPa
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/v1/players?${stringifiedParams}` : `/v1/players`
+  return stringifiedParams.length > 0 ? `/v1/tournaments/${tournamentSlug}/players?${stringifiedParams}` : `/v1/tournaments/${tournamentSlug}/players`
 }
 
-export const listPlayersV1PlayersGet = async (params?: ListPlayersV1PlayersGetParams, options?: RequestInit): Promise<listPlayersV1PlayersGetResponse> => {
+export const listPlayersV1TournamentsTournamentSlugPlayersGet = async (tournamentSlug: string,
+    params?: ListPlayersV1TournamentsTournamentSlugPlayersGetParams, options?: RequestInit): Promise<listPlayersV1TournamentsTournamentSlugPlayersGetResponse> => {
   
-  return orvalClient<listPlayersV1PlayersGetResponse>(getListPlayersV1PlayersGetUrl(params),
+  return orvalClient<listPlayersV1TournamentsTournamentSlugPlayersGetResponse>(getListPlayersV1TournamentsTournamentSlugPlayersGetUrl(tournamentSlug,params),
   {      
     ...options,
     method: 'GET'
@@ -93,69 +95,75 @@ export const listPlayersV1PlayersGet = async (params?: ListPlayersV1PlayersGetPa
 
 
 
-export const getListPlayersV1PlayersGetQueryKey = (params?: ListPlayersV1PlayersGetParams,) => {
+export const getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey = (tournamentSlug: string,
+    params?: ListPlayersV1TournamentsTournamentSlugPlayersGetParams,) => {
     return [
-    `/v1/players`, ...(params ? [params] : [])
+    `/v1/tournaments/${tournamentSlug}/players`, ...(params ? [params] : [])
     ] as const;
     }
 
     
-export const getListPlayersV1PlayersGetQueryOptions = <TData = Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError = HTTPValidationError>(params?: ListPlayersV1PlayersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export const getListPlayersV1TournamentsTournamentSlugPlayersGetQueryOptions = <TData = Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError = HTTPValidationError>(tournamentSlug: string,
+    params?: ListPlayersV1TournamentsTournamentSlugPlayersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListPlayersV1PlayersGetQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(tournamentSlug,params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPlayersV1PlayersGet>>> = ({ signal }) => listPlayersV1PlayersGet(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>> = ({ signal }) => listPlayersV1TournamentsTournamentSlugPlayersGet(tournamentSlug,params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(tournamentSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListPlayersV1PlayersGetQueryResult = NonNullable<Awaited<ReturnType<typeof listPlayersV1PlayersGet>>>
-export type ListPlayersV1PlayersGetQueryError = HTTPValidationError
+export type ListPlayersV1TournamentsTournamentSlugPlayersGetQueryResult = NonNullable<Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>>
+export type ListPlayersV1TournamentsTournamentSlugPlayersGetQueryError = HTTPValidationError
 
 
-export function useListPlayersV1PlayersGet<TData = Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError = HTTPValidationError>(
- params: undefined |  ListPlayersV1PlayersGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError, TData>> & Pick<
+export function useListPlayersV1TournamentsTournamentSlugPlayersGet<TData = Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params: undefined |  ListPlayersV1TournamentsTournamentSlugPlayersGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listPlayersV1PlayersGet>>,
+          Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>,
           TError,
-          Awaited<ReturnType<typeof listPlayersV1PlayersGet>>
+          Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListPlayersV1PlayersGet<TData = Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError = HTTPValidationError>(
- params?: ListPlayersV1PlayersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError, TData>> & Pick<
+export function useListPlayersV1TournamentsTournamentSlugPlayersGet<TData = Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: ListPlayersV1TournamentsTournamentSlugPlayersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listPlayersV1PlayersGet>>,
+          Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>,
           TError,
-          Awaited<ReturnType<typeof listPlayersV1PlayersGet>>
+          Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListPlayersV1PlayersGet<TData = Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError = HTTPValidationError>(
- params?: ListPlayersV1PlayersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export function useListPlayersV1TournamentsTournamentSlugPlayersGet<TData = Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: ListPlayersV1TournamentsTournamentSlugPlayersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List Players
  */
 
-export function useListPlayersV1PlayersGet<TData = Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError = HTTPValidationError>(
- params?: ListPlayersV1PlayersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1PlayersGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export function useListPlayersV1TournamentsTournamentSlugPlayersGet<TData = Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: ListPlayersV1TournamentsTournamentSlugPlayersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlayersV1TournamentsTournamentSlugPlayersGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListPlayersV1PlayersGetQueryOptions(params,options)
+  const queryOptions = getListPlayersV1TournamentsTournamentSlugPlayersGetQueryOptions(tournamentSlug,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -166,34 +174,34 @@ export function useListPlayersV1PlayersGet<TData = Awaited<ReturnType<typeof lis
 
 
 /**
- * A single player's profile + ratings + most recent matches.
+ * A roster player's profile + ratings + most recent matches.
 
-Matches are joined via ``MatchPlayer.profile_id``; ``MatchPlayer`` has no
-foreign key back to ``Player`` (opponents needn't be tracked), so the
-join is explicit rather than a SQLAlchemy relationship.
+404 if the profile isn't on this tournament's roster. Matches are
+joined via ``MatchPlayer.profile_id`` (no FK back to ``Player``).
  * @summary Get Player
  */
-export type getPlayerV1PlayersProfileIdGetResponse200 = {
+export type getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse200 = {
   data: PlayerDetail
   status: 200
 }
 
-export type getPlayerV1PlayersProfileIdGetResponse422 = {
+export type getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse422 = {
   data: HTTPValidationError
   status: 422
 }
 
-export type getPlayerV1PlayersProfileIdGetResponseSuccess = (getPlayerV1PlayersProfileIdGetResponse200) & {
+export type getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseSuccess = (getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse200) & {
   headers: Headers;
 };
-export type getPlayerV1PlayersProfileIdGetResponseError = (getPlayerV1PlayersProfileIdGetResponse422) & {
+export type getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseError = (getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse422) & {
   headers: Headers;
 };
 
-export type getPlayerV1PlayersProfileIdGetResponse = (getPlayerV1PlayersProfileIdGetResponseSuccess | getPlayerV1PlayersProfileIdGetResponseError)
+export type getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse = (getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseSuccess | getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseError)
 
-export const getGetPlayerV1PlayersProfileIdGetUrl = (profileId: number,
-    params?: GetPlayerV1PlayersProfileIdGetParams,) => {
+export const getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetUrl = (tournamentSlug: string,
+    profileId: number,
+    params?: GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -205,13 +213,14 @@ export const getGetPlayerV1PlayersProfileIdGetUrl = (profileId: number,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/v1/players/${profileId}?${stringifiedParams}` : `/v1/players/${profileId}`
+  return stringifiedParams.length > 0 ? `/v1/tournaments/${tournamentSlug}/players/${profileId}?${stringifiedParams}` : `/v1/tournaments/${tournamentSlug}/players/${profileId}`
 }
 
-export const getPlayerV1PlayersProfileIdGet = async (profileId: number,
-    params?: GetPlayerV1PlayersProfileIdGetParams, options?: RequestInit): Promise<getPlayerV1PlayersProfileIdGetResponse> => {
+export const getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet = async (tournamentSlug: string,
+    profileId: number,
+    params?: GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams, options?: RequestInit): Promise<getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse> => {
   
-  return orvalClient<getPlayerV1PlayersProfileIdGetResponse>(getGetPlayerV1PlayersProfileIdGetUrl(profileId,params),
+  return orvalClient<getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse>(getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetUrl(tournamentSlug,profileId,params),
   {      
     ...options,
     method: 'GET'
@@ -224,75 +233,81 @@ export const getPlayerV1PlayersProfileIdGet = async (profileId: number,
 
 
 
-export const getGetPlayerV1PlayersProfileIdGetQueryKey = (profileId: number,
-    params?: GetPlayerV1PlayersProfileIdGetParams,) => {
+export const getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryKey = (tournamentSlug: string,
+    profileId: number,
+    params?: GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams,) => {
     return [
-    `/v1/players/${profileId}`, ...(params ? [params] : [])
+    `/v1/tournaments/${tournamentSlug}/players/${profileId}`, ...(params ? [params] : [])
     ] as const;
     }
 
     
-export const getGetPlayerV1PlayersProfileIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError = HTTPValidationError>(profileId: number,
-    params?: GetPlayerV1PlayersProfileIdGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export const getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError = HTTPValidationError>(tournamentSlug: string,
+    profileId: number,
+    params?: GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPlayerV1PlayersProfileIdGetQueryKey(profileId,params);
+  const queryKey =  queryOptions?.queryKey ?? getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryKey(tournamentSlug,profileId,params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>> = ({ signal }) => getPlayerV1PlayersProfileIdGet(profileId,params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>> = ({ signal }) => getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet(tournamentSlug,profileId,params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(profileId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(tournamentSlug && profileId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetPlayerV1PlayersProfileIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>>
-export type GetPlayerV1PlayersProfileIdGetQueryError = HTTPValidationError
+export type GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>>
+export type GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryError = HTTPValidationError
 
 
-export function useGetPlayerV1PlayersProfileIdGet<TData = Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError = HTTPValidationError>(
- profileId: number,
-    params: undefined |  GetPlayerV1PlayersProfileIdGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError, TData>> & Pick<
+export function useGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGet<TData = Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    profileId: number,
+    params: undefined |  GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>,
+          Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>,
           TError,
-          Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>
+          Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPlayerV1PlayersProfileIdGet<TData = Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError = HTTPValidationError>(
- profileId: number,
-    params?: GetPlayerV1PlayersProfileIdGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError, TData>> & Pick<
+export function useGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGet<TData = Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    profileId: number,
+    params?: GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>,
+          Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>,
           TError,
-          Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>
+          Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPlayerV1PlayersProfileIdGet<TData = Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError = HTTPValidationError>(
- profileId: number,
-    params?: GetPlayerV1PlayersProfileIdGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export function useGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGet<TData = Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    profileId: number,
+    params?: GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get Player
  */
 
-export function useGetPlayerV1PlayersProfileIdGet<TData = Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError = HTTPValidationError>(
- profileId: number,
-    params?: GetPlayerV1PlayersProfileIdGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1PlayersProfileIdGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export function useGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGet<TData = Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    profileId: number,
+    params?: GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerV1TournamentsTournamentSlugPlayersProfileIdGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetPlayerV1PlayersProfileIdGetQueryOptions(profileId,params,options)
+  const queryOptions = getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryOptions(tournamentSlug,profileId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -21,6 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  HTTPValidationError,
   ListEnvelopeMatchRead
 } from '../../types';
 
@@ -32,35 +33,42 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * Matches currently in ``staging`` or ``in_progress`` state.
+ * The tournament roster's matches currently in ``staging`` or ``in_progress``.
 
-Backed by the ``ix_matches_state`` index. Ordered by ``started_at desc``
-so the most recent kick-offs sit at the top.
+Scoped via ``live_match_players`` — the live poller's per-cycle
+snapshot of who is in a live lobby. Ordered by ``started_at`` desc.
  * @summary Get Live
  */
-export type getLiveV1LiveGetResponse200 = {
+export type getLiveV1TournamentsTournamentSlugLiveGetResponse200 = {
   data: ListEnvelopeMatchRead
   status: 200
 }
 
-export type getLiveV1LiveGetResponseSuccess = (getLiveV1LiveGetResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getLiveV1LiveGetResponse = (getLiveV1LiveGetResponseSuccess)
-
-export const getGetLiveV1LiveGetUrl = () => {
-
-
-  
-
-  return `/v1/live`
+export type getLiveV1TournamentsTournamentSlugLiveGetResponse422 = {
+  data: HTTPValidationError
+  status: 422
 }
 
-export const getLiveV1LiveGet = async ( options?: RequestInit): Promise<getLiveV1LiveGetResponse> => {
+export type getLiveV1TournamentsTournamentSlugLiveGetResponseSuccess = (getLiveV1TournamentsTournamentSlugLiveGetResponse200) & {
+  headers: Headers;
+};
+export type getLiveV1TournamentsTournamentSlugLiveGetResponseError = (getLiveV1TournamentsTournamentSlugLiveGetResponse422) & {
+  headers: Headers;
+};
+
+export type getLiveV1TournamentsTournamentSlugLiveGetResponse = (getLiveV1TournamentsTournamentSlugLiveGetResponseSuccess | getLiveV1TournamentsTournamentSlugLiveGetResponseError)
+
+export const getGetLiveV1TournamentsTournamentSlugLiveGetUrl = (tournamentSlug: string,) => {
+
+
   
-  return orvalClient<getLiveV1LiveGetResponse>(getGetLiveV1LiveGetUrl(),
+
+  return `/v1/tournaments/${tournamentSlug}/live`
+}
+
+export const getLiveV1TournamentsTournamentSlugLiveGet = async (tournamentSlug: string, options?: RequestInit): Promise<getLiveV1TournamentsTournamentSlugLiveGetResponse> => {
+  
+  return orvalClient<getLiveV1TournamentsTournamentSlugLiveGetResponse>(getGetLiveV1TournamentsTournamentSlugLiveGetUrl(tournamentSlug),
   {      
     ...options,
     method: 'GET'
@@ -73,69 +81,69 @@ export const getLiveV1LiveGet = async ( options?: RequestInit): Promise<getLiveV
 
 
 
-export const getGetLiveV1LiveGetQueryKey = () => {
+export const getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey = (tournamentSlug: string,) => {
     return [
-    `/v1/live`
+    `/v1/tournaments/${tournamentSlug}/live`
     ] as const;
     }
 
     
-export const getGetLiveV1LiveGetQueryOptions = <TData = Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export const getGetLiveV1TournamentsTournamentSlugLiveGetQueryOptions = <TData = Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError = HTTPValidationError>(tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetLiveV1LiveGetQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey(tournamentSlug);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLiveV1LiveGet>>> = ({ signal }) => getLiveV1LiveGet({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>> = ({ signal }) => getLiveV1TournamentsTournamentSlugLiveGet(tournamentSlug, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(tournamentSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetLiveV1LiveGetQueryResult = NonNullable<Awaited<ReturnType<typeof getLiveV1LiveGet>>>
-export type GetLiveV1LiveGetQueryError = unknown
+export type GetLiveV1TournamentsTournamentSlugLiveGetQueryResult = NonNullable<Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>>
+export type GetLiveV1TournamentsTournamentSlugLiveGetQueryError = HTTPValidationError
 
 
-export function useGetLiveV1LiveGet<TData = Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError, TData>> & Pick<
+export function useGetLiveV1TournamentsTournamentSlugLiveGet<TData = Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getLiveV1LiveGet>>,
+          Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>,
           TError,
-          Awaited<ReturnType<typeof getLiveV1LiveGet>>
+          Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetLiveV1LiveGet<TData = Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError, TData>> & Pick<
+export function useGetLiveV1TournamentsTournamentSlugLiveGet<TData = Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getLiveV1LiveGet>>,
+          Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>,
           TError,
-          Awaited<ReturnType<typeof getLiveV1LiveGet>>
+          Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetLiveV1LiveGet<TData = Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export function useGetLiveV1TournamentsTournamentSlugLiveGet<TData = Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get Live
  */
 
-export function useGetLiveV1LiveGet<TData = Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1LiveGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+export function useGetLiveV1TournamentsTournamentSlugLiveGet<TData = Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLiveV1TournamentsTournamentSlugLiveGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetLiveV1LiveGetQueryOptions(options)
+  const queryOptions = getGetLiveV1TournamentsTournamentSlugLiveGetQueryOptions(tournamentSlug,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -26,20 +26,20 @@ import type {
 } from '../../types';
 
 
-export const getGetLiveV1LiveGetResponseMock = (overrideResponse: Partial<Extract<ListEnvelopeMatchRead, object>> = {}): ListEnvelopeMatchRead => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({match_id: faker.number.int(), map_name: faker.string.alpha({length: {min: 10, max: 20}}), matchtype_id: faker.number.int(), leaderboard_id: faker.helpers.arrayElement([faker.number.int(),null,]), started_at: faker.date.past().toISOString().slice(0, 19) + 'Z', completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), state: faker.helpers.arrayElement(Object.values(MatchState)), updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z', players: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({profile_id: faker.number.int(), civilization_id: faker.number.int(), team_id: faker.number.int(), outcome: faker.helpers.arrayElement([faker.helpers.arrayElement(Object.values(MatchOutcome)),null,]), old_rating: faker.helpers.arrayElement([faker.number.int(),null,]), new_rating: faker.helpers.arrayElement([faker.number.int(),null,]), xp_gained: faker.number.int()}))})), ...overrideResponse})
+export const getGetLiveV1TournamentsTournamentSlugLiveGetResponseMock = (overrideResponse: Partial<Extract<ListEnvelopeMatchRead, object>> = {}): ListEnvelopeMatchRead => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({match_id: faker.number.int(), map_name: faker.string.alpha({length: {min: 10, max: 20}}), matchtype_id: faker.number.int(), leaderboard_id: faker.helpers.arrayElement([faker.number.int(),null,]), started_at: faker.date.past().toISOString().slice(0, 19) + 'Z', completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), state: faker.helpers.arrayElement(Object.values(MatchState)), updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z', players: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({profile_id: faker.number.int(), civilization_id: faker.number.int(), team_id: faker.number.int(), outcome: faker.helpers.arrayElement([faker.helpers.arrayElement(Object.values(MatchOutcome)),null,]), old_rating: faker.helpers.arrayElement([faker.number.int(),null,]), new_rating: faker.helpers.arrayElement([faker.number.int(),null,]), xp_gained: faker.number.int()}))})), ...overrideResponse})
 
 
-export const getGetLiveV1LiveGetMockHandler = (overrideResponse?: ListEnvelopeMatchRead | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ListEnvelopeMatchRead> | ListEnvelopeMatchRead), options?: RequestHandlerOptions) => {
-  return http.get('*/v1/live', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+export const getGetLiveV1TournamentsTournamentSlugLiveGetMockHandler = (overrideResponse?: ListEnvelopeMatchRead | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ListEnvelopeMatchRead> | ListEnvelopeMatchRead), options?: RequestHandlerOptions) => {
+  return http.get('*/v1/tournaments/:tournamentSlug/live', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
   
   
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetLiveV1LiveGetResponseMock(),
+    : getGetLiveV1TournamentsTournamentSlugLiveGetResponseMock(),
       { status: 200
       })
   }, options)
 }
 export const getLiveMock = () => [
-  getGetLiveV1LiveGetMockHandler()
+  getGetLiveV1TournamentsTournamentSlugLiveGetMockHandler()
 ]

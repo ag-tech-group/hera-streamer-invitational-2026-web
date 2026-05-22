@@ -21,9 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  HTTPValidationError,
-  ListEnvelopeLeaderboardRead,
-  ListEnvelopeStandingRow
+  ListEnvelopeLeaderboardRead
 } from '../../types';
 
 import { orvalClient } from '../../../orval-client';
@@ -37,8 +35,8 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * Available leaderboards, sourced from the in-memory cache.
 
 The polling worker fills the cache at startup from upstream
-``getAvailableLeaderboards`` and refreshes daily. Until that worker
-lands, this endpoint returns an empty list with ``last_polled_at: null``.
+``getAvailableLeaderboards``. Each tournament tracks one of these by
+``leaderboard_id``.
  * @summary List Leaderboards
  */
 export type listLeaderboardsV1LeaderboardsGetResponse200 = {
@@ -139,129 +137,6 @@ export function useListLeaderboardsV1LeaderboardsGet<TData = Awaited<ReturnType<
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getListLeaderboardsV1LeaderboardsGetQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-/**
- * Tracked players' ratings on one leaderboard, sorted by current rating desc.
-
-Joins ``PlayerRating`` with ``Player`` so each row contains both the
-rating numbers and the player identity (alias, country). The
-``(leaderboard_id, current_rating)`` composite index on
-``player_ratings`` covers this query.
- * @summary Get Standings
- */
-export type getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse200 = {
-  data: ListEnvelopeStandingRow
-  status: 200
-}
-
-export type getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-
-export type getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponseSuccess = (getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse200) & {
-  headers: Headers;
-};
-export type getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponseError = (getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse422) & {
-  headers: Headers;
-};
-
-export type getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse = (getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponseSuccess | getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponseError)
-
-export const getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetUrl = (leaderboardId: number,) => {
-
-
-  
-
-  return `/v1/leaderboards/${leaderboardId}/standings`
-}
-
-export const getStandingsV1LeaderboardsLeaderboardIdStandingsGet = async (leaderboardId: number, options?: RequestInit): Promise<getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse> => {
-  
-  return orvalClient<getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse>(getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetUrl(leaderboardId),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-  
-
-
-
-
-export const getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryKey = (leaderboardId: number,) => {
-    return [
-    `/v1/leaderboards/${leaderboardId}/standings`
-    ] as const;
-    }
-
-    
-export const getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryOptions = <TData = Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError = HTTPValidationError>(leaderboardId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryKey(leaderboardId);
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>> = ({ signal }) => getStandingsV1LeaderboardsLeaderboardIdStandingsGet(leaderboardId, { signal, ...requestOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(leaderboardId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>>
-export type GetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryError = HTTPValidationError
-
-
-export function useGetStandingsV1LeaderboardsLeaderboardIdStandingsGet<TData = Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError = HTTPValidationError>(
- leaderboardId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>,
-          TError,
-          Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof orvalClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetStandingsV1LeaderboardsLeaderboardIdStandingsGet<TData = Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError = HTTPValidationError>(
- leaderboardId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>,
-          TError,
-          Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof orvalClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetStandingsV1LeaderboardsLeaderboardIdStandingsGet<TData = Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError = HTTPValidationError>(
- leaderboardId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get Standings
- */
-
-export function useGetStandingsV1LeaderboardsLeaderboardIdStandingsGet<TData = Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError = HTTPValidationError>(
- leaderboardId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsV1LeaderboardsLeaderboardIdStandingsGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryOptions(leaderboardId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

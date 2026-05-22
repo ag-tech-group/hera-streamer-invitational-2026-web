@@ -5,14 +5,18 @@
  * Open-source live-standings API for AoE2: DE tournaments.
  * OpenAPI spec version: 0.0.1
  */
+import type { MatchOutcome } from './matchOutcome';
+import type { TournamentRecord } from './tournamentRecord';
 
 /**
- * One row in the standings list for a given leaderboard.
+ * One row in a tournament's standings list.
 
-Denormalized join of ``Player`` and ``PlayerRating`` so consumers get
-everything they need to render a standings table in one row, without
-an extra ``ratings[]`` indirection. Sorted by ``current_rating`` desc
-on the endpoint.
+A denormalized read model: a join of ``Player`` and ``PlayerRating``
+plus folded-in derived fields, so a consumer renders a full standings
+table from one response with no per-player fan-out. ``recent_results``
+is completed-match form; ``tournament_record`` is the player's record
+within the tournament's date window; ``in_match`` / ``live_match_id``
+are current live-match status. Sorted by ``current_rating`` desc.
  */
 export interface StandingRow {
   profile_id: number;
@@ -23,8 +27,12 @@ export interface StandingRow {
   wins: number;
   losses: number;
   streak: number;
+  recent_results: MatchOutcome[];
+  tournament_record: TournamentRecord;
   rank: number | null;
   rank_total: number | null;
+  in_match: boolean;
+  live_match_id: number | null;
   last_match_at: string | null;
   updated_at: string;
 }

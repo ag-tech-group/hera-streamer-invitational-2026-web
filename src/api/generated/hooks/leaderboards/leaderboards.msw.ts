@@ -18,14 +18,11 @@ import type {
 } from 'msw';
 
 import type {
-  ListEnvelopeLeaderboardRead,
-  ListEnvelopeStandingRow
+  ListEnvelopeLeaderboardRead
 } from '../../types';
 
 
 export const getListLeaderboardsV1LeaderboardsGetResponseMock = (overrideResponse: Partial<Extract<ListEnvelopeLeaderboardRead, object>> = {}): ListEnvelopeLeaderboardRead => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({leaderboard_id: faker.number.int(), name: faker.string.alpha({length: {min: 10, max: 20}}), is_ranked: faker.datatype.boolean()})), ...overrideResponse})
-
-export const getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetResponseMock = (overrideResponse: Partial<Extract<ListEnvelopeStandingRow, object>> = {}): ListEnvelopeStandingRow => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({profile_id: faker.number.int(), alias: faker.string.alpha({length: {min: 10, max: 20}}), country: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), current_rating: faker.number.int(), max_rating: faker.number.int(), wins: faker.number.int(), losses: faker.number.int(), streak: faker.number.int(), rank: faker.helpers.arrayElement([faker.number.int(),null,]), rank_total: faker.helpers.arrayElement([faker.number.int(),null,]), last_match_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z'})), ...overrideResponse})
 
 
 export const getListLeaderboardsV1LeaderboardsGetMockHandler = (overrideResponse?: ListEnvelopeLeaderboardRead | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ListEnvelopeLeaderboardRead> | ListEnvelopeLeaderboardRead), options?: RequestHandlerOptions) => {
@@ -39,19 +36,6 @@ export const getListLeaderboardsV1LeaderboardsGetMockHandler = (overrideResponse
       })
   }, options)
 }
-
-export const getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetMockHandler = (overrideResponse?: ListEnvelopeStandingRow | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ListEnvelopeStandingRow> | ListEnvelopeStandingRow), options?: RequestHandlerOptions) => {
-  return http.get('*/v1/leaderboards/:leaderboardId/standings', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-  
-  
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
 export const getLeaderboardsMock = () => [
-  getListLeaderboardsV1LeaderboardsGetMockHandler(),
-  getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetMockHandler()
+  getListLeaderboardsV1LeaderboardsGetMockHandler()
 ]

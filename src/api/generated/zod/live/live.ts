@@ -9,13 +9,17 @@ import * as zod from 'zod';
 
 
 /**
- * Matches currently in ``staging`` or ``in_progress`` state.
+ * The tournament roster's matches currently in ``staging`` or ``in_progress``.
 
-Backed by the ``ix_matches_state`` index. Ordered by ``started_at desc``
-so the most recent kick-offs sit at the top.
+Scoped via ``live_match_players`` — the live poller's per-cycle
+snapshot of who is in a live lobby. Ordered by ``started_at`` desc.
  * @summary Get Live
  */
-export const GetLiveV1LiveGetResponse = zod.object({
+export const GetLiveV1TournamentsTournamentSlugLiveGetParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const GetLiveV1TournamentsTournamentSlugLiveGetResponse = zod.object({
   "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "items": zod.array(zod.object({
   "match_id": zod.number(),

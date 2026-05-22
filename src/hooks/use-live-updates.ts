@@ -3,10 +3,10 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useEffect } from "react"
 
 import { baseUrl } from "@/api/api"
-import { getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryKey } from "@/api/generated/hooks/leaderboards/leaderboards"
-import { getGetLiveV1LiveGetQueryKey } from "@/api/generated/hooks/live/live"
-import { getListMatchesV1MatchesGetQueryKey } from "@/api/generated/hooks/matches/matches"
+import { getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey } from "@/api/generated/hooks/live/live"
+import { getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey } from "@/api/generated/hooks/matches/matches"
 import { getStreamV1StreamGetUrl } from "@/api/generated/hooks/stream/stream"
+import { getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey } from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
 import { logger } from "@/lib/logger"
 
@@ -38,13 +38,21 @@ export function useLiveUpdates(): void {
     // The query key invalidated for each nudge type. `live` and `matches`
     // have no consumer yet, so those invalidations are currently no-ops —
     // wiring them now keeps the stream layer complete for when those views
-    // land, with no change needed here.
+    // land, with no change needed here. All three endpoints are scoped to
+    // the active tournament.
+    const tournamentSlug = activeTournament.apiTournamentSlug
     const queryKeyFor: Record<NudgeEvent, QueryKey> = {
-      standings: getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryKey(
-        activeTournament.leaderboardId
+      standings:
+        getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
+          tournamentSlug
+        ),
+      live: getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey(
+        tournamentSlug
       ),
-      live: getGetLiveV1LiveGetQueryKey(),
-      matches: getListMatchesV1MatchesGetQueryKey(),
+      matches:
+        getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey(
+          tournamentSlug
+        ),
     }
 
     const source = new EventSource(`${baseUrl}${getStreamV1StreamGetUrl()}`)

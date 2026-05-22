@@ -1,4 +1,4 @@
-import type { getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse } from "@/api/generated/hooks/leaderboards/leaderboards"
+import type { getStandingsV1TournamentsTournamentSlugStandingsGetResponse } from "@/api/generated/hooks/tournaments/tournaments"
 import type { StandingRow } from "@/api/generated/types"
 import type { StandingsRow, StandingsSnapshot } from "@/types"
 
@@ -10,7 +10,7 @@ import type { StandingsRow, StandingsSnapshot } from "@/types"
 
 /** Full response shape returned by the generated standings query hook. */
 type StandingsResponse =
-  getStandingsV1LeaderboardsLeaderboardIdStandingsGetResponse
+  getStandingsV1TournamentsTournamentSlugStandingsGetResponse
 
 function toStandingsRow(dto: StandingRow): StandingsRow {
   return {

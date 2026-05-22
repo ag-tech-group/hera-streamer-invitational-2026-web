@@ -9,26 +9,30 @@ import * as zod from 'zod';
 
 
 /**
- * Recent matches involving any tracked player, ordered by ``started_at`` desc.
+ * Recent matches involving the tournament's roster, newest first.
 
-No pagination — the tournament-scale dataset comfortably fits inside a
-``?limit`` window. Filters combine: ``?profile_id=N&state=completed``
-returns that player's recent completed matches.
+Always scoped to matches a roster member appeared in. The optional
+filters narrow further: ``?profile_id=N&state=completed`` returns one
+player's recent completed matches.
  * @summary List Matches
  */
-export const listMatchesV1MatchesGetQueryLimitDefault = 50;
-export const listMatchesV1MatchesGetQueryLimitMax = 200;
+export const ListMatchesV1TournamentsTournamentSlugMatchesGetParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const listMatchesV1TournamentsTournamentSlugMatchesGetQueryLimitDefault = 50;
+export const listMatchesV1TournamentsTournamentSlugMatchesGetQueryLimitMax = 200;
 
 
 
-export const ListMatchesV1MatchesGetQueryParams = zod.object({
+export const ListMatchesV1TournamentsTournamentSlugMatchesGetQueryParams = zod.object({
   "profile_id": zod.union([zod.number(),zod.null()]).optional().describe('Restrict to matches the given profile_id appeared in.'),
   "leaderboard_id": zod.union([zod.number(),zod.null()]).optional().describe('Restrict to matches on the given leaderboard.'),
   "state": zod.union([zod.enum(['staging', 'in_progress', 'completed']),zod.null()]).optional().describe('Restrict to matches in this state.'),
-  "limit": zod.number().min(1).max(listMatchesV1MatchesGetQueryLimitMax).default(listMatchesV1MatchesGetQueryLimitDefault).describe('Max matches to return (1-200, default 50).')
+  "limit": zod.number().min(1).max(listMatchesV1TournamentsTournamentSlugMatchesGetQueryLimitMax).default(listMatchesV1TournamentsTournamentSlugMatchesGetQueryLimitDefault).describe('Max matches to return (1-200, default 50).')
 })
 
-export const ListMatchesV1MatchesGetResponse = zod.object({
+export const ListMatchesV1TournamentsTournamentSlugMatchesGetResponse = zod.object({
   "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "items": zod.array(zod.object({
   "match_id": zod.number(),
@@ -53,18 +57,19 @@ export const ListMatchesV1MatchesGetResponse = zod.object({
 })
 
 /**
- * A single match with all ``MatchPlayer`` rows.
+ * A single match with all its ``MatchPlayer`` rows.
 
-Cache headers are state-aware: ``no-store`` while the match is still
-in progress or staging (the response changes on every poll cycle);
-``public, max-age=60`` once completed.
+404 if the match doesn't exist, or exists but involves no member of
+this tournament's roster. Cache headers are state-aware: ``no-store``
+while in progress, ``public, max-age=60`` once completed.
  * @summary Get Match
  */
-export const GetMatchV1MatchesMatchIdGetParams = zod.object({
-  "match_id": zod.number()
+export const GetMatchV1TournamentsTournamentSlugMatchesMatchIdGetParams = zod.object({
+  "match_id": zod.number(),
+  "tournament_slug": zod.string()
 })
 
-export const GetMatchV1MatchesMatchIdGetResponse = zod.object({
+export const GetMatchV1TournamentsTournamentSlugMatchesMatchIdGetResponse = zod.object({
   "match_id": zod.number(),
   "map_name": zod.string(),
   "matchtype_id": zod.number(),

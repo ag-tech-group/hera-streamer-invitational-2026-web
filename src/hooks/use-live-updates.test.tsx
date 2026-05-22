@@ -3,8 +3,8 @@ import { renderHook } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryKey } from "@/api/generated/hooks/leaderboards/leaderboards"
-import { getGetLiveV1LiveGetQueryKey } from "@/api/generated/hooks/live/live"
+import { getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey } from "@/api/generated/hooks/live/live"
+import { getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey } from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { MockEventSource } from "@/test/mock-event-source"
@@ -34,8 +34,8 @@ describe("useLiveUpdates", () => {
     })
 
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: getGetStandingsV1LeaderboardsLeaderboardIdStandingsGetQueryKey(
-        activeTournament.leaderboardId
+      queryKey: getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
+        activeTournament.apiTournamentSlug
       ),
     })
   })
@@ -46,7 +46,9 @@ describe("useLiveUpdates", () => {
     MockEventSource.last().emit("live", { polled_at: "2026-05-21T00:00:00Z" })
 
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: getGetLiveV1LiveGetQueryKey(),
+      queryKey: getGetLiveV1TournamentsTournamentSlugLiveGetQueryKey(
+        activeTournament.apiTournamentSlug
+      ),
     })
   })
 
