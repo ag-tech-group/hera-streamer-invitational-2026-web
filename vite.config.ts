@@ -58,6 +58,17 @@ export default defineConfig({
     // so the browser fetches only the flags actually rendered on screen.
     assetsInlineLimit: (filePath: string) =>
       filePath.includes("flag-icons") ? false : undefined,
+    rollupOptions: {
+      output: {
+        // Force the lazy-loaded posthog-js (and its internal modules) into
+        // a stably-named chunk so scripts/size-check.mjs can budget it by
+        // name. Without this, Rolldown emits a generic "module-XX.js" that
+        // shifts as other dynamic chunks come and go.
+        manualChunks(id: string) {
+          if (id.includes("/posthog-js/")) return "posthog"
+        },
+      },
+    },
   },
   define: {
     __APP_RELEASE__: JSON.stringify(releaseSha),
