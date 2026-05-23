@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react"
 import { Link } from "@tanstack/react-router"
 import type { ErrorComponentProps } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
@@ -8,6 +9,9 @@ export function ErrorBoundary({ error, reset }: ErrorComponentProps) {
     message: error.message,
     stack: error.stack,
   })
+  // Sentry.captureException is a no-op when the SDK isn't initialized (no
+  // VITE_SENTRY_DSN), so safe to call unconditionally.
+  Sentry.captureException(error)
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-8">

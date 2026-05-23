@@ -75,12 +75,27 @@ src/
 
 ## Environment Variables
 
-| Variable               | Description                               | Default                              |
-| ---------------------- | ----------------------------------------- | ------------------------------------ |
-| `VITE_API_URL`         | Backend API URL                           | `/api`                               |
-| `VITE_TOURNAMENT_SLUG` | Tournament config this build serves       | `hera-streamer-invitational-2026`    |
-| `VITE_LOG_LEVEL`       | Minimum log level (debug/info/warn/error) | `debug` (dev), `warn` (prod)         |
-| `OPENAPI_URL`          | OpenAPI spec URL for `pnpm generate-api`  | `http://localhost:8000/openapi.json` |
+### Runtime (bundled, `VITE_*` reach the browser)
+
+| Variable                                   | Description                                                      | Default                           |
+| ------------------------------------------ | ---------------------------------------------------------------- | --------------------------------- |
+| `VITE_API_URL`                             | Backend API URL                                                  | `/api`                            |
+| `VITE_TOURNAMENT_SLUG`                     | Tournament config this build serves                              | `hera-streamer-invitational-2026` |
+| `VITE_LOG_LEVEL`                           | Minimum log level (debug/info/warn/error)                        | `debug` (dev), `warn` (prod)      |
+| `VITE_SENTRY_DSN`                          | Sentry project DSN — unset = SDK never initialises (zero events) | unset                             |
+| `VITE_SENTRY_TRACES_SAMPLE_RATE`           | Performance trace sample rate (`0` – `1`)                        | `0`                               |
+| `VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE`  | Session replay sample rate (`0` – `1`)                           | `0`                               |
+| `VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE` | Replay sample rate on error (`0` – `1`)                          | `0`                               |
+
+### Build-time (used by tooling, not bundled)
+
+| Variable            | Description                                                                                                    |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `OPENAPI_URL`       | OpenAPI spec URL for `pnpm generate-api` (defaults to `http://localhost:8000/openapi.json`).                   |
+| `COMMIT_REF`        | Auto-set by Netlify per build; baked into the bundle as Sentry's `release` tag. Locally falls back to `"dev"`. |
+| `SENTRY_AUTH_TOKEN` | Sentry auth token for source-map upload at build time. Source maps are not generated when unset.               |
+| `SENTRY_ORG`        | Sentry org slug — required together with `SENTRY_AUTH_TOKEN` + `SENTRY_PROJECT` to enable upload.              |
+| `SENTRY_PROJECT`    | Sentry project slug — required together with the other two.                                                    |
 
 ## Deploy
 
