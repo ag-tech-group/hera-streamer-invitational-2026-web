@@ -12,15 +12,23 @@ import { cn } from "@/lib/utils"
  * the `target` and `label` props make it reusable for any future
  * fixed-target countdown.
  */
+type Variant = "hero" | "compact"
+
 export function Countdown({
   target,
   label,
+  variant = "hero",
   className,
 }: {
   /** ISO-8601 timestamp to count down to. `null` renders nothing. */
   target: string | null
   /** Optional eyebrow above the digits, e.g. `"Tournament starts in"`. */
   label?: string
+  /**
+   * `hero` (default): page-anchoring big digits, generous padding.
+   * `compact`: smaller digits + tighter padding for sidebar / secondary use.
+   */
+  variant?: Variant
   className?: string
 }) {
   const remainingMs = useTickingRemaining(target)
@@ -35,10 +43,12 @@ export function Countdown({
   const minutes = Math.floor((totalSeconds % 3_600) / 60)
   const seconds = totalSeconds % 60
 
+  const isHero = variant === "hero"
   return (
     <section
       className={cn(
-        "bg-card shadow-card flex flex-col items-center gap-3 rounded-lg border p-6",
+        "bg-card shadow-card flex flex-col items-center gap-3 rounded-lg",
+        isHero ? "p-6" : "p-4",
         className
       )}
     >
@@ -47,44 +57,77 @@ export function Countdown({
           {label}
         </p>
       ) : null}
-      <p className="text-sm font-medium sm:text-base">
+      <p
+        className={cn(
+          "font-medium",
+          isHero ? "text-sm sm:text-base" : "text-center text-xs"
+        )}
+      >
         {formatTargetDateTime(target)}
       </p>
-      <div className="flex items-baseline gap-3 tabular-nums sm:gap-5">
-        <Segment value={days} unit="days" />
-        <Separator />
-        <Segment value={hours} unit="hrs" />
-        <Separator />
-        <Segment value={minutes} unit="min" />
-        <Separator />
-        <Segment value={seconds} unit="sec" />
+      <div
+        className={cn(
+          "flex items-baseline tabular-nums",
+          isHero ? "gap-3 sm:gap-5" : "gap-2 sm:gap-3"
+        )}
+      >
+        <Segment value={days} unit="days" variant={variant} />
+        <Separator variant={variant} />
+        <Segment value={hours} unit="hrs" variant={variant} />
+        <Separator variant={variant} />
+        <Segment value={minutes} unit="min" variant={variant} />
+        <Separator variant={variant} />
+        <Segment value={seconds} unit="sec" variant={variant} />
       </div>
     </section>
   )
 }
 
-function Segment({ value, unit }: { value: number; unit: string }) {
+function Segment({
+  value,
+  unit,
+  variant,
+}: {
+  value: number
+  unit: string
+  variant: Variant
+}) {
+  const isHero = variant === "hero"
   return (
     <div className="flex flex-col items-center gap-1">
       {/*
        * Bebas Neue ships only weight 400; we drop `font-bold` here for the
        * same reason as the page <h1>. The face is heavy enough at 400.
        */}
-      <span className="font-display text-5xl leading-none sm:text-6xl">
+      <span
+        className={cn(
+          "font-display leading-none",
+          isHero ? "text-5xl sm:text-6xl" : "text-3xl sm:text-4xl"
+        )}
+      >
         {value.toString().padStart(2, "0")}
       </span>
-      <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
+      <span
+        className={cn(
+          "text-muted-foreground font-medium tracking-wider uppercase",
+          isHero ? "text-[10px]" : "text-[9px]"
+        )}
+      >
         {unit}
       </span>
     </div>
   )
 }
 
-function Separator() {
+function Separator({ variant }: { variant: Variant }) {
+  const isHero = variant === "hero"
   return (
     <span
       aria-hidden
-      className="text-muted-foreground/40 text-3xl leading-none sm:text-4xl"
+      className={cn(
+        "text-muted-foreground/40 leading-none",
+        isHero ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl"
+      )}
     >
       :
     </span>
