@@ -25,6 +25,7 @@ export * from './matchOutcome';
 export * from './matchPlayerRead';
 export * from './matchRead';
 export * from './matchState';
+export * from './meRead';
 export * from './playerDetail';
 export * from './playerRatingRead';
 export * from './playerRead';
