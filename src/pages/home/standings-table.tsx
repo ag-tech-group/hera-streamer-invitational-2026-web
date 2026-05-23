@@ -156,10 +156,20 @@ function TableShell({
   )
 }
 
-/** Tournament position — the row's 1-based place in the standings. */
+/**
+ * Tournament position — the row's 1-based place. The top three are
+ * weighted; rank-1 also gets the brand accent so the leader stands out
+ * at a glance.
+ */
 function PositionCell({ position }: { position: number }) {
   return (
-    <span className={cn("tabular-nums", position <= 3 && "font-semibold")}>
+    <span
+      className={cn(
+        "tabular-nums",
+        position <= 3 && "font-semibold",
+        position === 1 && "text-brand"
+      )}
+    >
       {position}
     </span>
   )
@@ -221,12 +231,12 @@ function PlayerCell({
 function LiveBadge() {
   return (
     <span
-      className="bg-destructive/10 text-destructive inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
+      className="bg-brand/15 text-brand inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
       aria-label="In a live match"
     >
       <span className="relative flex size-1.5" aria-hidden>
-        <span className="bg-destructive absolute inline-flex size-full animate-ping rounded-full opacity-75" />
-        <span className="bg-destructive relative inline-flex size-1.5 rounded-full" />
+        <span className="bg-brand absolute inline-flex size-full animate-ping rounded-full opacity-75" />
+        <span className="bg-brand relative inline-flex size-1.5 rounded-full" />
       </span>
       Live
     </span>
