@@ -47,7 +47,11 @@ export function HomePage() {
         <div className="flex items-center gap-3">
           <img src="/logo.png" alt="" className="size-16 shrink-0" />
           <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-bold tracking-tight">
+            {/*
+             * Drops `font-bold` because Bebas Neue ships only weight 400 —
+             * forcing a synthetic 700 produces an ugly emboldened glyph.
+             */}
+            <h1 className="font-display text-4xl tracking-wide">
               Live Standings
             </h1>
             <p className="text-muted-foreground text-sm">

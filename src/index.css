@@ -1,6 +1,20 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/*
+ * Hero display face (#38): Bebas Neue — the broadcast-graphic standard
+ * (bold, blocky, condensed). Single weight, latin subset, ~14 KB woff2.
+ * Applied only to the page <h1> and the countdown digits via the
+ * `font-display` Tailwind utility wired in the @theme block below.
+ */
+@font-face {
+  font-family: "Bebas Neue";
+  src: url("/fonts/bebas-neue-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -142,6 +156,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  /*
+   * Hero face — used via Tailwind's `font-display` utility. System fallback
+   * keeps text visible during the brief Bebas Neue load (font-display: swap).
+   */
+  --font-display: "Bebas Neue", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
