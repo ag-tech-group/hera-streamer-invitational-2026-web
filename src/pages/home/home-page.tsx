@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { Countdown } from "@/components/countdown"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
@@ -54,9 +55,12 @@ export function HomePage() {
             </p>
           </div>
         </div>
-        {activeData ? (
-          <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
-        ) : null}
+        <div className="flex items-center gap-2">
+          {activeData ? (
+            <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
+          ) : null}
+          <ThemeToggle />
+        </div>
       </header>
 
       <Countdown
