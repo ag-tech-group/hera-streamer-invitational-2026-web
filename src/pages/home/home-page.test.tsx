@@ -77,7 +77,7 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
   ],
 }
 
-// Default tournament fixture: no start/end date, so the hero countdown stays
+// Default tournament fixture: no dates set, so the hero countdown stays
 // hidden in tests that aren't about it. Overridden per-test where needed.
 const tournament: TournamentRead = {
   id: 1,
@@ -86,6 +86,7 @@ const tournament: TournamentRead = {
   leaderboard_id: 3,
   start_date: null,
   end_date: null,
+  grand_finals_date: null,
   created_at: "2026-05-01T00:00:00Z",
 }
 
