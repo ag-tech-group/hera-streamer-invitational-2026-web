@@ -66,7 +66,11 @@ export function Countdown({
 function Segment({ value, unit }: { value: number; unit: string }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="text-4xl leading-none font-bold sm:text-5xl">
+      {/*
+       * Bebas Neue ships only weight 400; we drop `font-bold` here for the
+       * same reason as the page <h1>. The face is heavy enough at 400.
+       */}
+      <span className="font-display text-5xl leading-none sm:text-6xl">
         {value.toString().padStart(2, "0")}
       </span>
       <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
