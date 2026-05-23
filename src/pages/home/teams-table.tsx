@@ -97,16 +97,22 @@ function TeamsTableShell({
   children: ReactNode
 }) {
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="bg-card shadow-card overflow-hidden rounded-lg">
       <table className="w-full border-collapse text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead>
-          <tr className="text-muted-foreground border-b text-left text-xs tracking-wide uppercase">
-            <th className="px-4 py-3 font-medium">Position</th>
-            <th className="px-4 py-3 font-medium">Team</th>
-            <th className="px-4 py-3 text-right font-medium">Combined</th>
-            <th className="px-4 py-3 text-right font-medium">Avg</th>
-            <th className="px-4 py-3 font-medium">Members</th>
+          {/*
+           * Header row uses the display face (#38) for a broadcast caps
+           * treatment; `font-medium` is dropped from the cells because
+           * Bebas Neue ships only weight 400 and synthesising 500 would
+           * smear the glyphs.
+           */}
+          <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
+            <th className="px-4 py-3">Position</th>
+            <th className="px-4 py-3">Team</th>
+            <th className="px-4 py-3 text-right">Combined</th>
+            <th className="px-4 py-3 text-right">Avg</th>
+            <th className="px-4 py-3">Members</th>
           </tr>
         </thead>
         <tbody ref={bodyRef}>{children}</tbody>

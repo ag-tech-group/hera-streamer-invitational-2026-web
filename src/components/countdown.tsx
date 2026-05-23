@@ -38,7 +38,7 @@ export function Countdown({
   return (
     <section
       className={cn(
-        "bg-card flex flex-col items-center gap-3 rounded-lg border p-6",
+        "bg-card shadow-card flex flex-col items-center gap-3 rounded-lg border p-6",
         className
       )}
     >

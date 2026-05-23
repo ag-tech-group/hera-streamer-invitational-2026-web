@@ -134,20 +134,26 @@ function TableShell({
   children: ReactNode
 }) {
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="bg-card shadow-card overflow-hidden rounded-lg">
       <table className="w-full border-collapse text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead>
-          <tr className="text-muted-foreground border-b text-left text-xs tracking-wide uppercase">
-            <th className="px-4 py-3 font-medium">Position</th>
-            <th className="px-4 py-3 font-medium">Ladder</th>
-            <th className="px-4 py-3 font-medium">Player</th>
-            <th className="px-4 py-3 text-right font-medium">Rating</th>
-            <th className="px-4 py-3 text-right font-medium">Peak</th>
-            <th className="px-4 py-3 text-center font-medium">Streak</th>
-            <th className="px-4 py-3 text-right font-medium">Games</th>
-            <th className="px-4 py-3 font-medium">Recent</th>
-            <th className="px-4 py-3 font-medium">Activity</th>
+          {/*
+           * Header row uses the display face (#38) for a broadcast caps
+           * treatment; `font-medium` is dropped from the cells because
+           * Bebas Neue ships only weight 400 and synthesising 500 would
+           * smear the glyphs.
+           */}
+          <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
+            <th className="px-4 py-3">Position</th>
+            <th className="px-4 py-3">Ladder</th>
+            <th className="px-4 py-3">Player</th>
+            <th className="px-4 py-3 text-right">Rating</th>
+            <th className="px-4 py-3 text-right">Peak</th>
+            <th className="px-4 py-3 text-center">Streak</th>
+            <th className="px-4 py-3 text-right">Games</th>
+            <th className="px-4 py-3">Recent</th>
+            <th className="px-4 py-3">Activity</th>
           </tr>
         </thead>
         <tbody ref={bodyRef}>{children}</tbody>
