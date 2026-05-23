@@ -32,9 +32,9 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * Available leaderboards, sourced from the in-memory cache.
+ * Available leaderboards, sourced from the ``leaderboards`` table.
 
-The polling worker fills the cache at startup from upstream
+The polling worker upserts rows here at startup from upstream
 ``getAvailableLeaderboards``. Each tournament tracks one of these by
 ``leaderboard_id``.
  * @summary List Leaderboards

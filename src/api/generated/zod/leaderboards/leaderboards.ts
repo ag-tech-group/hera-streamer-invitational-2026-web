@@ -9,9 +9,9 @@ import * as zod from 'zod';
 
 
 /**
- * Available leaderboards, sourced from the in-memory cache.
+ * Available leaderboards, sourced from the ``leaderboards`` table.
 
-The polling worker fills the cache at startup from upstream
+The polling worker upserts rows here at startup from upstream
 ``getAvailableLeaderboards``. Each tournament tracks one of these by
 ``leaderboard_id``.
  * @summary List Leaderboards
@@ -22,6 +22,6 @@ export const ListLeaderboardsV1LeaderboardsGetResponse = zod.object({
   "leaderboard_id": zod.number(),
   "name": zod.string(),
   "is_ranked": zod.boolean()
-}).describe('Leaderboard metadata, sourced from upstream ``getAvailableLeaderboards``.\n\nUntil the polling worker fills the in-memory cache (see\n``app.leaderboards_cache``), the ``\/v1\/leaderboards`` endpoint returns\nan empty list. The minimal shape here — id, name, ranked flag — is\nenough for the consumer to render a leaderboard picker; richer\nmetadata (matchtype mappings, etc.) gets added as needed.'))
+}).describe('Leaderboard metadata, sourced from the ``leaderboards`` table.\n\nThe polling worker upserts rows on startup from upstream\n``getAvailableLeaderboards``. The minimal shape here — id, name,\nranked flag — is enough for the consumer to render a leaderboard\npicker; richer metadata (matchtype mappings, etc.) lives on the DB\nrow but is deliberately not exposed on the API.'))
 })
 
