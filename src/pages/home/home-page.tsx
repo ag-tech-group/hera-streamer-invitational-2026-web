@@ -1,9 +1,11 @@
 import { useState } from "react"
 
+import { Countdown } from "@/components/countdown"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
+import { useTournament } from "@/hooks/use-tournament"
 import { LastUpdatedBadge } from "@/pages/home/last-updated-badge"
 import {
   StandingsEmpty,
@@ -30,6 +32,11 @@ export function HomePage() {
   // query so the visible table refetches without a manual reload.
   useLiveUpdates()
 
+  // Tournament metadata (start/end dates) for the hero countdown. The
+  // dates live in the DB and are served on `TournamentRead`; the countdown
+  // renders nothing until a date is set.
+  const tournament = useTournament()
+
   // The "last updated" badge reflects whichever view is on screen.
   const activeData = view === "players" ? standings.data : teams.data
 
@@ -51,6 +58,11 @@ export function HomePage() {
           <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
         ) : null}
       </header>
+
+      <Countdown
+        target={tournament.data?.startDate ?? null}
+        label="Tournament starts in"
+      />
 
       <ViewTabs value={view} onChange={setView} />
 
