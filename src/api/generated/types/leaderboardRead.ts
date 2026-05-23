@@ -7,13 +7,13 @@
  */
 
 /**
- * Leaderboard metadata, sourced from upstream ``getAvailableLeaderboards``.
+ * Leaderboard metadata, sourced from the ``leaderboards`` table.
 
-Until the polling worker fills the in-memory cache (see
-``app.leaderboards_cache``), the ``/v1/leaderboards`` endpoint returns
-an empty list. The minimal shape here — id, name, ranked flag — is
-enough for the consumer to render a leaderboard picker; richer
-metadata (matchtype mappings, etc.) gets added as needed.
+The polling worker upserts rows on startup from upstream
+``getAvailableLeaderboards``. The minimal shape here — id, name,
+ranked flag — is enough for the consumer to render a leaderboard
+picker; richer metadata (matchtype mappings, etc.) lives on the DB
+row but is deliberately not exposed on the API.
  */
 export interface LeaderboardRead {
   leaderboard_id: number;
