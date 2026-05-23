@@ -40,38 +40,46 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /*
+   * Broadcast-themed dark palette (#37): cool stone/steel — hue 240° with
+   * very low chroma so the page reads as carved-from-something rather than
+   * neutral charcoal. `--card` is lifted ~3 lightness steps above
+   * `--background` so cards have real surface elevation before any texture
+   * or shadow is applied. Functional colours (`--destructive`, `--chart-*`)
+   * are left alone — those carry meaning, not atmosphere.
+   */
+  --background: oklch(0.17 0.012 240);
+  --foreground: oklch(0.96 0.003 240);
+  --card: oklch(0.21 0.013 240);
+  --card-foreground: oklch(0.96 0.003 240);
+  --popover: oklch(0.21 0.013 240);
+  --popover-foreground: oklch(0.96 0.003 240);
+  --primary: oklch(0.96 0.003 240);
+  --primary-foreground: oklch(0.21 0.013 240);
+  --secondary: oklch(0.28 0.014 240);
+  --secondary-foreground: oklch(0.96 0.003 240);
+  --muted: oklch(0.26 0.012 240);
+  --muted-foreground: oklch(0.7 0.008 240);
+  --accent: oklch(0.28 0.014 240);
+  --accent-foreground: oklch(0.96 0.003 240);
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --border: oklch(0.3 0.014 240);
+  --input: oklch(0.3 0.014 240);
+  --ring: oklch(0.5 0.02 240);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar: oklch(0.21 0.013 240);
+  --sidebar-foreground: oklch(0.96 0.003 240);
   --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --sidebar-primary-foreground: oklch(0.96 0.003 240);
+  --sidebar-accent: oklch(0.28 0.014 240);
+  --sidebar-accent-foreground: oklch(0.96 0.003 240);
+  --sidebar-border: oklch(0.3 0.014 240);
+  --sidebar-ring: oklch(0.5 0.02 240);
 }
 
 @theme inline {
@@ -120,5 +128,23 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /*
+   * Atmospheric depth in dark mode (#37): a subtle viewport-anchored radial
+   * highlight at the top fades into the base palette, layered over a fine
+   * SVG noise tile that gives the page a stone-like texture. Light mode
+   * keeps the flat surface — it's the functional fallback, not the polished
+   * primary experience.
+   */
+  .dark body {
+    background-image:
+      radial-gradient(
+        ellipse 100vw 60vh at 50% 0%,
+        oklch(0.24 0.014 240 / 0.55),
+        transparent 70%
+      ),
+      url("/textures/noise.svg");
+    background-repeat: no-repeat, repeat;
   }
 }
