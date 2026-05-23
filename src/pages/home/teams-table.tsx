@@ -115,10 +115,20 @@ function TeamsTableShell({
   )
 }
 
-/** Team standings position — the row's 1-based place, top three weighted. */
+/**
+ * Team standings position — the row's 1-based place. Top three are
+ * weighted; rank-1 also gets the brand accent, matching the player
+ * standings treatment.
+ */
 function PositionCell({ position }: { position: number }) {
   return (
-    <span className={cn("tabular-nums", position <= 3 && "font-semibold")}>
+    <span
+      className={cn(
+        "tabular-nums",
+        position <= 3 && "font-semibold",
+        position === 1 && "text-brand"
+      )}
+    >
       {position}
     </span>
   )

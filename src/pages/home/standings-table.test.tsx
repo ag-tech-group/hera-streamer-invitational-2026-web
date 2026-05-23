@@ -134,6 +134,24 @@ describe("StandingsTable — games played", () => {
   })
 })
 
+describe("StandingsTable — rank-1 highlight", () => {
+  it("applies the brand accent to the rank-1 position", () => {
+    render(<StandingsTable rows={rows} />)
+    const bodyRows = screen.getAllByRole("row").slice(1)
+    const firstPos = within(bodyRows[0]).getAllByRole("cell")[0]
+    expect(firstPos.querySelector("span")).toHaveClass("text-brand")
+  })
+
+  it("does not apply the brand accent below rank 1", () => {
+    render(<StandingsTable rows={rows} />)
+    const bodyRows = screen.getAllByRole("row").slice(1)
+    const secondPos = within(bodyRows[1]).getAllByRole("cell")[0]
+    const thirdPos = within(bodyRows[2]).getAllByRole("cell")[0]
+    expect(secondPos.querySelector("span")).not.toHaveClass("text-brand")
+    expect(thirdPos.querySelector("span")).not.toHaveClass("text-brand")
+  })
+})
+
 describe("StandingsTable — country flag", () => {
   it("renders a country flag for a player with a country", () => {
     render(
