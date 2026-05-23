@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
 import { Countdown } from "@/components/countdown"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -7,6 +7,7 @@ import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
+import { useAnalytics } from "@/lib/analytics"
 import { LastUpdatedBadge } from "@/pages/home/last-updated-badge"
 import {
   StandingsEmpty,
@@ -37,6 +38,30 @@ export function HomePage() {
   // dates live in the DB and are served on `TournamentRead`; the countdown
   // renders nothing until a date is set.
   const tournament = useTournament()
+
+  const analytics = useAnalytics()
+
+  // Track view-tab switches so we can see which standings (Players vs Teams)
+  // is the dominant view in production.
+  const handleViewChange = useCallback(
+    (next: StandingsView) => {
+      analytics.track("view.changed", { from: view, to: next })
+      setView(next)
+    },
+    [analytics, view]
+  )
+
+  // Track retry-button clicks separately per view — a spike in retries on
+  // either side is an early signal the relevant API path is unhealthy.
+  const handleRetryStandings = useCallback(() => {
+    analytics.track("standings.retry", { view: "players" })
+    void standings.refetch()
+  }, [analytics, standings])
+
+  const handleRetryTeams = useCallback(() => {
+    analytics.track("standings.retry", { view: "teams" })
+    void teams.refetch()
+  }, [analytics, teams])
 
   // The "last updated" badge reflects whichever view is on screen.
   const activeData = view === "players" ? standings.data : teams.data
@@ -98,21 +123,21 @@ export function HomePage() {
         />
 
         <div className="flex min-w-0 flex-1 flex-col gap-6 xl:order-2">
-          <ViewTabs value={view} onChange={setView} />
+          <ViewTabs value={view} onChange={handleViewChange} />
 
           {view === "players" ? (
             <StandingsSection
               snapshot={standings.data}
               isPending={standings.isPending}
               isError={standings.isError}
-              onRetry={() => void standings.refetch()}
+              onRetry={handleRetryStandings}
             />
           ) : (
             <TeamsSection
               snapshot={teams.data}
               isPending={teams.isPending}
               isError={teams.isError}
-              onRetry={() => void teams.refetch()}
+              onRetry={handleRetryTeams}
             />
           )}
         </div>

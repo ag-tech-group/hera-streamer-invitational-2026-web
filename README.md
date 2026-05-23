@@ -77,15 +77,17 @@ src/
 
 ### Runtime (bundled, `VITE_*` reach the browser)
 
-| Variable                                   | Description                                                      | Default                           |
-| ------------------------------------------ | ---------------------------------------------------------------- | --------------------------------- |
-| `VITE_API_URL`                             | Backend API URL                                                  | `/api`                            |
-| `VITE_TOURNAMENT_SLUG`                     | Tournament config this build serves                              | `hera-streamer-invitational-2026` |
-| `VITE_LOG_LEVEL`                           | Minimum log level (debug/info/warn/error)                        | `debug` (dev), `warn` (prod)      |
-| `VITE_SENTRY_DSN`                          | Sentry project DSN — unset = SDK never initialises (zero events) | unset                             |
-| `VITE_SENTRY_TRACES_SAMPLE_RATE`           | Performance trace sample rate (`0` – `1`)                        | `0`                               |
-| `VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE`  | Session replay sample rate (`0` – `1`)                           | `0`                               |
-| `VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE` | Replay sample rate on error (`0` – `1`)                          | `0`                               |
+| Variable                                   | Description                                                       | Default                           |
+| ------------------------------------------ | ----------------------------------------------------------------- | --------------------------------- |
+| `VITE_API_URL`                             | Backend API URL                                                   | `/api`                            |
+| `VITE_TOURNAMENT_SLUG`                     | Tournament config this build serves                               | `hera-streamer-invitational-2026` |
+| `VITE_LOG_LEVEL`                           | Minimum log level (debug/info/warn/error)                         | `debug` (dev), `warn` (prod)      |
+| `VITE_SENTRY_DSN`                          | Sentry project DSN — unset = SDK never initialises (zero events)  | unset                             |
+| `VITE_SENTRY_TRACES_SAMPLE_RATE`           | Performance trace sample rate (`0` – `1`)                         | `0`                               |
+| `VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE`  | Session replay sample rate (`0` – `1`)                            | `0`                               |
+| `VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE` | Replay sample rate on error (`0` – `1`)                           | `0`                               |
+| `VITE_POSTHOG_KEY`                         | PostHog project key — unset = SDK never initialises (zero events) | unset                             |
+| `VITE_POSTHOG_HOST`                        | PostHog ingest host (US/EU cloud or self-hosted)                  | `https://us.i.posthog.com`        |
 
 ### Build-time (used by tooling, not bundled)
 
