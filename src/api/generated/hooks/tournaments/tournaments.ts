@@ -28,6 +28,7 @@ import type {
   HTTPValidationError,
   ListEnvelopeStandingRow,
   ListEnvelopeTeamStandingRow,
+  TournamentCreate,
   TournamentRead,
   TournamentUpdate
 } from '../../types';
@@ -154,6 +155,102 @@ export function useListTournamentsV1TournamentsGet<TData = Awaited<ReturnType<ty
 
 
 /**
+ * Create a tournament — any authenticated criticalbit user may.
+
+The caller is recorded as the first owner, immediately able to ``PATCH``
+metadata, manage the roster + teams, and ``DELETE`` the tournament.
+409 if the slug is taken (it is unique across the deployment and how
+consumer URLs route to the right tournament). A competition window
+whose start falls after its end is rejected with 422.
+ * @summary Create Tournament
+ */
+export type createTournamentV1TournamentsPostResponse201 = {
+  data: TournamentRead
+  status: 201
+}
+
+export type createTournamentV1TournamentsPostResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type createTournamentV1TournamentsPostResponseSuccess = (createTournamentV1TournamentsPostResponse201) & {
+  headers: Headers;
+};
+export type createTournamentV1TournamentsPostResponseError = (createTournamentV1TournamentsPostResponse422) & {
+  headers: Headers;
+};
+
+export type createTournamentV1TournamentsPostResponse = (createTournamentV1TournamentsPostResponseSuccess | createTournamentV1TournamentsPostResponseError)
+
+export const getCreateTournamentV1TournamentsPostUrl = () => {
+
+
+  
+
+  return `/v1/tournaments`
+}
+
+export const createTournamentV1TournamentsPost = async (tournamentCreate: TournamentCreate, options?: RequestInit): Promise<createTournamentV1TournamentsPostResponse> => {
+  
+  return orvalClient<createTournamentV1TournamentsPostResponse>(getCreateTournamentV1TournamentsPostUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      tournamentCreate,)
+  }
+);}
+  
+
+
+
+export const getCreateTournamentV1TournamentsPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTournamentV1TournamentsPost>>, TError,{data: TournamentCreate}, TContext>, request?: SecondParameter<typeof orvalClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof createTournamentV1TournamentsPost>>, TError,{data: TournamentCreate}, TContext> => {
+
+const mutationKey = ['createTournamentV1TournamentsPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTournamentV1TournamentsPost>>, {data: TournamentCreate}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTournamentV1TournamentsPost(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTournamentV1TournamentsPostMutationResult = NonNullable<Awaited<ReturnType<typeof createTournamentV1TournamentsPost>>>
+    export type CreateTournamentV1TournamentsPostMutationBody = TournamentCreate
+    export type CreateTournamentV1TournamentsPostMutationError = HTTPValidationError
+
+    /**
+ * @summary Create Tournament
+ */
+export const useCreateTournamentV1TournamentsPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTournamentV1TournamentsPost>>, TError,{data: TournamentCreate}, TContext>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createTournamentV1TournamentsPost>>,
+        TError,
+        {data: TournamentCreate},
+        TContext
+      > => {
+      return useMutation(getCreateTournamentV1TournamentsPostMutationOptions(options), queryClient);
+    }
+    /**
  * A single tournament's metadata.
  * @summary Get Tournament Detail
  */
@@ -366,6 +463,100 @@ export const useUpdateTournamentV1TournamentsTournamentSlugPatch = <TError = HTT
         TContext
       > => {
       return useMutation(getUpdateTournamentV1TournamentsTournamentSlugPatchMutationOptions(options), queryClient);
+    }
+    /**
+ * Delete a tournament and everything tournament-scoped — owner-gated.
+
+Cascades to the roster (``tournament_players``), teams + team members
+(``teams`` / ``team_members``), and owners (``tournament_owners``)
+via the FKs' ``ON DELETE CASCADE``. Match history is not tournament-
+scoped and is preserved.
+ * @summary Delete Tournament
+ */
+export type deleteTournamentV1TournamentsTournamentSlugDeleteResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteTournamentV1TournamentsTournamentSlugDeleteResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type deleteTournamentV1TournamentsTournamentSlugDeleteResponseSuccess = (deleteTournamentV1TournamentsTournamentSlugDeleteResponse204) & {
+  headers: Headers;
+};
+export type deleteTournamentV1TournamentsTournamentSlugDeleteResponseError = (deleteTournamentV1TournamentsTournamentSlugDeleteResponse422) & {
+  headers: Headers;
+};
+
+export type deleteTournamentV1TournamentsTournamentSlugDeleteResponse = (deleteTournamentV1TournamentsTournamentSlugDeleteResponseSuccess | deleteTournamentV1TournamentsTournamentSlugDeleteResponseError)
+
+export const getDeleteTournamentV1TournamentsTournamentSlugDeleteUrl = (tournamentSlug: string,) => {
+
+
+  
+
+  return `/v1/tournaments/${tournamentSlug}`
+}
+
+export const deleteTournamentV1TournamentsTournamentSlugDelete = async (tournamentSlug: string, options?: RequestInit): Promise<deleteTournamentV1TournamentsTournamentSlugDeleteResponse> => {
+  
+  return orvalClient<deleteTournamentV1TournamentsTournamentSlugDeleteResponse>(getDeleteTournamentV1TournamentsTournamentSlugDeleteUrl(tournamentSlug),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+  
+
+
+
+export const getDeleteTournamentV1TournamentsTournamentSlugDeleteMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTournamentV1TournamentsTournamentSlugDelete>>, TError,{tournamentSlug: string}, TContext>, request?: SecondParameter<typeof orvalClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTournamentV1TournamentsTournamentSlugDelete>>, TError,{tournamentSlug: string}, TContext> => {
+
+const mutationKey = ['deleteTournamentV1TournamentsTournamentSlugDelete'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTournamentV1TournamentsTournamentSlugDelete>>, {tournamentSlug: string}> = (props) => {
+          const {tournamentSlug} = props ?? {};
+
+          return  deleteTournamentV1TournamentsTournamentSlugDelete(tournamentSlug,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTournamentV1TournamentsTournamentSlugDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTournamentV1TournamentsTournamentSlugDelete>>>
+    
+    export type DeleteTournamentV1TournamentsTournamentSlugDeleteMutationError = HTTPValidationError
+
+    /**
+ * @summary Delete Tournament
+ */
+export const useDeleteTournamentV1TournamentsTournamentSlugDelete = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTournamentV1TournamentsTournamentSlugDelete>>, TError,{tournamentSlug: string}, TContext>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTournamentV1TournamentsTournamentSlugDelete>>,
+        TError,
+        {tournamentSlug: string},
+        TContext
+      > => {
+      return useMutation(getDeleteTournamentV1TournamentsTournamentSlugDeleteMutationOptions(options), queryClient);
     }
     /**
  * The tournament's players, ranked by current rating on its leaderboard.

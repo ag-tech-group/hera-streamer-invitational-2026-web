@@ -29,6 +29,8 @@ import type {
 
 export const getListTournamentsV1TournamentsGetResponseMock = (): TournamentRead[] => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.number.int(), slug: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), leaderboard_id: faker.number.int(), start_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), end_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), grand_finals_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), created_at: faker.date.past().toISOString().slice(0, 19) + 'Z'})))
 
+export const getCreateTournamentV1TournamentsPostResponseMock = (overrideResponse: Partial<Extract<TournamentRead, object>> = {}): TournamentRead => ({id: faker.number.int(), slug: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), leaderboard_id: faker.number.int(), start_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), end_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), grand_finals_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), created_at: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
+
 export const getGetTournamentDetailV1TournamentsTournamentSlugGetResponseMock = (overrideResponse: Partial<Extract<TournamentRead, object>> = {}): TournamentRead => ({id: faker.number.int(), slug: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), leaderboard_id: faker.number.int(), start_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), end_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), grand_finals_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), created_at: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
 
 export const getUpdateTournamentV1TournamentsTournamentSlugPatchResponseMock = (overrideResponse: Partial<Extract<TournamentRead, object>> = {}): TournamentRead => ({id: faker.number.int(), slug: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), leaderboard_id: faker.number.int(), start_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), end_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), grand_finals_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), created_at: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
@@ -46,6 +48,18 @@ export const getListTournamentsV1TournamentsGetMockHandler = (overrideResponse?:
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getListTournamentsV1TournamentsGetResponseMock(),
       { status: 200
+      })
+  }, options)
+}
+
+export const getCreateTournamentV1TournamentsPostMockHandler = (overrideResponse?: TournamentRead | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<TournamentRead> | TournamentRead), options?: RequestHandlerOptions) => {
+  return http.post('*/v1/tournaments', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+  
+  
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getCreateTournamentV1TournamentsPostResponseMock(),
+      { status: 201
       })
   }, options)
 }
@@ -70,6 +84,16 @@ export const getUpdateTournamentV1TournamentsTournamentSlugPatchMockHandler = (o
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getUpdateTournamentV1TournamentsTournamentSlugPatchResponseMock(),
       { status: 200
+      })
+  }, options)
+}
+
+export const getDeleteTournamentV1TournamentsTournamentSlugDeleteMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/v1/tournaments/:tournamentSlug', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+  
+    return new HttpResponse(null,
+      { status: 204
       })
   }, options)
 }
@@ -99,8 +123,10 @@ export const getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetMock
 }
 export const getTournamentsMock = () => [
   getListTournamentsV1TournamentsGetMockHandler(),
+  getCreateTournamentV1TournamentsPostMockHandler(),
   getGetTournamentDetailV1TournamentsTournamentSlugGetMockHandler(),
   getUpdateTournamentV1TournamentsTournamentSlugPatchMockHandler(),
+  getDeleteTournamentV1TournamentsTournamentSlugDeleteMockHandler(),
   getGetStandingsV1TournamentsTournamentSlugStandingsGetMockHandler(),
   getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetMockHandler()
 ]
