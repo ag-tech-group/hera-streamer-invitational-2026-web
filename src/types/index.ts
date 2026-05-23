@@ -1,4 +1,5 @@
 export type { Tournament } from "./tournament"
+export type { TournamentInfo } from "./tournament-info"
 export type { MatchResult, StandingsRow, StandingsSnapshot } from "./standings"
 export type {
   TeamMember,

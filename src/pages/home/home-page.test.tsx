@@ -1,10 +1,12 @@
 import {
   getGetStandingsV1TournamentsTournamentSlugStandingsGetMockHandler as standingsHandler,
   getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetMockHandler as teamsHandler,
+  getGetTournamentDetailV1TournamentsTournamentSlugGetMockHandler as tournamentHandler,
 } from "@/api/generated/hooks/tournaments/tournaments.msw"
 import type {
   ListEnvelopeStandingRow,
   ListEnvelopeTeamStandingRow,
+  TournamentRead,
 } from "@/api/generated/types"
 import { renderWithFileRoutes } from "@/test/renderers"
 import { server } from "@/test/setup"
@@ -75,9 +77,21 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
   ],
 }
 
+// Default tournament fixture: no start/end date, so the hero countdown stays
+// hidden in tests that aren't about it. Overridden per-test where needed.
+const tournament: TournamentRead = {
+  id: 1,
+  slug: "default",
+  name: "Test Tournament",
+  leaderboard_id: 3,
+  start_date: null,
+  end_date: null,
+  created_at: "2026-05-01T00:00:00Z",
+}
+
 describe("HomePage", () => {
   it("renders the page heading", async () => {
-    server.use(standingsHandler(standings))
+    server.use(standingsHandler(standings), tournamentHandler(tournament))
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
@@ -87,7 +101,7 @@ describe("HomePage", () => {
   })
 
   it("renders a row for each player in the standings", async () => {
-    server.use(standingsHandler(standings))
+    server.use(standingsHandler(standings), tournamentHandler(tournament))
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
@@ -96,7 +110,7 @@ describe("HomePage", () => {
   })
 
   it("shows how recently the standings were last updated", async () => {
-    server.use(standingsHandler(standings))
+    server.use(standingsHandler(standings), tournamentHandler(tournament))
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
@@ -104,7 +118,10 @@ describe("HomePage", () => {
   })
 
   it("shows an empty state when the standings are empty", async () => {
-    server.use(standingsHandler({ last_polled_at: null, items: [] }))
+    server.use(
+      standingsHandler({ last_polled_at: null, items: [] }),
+      tournamentHandler(tournament)
+    )
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
@@ -113,6 +130,7 @@ describe("HomePage", () => {
 
   it("shows an error state when the standings request fails", async () => {
     server.use(
+      tournamentHandler(tournament),
       http.get("*/v1/tournaments/:tournamentSlug/standings", () =>
         HttpResponse.json({ detail: "boom" }, { status: 500 })
       )
@@ -126,7 +144,11 @@ describe("HomePage", () => {
   })
 
   it("switches to the Teams tab and shows the team standings", async () => {
-    server.use(standingsHandler(standings), teamsHandler(teamStandings))
+    server.use(
+      standingsHandler(standings),
+      teamsHandler(teamStandings),
+      tournamentHandler(tournament)
+    )
     const user = userEvent.setup()
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
@@ -134,5 +156,28 @@ describe("HomePage", () => {
     await user.click(screen.getByRole("button", { name: "Teams" }))
 
     expect(await screen.findByText("Team One")).toBeInTheDocument()
+  })
+
+  it("shows the hero countdown when the tournament has a future start date", async () => {
+    // 7 days ahead — far enough that digits don't tick to zero mid-test.
+    const startDate = new Date(Date.now() + 7 * 86_400_000).toISOString()
+    server.use(
+      standingsHandler(standings),
+      tournamentHandler({ ...tournament, start_date: startDate })
+    )
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/" })
+
+    expect(await screen.findByText(/tournament starts in/i)).toBeInTheDocument()
+  })
+
+  it("hides the countdown when the tournament has no start date", async () => {
+    server.use(standingsHandler(standings), tournamentHandler(tournament))
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/" })
+
+    // Wait for the page to render so the countdown has its chance to appear.
+    await screen.findByText("Player One")
+    expect(screen.queryByText(/tournament starts in/i)).not.toBeInTheDocument()
   })
 })
