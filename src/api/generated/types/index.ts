@@ -37,6 +37,8 @@ export * from './teamRead';
 export * from './teamStandingRow';
 export * from './teamUpdate';
 export * from './tournamentCreate';
+export * from './tournamentOwnerCreate';
+export * from './tournamentOwnerRead';
 export * from './tournamentRead';
 export * from './tournamentRecord';
 export * from './tournamentUpdate';
