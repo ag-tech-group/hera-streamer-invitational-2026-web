@@ -180,4 +180,16 @@ describe("HomePage", () => {
     await screen.findByText("Player One")
     expect(screen.queryByText(/tournament starts in/i)).not.toBeInTheDocument()
   })
+
+  it("shows a theme toggle in the header", async () => {
+    server.use(standingsHandler(standings), tournamentHandler(tournament))
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/" })
+
+    // The toggle labels itself by the current theme (Light / Dark / Auto);
+    // matching any of the three keeps the test robust to the default.
+    expect(
+      await screen.findByRole("button", { name: /^(light|dark|auto)$/i })
+    ).toBeInTheDocument()
+  })
 })
