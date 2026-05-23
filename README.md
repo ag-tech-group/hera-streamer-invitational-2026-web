@@ -82,6 +82,34 @@ src/
 | `VITE_LOG_LEVEL`       | Minimum log level (debug/info/warn/error) | `debug` (dev), `warn` (prod)         |
 | `OPENAPI_URL`          | OpenAPI spec URL for `pnpm generate-api`  | `http://localhost:8000/openapi.json` |
 
+## Deploy
+
+Deployed to Cloudflare Pages, served from `hera-streamer-invitational-2026.criticalbit.gg`. Public traffic will eventually enter via the path-based router at `aoe2.criticalbit.gg/<slug>` (slug TBD; until then, the subdomain is the canonical URL).
+
+### One-time Cloudflare Pages setup
+
+1. **Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git**, pick this repo, branch `main`.
+2. **Build settings**:
+   - Build command: `pnpm build`
+   - Build output directory: `dist`
+   - Root directory: `/` (default)
+3. **Environment variables** (Production, and Preview if you want PR previews):
+   - `VITE_API_URL` → `https://aoe2-live-standings-api.criticalbit.gg`
+   - `VITE_TOURNAMENT_SLUG` → `hera-streamer-invitational-2026`
+   - `VITE_LOG_LEVEL` → `warn`
+   - `NODE_VERSION` → `24` (so Pages installs Node 24 to match `package.json` engines)
+4. **Custom domain**: `hera-streamer-invitational-2026.criticalbit.gg`. Cloudflare provisions the DNS automatically.
+
+### How it deploys
+
+Cloudflare auto-builds on every push to `main` once the project is wired. The build runs `pnpm install` → `pnpm build` (which itself runs `generate-routes` → `tsc -b` → `vite build`) and serves the resulting `dist/` from the custom domain.
+
+`public/_headers` sets the production CSP (drops the `http://localhost:*` dev allowance from the `<meta>` CSP via header intersection) plus standard security headers. `public/_redirects` provides the SPA fallback so deep links from the TanStack Router resolve through `index.html`.
+
+### Path-router routing (deferred)
+
+Once a public slug is announced, add a route entry in `criticalbit-router/wrangler.jsonc` mapping `/<slug>` → this app's subdomain. The SPA never sees the slug (criticalbit-router strips it before proxying), so adding the route is a router-only change — no redeploy of this app.
+
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE).
