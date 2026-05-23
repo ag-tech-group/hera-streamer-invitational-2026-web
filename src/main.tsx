@@ -15,12 +15,15 @@ import "flag-icons/css/flag-icons.min.css"
 import { AnalyticsProvider } from "./lib/analytics"
 import { getErrorMessage } from "./lib/api-errors"
 import { FeatureFlagProvider } from "./lib/feature-flags"
+import { initPostHog, posthogBackend } from "./lib/posthog"
 import { initSentry } from "./lib/sentry"
 import { routeTree } from "./routeTree.gen"
 
-// Initialize Sentry as early as possible so init-time errors (e.g. provider
-// setup below) flow through the reporter. No-op when VITE_SENTRY_DSN is unset.
+// Initialize observability as early as possible so init-time errors / page
+// views are captured. Both are no-ops when their respective env keys are
+// unset (VITE_SENTRY_DSN, VITE_POSTHOG_KEY), so local dev ships zero events.
 initSentry()
+initPostHog()
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,7 +71,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="app_theme">
-        <AnalyticsProvider>
+        <AnalyticsProvider backend={posthogBackend}>
           <FeatureFlagProvider>
             <RouterProvider router={router} />
           </FeatureFlagProvider>

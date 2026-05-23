@@ -31,6 +31,13 @@ interface FeatureFlagProviderProps {
   staticFlags?: FlagMap
 }
 
+/**
+ * Future: when PostHog's user identity / per-user feature flags are wired
+ * up (see `lib/posthog.ts`'s docstring), this provider can source flags
+ * from PostHog (`posthog.getAllFlags()` / the `onFeatureFlags` callback)
+ * in addition to its current API + env fallback. The consumer surface
+ * (`useFeatureFlag`, `<Feature>`) doesn't change.
+ */
 export function FeatureFlagProvider({
   children,
   staticFlags,

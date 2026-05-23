@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo } from "react"
 import { logger } from "@/lib/logger"
 
-interface AnalyticsBackend {
+export interface AnalyticsBackend {
   track: (event: string, properties?: Record<string, unknown>) => void
   identify: (userId: string, traits?: Record<string, unknown>) => void
   page: (name?: string, properties?: Record<string, unknown>) => void

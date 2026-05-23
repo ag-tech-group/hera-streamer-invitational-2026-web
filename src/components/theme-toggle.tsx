@@ -1,12 +1,17 @@
 import { Moon, Monitor, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
+import { useAnalytics } from "@/lib/analytics"
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const analytics = useAnalytics()
 
   function cycle() {
-    setTheme(theme === "light" ? "dark" : theme === "dark" ? "system" : "light")
+    const next =
+      theme === "light" ? "dark" : theme === "dark" ? "system" : "light"
+    analytics.track("theme.changed", { from: theme, to: next })
+    setTheme(next)
   }
 
   return (
