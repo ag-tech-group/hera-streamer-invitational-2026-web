@@ -28,6 +28,35 @@ export const ListTournamentsV1TournamentsGetResponseItem = zod.object({
 export const ListTournamentsV1TournamentsGetResponse = zod.array(ListTournamentsV1TournamentsGetResponseItem)
 
 /**
+ * Create a tournament — any authenticated criticalbit user may.
+
+The caller is recorded as the first owner, immediately able to ``PATCH``
+metadata, manage the roster + teams, and ``DELETE`` the tournament.
+409 if the slug is taken (it is unique across the deployment and how
+consumer URLs route to the right tournament). A competition window
+whose start falls after its end is rejected with 422.
+ * @summary Create Tournament
+ */
+export const createTournamentV1TournamentsPostBodySlugMax = 64;
+
+
+export const createTournamentV1TournamentsPostBodySlugRegExp = new RegExp('^[a-z0-9](?:[a-z0-9-]\*[a-z0-9])?$');
+export const createTournamentV1TournamentsPostBodyNameMax = 200;
+
+export const createTournamentV1TournamentsPostBodyLeaderboardIdExclusiveMin = 0;
+
+
+
+export const CreateTournamentV1TournamentsPostBody = zod.object({
+  "slug": zod.string().min(1).max(createTournamentV1TournamentsPostBodySlugMax).regex(createTournamentV1TournamentsPostBodySlugRegExp),
+  "name": zod.string().min(1).max(createTournamentV1TournamentsPostBodyNameMax),
+  "leaderboard_id": zod.number().gt(createTournamentV1TournamentsPostBodyLeaderboardIdExclusiveMin),
+  "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional()
+}).describe('Body for ``POST \/v1\/tournaments`` — create a new tournament.\n\nRequired fields back non-nullable columns; the optional date fields\nbehave the same way as on ``TournamentUpdate`` (omit to leave unset,\nexplicit ``null`` is just an unset). ``slug`` is the routing key\nconsumers\' URLs are built from — restricted to lowercase alphanumeric\n+ internal hyphens so the value drops into a path segment unchanged.')
+
+/**
  * A single tournament's metadata.
  * @summary Get Tournament Detail
  */
@@ -83,6 +112,19 @@ export const UpdateTournamentV1TournamentsTournamentSlugPatchResponse = zod.obje
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
+
+/**
+ * Delete a tournament and everything tournament-scoped — owner-gated.
+
+Cascades to the roster (``tournament_players``), teams + team members
+(``teams`` / ``team_members``), and owners (``tournament_owners``)
+via the FKs' ``ON DELETE CASCADE``. Match history is not tournament-
+scoped and is preserved.
+ * @summary Delete Tournament
+ */
+export const DeleteTournamentV1TournamentsTournamentSlugDeleteParams = zod.object({
+  "tournament_slug": zod.string()
+})
 
 /**
  * The tournament's players, ranked by current rating on its leaderboard.
