@@ -19,11 +19,18 @@ import { initPostHog, posthogBackend } from "./lib/posthog"
 import { initSentry } from "./lib/sentry"
 import { routeTree } from "./routeTree.gen"
 
-// Initialize observability as early as possible so init-time errors / page
-// views are captured. Both are no-ops when their respective env keys are
-// unset (VITE_SENTRY_DSN, VITE_POSTHOG_KEY), so local dev ships zero events.
+// Initialize Sentry as early as possible so init-time errors flow through.
+// No-op when VITE_SENTRY_DSN is unset.
 initSentry()
-initPostHog()
+
+// Defer PostHog init until the browser is idle (#65 perf) so its ~60 KB gzip
+// SDK doesn't compete with first paint. Events captured before the SDK
+// finishes loading are queued by posthogBackend and flushed on init.
+if (typeof requestIdleCallback === "function") {
+  requestIdleCallback(() => void initPostHog())
+} else {
+  setTimeout(() => void initPostHog(), 0)
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
