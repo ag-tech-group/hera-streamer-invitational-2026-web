@@ -65,6 +65,13 @@
   --sidebar-accent-foreground: oklch(0.2 0.012 240);
   --sidebar-border: oklch(0.88 0.008 240);
   --sidebar-ring: oklch(0.65 0.015 240);
+  /*
+   * Card depth (#40): bright top inner highlight (a polished-stone edge
+   * catching light) plus a subtle cool-tinted outer drop shadow, so
+   * cards read as forged slabs rather than flat bordered rectangles.
+   */
+  --shadow-card:
+    inset 0 1px 0 oklch(1 0 0 / 0.7), 0 4px 12px oklch(0.5 0.02 240 / 0.12);
 }
 
 .dark {
@@ -115,6 +122,12 @@
   --sidebar-accent-foreground: oklch(0.96 0.003 240);
   --sidebar-border: oklch(0.3 0.014 240);
   --sidebar-ring: oklch(0.5 0.02 240);
+  /*
+   * Card depth (#40): subtle bright top edge (steel rim catching light)
+   * plus an outer drop shadow deep enough to read on the dark stone base.
+   */
+  --shadow-card:
+    inset 0 1px 0 oklch(0.35 0.015 240 / 0.4), 0 4px 12px oklch(0 0 0 / 0.4);
 }
 
 @theme inline {
@@ -161,6 +174,8 @@
    * keeps text visible during the brief Bebas Neue load (font-display: swap).
    */
   --font-display: "Bebas Neue", ui-sans-serif, system-ui, sans-serif;
+  /* Card depth (#40): exposes the per-theme --shadow-card token as `shadow-card`. */
+  --shadow-card: var(--shadow-card);
 }
 
 @layer base {

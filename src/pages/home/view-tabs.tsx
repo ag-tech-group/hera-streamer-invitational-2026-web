@@ -9,13 +9,15 @@ const TABS: { view: StandingsView; label: string }[] = [
 ]
 
 /**
- * Segmented control that switches the home page between the players standings
- * and the team standings.
+ * Underline-indicator tab strip that switches between the players and team
+ * standings.
  *
- * A two-option view switch, modelled as a pair of `aria-pressed` toggle
- * buttons rather than the full ARIA tabs pattern — which would also require
- * tabpanel wiring and roving-tabindex keyboard navigation for no real gain
- * here.
+ * Modelled as `aria-pressed` toggle buttons rather than the full ARIA tabs
+ * pattern (which would also need tabpanel wiring and roving tabindex for no
+ * real gain here). The active tab is marked by a brand-blue 2px bottom
+ * border; inactive tabs carry a transparent border of the same width so the
+ * underline flips on without any layout shift. Labels use the display face
+ * (#38) for the same broadcast caps treatment as the table column headers.
  */
 export function ViewTabs({
   value,
@@ -25,11 +27,7 @@ export function ViewTabs({
   onChange: (view: StandingsView) => void
 }) {
   return (
-    <div
-      role="group"
-      aria-label="Standings view"
-      className="bg-muted inline-flex gap-1 self-start rounded-lg p-1"
-    >
+    <div role="group" aria-label="Standings view" className="flex gap-6">
       {TABS.map((tab) => {
         const active = tab.view === value
         return (
@@ -39,10 +37,10 @@ export function ViewTabs({
             aria-pressed={active}
             onClick={() => onChange(tab.view)}
             className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              "font-display border-b-2 px-1 py-3 text-base tracking-wider uppercase transition-colors",
               active
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "border-brand text-foreground"
+                : "text-muted-foreground hover:text-foreground border-transparent"
             )}
           >
             {tab.label}
