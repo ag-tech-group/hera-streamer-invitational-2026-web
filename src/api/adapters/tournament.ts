@@ -34,6 +34,7 @@ export function toTournamentInfo(response: TournamentResponse): TournamentInfo {
     leaderboardId: dto.leaderboard_id,
     startDate: dto.start_date,
     endDate: dto.end_date,
+    grandFinalsDate: dto.grand_finals_date,
     createdAt: dto.created_at,
   }
 }

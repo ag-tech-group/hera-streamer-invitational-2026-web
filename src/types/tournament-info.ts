@@ -20,6 +20,8 @@ export interface TournamentInfo {
   startDate: string | null
   /** ISO-8601 end timestamp, or null if not yet set in the DB. */
   endDate: string | null
+  /** ISO-8601 grand-finals start timestamp (#17), or null if not yet set. */
+  grandFinalsDate: string | null
   /** ISO-8601 timestamp when the tournament record was created. */
   createdAt: string
 }

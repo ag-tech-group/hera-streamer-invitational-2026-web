@@ -182,6 +182,31 @@ describe("HomePage", () => {
     expect(screen.queryByText(/tournament starts in/i)).not.toBeInTheDocument()
   })
 
+  it("shows the grand-finals countdown when grand_finals_date is set", async () => {
+    // 30 days ahead — clearly in the future so the countdown stays rendered.
+    const grandFinals = new Date(Date.now() + 30 * 86_400_000).toISOString()
+    server.use(
+      standingsHandler(standings),
+      tournamentHandler({ ...tournament, grand_finals_date: grandFinals })
+    )
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/" })
+
+    expect(
+      await screen.findByText(/grand finals start in/i)
+    ).toBeInTheDocument()
+  })
+
+  it("hides the grand-finals countdown when grand_finals_date is null", async () => {
+    server.use(standingsHandler(standings), tournamentHandler(tournament))
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/" })
+
+    // Wait for the page to render so the countdown has its chance to appear.
+    await screen.findByText("Player One")
+    expect(screen.queryByText(/grand finals start in/i)).not.toBeInTheDocument()
+  })
+
   it("shows a theme toggle in the header", async () => {
     server.use(standingsHandler(standings), tournamentHandler(tournament))
 
