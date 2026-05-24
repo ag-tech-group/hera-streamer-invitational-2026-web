@@ -1,7 +1,15 @@
 import { Globe } from "lucide-react"
+import { useMemo } from "react"
 import type { ReactNode, Ref } from "react"
 
+import { SortableTh } from "@/components/sortable-th"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  useTableSort,
+  type SortableValue,
+  type SortDirection,
+  type SortState,
+} from "@/hooks/use-table-sort"
 import { formatRelativeTime, normalizeCountryCode } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
@@ -23,14 +31,30 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
   // Activity column is measured against the same clock.
   const now = new Date()
 
-  // FLIP animation: rows slide to their new spots whenever the order changes.
-  // `orderKey` changes iff the ranked order does.
-  const orderKey = rows.map((row) => row.profileId).join(",")
+  const { sortedRows, sortState, sortBy } = useTableSort(rows, getSortValue)
+
+  // FLIP animation: rows slide to their new spots whenever the order
+  // changes (either from a live SSE refresh or a header click).
+  const orderKey = sortedRows.map((row) => row.profileId).join(",")
   const { containerRef, registerRow } = useFlipRows(orderKey)
 
+  // The Position column shows the row's tournament rank, which is the
+  // index in the *original* (unsorted) row list — not the current sorted
+  // view. Without this, sorting by another column would relabel "Position 1"
+  // as the top of that sort instead of the tournament leader.
+  const positionMap = useMemo(() => {
+    const map = new Map<number, number>()
+    rows.forEach((row, i) => map.set(row.profileId, i + 1))
+    return map
+  }, [rows])
+
   return (
-    <TableShell caption="Live tournament standings" bodyRef={containerRef}>
-      {rows.map((row, index) => (
+    <TableShell
+      caption="Live tournament standings"
+      bodyRef={containerRef}
+      headerRow={<StandingsHeaderRow sortState={sortState} onSort={sortBy} />}
+    >
+      {sortedRows.map((row) => (
         <tr
           key={row.profileId}
           data-flip-id={row.profileId}
@@ -38,7 +62,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
           className="hover:bg-muted/40 border-b transition-colors last:border-b-0"
         >
           <td className="px-4 py-3">
-            <PositionCell position={index + 1} />
+            <PositionCell position={positionMap.get(row.profileId) ?? 0} />
           </td>
           <td className="px-4 py-3">
             <RankCell rank={row.rank} />
@@ -74,6 +98,101 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
   )
 }
 
+/** Maps a sort key onto the `StandingsRow` field it ranks by. */
+function getSortValue(row: StandingsRow, key: string): SortableValue {
+  switch (key) {
+    case "rank":
+      return row.rank
+    case "alias":
+      return row.alias
+    case "currentRating":
+      return row.currentRating
+    case "maxRating":
+      return row.maxRating
+    case "streak":
+      return row.streak
+    case "gamesPlayed":
+      return row.gamesPlayed
+    case "lastMatchAt":
+      return row.lastMatchAt
+    default:
+      return null
+  }
+}
+
+/**
+ * Header row for the players standings, shared between the populated
+ * table (passes sort state + handler) and the loading skeleton (omits
+ * both, so `SortableTh` renders plain headers).
+ */
+function StandingsHeaderRow({
+  sortState,
+  onSort,
+}: {
+  sortState?: SortState | null
+  onSort?: (key: string, defaultDirection: SortDirection) => void
+}) {
+  return (
+    <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
+      <SortableTh label="Position" />
+      <SortableTh
+        label="Ladder"
+        sortKey="rank"
+        defaultDirection="asc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh
+        label="Player"
+        sortKey="alias"
+        defaultDirection="asc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh
+        label="Rating"
+        align="right"
+        sortKey="currentRating"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh
+        label="Peak"
+        align="right"
+        sortKey="maxRating"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh
+        label="Streak"
+        align="center"
+        sortKey="streak"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh
+        label="Games"
+        align="right"
+        sortKey="gamesPlayed"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh label="Recent" />
+      <SortableTh
+        label="Activity"
+        sortKey="lastMatchAt"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+    </tr>
+  )
+}
+
 /**
  * Loading placeholder for the standings table. Renders through the same
  * `TableShell` and column count as the real table, so data arriving causes no
@@ -81,7 +200,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
  */
 export function StandingsTableSkeleton() {
   return (
-    <TableShell caption="Loading standings">
+    <TableShell caption="Loading standings" headerRow={<StandingsHeaderRow />}>
       {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
         <tr key={index} className="border-b last:border-b-0">
           <td className="px-4 py-3">
@@ -121,41 +240,28 @@ export function StandingsTableSkeleton() {
 }
 
 /**
- * Shared chrome — bordered container, table element, column header — so the
- * populated table and its loading skeleton can never drift out of alignment.
+ * Shared chrome — bordered container, table element — so the populated
+ * table and its loading skeleton can never drift out of alignment. The
+ * header row is passed in so each caller (populated vs. skeleton) can wire
+ * sort state where appropriate; the broadcast caps treatment lives on the
+ * `<tr>` itself (see `StandingsHeaderRow`).
  */
 function TableShell({
   caption,
   bodyRef,
+  headerRow,
   children,
 }: {
   caption: string
   bodyRef?: Ref<HTMLTableSectionElement>
+  headerRow: ReactNode
   children: ReactNode
 }) {
   return (
     <div className="bg-card shadow-card overflow-x-auto rounded-lg">
       <table className="w-full min-w-[800px] border-collapse text-sm">
         <caption className="sr-only">{caption}</caption>
-        <thead>
-          {/*
-           * Header row uses the display face (#38) for a broadcast caps
-           * treatment; `font-medium` is dropped from the cells because
-           * Bebas Neue ships only weight 400 and synthesising 500 would
-           * smear the glyphs.
-           */}
-          <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
-            <th className="px-4 py-3">Position</th>
-            <th className="px-4 py-3">Ladder</th>
-            <th className="px-4 py-3">Player</th>
-            <th className="px-4 py-3 text-right">Rating</th>
-            <th className="px-4 py-3 text-right">Peak</th>
-            <th className="px-4 py-3 text-center">Streak</th>
-            <th className="px-4 py-3 text-right">Games</th>
-            <th className="px-4 py-3">Recent</th>
-            <th className="px-4 py-3">Activity</th>
-          </tr>
-        </thead>
+        <thead>{headerRow}</thead>
         <tbody ref={bodyRef}>{children}</tbody>
       </table>
     </div>
