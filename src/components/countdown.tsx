@@ -57,14 +57,6 @@ export function Countdown({
           {label}
         </p>
       ) : null}
-      <p
-        className={cn(
-          "font-medium",
-          isHero ? "text-sm sm:text-base" : "text-center text-xs"
-        )}
-      >
-        {formatTargetDateTime(target)}
-      </p>
       <div
         className={cn(
           "flex items-baseline tabular-nums",
@@ -79,6 +71,14 @@ export function Countdown({
         <Separator variant={variant} />
         <Segment value={seconds} unit="sec" variant={variant} />
       </div>
+      <p
+        className={cn(
+          "font-medium",
+          isHero ? "text-sm sm:text-base" : "text-center text-xs"
+        )}
+      >
+        {formatTargetDateTime(target)}
+      </p>
     </section>
   )
 }

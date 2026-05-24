@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from "react"
 import { Outlet, useRouter } from "@tanstack/react-router"
 import { Toaster } from "sonner"
 
+import { SiteFooter } from "@/components/site-footer"
 import { useAnalytics } from "@/lib/analytics"
 
 const TanStackRouterDevtools = import.meta.env.PROD
@@ -43,7 +44,18 @@ export function RootComponent() {
   return (
     <>
       <RouteTracker />
-      <Outlet />
+      {/*
+       * Sticky-footer layout: `min-h-svh` on the wrapper plus `flex-1`
+       * on `<main>` keeps the footer pinned to the bottom even when the
+       * routed page is shorter than the viewport. Pages render into
+       * `<main>` and no longer need their own `min-h-svh`.
+       */}
+      <div className="flex min-h-svh flex-col">
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <SiteFooter />
+      </div>
       <Toaster position="bottom-right" richColors closeButton />
       <Suspense fallback={null}>
         <TanStackRouterDevtools />

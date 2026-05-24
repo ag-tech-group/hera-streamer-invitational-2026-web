@@ -134,8 +134,8 @@ function TableShell({
   children: ReactNode
 }) {
   return (
-    <div className="bg-card shadow-card overflow-hidden rounded-lg">
-      <table className="w-full border-collapse text-sm">
+    <div className="bg-card shadow-card overflow-x-auto rounded-lg">
+      <table className="w-full min-w-[800px] border-collapse text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead>
           {/*
