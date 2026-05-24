@@ -43,6 +43,15 @@ export function Countdown({
   const minutes = Math.floor((totalSeconds % 3_600) / 60)
   const seconds = totalSeconds % 60
 
+  // The leftmost non-zero segment carries the brand accent so the eye lands
+  // on the unit that actually matters at this point in the countdown. As
+  // higher units tick down to zero the highlight migrates rightward
+  // (days → hrs → min → sec) — a built-in "urgency progression" without any
+  // animation. Seconds is the floor since the component already returns
+  // null when the whole remaining time is zero.
+  const segmentValues = [days, hours, minutes, seconds]
+  const highlightIndex = segmentValues.findIndex((v) => v > 0)
+
   const isHero = variant === "hero"
   return (
     <section
@@ -63,13 +72,33 @@ export function Countdown({
           isHero ? "gap-3 sm:gap-5" : "gap-2 sm:gap-3"
         )}
       >
-        <Segment value={days} unit="days" variant={variant} />
+        <Segment
+          value={days}
+          unit="days"
+          variant={variant}
+          highlighted={highlightIndex === 0}
+        />
         <Separator variant={variant} />
-        <Segment value={hours} unit="hrs" variant={variant} />
+        <Segment
+          value={hours}
+          unit="hrs"
+          variant={variant}
+          highlighted={highlightIndex === 1}
+        />
         <Separator variant={variant} />
-        <Segment value={minutes} unit="min" variant={variant} />
+        <Segment
+          value={minutes}
+          unit="min"
+          variant={variant}
+          highlighted={highlightIndex === 2}
+        />
         <Separator variant={variant} />
-        <Segment value={seconds} unit="sec" variant={variant} />
+        <Segment
+          value={seconds}
+          unit="sec"
+          variant={variant}
+          highlighted={highlightIndex === 3}
+        />
       </div>
       <p
         className={cn(
@@ -87,10 +116,12 @@ function Segment({
   value,
   unit,
   variant,
+  highlighted,
 }: {
   value: number
   unit: string
   variant: Variant
+  highlighted: boolean
 }) {
   const isHero = variant === "hero"
   return (
@@ -101,8 +132,9 @@ function Segment({
        */}
       <span
         className={cn(
-          "font-display leading-none",
-          isHero ? "text-5xl sm:text-6xl" : "text-3xl sm:text-4xl"
+          "font-display leading-none transition-colors",
+          isHero ? "text-5xl sm:text-6xl" : "text-3xl sm:text-4xl",
+          highlighted && "text-brand"
         )}
       >
         {value.toString().padStart(2, "0")}

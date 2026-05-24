@@ -22,4 +22,41 @@ export interface Tournament {
    * tracks the tournament with slug `"default"`.
    */
   apiTournamentSlug: string
+  /**
+   * Promotional links surfaced on the standings page (channels, donation
+   * pages, etc.). The frontend renders whatever is configured; the API has
+   * no opinion about host promo content. When unset or empty,
+   * `HostLinksCard` renders nothing.
+   */
+  hostLinks?: HostLink[]
+  /**
+   * Eyebrow label on the `HostLinksCard` (e.g., `"Hosted by Hera"`). When
+   * unset, the component falls back to a generic `"Hosted by"`.
+   */
+  hostLabel?: string
 }
+
+/** A single host-channel / donation / social link rendered on the standings page. */
+export interface HostLink {
+  /** Short display label, e.g. `"Twitch"` or `"Donate"`. */
+  label: string
+  /** Absolute URL (`https://…`). Opens in a new tab. */
+  url: string
+  /** Category, used to pick an icon. Unknown values fall back to a generic external-link glyph. */
+  kind: HostLinkKind
+}
+
+/**
+ * Recognised `HostLink.kind` values. Each maps to an icon in `HostLinksCard`.
+ * Brand-named values (`twitch`, `youtube`, `patreon`) use the platform's own
+ * mark; generic values (`stream`, `donate`, `social`, `other`) use a Lucide
+ * glyph in the appropriate category.
+ */
+export type HostLinkKind =
+  | "twitch"
+  | "youtube"
+  | "patreon"
+  | "stream"
+  | "donate"
+  | "social"
+  | "other"
