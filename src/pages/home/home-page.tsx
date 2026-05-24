@@ -1,7 +1,9 @@
 import { useCallback, useState } from "react"
 
 import { Countdown } from "@/components/countdown"
+import { HostLinksCard } from "@/components/host-links-card"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
@@ -106,47 +108,43 @@ export function HomePage() {
       </header>
 
       {/*
-       * Three-column grid on 2xl+; stacks vertically on smaller screens.
-       * The grid has two rows:
-       *   Row 1: empty | tabs  | empty
-       *   Row 2: start | table | finals
-       * Cards align with the table's top (not the tabs') because they
-       * share row 2 with the table. `minmax(0, 1fr)` on the middle
-       * column lets the table cell shrink past its content's intrinsic
-       * width so a wide table doesn't blow out the column.
+       * Two-column flex layout on 2xl+; stacks vertically on smaller
+       * screens. Left column carries the stacked context cards (countdowns
+       * + host links); right column carries the view tabs and the
+       * standings table. Each column flows top-down from its own top, so
+       * the topmost card aligns with the tabs (not the table). `min-w-0`
+       * on the right column lets the table shrink past its content's
+       * intrinsic width without blowing out the layout.
        *
-       * Both `<Countdown>`s self-hide when their target is null or
-       * past — the matching grid cell goes empty without collapsing
-       * the row. Source order is Start → Finals → Tabs → Table so
-       * mobile (flex-col) puts both countdowns above the tabs/table
-       * block — both are "what's coming next" context that beats data
-       * the user already sees by scrolling.
+       * Source order is [cards block] → [tabs+table block] so mobile
+       * (flex-col) puts the context cards above the standings — "what's
+       * coming next" and "where to follow the host" both beat data the
+       * user already sees by scrolling.
        *
-       * The 3-col breakpoint is `2xl:` (1536px), not `xl:` (1280px),
-       * because two 280px sidebars plus a usable table only fit
-       * comfortably starting around 1536px — below that, stacked
-       * gives the table full width instead of squishing it.
+       * Side-by-side kicks in at `2xl:` (1536px) because the cards plus
+       * a usable table only fit comfortably starting around there; below
+       * that, stacked gives the table the full page width.
        */}
-      <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[280px_minmax(0,1fr)_280px] 2xl:items-start">
-        <Countdown
-          target={tournament.data?.startDate ?? null}
-          label="Tournament starts in"
-          variant="compact"
-          className="2xl:col-start-1 2xl:row-start-2"
-        />
-
-        <Countdown
-          target={tournament.data?.grandFinalsDate ?? null}
-          label="Grand finals start in"
-          variant="compact"
-          className="2xl:col-start-3 2xl:row-start-2"
-        />
-
-        <div className="2xl:col-start-2 2xl:row-start-1">
-          <ViewTabs value={view} onChange={handleViewChange} />
+      <div className="flex flex-col gap-6 2xl:flex-row 2xl:items-start">
+        <div className="flex flex-col gap-6 2xl:w-1/4 2xl:shrink-0">
+          <Countdown
+            target={tournament.data?.startDate ?? null}
+            label="Tournament starts in"
+            variant="compact"
+          />
+          <Countdown
+            target={tournament.data?.grandFinalsDate ?? null}
+            label="Grand finals start in"
+            variant="compact"
+          />
+          <HostLinksCard
+            label={activeTournament.hostLabel}
+            links={activeTournament.hostLinks}
+          />
         </div>
 
-        <div className="min-w-0 2xl:col-start-2 2xl:row-start-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
+          <ViewTabs value={view} onChange={handleViewChange} />
           {view === "players" ? (
             <StandingsSection
               snapshot={standings.data}
