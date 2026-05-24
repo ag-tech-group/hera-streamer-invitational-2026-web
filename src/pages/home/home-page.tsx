@@ -152,6 +152,7 @@ export function HomePage() {
               snapshot={standings.data}
               isPending={standings.isPending}
               isError={standings.isError}
+              error={standings.error}
               onRetry={handleRetryStandings}
             />
           ) : (
@@ -159,6 +160,7 @@ export function HomePage() {
               snapshot={teams.data}
               isPending={teams.isPending}
               isError={teams.isError}
+              error={teams.error}
               onRetry={handleRetryTeams}
             />
           )}
@@ -177,11 +179,13 @@ function StandingsSection({
   snapshot,
   isPending,
   isError,
+  error,
   onRetry,
 }: {
   snapshot: StandingsSnapshot | undefined
   isPending: boolean
   isError: boolean
+  error: unknown
   onRetry: () => void
 }) {
   if (isPending) {
@@ -189,7 +193,7 @@ function StandingsSection({
   }
 
   if (isError || !snapshot) {
-    return <StandingsError onRetry={onRetry} />
+    return <StandingsError error={error} onRetry={onRetry} />
   }
 
   if (snapshot.rows.length === 0) {
@@ -204,11 +208,13 @@ function TeamsSection({
   snapshot,
   isPending,
   isError,
+  error,
   onRetry,
 }: {
   snapshot: TeamStandingsSnapshot | undefined
   isPending: boolean
   isError: boolean
+  error: unknown
   onRetry: () => void
 }) {
   if (isPending) {
@@ -216,7 +222,7 @@ function TeamsSection({
   }
 
   if (isError || !snapshot) {
-    return <TeamsError onRetry={onRetry} />
+    return <TeamsError error={error} onRetry={onRetry} />
   }
 
   if (snapshot.rows.length === 0) {

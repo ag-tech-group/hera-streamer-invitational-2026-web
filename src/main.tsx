@@ -13,7 +13,7 @@ import { ThemeProvider } from "./components/theme-provider"
 import "./index.css"
 import "flag-icons/css/flag-icons.min.css"
 import { AnalyticsProvider } from "./lib/analytics"
-import { getErrorMessage } from "./lib/api-errors"
+import { getUserMessage, parseApiError } from "./lib/api-errors"
 import { FeatureFlagProvider } from "./lib/feature-flags"
 import { initPostHog, posthogBackend } from "./lib/posthog"
 import { initSentry } from "./lib/sentry"
@@ -43,8 +43,12 @@ const queryClient = new QueryClient({
   mutationCache: new MutationCache({
     onError: async (error, _variables, _context, mutation) => {
       if (mutation.meta?.skipGlobalError) return
-      const message = await getErrorMessage(error)
-      toast.error(message)
+      const normalized = await parseApiError(error)
+      toast.error(getUserMessage(normalized), {
+        description: normalized.requestId
+          ? `Reference: ${normalized.requestId}`
+          : undefined,
+      })
     },
   }),
 })

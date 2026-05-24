@@ -1,6 +1,7 @@
 import { Shield, TriangleAlert, Users } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { useNormalizedError } from "@/lib/api-errors"
 
 /** Shared chrome for the empty/error side panels — same elevated card surface as the populated tables, so all three states sit at the same depth on the page. */
 const PANEL_CLASS =
@@ -28,9 +29,18 @@ export function StandingsEmpty() {
 
 /**
  * Shown when the standings request fails. Offers a manual retry; live SSE
- * nudges also re-trigger the request automatically as new data lands.
+ * nudges also re-trigger the request automatically as new data lands. The
+ * request ID (from the API's error envelope or `X-Request-ID` header) is
+ * surfaced here so users can quote it to support — see #70.
  */
-export function StandingsError({ onRetry }: { onRetry: () => void }) {
+export function StandingsError({
+  error,
+  onRetry,
+}: {
+  error: unknown
+  onRetry: () => void
+}) {
+  const normalized = useNormalizedError(error)
   return (
     <div className={PANEL_CLASS}>
       <TriangleAlert className="text-destructive size-8" aria-hidden />
@@ -39,6 +49,11 @@ export function StandingsError({ onRetry }: { onRetry: () => void }) {
         <p className="text-muted-foreground text-sm">
           Something went wrong reaching the leaderboard.
         </p>
+        {normalized?.requestId ? (
+          <p className="text-muted-foreground/70 font-mono text-xs">
+            Reference: {normalized.requestId}
+          </p>
+        ) : null}
       </div>
       <Button variant="outline" size="sm" onClick={onRetry}>
         Try again
@@ -69,8 +84,16 @@ export function TeamsEmpty() {
 /**
  * Shown when the team standings request fails. Offers a manual retry; live
  * SSE nudges also re-trigger the request automatically as new data lands.
+ * Matches `StandingsError`: the request ID is surfaced when available.
  */
-export function TeamsError({ onRetry }: { onRetry: () => void }) {
+export function TeamsError({
+  error,
+  onRetry,
+}: {
+  error: unknown
+  onRetry: () => void
+}) {
+  const normalized = useNormalizedError(error)
   return (
     <div className={PANEL_CLASS}>
       <TriangleAlert className="text-destructive size-8" aria-hidden />
@@ -79,6 +102,11 @@ export function TeamsError({ onRetry }: { onRetry: () => void }) {
         <p className="text-muted-foreground text-sm">
           Something went wrong reaching the team standings.
         </p>
+        {normalized?.requestId ? (
+          <p className="text-muted-foreground/70 font-mono text-xs">
+            Reference: {normalized.requestId}
+          </p>
+        ) : null}
       </div>
       <Button variant="outline" size="sm" onClick={onRetry}>
         Try again
