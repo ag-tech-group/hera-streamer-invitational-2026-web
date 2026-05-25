@@ -1,4 +1,4 @@
-import { type HttpHandler } from "msw"
+import { http, HttpResponse, type HttpHandler } from "msw"
 
 /**
  * MSW handler aggregator for tests.
@@ -7,5 +7,14 @@ import { type HttpHandler } from "msw"
  * or registered per-test via `server.use(...)`. We don't author fake-data
  * handlers for product features — the frontend consumes real endpoints from
  * the sibling API.
+ *
+ * Defaults set up here are for cross-cutting infra that fires on every page
+ * (the auth probe, etc.) so individual tests aren't required to mock them.
  */
-export const handlers: HttpHandler[] = []
+export const handlers: HttpHandler[] = [
+  // Default: anonymous `/v1/me` — the unauthenticated state. Tests that
+  // need to simulate a signed-in user override with `server.use(...)`.
+  http.get("*/v1/me", () =>
+    HttpResponse.json({ detail: "Not authenticated" }, { status: 401 })
+  ),
+]

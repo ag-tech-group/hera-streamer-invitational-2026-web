@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react"
 import { NotFound } from "@/components/not-found"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { activeTournament } from "@/config/tournaments"
-import { useFeatureFlag } from "@/lib/feature-flags"
+import { useAuth } from "@/lib/auth"
 import { OwnersSection } from "@/pages/admin/sections/owners-section"
 import { PlayersSection } from "@/pages/admin/sections/players-section"
 import { TeamsSection } from "@/pages/admin/sections/teams-section"
@@ -13,21 +13,20 @@ import { TournamentDetailsSection } from "@/pages/admin/sections/tournament-deta
 /**
  * Admin landing page for the active tournament.
  *
- * Gated by the `admin_tab` feature flag — see #74 and the follow-up #80.
- * The flag is the temporary stand-in for real auth: until the sign-in flow
- * lands (#80), the admin surface is hidden DOM-absent (not just
- * CSS-hidden) so an unauthenticated viewer never sees it in the markup or
- * discovers the route by accident. When the flag is off, the page renders
- * a 404, matching what a route that doesn't exist would look like.
+ * Gated on `useAuth().isAdmin` — true only when the signed-in user owns
+ * this build's tournament (per `GET /v1/me`'s `owned_tournaments`). For
+ * everyone else the page renders `<NotFound />`, matching what a route
+ * that doesn't exist would look like — DOM-absent, not CSS-hidden, so a
+ * non-admin viewer never finds the admin surface in the markup either.
  *
  * The page is scoped to this build's tournament: it edits *this*
  * tournament's metadata, roster, owners, and teams — not a general-purpose
  * multi-tournament admin (out of scope per #74).
  */
 export function AdminPage() {
-  const { enabled, loading } = useFeatureFlag("admin_tab")
-  if (loading) return null
-  if (!enabled) return <NotFound />
+  const { isAdmin, isLoading } = useAuth()
+  if (isLoading) return null
+  if (!isAdmin) return <NotFound />
   return <AdminLayout />
 }
 

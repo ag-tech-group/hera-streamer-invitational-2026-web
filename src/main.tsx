@@ -14,6 +14,7 @@ import "./index.css"
 import "flag-icons/css/flag-icons.min.css"
 import { AnalyticsProvider } from "./lib/analytics"
 import { getUserMessage, parseApiError } from "./lib/api-errors"
+import { AuthProvider } from "./lib/auth"
 import { FeatureFlagProvider } from "./lib/feature-flags"
 import { initPostHog, posthogBackend } from "./lib/posthog"
 import { initSentry } from "./lib/sentry"
@@ -83,9 +84,11 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="app_theme">
         <AnalyticsProvider backend={posthogBackend}>
-          <FeatureFlagProvider>
-            <RouterProvider router={router} />
-          </FeatureFlagProvider>
+          <AuthProvider>
+            <FeatureFlagProvider>
+              <RouterProvider router={router} />
+            </FeatureFlagProvider>
+          </AuthProvider>
         </AnalyticsProvider>
       </ThemeProvider>
     </QueryClientProvider>
