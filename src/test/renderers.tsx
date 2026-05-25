@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@/components/theme-provider"
 import { AnalyticsProvider } from "@/lib/analytics"
+import { AuthProvider } from "@/lib/auth"
 import { FeatureFlagProvider } from "@/lib/feature-flags"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import {
@@ -50,10 +51,12 @@ export async function renderWithFileRoutes(
       <QueryClientProvider client={testQueryClient}>
         <ThemeProvider>
           <AnalyticsProvider>
-            <FeatureFlagProvider staticFlags={{}}>
-              <RouterProvider router={testRouter} />
-              {ui}
-            </FeatureFlagProvider>
+            <AuthProvider>
+              <FeatureFlagProvider staticFlags={{}}>
+                <RouterProvider router={testRouter} />
+                {ui}
+              </FeatureFlagProvider>
+            </AuthProvider>
           </AnalyticsProvider>
         </ThemeProvider>
       </QueryClientProvider>,

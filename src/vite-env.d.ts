@@ -10,6 +10,18 @@ interface ImportMetaEnv {
   readonly VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE?: string
   readonly VITE_POSTHOG_KEY?: string
   readonly VITE_POSTHOG_HOST?: string
+  /**
+   * Override for the shared auth frontend URL (sign-in / profile).
+   * Defaults to `https://auth.criticalbit.gg` — point at a local
+   * `auth-web` instance during dev.
+   */
+  readonly VITE_AUTH_URL?: string
+  /**
+   * Override for the shared auth API URL (used for the cross-origin
+   * logout POST). Defaults to `https://auth-api.criticalbit.gg` —
+   * point at a local `auth-api` instance during dev.
+   */
+  readonly VITE_AUTH_API_URL?: string
 }
 
 interface ImportMeta {

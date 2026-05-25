@@ -1,13 +1,15 @@
 import { Link } from "@tanstack/react-router"
-import { ShieldUser } from "lucide-react"
+import { LogIn, LogOut, ShieldUser } from "lucide-react"
 import { useCallback, useState } from "react"
 
 import { Countdown } from "@/components/countdown"
 import { HostLinksCard } from "@/components/host-links-card"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
-import { Feature } from "@/lib/feature-flags"
+import { useAuth } from "@/lib/auth"
+import { loginUrl } from "@/lib/auth-config"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
@@ -111,22 +113,7 @@ export function HomePage() {
           {activeData ? (
             <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
           ) : null}
-          {/*
-           * Admin entry point. Wrapped in `<Feature>` so the link is
-           * DOM-absent for non-admin visitors — the route itself is also
-           * gated by the same flag, so a viewer with DevTools open
-           * couldn't discover the route by inspecting markup either.
-           * Replaced by the real sign-in flow under #80.
-           */}
-          <Feature flag="admin_tab">
-            <Link
-              to="/admin"
-              className="hover:bg-accent hover:text-accent-foreground text-muted-foreground inline-flex size-9 items-center justify-center rounded-md transition-colors"
-              aria-label="Admin"
-            >
-              <ShieldUser className="size-4" aria-hidden />
-            </Link>
-          </Feature>
+          <AuthControls />
           <ThemeToggle />
         </div>
       </header>
@@ -189,6 +176,57 @@ export function HomePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * App-bar auth widget. Three visible states keyed on `useAuth()`:
+ * - **loading**: render nothing so the bar doesn't flash a sign-in
+ *   button that immediately swaps for a sign-out one.
+ * - **unauthenticated**: a "Sign in" link that leaves the SPA for the
+ *   shared auth frontend with our origin as the redirect target.
+ * - **authenticated**: a sign-out button (plus an admin entry point
+ *   when the user owns the active tournament — DOM-absent otherwise
+ *   so a non-admin viewer never sees the route hinted in markup).
+ */
+function AuthControls() {
+  const { isLoading, isAuthenticated, isAdmin, signOut } = useAuth()
+
+  if (isLoading) return null
+
+  if (!isAuthenticated) {
+    return (
+      <Button variant="outline" size="sm" asChild>
+        <a href={loginUrl(window.location.pathname)}>
+          <LogIn className="size-4" aria-hidden />
+          Sign in
+        </a>
+      </Button>
+    )
+  }
+
+  return (
+    <>
+      {isAdmin ? (
+        <Link
+          to="/admin"
+          className="hover:bg-accent hover:text-accent-foreground text-muted-foreground inline-flex size-9 items-center justify-center rounded-md transition-colors"
+          aria-label="Admin"
+        >
+          <ShieldUser className="size-4" aria-hidden />
+        </Link>
+      ) : null}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => void signOut()}
+        aria-label="Sign out"
+      >
+        <LogOut className="size-4" aria-hidden />
+        Sign out
+      </Button>
+    </>
   )
 }
 
