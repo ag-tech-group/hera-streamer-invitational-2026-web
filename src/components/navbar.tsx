@@ -96,7 +96,11 @@ function AuthWidget() {
           className="hover:bg-accent hover:text-accent-foreground inline-flex h-8 items-center gap-2 rounded-md px-2 text-sm transition-colors"
           aria-label="Account menu"
         >
-          <UserAvatar avatarUrl={avatarUrl} />
+          <UserAvatar
+            avatarUrl={avatarUrl}
+            email={email}
+            displayName={displayName}
+          />
           <span className="hidden max-w-[160px] truncate sm:inline">
             {label}
           </span>

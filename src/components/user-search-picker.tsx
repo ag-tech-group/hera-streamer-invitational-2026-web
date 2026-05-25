@@ -51,7 +51,10 @@ export function UserSearchPicker({
   if (selected) {
     return (
       <div className="border-input bg-muted/30 flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border px-2 text-sm">
-        <UserAvatar avatarUrl={selected.avatar_url} />
+        <UserAvatar
+          avatarUrl={selected.avatar_url}
+          displayName={selected.display_name}
+        />
         <span className="min-w-0 truncate">
           {selected.display_name ?? selected.id}
         </span>
@@ -138,7 +141,10 @@ function SearchResults({
             "hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 px-3 py-2 text-sm"
           )}
         >
-          <UserAvatar avatarUrl={user.avatar_url} />
+          <UserAvatar
+            avatarUrl={user.avatar_url}
+            displayName={user.display_name}
+          />
           <span className="min-w-0 truncate">
             {user.display_name ?? user.id}
           </span>
