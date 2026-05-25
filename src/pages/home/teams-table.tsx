@@ -1,6 +1,14 @@
+import { useMemo } from "react"
 import type { ReactNode, Ref } from "react"
 
+import { SortableTh } from "@/components/sortable-th"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  useTableSort,
+  type SortableValue,
+  type SortDirection,
+  type SortState,
+} from "@/hooks/use-table-sort"
 import { cn } from "@/lib/utils"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
 import type { TeamMember, TeamStandingsRow } from "@/types"
@@ -14,14 +22,29 @@ const SKELETON_ROW_COUNT = 4
  * ratings); each row carries the team identity and its full roster.
  */
 export function TeamsTable({ rows }: { rows: TeamStandingsRow[] }) {
+  const { sortedRows, sortState, sortBy } = useTableSort(rows, getSortValue)
+
   // FLIP animation: rows slide to their new spots when the ranked order
   // changes, matching the players table.
-  const orderKey = rows.map((row) => row.teamId).join(",")
+  const orderKey = sortedRows.map((row) => row.teamId).join(",")
   const { containerRef, registerRow } = useFlipRows(orderKey)
 
+  // Position reflects the canonical (unsorted) standings — same pattern
+  // as the players table; sorting by another column shouldn't relabel
+  // the leaderboard rank.
+  const positionMap = useMemo(() => {
+    const map = new Map<number, number>()
+    rows.forEach((row, i) => map.set(row.teamId, i + 1))
+    return map
+  }, [rows])
+
   return (
-    <TeamsTableShell caption="Tournament team standings" bodyRef={containerRef}>
-      {rows.map((row, index) => (
+    <TeamsTableShell
+      caption="Tournament team standings"
+      bodyRef={containerRef}
+      headerRow={<TeamsHeaderRow sortState={sortState} onSort={sortBy} />}
+    >
+      {sortedRows.map((row) => (
         <tr
           key={row.teamId}
           data-flip-id={row.teamId}
@@ -29,7 +52,7 @@ export function TeamsTable({ rows }: { rows: TeamStandingsRow[] }) {
           className="hover:bg-muted/40 border-b transition-colors last:border-b-0"
         >
           <td className="px-4 py-3">
-            <PositionCell position={index + 1} />
+            <PositionCell position={positionMap.get(row.teamId) ?? 0} />
           </td>
           <td className="px-4 py-3">
             <TeamCell initials={row.initials} name={row.name} />
@@ -49,6 +72,62 @@ export function TeamsTable({ rows }: { rows: TeamStandingsRow[] }) {
   )
 }
 
+/** Maps a sort key onto the `TeamStandingsRow` field it ranks by. */
+function getSortValue(row: TeamStandingsRow, key: string): SortableValue {
+  switch (key) {
+    case "name":
+      return row.name
+    case "combinedRatingSum":
+      return row.combinedRatingSum
+    case "combinedRatingAverage":
+      return row.combinedRatingAverage
+    default:
+      return null
+  }
+}
+
+/**
+ * Header row for the team standings, shared between the populated table
+ * (passes sort state + handler) and the loading skeleton (omits both).
+ */
+function TeamsHeaderRow({
+  sortState,
+  onSort,
+}: {
+  sortState?: SortState | null
+  onSort?: (key: string, defaultDirection: SortDirection) => void
+}) {
+  return (
+    <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
+      <SortableTh label="Position" />
+      <SortableTh
+        label="Team"
+        sortKey="name"
+        defaultDirection="asc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh
+        label="Combined"
+        align="right"
+        sortKey="combinedRatingSum"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh
+        label="Avg"
+        align="right"
+        sortKey="combinedRatingAverage"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh label="Members" />
+    </tr>
+  )
+}
+
 /**
  * Loading placeholder for the team standings table. Renders through the same
  * `TeamsTableShell` and column count as the real table, so data arriving
@@ -56,7 +135,10 @@ export function TeamsTable({ rows }: { rows: TeamStandingsRow[] }) {
  */
 export function TeamsTableSkeleton() {
   return (
-    <TeamsTableShell caption="Loading team standings">
+    <TeamsTableShell
+      caption="Loading team standings"
+      headerRow={<TeamsHeaderRow />}
+    >
       {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
         <tr key={index} className="border-b last:border-b-0">
           <td className="px-4 py-3">
@@ -84,37 +166,26 @@ export function TeamsTableSkeleton() {
 }
 
 /**
- * Shared chrome — bordered container, table element, column header — so the
- * populated team table and its loading skeleton stay aligned.
+ * Shared chrome — bordered container, table element — so the populated
+ * team table and its loading skeleton stay aligned. The header row is
+ * passed in so each caller wires sort state where appropriate.
  */
 function TeamsTableShell({
   caption,
   bodyRef,
+  headerRow,
   children,
 }: {
   caption: string
   bodyRef?: Ref<HTMLTableSectionElement>
+  headerRow: ReactNode
   children: ReactNode
 }) {
   return (
-    <div className="bg-card shadow-card overflow-x-auto rounded-lg">
+    <div className="bg-card shadow-card overflow-x-auto overflow-y-hidden rounded-lg">
       <table className="w-full border-collapse text-sm">
         <caption className="sr-only">{caption}</caption>
-        <thead>
-          {/*
-           * Header row uses the display face (#38) for a broadcast caps
-           * treatment; `font-medium` is dropped from the cells because
-           * Bebas Neue ships only weight 400 and synthesising 500 would
-           * smear the glyphs.
-           */}
-          <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
-            <th className="px-4 py-3">Position</th>
-            <th className="px-4 py-3">Team</th>
-            <th className="px-4 py-3 text-right">Combined</th>
-            <th className="px-4 py-3 text-right">Avg</th>
-            <th className="px-4 py-3">Members</th>
-          </tr>
-        </thead>
+        <thead>{headerRow}</thead>
         <tbody ref={bodyRef}>{children}</tbody>
       </table>
     </div>
