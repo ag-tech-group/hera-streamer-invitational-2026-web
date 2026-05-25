@@ -52,13 +52,9 @@ export function TeamsSection() {
     activeTournament.apiTournamentSlug
   )
 
-  const realRows = teams.data?.rows ?? []
-  // TEMP (#74 review): show a fake team card when the API returns no
-  // teams so the card UI can be visually verified before the auth /
-  // CORS plumbing makes the create flow reachable from the browser.
-  // Revert by replacing `rows` with `realRows`.
-  const rows: TeamStandingsRow[] =
-    realRows.length > 0 ? realRows : FAKE_TEAMS_FOR_REVIEW
+  // Memoised so the `[]` fallback doesn't change identity on every render
+  // when there's no data — keeps `playerTeamMap`'s `useMemo` stable too.
+  const rows = useMemo(() => teams.data?.rows ?? [], [teams.data?.rows])
 
   const allPlayers: PlayerRead[] =
     playersQuery.data?.status === 200 ? playersQuery.data.data.items : []
@@ -111,31 +107,6 @@ function teamsQueryKey() {
     activeTournament.apiTournamentSlug
   )
 }
-
-// TEMP (#74 review): see comment in `TeamsSection`. Revert with the
-// section's `rows` fallback.
-const FAKE_TEAMS_FOR_REVIEW: TeamStandingsRow[] = [
-  {
-    teamId: -1,
-    name: "Alpha Squadron",
-    initials: "ALP",
-    combinedRatingSum: 7050,
-    combinedRatingAverage: 2350,
-    members: [
-      { profileId: 1819870, alias: "Hera", currentRating: 2480 },
-      { profileId: 255573, alias: "TheViper", currentRating: 2410 },
-      { profileId: 4473383, alias: "DauT", currentRating: 2160 },
-    ],
-  },
-  {
-    teamId: -2,
-    name: "Bravo Initiative",
-    initials: "BRV",
-    combinedRatingSum: 2150,
-    combinedRatingAverage: 2150,
-    members: [{ profileId: 999999, alias: "Yo", currentRating: 2150 }],
-  },
-]
 
 /** One team's full admin card: header (name/initials/edit/delete) + members + add-member form. */
 function TeamItem({
