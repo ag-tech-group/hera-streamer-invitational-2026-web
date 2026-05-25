@@ -51,7 +51,7 @@ export function HostLinksCard({
       <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
         {label}
       </p>
-      <ul className="flex flex-col gap-1">
+      <ul className="grid grid-cols-2 gap-1">
         {links.map((link) => {
           const Icon = KIND_ICON[link.kind] ?? ExternalLink
           return (
