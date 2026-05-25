@@ -212,4 +212,29 @@
       url("/textures/noise-dark.svg");
     background-repeat: no-repeat, repeat;
   }
+
+  /*
+   * Hide the spinner arrows on every `<input type="number">`. Admin forms
+   * take ladder/profile IDs (5–7 digit values) where incrementing by 1
+   * via the spinner is useless and the arrows visually crowd the field.
+   */
+  input[type="number"] {
+    appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+
+  /*
+   * Lift the native calendar-picker glyph in dark mode — the browser
+   * default is near-black and effectively invisible on the dark stone
+   * card surface used by admin date fields.
+   */
+  .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  .dark input[type="date"]::-webkit-calendar-picker-indicator,
+  .dark input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.85);
+  }
 }

@@ -60,7 +60,11 @@ export function FeatureFlagProvider({
     if (staticFlags !== undefined) {
       return { flags: staticFlags, isLoading: false }
     }
-    return { flags: data ?? getEnvFlags(), isLoading }
+    // `VITE_FEATURE_*` env vars are build-time overrides — they should beat
+    // anything the API returns, not just act as a fallback when the call
+    // fails. Lets `.env.local` flip a flag locally without changing the
+    // API, and lets a deploy-preview env var flip a flag for that preview.
+    return { flags: { ...(data ?? {}), ...getEnvFlags() }, isLoading }
   }, [staticFlags, data, isLoading])
 
   return (
