@@ -104,10 +104,10 @@ export function HomePage() {
           </div>
         </div>
         {/*
-         * `w-full justify-between` makes the badge sit at the left and the
-         * theme toggle at the right when the header wraps to a second row
-         * on narrow viewports. At `sm:` and up the header fits on one row
-         * so the inner div snaps back to content-width.
+         * `w-full justify-between` keeps the auth controls and theme
+         * toggle pinned to opposite edges when the header wraps to a
+         * second row on narrow viewports. At `sm:` and up the header
+         * fits on one row so the inner div snaps back to content-width.
          */}
         <div className="flex w-full items-center justify-between gap-2 sm:w-auto">
           <AuthControls />
