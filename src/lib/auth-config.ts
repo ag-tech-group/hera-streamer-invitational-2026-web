@@ -58,6 +58,49 @@ export interface UserSearchResult {
 }
 
 /**
+ * Identity fields the auth API returns for the currently-signed-in user
+ * via `GET /auth/me`. Subset of the auth-api's full `UserRead` schema —
+ * we only consume the fields the SPA actually surfaces in the navbar
+ * dropdown. `email` is nullable because Steam-OAuth users carry
+ * `email=null` until they go through the accept-tos email gate
+ * (see [auth-api#31](https://github.com/ag-tech-group/criticalbit-auth-api/issues/31)).
+ */
+export interface AuthApiMe {
+  id: string
+  email: string | null
+  display_name: string | null
+  avatar_url: string | null
+}
+
+/**
+ * Probe the auth API for the current user's identity. Used by
+ * `AuthProvider` to populate display_name / email / avatar_url so the
+ * navbar can render the auth widget with a proper user identity
+ * rather than just a "Sign out" button.
+ *
+ * Mirrors `searchUsers`' refresh-and-retry shape: a stale access token
+ * triggers a single refresh attempt before the failure propagates,
+ * matching the ky client's `afterResponse` hook for the standings API.
+ * Returns `null` when the call fails for any reason (network drop, 401
+ * after refresh failed, etc.) — caller treats `null` as unauthenticated.
+ */
+export async function getAuthMe(): Promise<AuthApiMe | null> {
+  const url = `${AUTH_API_URL}/auth/me`
+  const send = () => fetch(url, { credentials: "include" })
+
+  let res = await send()
+  if (res.status === 401) {
+    const { attemptRefresh } = await import("@/api/api")
+    const refreshed = await attemptRefresh()
+    if (refreshed) {
+      res = await send()
+    }
+  }
+  if (!res.ok) return null
+  return res.json()
+}
+
+/**
  * Type-ahead user search against the auth API's `/users/search`.
  *
  * Matches case-insensitive against both display_name and email (the

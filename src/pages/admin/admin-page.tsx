@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router"
 import { ChevronLeft } from "lucide-react"
 
 import { NotFound } from "@/components/not-found"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { activeTournament } from "@/config/tournaments"
 import { useAuth } from "@/lib/auth"
 import { OwnersSection } from "@/pages/admin/sections/owners-section"
@@ -33,28 +32,16 @@ export function AdminPage() {
 function AdminLayout() {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-8">
-      <header className="border-border flex flex-col gap-3 border-b-2 pb-4">
-        {/*
-         * Two-row header: navigation chrome (back + theme toggle) sits
-         * on its own line so it doesn't compete with the page title
-         * vertically. The title block flows below as a normal heading.
-         */}
-        <div className="flex items-center justify-between gap-3">
-          <Link
-            to="/"
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
-          >
-            <ChevronLeft className="size-4" aria-hidden />
-            Back to standings
-          </Link>
-          <ThemeToggle />
-        </div>
-        <div className="flex flex-col">
-          <h1 className="font-display text-4xl tracking-wide">Admin</h1>
-          <p className="text-muted-foreground text-sm">
-            {activeTournament.name}
-          </p>
-        </div>
+      <header className="border-border flex flex-col gap-2 border-b-2 pb-4">
+        <Link
+          to="/"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start text-sm transition-colors"
+        >
+          <ChevronLeft className="size-4" aria-hidden />
+          Back to standings
+        </Link>
+        <h1 className="font-display text-4xl tracking-wide">Admin</h1>
+        <p className="text-muted-foreground text-sm">{activeTournament.name}</p>
       </header>
 
       <AdminSection title="Tournament details">
