@@ -108,51 +108,55 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
   const secondary = ownerSecondaryIdentity(owner)
 
   return (
-    <li className="bg-muted/30 flex items-center gap-3 rounded-md px-3 py-2">
-      <UserAvatar
-        avatarUrl={owner.avatar_url}
-        email={owner.email}
-        displayName={owner.display_name}
-      />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-sm font-medium">{primary}</span>
-        {secondary ? (
-          <span className="text-muted-foreground truncate text-xs">
-            {secondary}
-          </span>
-        ) : null}
+    <li className="bg-muted/30 flex flex-col gap-2 rounded-md px-3 py-2 sm:flex-row sm:items-center sm:gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <UserAvatar
+          avatarUrl={owner.avatar_url}
+          email={owner.email}
+          displayName={owner.display_name}
+        />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-sm font-medium">{primary}</span>
+          {secondary ? (
+            <span className="text-muted-foreground truncate text-xs">
+              {secondary}
+            </span>
+          ) : null}
+        </div>
       </div>
-      <span className="text-muted-foreground shrink-0 text-xs">
-        Granted {new Date(owner.created_at).toLocaleDateString()}
-      </span>
-      <ConfirmDialog
-        trigger={
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={mutation.isPending}
-            aria-label={`Revoke ${primary}`}
-          >
-            <Trash2 className="size-4" aria-hidden />
-          </Button>
-        }
-        title="Revoke ownership?"
-        description={
-          <>
-            <strong>{primary}</strong> will lose admin access to this
-            tournament.
-          </>
-        }
-        confirmLabel="Revoke"
-        destructive
-        onConfirm={() =>
-          mutation.mutate({
-            tournamentSlug: activeTournament.apiTournamentSlug,
-            userId: owner.user_id,
-          })
-        }
-      />
+      <div className="flex items-center justify-between gap-3 sm:justify-end">
+        <span className="text-muted-foreground shrink-0 text-xs">
+          Granted {new Date(owner.created_at).toLocaleDateString()}
+        </span>
+        <ConfirmDialog
+          trigger={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={mutation.isPending}
+              aria-label={`Revoke ${primary}`}
+            >
+              <Trash2 className="size-4" aria-hidden />
+            </Button>
+          }
+          title="Revoke ownership?"
+          description={
+            <>
+              <strong>{primary}</strong> will lose admin access to this
+              tournament.
+            </>
+          }
+          confirmLabel="Revoke"
+          destructive
+          onConfirm={() =>
+            mutation.mutate({
+              tournamentSlug: activeTournament.apiTournamentSlug,
+              userId: owner.user_id,
+            })
+          }
+        />
+      </div>
     </li>
   )
 }
