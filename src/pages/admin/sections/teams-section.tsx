@@ -559,14 +559,19 @@ function CreateTeamForm() {
       className="border-border/60 flex flex-col gap-2 border-t pt-4"
     >
       <Label>Create team</Label>
-      <div className="flex gap-2">
+      {/*
+       * Stack the inputs + submit vertically on small viewports — the
+       * initials, team name, and submit triplet can't share one row
+       * without crowding below ~`sm:`. Side-by-side on `sm:` and up.
+       */}
+      <div className="flex flex-col gap-2 sm:flex-row">
         <Input
           value={initials}
           onChange={(event) => setInitials(event.target.value)}
           placeholder="Initials"
           maxLength={8}
           required
-          className="w-24"
+          className="sm:w-24"
           aria-label="Initials"
         />
         <Input

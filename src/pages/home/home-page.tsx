@@ -104,15 +104,12 @@ export function HomePage() {
           </div>
         </div>
         {/*
-         * `w-full justify-between` makes the badge sit at the left and the
-         * theme toggle at the right when the header wraps to a second row
-         * on narrow viewports. At `sm:` and up the header fits on one row
-         * so the inner div snaps back to content-width.
+         * `w-full justify-between` keeps the auth controls and theme
+         * toggle pinned to opposite edges when the header wraps to a
+         * second row on narrow viewports. At `sm:` and up the header
+         * fits on one row so the inner div snaps back to content-width.
          */}
         <div className="flex w-full items-center justify-between gap-2 sm:w-auto">
-          {activeData ? (
-            <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
-          ) : null}
           <AuthControls />
           <ThemeToggle />
         </div>
@@ -155,7 +152,20 @@ export function HomePage() {
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <ViewTabs value={view} onChange={handleViewChange} />
+          {/*
+           * Tabs row with the "last updated" badge right-aligned via
+           * `ml-auto`. `flex-wrap` lets the badge drop to its own line on
+           * narrow viewports where tabs + badge can't share one row, and
+           * `ml-auto` keeps the badge on the right regardless of wrap.
+           */}
+          <div className="flex flex-wrap items-center gap-3">
+            <ViewTabs value={view} onChange={handleViewChange} />
+            {activeData ? (
+              <div className="ml-auto">
+                <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
+              </div>
+            ) : null}
+          </div>
           {view === "players" ? (
             <StandingsSection
               snapshot={standings.data}
@@ -208,13 +218,11 @@ function AuthControls() {
   return (
     <>
       {isAdmin ? (
-        <Link
-          to="/admin"
-          className="hover:bg-accent hover:text-accent-foreground text-muted-foreground inline-flex size-9 items-center justify-center rounded-md transition-colors"
-          aria-label="Admin"
-        >
-          <ShieldUser className="size-4" aria-hidden />
-        </Link>
+        <Button variant="outline" size="icon-sm" asChild aria-label="Admin">
+          <Link to="/admin">
+            <ShieldUser className="size-4" aria-hidden />
+          </Link>
+        </Button>
       ) : null}
       <Button
         type="button"

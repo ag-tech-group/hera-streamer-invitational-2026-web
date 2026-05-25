@@ -15,9 +15,10 @@ import { cn } from "@/lib/utils"
  * The active-sort glyph (`ChevronUp`/`ChevronDown`) renders in the brand
  * accent so the active column reads at a glance; the unsorted glyph
  * (`ChevronsUpDown`) sits in the muted foreground to advertise the
- * affordance without competing with the active marker. For right-aligned
- * columns the icon flips to the *left* of the label so the column's
- * numeric content stays flush to the right margin.
+ * affordance without competing with the active marker. The icon always
+ * sits *after* the label regardless of cell alignment — readers expect
+ * sort glyphs to trail the column name, and flipping it for right-aligned
+ * columns just reads inconsistently.
  */
 type Align = "left" | "center" | "right"
 
@@ -68,11 +69,6 @@ export function SortableTh({
         ? "descending"
         : "none"
 
-  // For right-aligned columns the icon precedes the label so the trailing
-  // edge of the cell is the label's last letter — matches the visual
-  // alignment of the numeric cells below.
-  const iconBeforeLabel = align === "right"
-
   return (
     <th className={cn("px-4 py-3", TH_ALIGN[align])} aria-sort={ariaSort}>
       <button
@@ -84,23 +80,11 @@ export function SortableTh({
           active && "text-foreground"
         )}
       >
-        {iconBeforeLabel ? (
-          <>
-            <Icon
-              className={cn("size-3", active ? "text-brand" : "opacity-60")}
-              aria-hidden
-            />
-            <span>{label}</span>
-          </>
-        ) : (
-          <>
-            <span>{label}</span>
-            <Icon
-              className={cn("size-3", active ? "text-brand" : "opacity-60")}
-              aria-hidden
-            />
-          </>
-        )}
+        <span>{label}</span>
+        <Icon
+          className={cn("size-3", active ? "text-brand" : "opacity-60")}
+          aria-hidden
+        />
       </button>
     </th>
   )

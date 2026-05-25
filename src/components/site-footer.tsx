@@ -7,7 +7,19 @@
 export function SiteFooter() {
   return (
     <footer className="border-border/50 border-t">
-      <div className="text-muted-foreground mx-auto w-full max-w-[1536px] px-8 py-6 text-xs">
+      <div className="text-muted-foreground mx-auto flex w-full max-w-[1536px] flex-col gap-1.5 px-8 py-6 text-xs">
+        <p>
+          Part of{" "}
+          <a
+            href="https://criticalbit.gg"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground underline-offset-2 transition-colors hover:underline"
+          >
+            criticalbit.gg
+          </a>
+          .
+        </p>
         <p>
           Age of Empires II © Microsoft Corporation. This site was created under
           Microsoft&apos;s{" "}
