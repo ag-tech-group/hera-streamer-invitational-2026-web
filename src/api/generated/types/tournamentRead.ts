@@ -18,7 +18,6 @@ export interface TournamentRead {
   name: string;
   leaderboard_id: number;
   start_date: string | null;
-  end_date: string | null;
   grand_finals_date: string | null;
   created_at: string;
 }

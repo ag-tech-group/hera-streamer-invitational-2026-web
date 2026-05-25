@@ -130,13 +130,10 @@ function TournamentDetailsForm({
 
 /**
  * Local form state — strings everywhere so inputs can be controlled
- * directly. Fields intentionally not editable here:
- * - `leaderboard_id` picks which AoE2 ladder feeds this tournament's
- *   standings — changing it would swap the leaderboard wholesale, not a
- *   normal admin op. One-time setup via the API.
- * - `end_date` is being dropped from the API (see aoe2-live-standings-api
- *   #76); when that lands and orval regenerates, no further work is
- *   needed here since the form already doesn't reference it.
+ * directly. `leaderboard_id` picks which AoE2 ladder feeds this
+ * tournament's standings — changing it would swap the leaderboard
+ * wholesale, so the form intentionally doesn't surface it; one-time
+ * setup via the API.
  */
 interface FormState {
   name: string

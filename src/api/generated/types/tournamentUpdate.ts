@@ -10,10 +10,10 @@
  * Partial update for a tournament's metadata (``PATCH``).
 
 Every field is optional; only the fields present in the request body
-are applied. ``start_date`` / ``end_date`` / ``grand_finals_date``
-may be set to ``null`` to clear them. ``name`` and ``leaderboard_id``
-back non-nullable columns, so an explicit ``null`` for either is
-rejected with 422.
+are applied. ``start_date`` / ``grand_finals_date`` may be set to
+``null`` to clear them. ``name`` and ``leaderboard_id`` back non-
+nullable columns, so an explicit ``null`` for either is rejected
+with 422.
 
 ``slug`` is intentionally not updatable — it is the routing key
 consumers' URLs are built from.
@@ -22,6 +22,5 @@ export interface TournamentUpdate {
   name?: string | null;
   leaderboard_id?: number | null;
   start_date?: string | null;
-  end_date?: string | null;
   grand_finals_date?: string | null;
 }

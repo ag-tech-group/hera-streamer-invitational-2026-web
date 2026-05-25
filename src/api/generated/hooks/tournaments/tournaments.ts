@@ -161,7 +161,7 @@ The caller is recorded as the first owner, immediately able to ``PATCH``
 metadata, manage the roster + teams, and ``DELETE`` the tournament.
 409 if the slug is taken (it is unique across the deployment and how
 consumer URLs route to the right tournament). A competition window
-whose start falls after its end is rejected with 422.
+whose start falls after its grand finals is rejected with 422.
  * @summary Create Tournament
  */
 export type createTournamentV1TournamentsPostResponse201 = {
@@ -372,9 +372,10 @@ export function useGetTournamentDetailV1TournamentsTournamentSlugGet<TData = Awa
  * Edit a tournament's metadata — owner-gated.
 
 PATCH semantics: only the fields present in the request body change.
-``start_date`` / ``end_date`` accept ``null`` to clear a bound; a
-competition window whose start falls after its end is rejected with
-422. ``slug`` is immutable — it is the key consumer URLs are built on.
+``start_date`` / ``grand_finals_date`` accept ``null`` to clear a
+bound; a competition window whose start falls after its grand finals
+is rejected with 422. ``slug`` is immutable — it is the key consumer
+URLs are built on.
  * @summary Update Tournament
  */
 export type updateTournamentV1TournamentsTournamentSlugPatchResponse200 = {

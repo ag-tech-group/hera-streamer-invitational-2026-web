@@ -30,6 +30,5 @@ export interface TournamentCreate {
   /** @exclusiveMinimum 0 */
   leaderboard_id: number;
   start_date?: string | null;
-  end_date?: string | null;
   grand_finals_date?: string | null;
 }
