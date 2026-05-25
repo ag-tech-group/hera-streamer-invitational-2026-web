@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react"
 
+import { setOnUnauthorized } from "@/api/api"
 import { getMeV1MeGet } from "@/api/generated/hooks/me/me"
 import { activeTournament } from "@/config/tournaments"
 import { logoutFromAuthApi } from "@/lib/auth-config"
@@ -100,6 +101,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  // Subscribe to permanently-401 responses from anywhere in the app
+  // (any standings API call whose refresh attempt also failed). When
+  // that happens we mirror the server's view by clearing the cached
+  // auth fields — otherwise the UI would keep claiming the user is
+  // signed in after their session has actually expired.
+  useEffect(() => {
+    setOnUnauthorized(() => {
+      clearAuthFields()
+      setIsLoading(false)
+    })
+    return () => setOnUnauthorized(null)
+  }, [clearAuthFields])
 
   const value = useMemo<AuthContextValue>(
     () => ({
