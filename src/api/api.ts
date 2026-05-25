@@ -23,7 +23,7 @@ export function setOnUnauthorized(cb: (() => void) | null) {
  * otherwise (network failure or expired refresh family).
  */
 let refreshPromise: Promise<boolean> | null = null
-async function attemptRefresh(): Promise<boolean> {
+export async function attemptRefresh(): Promise<boolean> {
   if (refreshPromise) return refreshPromise
   refreshPromise = (async () => {
     try {

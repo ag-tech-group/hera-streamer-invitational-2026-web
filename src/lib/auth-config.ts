@@ -44,3 +44,49 @@ export async function logoutFromAuthApi(): Promise<void> {
     credentials: "include",
   })
 }
+
+/**
+ * Public identity surface returned by `GET /users/search`. Intentionally
+ * minimal — email is matched server-side as an input convenience but
+ * never returned, so the type-ahead picker can't accidentally surface
+ * other users' email addresses to a curious admin.
+ */
+export interface UserSearchResult {
+  id: string
+  display_name: string | null
+  avatar_url: string | null
+}
+
+/**
+ * Type-ahead user search against the auth API's `/users/search`.
+ *
+ * Matches case-insensitive against both display_name and email (the
+ * email match key is a convenience for admins who know the address;
+ * the email itself isn't echoed back). Requires auth — a stale access
+ * token triggers a single refresh-and-retry before propagating the
+ * failure.
+ */
+export async function searchUsers(
+  q: string,
+  limit = 10
+): Promise<UserSearchResult[]> {
+  const url = new URL(`${AUTH_API_URL}/users/search`)
+  url.searchParams.set("q", q)
+  url.searchParams.set("limit", String(limit))
+
+  const send = () => fetch(url, { credentials: "include" })
+
+  let res = await send()
+  if (res.status === 401) {
+    // Lazy import to dodge the api.ts → auth-config.ts → api.ts cycle.
+    const { attemptRefresh } = await import("@/api/api")
+    const refreshed = await attemptRefresh()
+    if (refreshed) {
+      res = await send()
+    }
+  }
+  if (!res.ok) {
+    throw new Error(`searchUsers failed: ${res.status}`)
+  }
+  return res.json()
+}

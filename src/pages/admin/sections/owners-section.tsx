@@ -12,10 +12,11 @@ import {
 import type { TournamentOwnerRead } from "@/api/generated/types"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { UserSearchPicker } from "@/components/user-search-picker"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
+import type { UserSearchResult } from "@/lib/auth-config"
 
 /**
  * Manage the active tournament's owners — list, grant, revoke.
@@ -145,7 +146,7 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
 function GrantOwnerForm() {
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
-  const [userId, setUserId] = useState("")
+  const [selected, setSelected] = useState<UserSearchResult | null>(null)
 
   const mutation = useGrantTournamentOwnerV1TournamentsTournamentSlugOwnersPost(
     {
@@ -155,7 +156,7 @@ function GrantOwnerForm() {
       mutation: {
         onSuccess: () => {
           idempotencyKey.reset()
-          setUserId("")
+          setSelected(null)
           void queryClient.invalidateQueries({
             queryKey:
               getListTournamentOwnersV1TournamentsTournamentSlugOwnersGetQueryKey(
@@ -172,24 +173,23 @@ function GrantOwnerForm() {
     <form
       onSubmit={(event) => {
         event.preventDefault()
+        if (!selected) return
         mutation.mutate({
           tournamentSlug: activeTournament.apiTournamentSlug,
-          data: { user_id: userId.trim() },
+          data: { user_id: selected.id },
         })
       }}
       className="border-border/60 flex flex-col gap-2 border-t pt-4"
     >
-      <Label htmlFor="grant-owner-user-id">Grant ownership</Label>
+      <Label htmlFor="grant-owner-search">Grant ownership</Label>
       <div className="flex gap-2">
-        <Input
-          id="grant-owner-user-id"
-          value={userId}
-          onChange={(event) => setUserId(event.target.value)}
-          placeholder="criticalbit user UUID"
-          required
-          pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        <UserSearchPicker
+          inputId="grant-owner-search"
+          selected={selected}
+          onSelect={setSelected}
+          placeholder="Search by name or email"
         />
-        <Button type="submit" disabled={mutation.isPending || !userId}>
+        <Button type="submit" disabled={mutation.isPending || !selected}>
           {mutation.isPending ? "Granting…" : "Grant"}
         </Button>
       </div>
