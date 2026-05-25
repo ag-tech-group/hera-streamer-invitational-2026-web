@@ -11,14 +11,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/user-avatar"
+import { useTournament } from "@/hooks/use-tournament"
 import { useAuth } from "@/lib/auth"
 import { AUTH_URL, loginUrl } from "@/lib/auth-config"
 
 /**
  * Top-level app shell navbar — fixed to the top of the viewport on
- * every route. Carries the brand on the left and the theme toggle +
- * auth widget on the right; page-level headers below shouldn't
- * compete for that space.
+ * every route. Carries the brand (logo + "Live Standings") with the
+ * active tournament name as an eyebrow chip beside it on the left,
+ * and the theme toggle + auth widget on the right; page-level headers
+ * below shouldn't compete for that space.
  *
  * Layout mirrors criticalbit-web's `Navbar`: full-width translucent
  * bar (`bg-background/80` + `backdrop-blur-sm`), `h-14`, content
@@ -27,19 +29,38 @@ import { AUTH_URL, loginUrl } from "@/lib/auth-config"
  * fixed bar.
  */
 export function Navbar() {
+  // Shares the cache entry with HomePage's own useTournament() call — both
+  // hit the same query key, so the navbar piggybacks on whichever fetch
+  // resolves first and re-renders when the name arrives.
+  const tournament = useTournament()
+  const tournamentName = tournament.data?.name ?? null
+
   return (
     <nav className="border-border/50 bg-background/80 fixed top-0 z-50 w-full border-b backdrop-blur-sm">
       <div className="mx-auto flex h-14 w-full max-w-[1536px] items-center justify-between gap-3 px-4">
-        <Link
-          to="/"
-          className="flex items-center gap-2 transition-opacity hover:opacity-80"
-          aria-label="Live Standings"
-        >
-          <img src="/logo.png" alt="" className="size-8 shrink-0" />
-          <span className="font-display hidden text-lg tracking-wide sm:inline">
-            Live Standings
-          </span>
-        </Link>
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            to="/"
+            className="flex items-center gap-2 transition-opacity hover:opacity-80"
+            aria-label="Live Standings"
+          >
+            <img src="/logo.png" alt="" className="size-8 shrink-0" />
+            <span className="font-display hidden text-lg tracking-wide sm:inline">
+              Live Standings
+            </span>
+          </Link>
+          {tournamentName ? (
+            <>
+              <span
+                aria-hidden
+                className="bg-border hidden h-5 w-px shrink-0 sm:inline-block"
+              />
+              <span className="text-muted-foreground hidden truncate text-xs font-medium tracking-widest uppercase sm:inline">
+                {tournamentName}
+              </span>
+            </>
+          ) : null}
+        </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <AuthWidget />
