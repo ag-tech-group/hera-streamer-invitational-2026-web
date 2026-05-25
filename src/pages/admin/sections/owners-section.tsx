@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
-import { getUserMessage, parseApiError } from "@/lib/api-errors"
 
 /**
  * Manage the active tournament's owners — list, grant, revoke.
@@ -61,8 +60,12 @@ function OwnersList({
     return <p className="text-muted-foreground text-sm">Loading…</p>
   }
   if (error) {
+    // Most likely cause until the sign-in flow lands: the list endpoint
+    // requires an authenticated owner and the SPA is anonymous. See #80.
     return (
-      <p className="text-destructive text-sm">Couldn&apos;t load owners.</p>
+      <p className="text-destructive text-sm">
+        Couldn&apos;t load owners — requires sign-in (pending #80).
+      </p>
     )
   }
   if (owners.length === 0) {
@@ -97,7 +100,6 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
           })
           toast.success("Owner revoked.")
         },
-        onError: async (error) => surfaceError(error),
       },
     })
 
@@ -114,12 +116,13 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
         variant="outline"
         size="sm"
         disabled={mutation.isPending}
-        onClick={() =>
+        onClick={() => {
+          if (!confirm(`Revoke ownership for ${owner.user_id}?`)) return
           mutation.mutate({
             tournamentSlug: activeTournament.apiTournamentSlug,
             userId: owner.user_id,
           })
-        }
+        }}
         aria-label={`Revoke ${owner.user_id}`}
       >
         <Trash2 className="size-4" aria-hidden />
@@ -150,7 +153,6 @@ function GrantOwnerForm() {
           })
           toast.success("Owner granted.")
         },
-        onError: async (error) => surfaceError(error),
       },
     }
   )
@@ -182,14 +184,4 @@ function GrantOwnerForm() {
       </div>
     </form>
   )
-}
-
-/** Surface an API error via toast, including the request ID for support. */
-async function surfaceError(error: unknown) {
-  const normalized = await parseApiError(error)
-  toast.error(getUserMessage(normalized), {
-    description: normalized.requestId
-      ? `Reference: ${normalized.requestId}`
-      : undefined,
-  })
 }

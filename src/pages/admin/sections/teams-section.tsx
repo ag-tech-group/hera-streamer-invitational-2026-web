@@ -17,7 +17,6 @@ import { Label } from "@/components/ui/label"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
 import { useTeamStandings } from "@/hooks/use-team-standings"
-import { getUserMessage, parseApiError } from "@/lib/api-errors"
 import type { TeamMember, TeamStandingsRow } from "@/types"
 
 /**
@@ -114,7 +113,6 @@ function EditTeamForm({
         toast.success("Team updated.")
         onDone()
       },
-      onError: async (error) => surfaceError(error),
     },
   })
 
@@ -171,7 +169,6 @@ function DeleteTeamButton({ team }: { team: TeamStandingsRow }) {
         void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
         toast.success("Team deleted.")
       },
-      onError: async (error) => surfaceError(error),
     },
   })
 
@@ -245,7 +242,6 @@ function MemberChip({
             idempotencyKey.reset()
             void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
           },
-          onError: async (error) => surfaceError(error),
         },
       }
     )
@@ -255,13 +251,14 @@ function MemberChip({
       <button
         type="button"
         disabled={mutation.isPending}
-        onClick={() =>
+        onClick={() => {
+          if (!confirm(`Remove ${member.alias} from the team?`)) return
           mutation.mutate({
             tournamentSlug: activeTournament.apiTournamentSlug,
             teamId,
             profileId: member.profileId,
           })
-        }
+        }}
         className="bg-muted/40 hover:bg-destructive/20 hover:text-destructive group inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs transition-colors disabled:opacity-50"
         aria-label={`Remove ${member.alias} from team`}
       >
@@ -289,7 +286,6 @@ function AddMemberForm({ teamId }: { teamId: number }) {
           setProfileId("")
           void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
         },
-        onError: async (error) => surfaceError(error),
       },
     })
 
@@ -303,26 +299,34 @@ function AddMemberForm({ teamId }: { teamId: number }) {
           data: { profile_id: Number(profileId) },
         })
       }}
-      className="flex gap-2"
+      className="flex flex-col gap-2"
     >
-      <Input
-        type="number"
-        inputMode="numeric"
-        value={profileId}
-        onChange={(event) => setProfileId(event.target.value)}
-        placeholder="profile_id"
-        min={1}
-        required
-        className="h-8 text-xs"
-        aria-label="Profile ID to add"
-      />
-      <Button
-        type="submit"
-        size="sm"
-        disabled={mutation.isPending || !profileId}
+      <Label
+        htmlFor={`add-member-${teamId}`}
+        className="text-muted-foreground text-xs"
       >
-        {mutation.isPending ? "Adding…" : "Add"}
-      </Button>
+        Add member
+      </Label>
+      <div className="flex gap-2">
+        <Input
+          id={`add-member-${teamId}`}
+          type="number"
+          inputMode="numeric"
+          value={profileId}
+          onChange={(event) => setProfileId(event.target.value)}
+          placeholder="profile_id"
+          min={1}
+          required
+          className="h-8 text-xs"
+        />
+        <Button
+          type="submit"
+          size="sm"
+          disabled={mutation.isPending || !profileId}
+        >
+          {mutation.isPending ? "Adding…" : "Add"}
+        </Button>
+      </div>
     </form>
   )
 }
@@ -343,7 +347,6 @@ function CreateTeamForm() {
         void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
         toast.success("Team created.")
       },
-      onError: async (error) => surfaceError(error),
     },
   })
 
@@ -386,13 +389,4 @@ function CreateTeamForm() {
       </div>
     </form>
   )
-}
-
-async function surfaceError(error: unknown) {
-  const normalized = await parseApiError(error)
-  toast.error(getUserMessage(normalized), {
-    description: normalized.requestId
-      ? `Reference: ${normalized.requestId}`
-      : undefined,
-  })
 }

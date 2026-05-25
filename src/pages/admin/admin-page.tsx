@@ -33,7 +33,7 @@ export function AdminPage() {
 
 function AdminLayout() {
   return (
-    <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-8">
       <header className="border-border flex flex-wrap items-center justify-between gap-3 border-b-2 pb-4">
         <div className="flex items-center gap-4">
           <Link

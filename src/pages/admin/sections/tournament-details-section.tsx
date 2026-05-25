@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
 import { useTournament } from "@/hooks/use-tournament"
-import { getUserMessage, parseApiError } from "@/lib/api-errors"
 import type { TournamentInfo } from "@/types"
 
 /**
@@ -64,7 +63,10 @@ function TournamentDetailsForm({
       onSuccess: () => {
         // Fresh key for the next logical operation, plus refetch so any
         // backend-side normalisation (whitespace trimming, etc.) is
-        // reflected in `useTournament()` cache.
+        // reflected in `useTournament()` cache. Errors are handled
+        // centrally by `main.tsx`'s `MutationCache.onError` (toast with
+        // `Reference: <id>`) — no per-mutation `onError` here, or the
+        // toast would fire twice.
         idempotencyKey.reset()
         void queryClient.invalidateQueries({
           queryKey: [
@@ -73,14 +75,6 @@ function TournamentDetailsForm({
           ],
         })
         toast.success("Tournament updated.")
-      },
-      onError: async (error) => {
-        const normalized = await parseApiError(error)
-        toast.error(getUserMessage(normalized), {
-          description: normalized.requestId
-            ? `Reference: ${normalized.requestId}`
-            : undefined,
-        })
       },
     },
   })
@@ -100,13 +94,6 @@ function TournamentDetailsForm({
         label="Name"
         value={form.name}
         onChange={(v) => setForm({ ...form, name: v })}
-      />
-      <Field
-        id="tournament-leaderboard"
-        label="Leaderboard ID"
-        type="number"
-        value={form.leaderboardId}
-        onChange={(v) => setForm({ ...form, leaderboardId: v })}
       />
       <Field
         id="tournament-start"
@@ -138,10 +125,16 @@ function TournamentDetailsForm({
   )
 }
 
-/** Local form state — strings everywhere so inputs can be controlled directly. */
+/**
+ * Local form state — strings everywhere so inputs can be controlled
+ * directly. `leaderboard_id` is intentionally not editable here: it
+ * picks which AoE2 ladder feeds this tournament's standings, so
+ * changing it would swap the leaderboard wholesale — not something a
+ * tournament admin should do through this surface. Use the API
+ * directly for that one-time setup.
+ */
 interface FormState {
   name: string
-  leaderboardId: string
   /** `datetime-local` value: `"YYYY-MM-DDTHH:mm"` in the viewer's local clock. */
   startDate: string
   endDate: string
@@ -151,7 +144,6 @@ interface FormState {
 function toFormState(tournament: TournamentInfo): FormState {
   return {
     name: tournament.name,
-    leaderboardId: String(tournament.leaderboardId),
     startDate: toDatetimeLocal(tournament.startDate),
     endDate: toDatetimeLocal(tournament.endDate),
     grandFinalsDate: toDatetimeLocal(tournament.grandFinalsDate),
@@ -162,7 +154,6 @@ function toFormState(tournament: TournamentInfo): FormState {
 function toUpdateBody(form: FormState): TournamentUpdate {
   return {
     name: form.name,
-    leaderboard_id: Number(form.leaderboardId),
     start_date: fromDatetimeLocal(form.startDate),
     end_date: fromDatetimeLocal(form.endDate),
     grand_finals_date: fromDatetimeLocal(form.grandFinalsDate),

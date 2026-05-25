@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
-import { getUserMessage, parseApiError } from "@/lib/api-errors"
 
 /**
  * Manage the active tournament's player roster — add / remove by
@@ -95,7 +94,6 @@ function PlayerRow({ player }: { player: PlayerRead }) {
           })
           toast.success("Player removed.")
         },
-        onError: async (error) => surfaceError(error),
       },
     })
 
@@ -113,12 +111,13 @@ function PlayerRow({ player }: { player: PlayerRead }) {
         variant="outline"
         size="sm"
         disabled={mutation.isPending}
-        onClick={() =>
+        onClick={() => {
+          if (!confirm(`Remove ${player.alias} from the roster?`)) return
           mutation.mutate({
             tournamentSlug: activeTournament.apiTournamentSlug,
             profileId: player.profile_id,
           })
-        }
+        }}
         aria-label={`Remove ${player.alias}`}
       >
         <Trash2 className="size-4" aria-hidden />
@@ -147,7 +146,6 @@ function AddPlayerForm() {
         })
         toast.success("Player added.")
       },
-      onError: async (error) => surfaceError(error),
     },
   })
 
@@ -178,15 +176,32 @@ function AddPlayerForm() {
           {mutation.isPending ? "Adding…" : "Add"}
         </Button>
       </div>
+      <ProfileIdHint />
     </form>
   )
 }
 
-async function surfaceError(error: unknown) {
-  const normalized = await parseApiError(error)
-  toast.error(getUserMessage(normalized), {
-    description: normalized.requestId
-      ? `Reference: ${normalized.requestId}`
-      : undefined,
-  })
+/**
+ * One-liner that points admins at where to find a profile_id. The number
+ * is the path segment in an aoe2insights player URL — most hosts already
+ * use that site to look up player history.
+ */
+export function ProfileIdHint() {
+  return (
+    <p className="text-muted-foreground text-xs">
+      Find a player&apos;s <code className="font-mono">profile_id</code> in
+      their{" "}
+      <a
+        href="https://www.aoe2insights.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:text-foreground underline underline-offset-2"
+      >
+        aoe2insights
+      </a>{" "}
+      URL — e.g.{" "}
+      <code className="font-mono">aoe2insights.com/user/1819870</code> →{" "}
+      <code className="font-mono">1819870</code>.
+    </p>
+  )
 }
