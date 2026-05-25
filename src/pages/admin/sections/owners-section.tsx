@@ -60,11 +60,9 @@ function OwnersList({
     return <p className="text-muted-foreground text-sm">Loading…</p>
   }
   if (error) {
-    // Most likely cause until the sign-in flow lands: the list endpoint
-    // requires an authenticated owner and the SPA is anonymous. See #80.
     return (
       <p className="text-destructive text-sm">
-        Couldn&apos;t load owners — requires sign-in (pending #80).
+        Couldn&apos;t load owners — requires sign-in.
       </p>
     )
   }

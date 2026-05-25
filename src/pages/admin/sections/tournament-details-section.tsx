@@ -89,33 +89,36 @@ function TournamentDetailsForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <Field
-        id="tournament-name"
-        label="Name"
-        value={form.name}
-        onChange={(v) => setForm({ ...form, name: v })}
-      />
-      <Field
-        id="tournament-start"
-        label="Start date"
-        type="datetime-local"
-        value={form.startDate}
-        onChange={(v) => setForm({ ...form, startDate: v })}
-      />
-      <Field
-        id="tournament-end"
-        label="End date"
-        type="datetime-local"
-        value={form.endDate}
-        onChange={(v) => setForm({ ...form, endDate: v })}
-      />
-      <Field
-        id="tournament-finals"
-        label="Grand finals date"
-        type="datetime-local"
-        value={form.grandFinalsDate}
-        onChange={(v) => setForm({ ...form, grandFinalsDate: v })}
-      />
+      {/*
+       * Two-column grid on `sm:` and up packs the form denser than a
+       * full-width single column does — at the admin page's `max-w-4xl`
+       * a single-column stack leaves ~600px of empty space next to every
+       * input. `Name` spans both columns since the value can be longer
+       * than a date cell can comfortably hold.
+       */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field
+          id="tournament-name"
+          label="Name"
+          value={form.name}
+          onChange={(v) => setForm({ ...form, name: v })}
+          className="sm:col-span-2"
+        />
+        <Field
+          id="tournament-start"
+          label="Start date"
+          type="datetime-local"
+          value={form.startDate}
+          onChange={(v) => setForm({ ...form, startDate: v })}
+        />
+        <Field
+          id="tournament-finals"
+          label="Grand finals date"
+          type="datetime-local"
+          value={form.grandFinalsDate}
+          onChange={(v) => setForm({ ...form, grandFinalsDate: v })}
+        />
+      </div>
       <div className="flex items-center justify-end">
         <Button type="submit" disabled={mutation.isPending}>
           {mutation.isPending ? "Saving…" : "Save changes"}
@@ -127,17 +130,18 @@ function TournamentDetailsForm({
 
 /**
  * Local form state — strings everywhere so inputs can be controlled
- * directly. `leaderboard_id` is intentionally not editable here: it
- * picks which AoE2 ladder feeds this tournament's standings, so
- * changing it would swap the leaderboard wholesale — not something a
- * tournament admin should do through this surface. Use the API
- * directly for that one-time setup.
+ * directly. Fields intentionally not editable here:
+ * - `leaderboard_id` picks which AoE2 ladder feeds this tournament's
+ *   standings — changing it would swap the leaderboard wholesale, not a
+ *   normal admin op. One-time setup via the API.
+ * - `end_date` is being dropped from the API (see aoe2-live-standings-api
+ *   #76); when that lands and orval regenerates, no further work is
+ *   needed here since the form already doesn't reference it.
  */
 interface FormState {
   name: string
   /** `datetime-local` value: `"YYYY-MM-DDTHH:mm"` in the viewer's local clock. */
   startDate: string
-  endDate: string
   grandFinalsDate: string
 }
 
@@ -145,7 +149,6 @@ function toFormState(tournament: TournamentInfo): FormState {
   return {
     name: tournament.name,
     startDate: toDatetimeLocal(tournament.startDate),
-    endDate: toDatetimeLocal(tournament.endDate),
     grandFinalsDate: toDatetimeLocal(tournament.grandFinalsDate),
   }
 }
@@ -155,7 +158,6 @@ function toUpdateBody(form: FormState): TournamentUpdate {
   return {
     name: form.name,
     start_date: fromDatetimeLocal(form.startDate),
-    end_date: fromDatetimeLocal(form.endDate),
     grand_finals_date: fromDatetimeLocal(form.grandFinalsDate),
   }
 }
@@ -180,15 +182,17 @@ function Field({
   type = "text",
   value,
   onChange,
+  className,
 }: {
   id: string
   label: string
   type?: string
   value: string
   onChange: (next: string) => void
+  className?: string
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={`flex flex-col gap-1.5 ${className ?? ""}`}>
       <Label htmlFor={id}>{label}</Label>
       <Input
         id={id}
