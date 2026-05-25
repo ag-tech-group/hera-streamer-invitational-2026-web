@@ -10,6 +10,7 @@ import {
   useRevokeTournamentOwnerV1TournamentsTournamentSlugOwnersUserIdDelete,
 } from "@/api/generated/hooks/owners/owners"
 import type { TournamentOwnerRead } from "@/api/generated/types"
+import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -109,22 +110,34 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
           Granted {new Date(owner.created_at).toLocaleDateString()}
         </span>
       </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={mutation.isPending}
-        onClick={() => {
-          if (!confirm(`Revoke ownership for ${owner.user_id}?`)) return
+      <ConfirmDialog
+        trigger={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={mutation.isPending}
+            aria-label={`Revoke ${owner.user_id}`}
+          >
+            <Trash2 className="size-4" aria-hidden />
+          </Button>
+        }
+        title="Revoke ownership?"
+        description={
+          <>
+            User <span className="font-mono">{owner.user_id}</span> will lose
+            admin access to this tournament.
+          </>
+        }
+        confirmLabel="Revoke"
+        destructive
+        onConfirm={() =>
           mutation.mutate({
             tournamentSlug: activeTournament.apiTournamentSlug,
             userId: owner.user_id,
           })
-        }}
-        aria-label={`Revoke ${owner.user_id}`}
-      >
-        <Trash2 className="size-4" aria-hidden />
-      </Button>
+        }
+      />
     </li>
   )
 }

@@ -10,6 +10,7 @@ import {
   useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDelete,
 } from "@/api/generated/hooks/players/players"
 import type { PlayerRead } from "@/api/generated/types"
+import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -106,22 +107,29 @@ function PlayerRow({ player }: { player: PlayerRead }) {
           {player.country ? ` · ${player.country}` : null}
         </span>
       </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={mutation.isPending}
-        onClick={() => {
-          if (!confirm(`Remove ${player.alias} from the roster?`)) return
+      <ConfirmDialog
+        trigger={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={mutation.isPending}
+            aria-label={`Remove ${player.alias}`}
+          >
+            <Trash2 className="size-4" aria-hidden />
+          </Button>
+        }
+        title={`Remove ${player.alias}?`}
+        description="This removes the player from the tournament roster. Their match history and ratings stay intact upstream."
+        confirmLabel="Remove"
+        destructive
+        onConfirm={() =>
           mutation.mutate({
             tournamentSlug: activeTournament.apiTournamentSlug,
             profileId: player.profile_id,
           })
-        }}
-        aria-label={`Remove ${player.alias}`}
-      >
-        <Trash2 className="size-4" aria-hidden />
-      </Button>
+        }
+      />
     </li>
   )
 }
