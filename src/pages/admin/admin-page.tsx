@@ -33,8 +33,13 @@ export function AdminPage() {
 function AdminLayout() {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-8">
-      <header className="border-border flex flex-wrap items-center justify-between gap-3 border-b-2 pb-4">
-        <div className="flex items-center gap-4">
+      <header className="border-border flex flex-col gap-3 border-b-2 pb-4">
+        {/*
+         * Two-row header: navigation chrome (back + theme toggle) sits
+         * on its own line so it doesn't compete with the page title
+         * vertically. The title block flows below as a normal heading.
+         */}
+        <div className="flex items-center justify-between gap-3">
           <Link
             to="/"
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
@@ -42,14 +47,14 @@ function AdminLayout() {
             <ChevronLeft className="size-4" aria-hidden />
             Back to standings
           </Link>
-          <div className="flex flex-col">
-            <h1 className="font-display text-4xl tracking-wide">Admin</h1>
-            <p className="text-muted-foreground text-sm">
-              {activeTournament.name}
-            </p>
-          </div>
+          <ThemeToggle />
         </div>
-        <ThemeToggle />
+        <div className="flex flex-col">
+          <h1 className="font-display text-4xl tracking-wide">Admin</h1>
+          <p className="text-muted-foreground text-sm">
+            {activeTournament.name}
+          </p>
+        </div>
       </header>
 
       <AdminSection title="Tournament details">
