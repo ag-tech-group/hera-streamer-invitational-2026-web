@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { User, X } from "lucide-react"
+import { X } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { UserAvatar } from "@/components/user-avatar"
 import { searchUsers, type UserSearchResult } from "@/lib/auth-config"
 import { cn } from "@/lib/utils"
 
@@ -50,7 +51,7 @@ export function UserSearchPicker({
   if (selected) {
     return (
       <div className="border-input bg-muted/30 flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border px-2 text-sm">
-        <UserAvatar user={selected} />
+        <UserAvatar avatarUrl={selected.avatar_url} />
         <span className="min-w-0 truncate">
           {selected.display_name ?? selected.id}
         </span>
@@ -137,7 +138,7 @@ function SearchResults({
             "hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 px-3 py-2 text-sm"
           )}
         >
-          <UserAvatar user={user} />
+          <UserAvatar avatarUrl={user.avatar_url} />
           <span className="min-w-0 truncate">
             {user.display_name ?? user.id}
           </span>
@@ -145,26 +146,6 @@ function SearchResults({
       ))}
     </ul>
   )
-}
-
-/**
- * Small circular avatar from `avatar_url` with a Lucide fallback.
- * Falls back gracefully when the upstream image 404s by hiding itself.
- */
-function UserAvatar({ user }: { user: UserSearchResult }) {
-  if (user.avatar_url) {
-    return (
-      <img
-        src={user.avatar_url}
-        alt=""
-        className="size-5 shrink-0 rounded-full object-cover"
-        onError={(event) => {
-          event.currentTarget.style.display = "none"
-        }}
-      />
-    )
-  }
-  return <User className="text-muted-foreground size-4 shrink-0" aria-hidden />
 }
 
 /**

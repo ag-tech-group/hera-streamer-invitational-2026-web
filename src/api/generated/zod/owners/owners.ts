@@ -18,6 +18,13 @@ import * as zod from 'zod';
 Oldest first — useful when reasoning about who's been around longest
 and which slot is "the original creator". Owner-gated like the rest
 of this router.
+
+Each row is enriched with the user's ``display_name`` / ``email`` /
+``avatar_url`` via a single batched call to auth-api's ``/users/lookup``
+(cached ~60s per id). The caller's access-token cookie is forwarded so
+the lookup runs as the same user that hit this endpoint. If auth-api
+is unreachable the enrichment fields fall back to ``null`` and the
+bare ``user_id`` / ``created_at`` rows still ship.
  * @summary List Tournament Owners
  */
 export const ListTournamentOwnersV1TournamentsTournamentSlugOwnersGetParams = zod.object({
@@ -26,8 +33,11 @@ export const ListTournamentOwnersV1TournamentsTournamentSlugOwnersGetParams = zo
 
 export const ListTournamentOwnersV1TournamentsTournamentSlugOwnersGetResponseItem = zod.object({
   "user_id": zod.string(),
-  "created_at": zod.iso.datetime({})
-}).describe('A criticalbit user authorized to manage a tournament.')
+  "created_at": zod.iso.datetime({}),
+  "display_name": zod.union([zod.string(),zod.null()]).optional(),
+  "email": zod.union([zod.string(),zod.null()]).optional(),
+  "avatar_url": zod.union([zod.string(),zod.null()]).optional()
+}).describe('A criticalbit user authorized to manage a tournament.\n\n``display_name``, ``email``, and ``avatar_url`` are resolved against\ncriticalbit-auth-api at response time and cached briefly per ``user_id``.\nAny may be ``null``: ``display_name`` \/ ``avatar_url`` if the user has\nnone set, ``email`` typically populated (auth-api always returns one,\npossibly a synthetic placeholder for Steam users who haven\'t gone\nthrough the accept-tos email gate). All three are null when the\nauth-api call fails — the row still resolves so the admin UI can\ndegrade gracefully to just ``user_id``.')
 export const ListTournamentOwnersV1TournamentsTournamentSlugOwnersGetResponse = zod.array(ListTournamentOwnersV1TournamentsTournamentSlugOwnersGetResponseItem)
 
 /**

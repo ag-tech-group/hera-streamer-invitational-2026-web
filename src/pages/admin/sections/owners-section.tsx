@@ -13,6 +13,7 @@ import type { TournamentOwnerRead } from "@/api/generated/types"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { UserAvatar } from "@/components/user-avatar"
 import { UserSearchPicker } from "@/components/user-search-picker"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
@@ -103,14 +104,23 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
       },
     })
 
+  const primary = ownerPrimaryIdentity(owner)
+  const secondary = ownerSecondaryIdentity(owner)
+
   return (
-    <li className="bg-muted/30 flex items-center justify-between gap-3 rounded-md px-3 py-2">
-      <div className="flex flex-col">
-        <span className="font-mono text-sm">{owner.user_id}</span>
-        <span className="text-muted-foreground text-xs">
-          Granted {new Date(owner.created_at).toLocaleDateString()}
-        </span>
+    <li className="bg-muted/30 flex items-center gap-3 rounded-md px-3 py-2">
+      <UserAvatar avatarUrl={owner.avatar_url} size="md" />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-sm font-medium">{primary}</span>
+        {secondary ? (
+          <span className="text-muted-foreground truncate text-xs">
+            {secondary}
+          </span>
+        ) : null}
       </div>
+      <span className="text-muted-foreground shrink-0 text-xs">
+        Granted {new Date(owner.created_at).toLocaleDateString()}
+      </span>
       <ConfirmDialog
         trigger={
           <Button
@@ -118,7 +128,7 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
             variant="outline"
             size="sm"
             disabled={mutation.isPending}
-            aria-label={`Revoke ${owner.user_id}`}
+            aria-label={`Revoke ${primary}`}
           >
             <Trash2 className="size-4" aria-hidden />
           </Button>
@@ -126,8 +136,8 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
         title="Revoke ownership?"
         description={
           <>
-            User <span className="font-mono">{owner.user_id}</span> will lose
-            admin access to this tournament.
+            <strong>{primary}</strong> will lose admin access to this
+            tournament.
           </>
         }
         confirmLabel="Revoke"
@@ -141,6 +151,28 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
       />
     </li>
   )
+}
+
+/**
+ * Pick the human-readable display string for an owner. Prefers
+ * `display_name` (set on the user's criticalbit profile, populated
+ * automatically for Steam / Google OAuth users), then falls back to
+ * `email`, then to the bare `user_id` if the auth-api lookup failed
+ * and neither populated.
+ */
+function ownerPrimaryIdentity(owner: TournamentOwnerRead): string {
+  return owner.display_name || owner.email || owner.user_id
+}
+
+/**
+ * The subordinate identity line shown beneath `ownerPrimaryIdentity`,
+ * or `null` when there's nothing useful to show there. We only show
+ * the email when `display_name` is the primary — otherwise the email
+ * would be on both lines, or the secondary would just repeat the UUID.
+ */
+function ownerSecondaryIdentity(owner: TournamentOwnerRead): string | null {
+  if (!owner.display_name) return null
+  return owner.email ?? null
 }
 
 function GrantOwnerForm() {

@@ -26,7 +26,7 @@ import type {
 } from '../../types';
 
 
-export const getListTournamentOwnersV1TournamentsTournamentSlugOwnersGetResponseMock = (): TournamentOwnerRead[] => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({user_id: faker.string.alpha({length: {min: 10, max: 20}}), created_at: faker.date.past().toISOString().slice(0, 19) + 'Z'})))
+export const getListTournamentOwnersV1TournamentsTournamentSlugOwnersGetResponseMock = (): TournamentOwnerRead[] => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({user_id: faker.string.alpha({length: {min: 10, max: 20}}), created_at: faker.date.past().toISOString().slice(0, 19) + 'Z', display_name: faker.helpers.arrayElement([faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), undefined]), email: faker.helpers.arrayElement([faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), undefined]), avatar_url: faker.helpers.arrayElement([faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), undefined])})))
 
 
 export const getListTournamentOwnersV1TournamentsTournamentSlugOwnersGetMockHandler = (overrideResponse?: TournamentOwnerRead[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TournamentOwnerRead[]> | TournamentOwnerRead[]), options?: RequestHandlerOptions) => {

@@ -12,8 +12,20 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
 
 /**
  * A criticalbit user authorized to manage a tournament.
+
+``display_name``, ``email``, and ``avatar_url`` are resolved against
+criticalbit-auth-api at response time and cached briefly per ``user_id``.
+Any may be ``null``: ``display_name`` / ``avatar_url`` if the user has
+none set, ``email`` typically populated (auth-api always returns one,
+possibly a synthetic placeholder for Steam users who haven't gone
+through the accept-tos email gate). All three are null when the
+auth-api call fails — the row still resolves so the admin UI can
+degrade gracefully to just ``user_id``.
  */
 export interface TournamentOwnerRead {
   user_id: string;
   created_at: string;
+  display_name?: string | null;
+  email?: string | null;
+  avatar_url?: string | null;
 }

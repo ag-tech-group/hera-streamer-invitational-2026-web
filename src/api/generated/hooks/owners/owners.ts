@@ -47,6 +47,13 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 Oldest first — useful when reasoning about who's been around longest
 and which slot is "the original creator". Owner-gated like the rest
 of this router.
+
+Each row is enriched with the user's ``display_name`` / ``email`` /
+``avatar_url`` via a single batched call to auth-api's ``/users/lookup``
+(cached ~60s per id). The caller's access-token cookie is forwarded so
+the lookup runs as the same user that hit this endpoint. If auth-api
+is unreachable the enrichment fields fall back to ``null`` and the
+bare ``user_id`` / ``created_at`` rows still ship.
  * @summary List Tournament Owners
  */
 export type listTournamentOwnersV1TournamentsTournamentSlugOwnersGetResponse200 = {
