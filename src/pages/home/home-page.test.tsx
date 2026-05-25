@@ -85,7 +85,6 @@ const tournament: TournamentRead = {
   name: "Test Tournament",
   leaderboard_id: 3,
   start_date: null,
-  end_date: null,
   grand_finals_date: null,
   created_at: "2026-05-01T00:00:00Z",
 }

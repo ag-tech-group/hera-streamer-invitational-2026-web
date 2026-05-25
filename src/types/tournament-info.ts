@@ -18,9 +18,10 @@ export interface TournamentInfo {
   leaderboardId: number
   /** ISO-8601 start timestamp, or null if not yet set in the DB. */
   startDate: string | null
-  /** ISO-8601 end timestamp, or null if not yet set in the DB. */
-  endDate: string | null
-  /** ISO-8601 grand-finals start timestamp (#17), or null if not yet set. */
+  /**
+   * ISO-8601 grand-finals timestamp (#17). Also the tournament-window
+   * upper bound now that `end_date` is gone (aoe2-live-standings-api#76).
+   */
   grandFinalsDate: string | null
   /** ISO-8601 timestamp when the tournament record was created. */
   createdAt: string
