@@ -1,11 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import {
-  ChevronDown,
-  ExternalLink,
-  LogIn,
-  LogOut,
-  ShieldUser,
-} from "lucide-react"
+import { ChevronDown, ExternalLink, LogOut, ShieldUser } from "lucide-react"
 
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -18,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/user-avatar"
 import { useAuth } from "@/lib/auth"
-import { AUTH_URL, loginUrl } from "@/lib/auth-config"
+import { AUTH_URL, logoutFromAuthApi, loginUrl } from "@/lib/auth-config"
 
 /**
  * Top-level app shell navbar — fixed to the top of the viewport on
@@ -60,6 +54,8 @@ export function Navbar() {
  * - **Loading**: render nothing (no flash of sign-in then sign-out).
  * - **Unauthenticated**: outline Sign in button linking to the shared
  *   auth frontend, with the current pathname as the post-auth redirect.
+ *   Matches the criticalbit-web / vagrant-story-web pattern — plain
+ *   "Sign in" text, no icon, visible at every breakpoint.
  * - **Authenticated**: DropdownMenu trigger showing the user's avatar
  *   + display_name (or email / user_id as fallback) + chevron. Items:
  *   Profile (external link to auth.criticalbit.gg/profile), Admin
@@ -82,9 +78,11 @@ function AuthWidget() {
   if (!isAuthenticated) {
     return (
       <Button variant="outline" size="sm" asChild>
-        <a href={loginUrl(window.location.pathname)}>
-          <LogIn className="size-4" aria-hidden />
-          <span className="hidden sm:inline">Sign in</span>
+        <a
+          href={loginUrl(window.location.pathname)}
+          onClick={handleSignInClick}
+        >
+          Sign in
         </a>
       </Button>
     )
@@ -137,4 +135,44 @@ function AuthWidget() {
       </DropdownMenuContent>
     </DropdownMenu>
   )
+}
+
+/**
+ * Defensively clear any lingering `criticalbit_access` cookie before
+ * sending the user to the auth frontend. If a stale cookie survives at
+ * `.criticalbit.gg` (e.g. the server-side session was revoked but the
+ * cookie wasn't), `auth.criticalbit.gg/login` may treat the user as
+ * already signed in and bounce them straight back to `redirect=` —
+ * the SPA then 401s on `/v1/me`, drops back to the Sign in button, and
+ * the user is stuck in a loop ("flash but doesn't sign in"). Logging
+ * out first ensures the auth FE sees a clean slate.
+ *
+ * Only intercepts the primary click — modifier-keys, middle-click, and
+ * right-click → "open in new tab" fall through to the native anchor
+ * navigation, preserving expected link semantics.
+ */
+function handleSignInClick(event: React.MouseEvent<HTMLAnchorElement>) {
+  if (
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  ) {
+    return
+  }
+  event.preventDefault()
+  const target = event.currentTarget.href
+  void (async () => {
+    try {
+      await logoutFromAuthApi()
+    } catch {
+      // Network drop / CORS hiccup — proceed with the redirect anyway,
+      // since clearing the cookie isn't strictly required for a fresh
+      // sign-in to succeed (just defensive against the stale-cookie
+      // bounce-back case).
+    }
+    window.location.href = target
+  })()
 }
