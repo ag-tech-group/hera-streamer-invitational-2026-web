@@ -17,4 +17,9 @@ export const handlers: HttpHandler[] = [
   http.get("*/v1/me", () =>
     HttpResponse.json({ detail: "Not authenticated" }, { status: 401 })
   ),
+  // Default: anonymous `/auth/me` on the auth API. Same pattern as
+  // above — tests override per-scenario when they need a signed-in user.
+  http.get("*/auth/me", () =>
+    HttpResponse.json({ detail: "Not authenticated" }, { status: 401 })
+  ),
 ]

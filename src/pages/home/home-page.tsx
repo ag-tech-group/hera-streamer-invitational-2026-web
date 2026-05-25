@@ -1,15 +1,9 @@
-import { Link } from "@tanstack/react-router"
-import { LogIn, LogOut, ShieldUser } from "lucide-react"
 import { useCallback, useState } from "react"
 
 import { Countdown } from "@/components/countdown"
 import { HostLinksCard } from "@/components/host-links-card"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { Button } from "@/components/ui/button"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
-import { useAuth } from "@/lib/auth"
-import { loginUrl } from "@/lib/auth-config"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
@@ -74,45 +68,28 @@ export function HomePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
-      <header className="border-border flex flex-wrap items-start justify-between gap-3 border-b-2 pb-4">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="" className="size-16 shrink-0" />
-          <div className="flex flex-col gap-1">
-            {tournament.data?.name ? (
-              <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-                {tournament.data.name}
-              </p>
-            ) : null}
-            {/*
-             * Drops `font-bold` because Bebas Neue ships only weight 400 —
-             * forcing a synthetic 700 produces an ugly emboldened glyph.
-             */}
-            <h1 className="font-display text-4xl tracking-wide">
-              Live Standings
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              <a
-                href="https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground underline-offset-2 transition-colors hover:underline"
-              >
-                Age of Empires 2: Definitive Edition
-              </a>{" "}
-              live rankings
-            </p>
-          </div>
-        </div>
+      <header className="border-border flex flex-col gap-1 border-b-2 pb-4">
+        {tournament.data?.name ? (
+          <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+            {tournament.data.name}
+          </p>
+        ) : null}
         {/*
-         * `w-full justify-between` keeps the auth controls and theme
-         * toggle pinned to opposite edges when the header wraps to a
-         * second row on narrow viewports. At `sm:` and up the header
-         * fits on one row so the inner div snaps back to content-width.
+         * Drops `font-bold` because Bebas Neue ships only weight 400 —
+         * forcing a synthetic 700 produces an ugly emboldened glyph.
          */}
-        <div className="flex w-full items-center justify-between gap-2 sm:w-auto">
-          <AuthControls />
-          <ThemeToggle />
-        </div>
+        <h1 className="font-display text-4xl tracking-wide">Live Standings</h1>
+        <p className="text-muted-foreground text-sm">
+          <a
+            href="https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground underline-offset-2 transition-colors hover:underline"
+          >
+            Age of Empires 2: Definitive Edition
+          </a>{" "}
+          live rankings
+        </p>
       </header>
 
       {/*
@@ -186,55 +163,6 @@ export function HomePage() {
         </div>
       </div>
     </div>
-  )
-}
-
-/**
- * App-bar auth widget. Three visible states keyed on `useAuth()`:
- * - **loading**: render nothing so the bar doesn't flash a sign-in
- *   button that immediately swaps for a sign-out one.
- * - **unauthenticated**: a "Sign in" link that leaves the SPA for the
- *   shared auth frontend with our origin as the redirect target.
- * - **authenticated**: a sign-out button (plus an admin entry point
- *   when the user owns the active tournament — DOM-absent otherwise
- *   so a non-admin viewer never sees the route hinted in markup).
- */
-function AuthControls() {
-  const { isLoading, isAuthenticated, isAdmin, signOut } = useAuth()
-
-  if (isLoading) return null
-
-  if (!isAuthenticated) {
-    return (
-      <Button variant="outline" size="sm" asChild>
-        <a href={loginUrl(window.location.pathname)}>
-          <LogIn className="size-4" aria-hidden />
-          Sign in
-        </a>
-      </Button>
-    )
-  }
-
-  return (
-    <>
-      {isAdmin ? (
-        <Button variant="outline" size="icon-sm" asChild aria-label="Admin">
-          <Link to="/admin">
-            <ShieldUser className="size-4" aria-hidden />
-          </Link>
-        </Button>
-      ) : null}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => void signOut()}
-        aria-label="Sign out"
-      >
-        <LogOut className="size-4" aria-hidden />
-        Sign out
-      </Button>
-    </>
   )
 }
 

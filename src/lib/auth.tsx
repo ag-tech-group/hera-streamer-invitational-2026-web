@@ -11,7 +11,7 @@ import {
 import { setOnUnauthorized } from "@/api/api"
 import { getMeV1MeGet } from "@/api/generated/hooks/me/me"
 import { activeTournament } from "@/config/tournaments"
-import { logoutFromAuthApi } from "@/lib/auth-config"
+import { getAuthMe, logoutFromAuthApi } from "@/lib/auth-config"
 
 /**
  * Auth state derived from a single probe against `GET /v1/me` at app
@@ -22,12 +22,25 @@ import { logoutFromAuthApi } from "@/lib/auth-config"
  * SPA renders the public surface only.
  */
 interface AuthContextValue {
-  /** True after a successful /v1/me probe; false otherwise (including 401). */
+  /** True after both /v1/me and /auth/me succeed; false otherwise. */
   isAuthenticated: boolean
   /** True while the initial probe is in flight. UI should defer gating decisions until this is false. */
   isLoading: boolean
   /** The criticalbit user UUID, or null when unauthenticated. */
   userId: string | null
+  /**
+   * Display name from `/auth/me`. Set automatically for Steam / Google
+   * OAuth users; null otherwise unless the user filled it in on their
+   * auth.criticalbit.gg profile.
+   */
+  displayName: string | null
+  /**
+   * Email from `/auth/me`. Null for Steam-OAuth users who haven't yet
+   * supplied a real email via the accept-tos gate (auth-api #31).
+   */
+  email: string | null
+  /** Avatar URL from `/auth/me`, or null when unset. */
+  avatarUrl: string | null
   /**
    * True when the current user owns the active tournament — the gate for
    * the admin entry point. Stays false for signed-in non-admins so the
@@ -35,9 +48,9 @@ interface AuthContextValue {
    */
   isAdmin: boolean
   /**
-   * Re-fetch /v1/me. Call after the SPA reloads following the auth
-   * frontend redirect, or before a write the user might be expected to
-   * have permission for.
+   * Re-fetch both identity probes. Call after the SPA reloads following
+   * the auth frontend redirect, or before a write the user might be
+   * expected to have permission for.
    */
   refresh: () => Promise<void>
   /**
@@ -53,6 +66,9 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [displayName, setDisplayName] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [ownedSlugs, setOwnedSlugs] = useState<Set<string>>(() => new Set())
   const [isLoading, setIsLoading] = useState(true)
 
@@ -63,20 +79,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // `signOut` does the full clear via `window.location.reload()`.
     setIsAuthenticated(false)
     setUserId(null)
+    setDisplayName(null)
+    setEmail(null)
+    setAvatarUrl(null)
     setOwnedSlugs(new Set())
   }, [])
 
   const refresh = useCallback(async () => {
     try {
-      const response = await getMeV1MeGet()
-      if (response.status !== 200) {
+      // Both probes in parallel — same auth cookie satisfies both, and
+      // doing them concurrently shaves a roundtrip off boot time.
+      const [meResponse, authMe] = await Promise.all([
+        getMeV1MeGet(),
+        getAuthMe(),
+      ])
+
+      if (meResponse.status !== 200 || !authMe) {
         clearAuthFields()
         return
       }
-      const me = response.data
+      const me = meResponse.data
       setIsAuthenticated(true)
       setUserId(me.user_id)
       setOwnedSlugs(new Set(me.owned_tournaments.map((t) => t.slug)))
+      setDisplayName(authMe.display_name)
+      setEmail(authMe.email)
+      setAvatarUrl(authMe.avatar_url)
     } catch {
       // ky throws on non-2xx (the 401 path here) and on network failures.
       // Either way: drop to the public/unauthenticated state.
@@ -120,11 +148,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated,
       isLoading,
       userId,
+      displayName,
+      email,
+      avatarUrl,
       isAdmin: ownedSlugs.has(activeTournament.apiTournamentSlug),
       refresh,
       signOut,
     }),
-    [isAuthenticated, isLoading, userId, ownedSlugs, refresh, signOut]
+    [
+      isAuthenticated,
+      isLoading,
+      userId,
+      displayName,
+      email,
+      avatarUrl,
+      ownedSlugs,
+      refresh,
+      signOut,
+    ]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

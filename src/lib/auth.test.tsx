@@ -42,11 +42,22 @@ describe("AuthProvider", () => {
     expect(result.current.isAdmin).toBe(false)
   })
 
-  it("marks the user authenticated when /v1/me returns 200", async () => {
+  it("marks the user authenticated when both /v1/me and /auth/me return 200", async () => {
     server.use(
       http.get("*/v1/me", () =>
         HttpResponse.json(
           { user_id: "user-1", owned_tournaments: [] },
+          { status: 200 }
+        )
+      ),
+      http.get("*/auth/me", () =>
+        HttpResponse.json(
+          {
+            id: "user-1",
+            email: "jane@example.com",
+            display_name: "Jane Doe",
+            avatar_url: "https://example.com/avatar.png",
+          },
           { status: 200 }
         )
       )
@@ -54,7 +65,27 @@ describe("AuthProvider", () => {
     const { result } = renderAuth()
     await waitFor(() => expect(result.current.isAuthenticated).toBe(true))
     expect(result.current.userId).toBe("user-1")
+    expect(result.current.displayName).toBe("Jane Doe")
+    expect(result.current.email).toBe("jane@example.com")
+    expect(result.current.avatarUrl).toBe("https://example.com/avatar.png")
     expect(result.current.isAdmin).toBe(false)
+  })
+
+  it("stays unauthenticated when /v1/me succeeds but /auth/me fails", async () => {
+    server.use(
+      http.get("*/v1/me", () =>
+        HttpResponse.json(
+          { user_id: "user-1", owned_tournaments: [] },
+          { status: 200 }
+        )
+      ),
+      http.get("*/auth/me", () =>
+        HttpResponse.json({ detail: "Not authenticated" }, { status: 401 })
+      )
+    )
+    const { result } = renderAuth()
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.isAuthenticated).toBe(false)
   })
 
   it("sets isAdmin when the active tournament is in owned_tournaments", async () => {
@@ -75,6 +106,17 @@ describe("AuthProvider", () => {
                 created_at: "2026-01-01T00:00:00Z",
               },
             ],
+          },
+          { status: 200 }
+        )
+      ),
+      http.get("*/auth/me", () =>
+        HttpResponse.json(
+          {
+            id: "user-1",
+            email: "jane@example.com",
+            display_name: "Jane Doe",
+            avatar_url: null,
           },
           { status: 200 }
         )
@@ -102,6 +144,17 @@ describe("AuthProvider", () => {
                 created_at: "2026-01-01T00:00:00Z",
               },
             ],
+          },
+          { status: 200 }
+        )
+      ),
+      http.get("*/auth/me", () =>
+        HttpResponse.json(
+          {
+            id: "user-1",
+            email: "jane@example.com",
+            display_name: "Jane Doe",
+            avatar_url: null,
           },
           { status: 200 }
         )

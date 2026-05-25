@@ -14,7 +14,10 @@ export function ErrorBoundary({ error, reset }: ErrorComponentProps) {
   Sentry.captureException(error)
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-8">
+    // `flex-1` fills the available space inside the app shell's `<main>`
+    // rather than taking the whole viewport — keeps the navbar and
+    // footer visible while the error state is up.
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
       <p className="text-muted-foreground text-sm font-medium tracking-widest uppercase">
         Something went wrong
       </p>
