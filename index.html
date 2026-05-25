@@ -7,18 +7,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!--
-      connect-src includes the deployed standings API origin so the browser
-      lets the generated client reach it (fetch + EventSource/SSE), plus
-      *.ingest.us.sentry.io for Sentry event ingestion when enabled.
-      http://localhost:* stays for running the API locally during dev.
-      worker-src 'self' blob: is required for Sentry session replay's
-      compression worker (only created when replay sampling > 0).
-    -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:* https://aoe2-live-standings-api.criticalbit.gg https://*.ingest.us.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com; worker-src 'self' blob:; img-src 'self' data:; object-src 'none'; frame-src 'none'; form-action 'self'; upgrade-insecure-requests; base-uri 'self'"
-    />
     <title>Live Standings</title>
   </head>
   <body>
