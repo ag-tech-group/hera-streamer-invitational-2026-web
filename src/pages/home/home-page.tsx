@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router"
+import { ShieldUser } from "lucide-react"
 import { useCallback, useState } from "react"
 
 import { Countdown } from "@/components/countdown"
@@ -5,6 +7,7 @@ import { HostLinksCard } from "@/components/host-links-card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
+import { Feature } from "@/lib/feature-flags"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
@@ -103,6 +106,22 @@ export function HomePage() {
           {activeData ? (
             <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
           ) : null}
+          {/*
+           * Admin entry point. Wrapped in `<Feature>` so the link is
+           * DOM-absent for non-admin visitors — the route itself is also
+           * gated by the same flag, so a viewer with DevTools open
+           * couldn't discover the route by inspecting markup either.
+           * Replaced by the real sign-in flow under #80.
+           */}
+          <Feature flag="admin_tab">
+            <Link
+              to="/admin"
+              className="hover:bg-accent hover:text-accent-foreground text-muted-foreground inline-flex size-9 items-center justify-center rounded-md transition-colors"
+              aria-label="Admin"
+            >
+              <ShieldUser className="size-4" aria-hidden />
+            </Link>
+          </Feature>
           <ThemeToggle />
         </div>
       </header>
