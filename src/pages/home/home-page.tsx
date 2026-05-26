@@ -20,7 +20,7 @@ import {
   StandingsTable,
   StandingsTableSkeleton,
 } from "@/pages/home/standings-table"
-import { TeamsTable, TeamsTableSkeleton } from "@/pages/home/teams-table"
+import { TeamsView, TeamsViewSkeleton } from "@/pages/home/teams-view"
 import { ViewTabs, type StandingsView } from "@/pages/home/view-tabs"
 import type { StandingsSnapshot, TeamStandingsSnapshot } from "@/types"
 
@@ -213,7 +213,7 @@ function TeamsSection({
   onRetry: () => void
 }) {
   if (isPending) {
-    return <TeamsTableSkeleton />
+    return <TeamsViewSkeleton />
   }
 
   if (isError || !snapshot) {
@@ -224,5 +224,5 @@ function TeamsSection({
     return <TeamsEmpty />
   }
 
-  return <TeamsTable rows={snapshot.rows} />
+  return <TeamsView rows={snapshot.rows} />
 }

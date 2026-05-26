@@ -71,14 +71,12 @@
     "viewOnAoe2insights": "View {{alias}} on aoe2insights"
   },
   "teams": {
-    "caption": "Tournament team standings",
-    "captionLoading": "Loading team standings",
-    "headers": {
-      "team": "Team",
-      "combined": "Combined",
-      "average": "Avg",
-      "members": "Members"
-    }
+    "average": "avg",
+    "playersCount_one": "{{count}} player",
+    "playersCount_other": "{{count}} players",
+    "noMembers": "No rated members yet.",
+    "rosterAriaLabel": "Team roster",
+    "versus": "VS"
   },
   "admin": {
     "title": "Admin",

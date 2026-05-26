@@ -72,6 +72,22 @@
    */
   --shadow-card:
     inset 0 1px 0 oklch(1 0 0 / 0.7), 0 4px 12px oklch(0.5 0.02 240 / 0.12);
+  /*
+   * Team palette (#90): the in-game AoE2 player 1 blue and player 2 red,
+   * remapped to OKLCH. Light-theme tuning — `*-strong` carries the hover
+   * border + glow accent (higher chroma, slightly lifted lightness so it
+   * reads as "energized"); `*-bg` is the low-opacity gradient wash on the
+   * pill surface. Wired through `@theme inline` so utilities like
+   * `bg-team-p1` / `border-team-p1-strong` are available, but most
+   * consumers should reach the panel-scoped `--team-color` aliases below
+   * instead so the same pill works for either team.
+   */
+  --team-p1: oklch(0.5 0.2 256);
+  --team-p1-strong: oklch(0.58 0.22 256);
+  --team-p1-bg: oklch(0.5 0.2 256 / 0.08);
+  --team-p2: oklch(0.55 0.21 28);
+  --team-p2-strong: oklch(0.63 0.23 28);
+  --team-p2-bg: oklch(0.55 0.21 28 / 0.08);
 }
 
 .dark {
@@ -128,6 +144,19 @@
    */
   --shadow-card:
     inset 0 1px 0 oklch(0.35 0.015 240 / 0.4), 0 4px 12px oklch(0 0 0 / 0.4);
+  /*
+   * Team palette (#90): dark-theme tuning — same hue families as the
+   * light palette, shifted to the upper lightness regime so the colours
+   * read at the same visual weight on the dark stone base. `*-bg`
+   * carries more alpha here because the stone background absorbs more
+   * of the wash than the sunlit palette does.
+   */
+  --team-p1: oklch(0.68 0.17 256);
+  --team-p1-strong: oklch(0.78 0.2 256);
+  --team-p1-bg: oklch(0.68 0.17 256 / 0.14);
+  --team-p2: oklch(0.7 0.18 28);
+  --team-p2-strong: oklch(0.78 0.21 28);
+  --team-p2-bg: oklch(0.7 0.18 28 / 0.14);
 }
 
 @theme inline {
@@ -176,11 +205,107 @@
   --font-display: "Bebas Neue", ui-sans-serif, system-ui, sans-serif;
   /* Card depth (#40): exposes the per-theme --shadow-card token as `shadow-card`. */
   --shadow-card: var(--shadow-card);
+  /*
+   * Team palette (#90): exposes the per-theme team tokens as Tailwind
+   * colors. Direct utility usage (`bg-team-p1`, `border-team-p2-strong`)
+   * is fine for one-off placements (e.g. a tab indicator), but the
+   * recommended path for repeated team-coloured surfaces is to set
+   * `data-team-color="p1"` on a parent — see the alias rules in
+   * `@layer base` — and have descendants read the generic
+   * `--team-color` / `--team-color-strong` / `--team-color-bg`. That way
+   * one pill component renders correctly for either team without
+   * conditional class names.
+   */
+  --color-team-p1: var(--team-p1);
+  --color-team-p1-strong: var(--team-p1-strong);
+  --color-team-p1-bg: var(--team-p1-bg);
+  --color-team-p2: var(--team-p2);
+  --color-team-p2-strong: var(--team-p2-strong);
+  --color-team-p2-bg: var(--team-p2-bg);
 }
 
 @layer base {
   * {
     @apply border-border;
+  }
+
+  /*
+   * Team palette aliasing (#90): a parent with `data-team-color="p1"`
+   * exposes the P1 (blue) palette to descendants as generic
+   * `--team-color` / `--team-color-strong` / `--team-color-bg` vars, and
+   * the P2 variant does the same for red. Player pills and panel
+   * accents read the generic vars, so the same component renders the
+   * right colour for whichever team it sits inside.
+   */
+  [data-team-color="p1"] {
+    --team-color: var(--team-p1);
+    --team-color-strong: var(--team-p1-strong);
+    --team-color-bg: var(--team-p1-bg);
+  }
+  [data-team-color="p2"] {
+    --team-color: var(--team-p2);
+    --team-color-strong: var(--team-p2-strong);
+    --team-color-bg: var(--team-p2-bg);
+  }
+
+  /*
+   * Player pill (#90): the team-coloured roster row. Reads the
+   * `--team-color*` aliases the parent panel exposes via
+   * `data-team-color`, so the same `.team-pill` paints blue inside a P1
+   * panel and red inside a P2 panel.
+   *
+   * Idle: translucent border, a soft glow keyed to the team colour.
+   * Hover: border snaps to the strong variant, glow intensifies, the
+   * pill lifts 2px. Same recipe Grubby uses on its race-coloured
+   * pills, ported to our palette.
+   *
+   * `color-mix` is used inline so the colour math stays in CSS (no
+   * pre-computed `--*-translucent` variants needed in the token block).
+   */
+  .team-pill {
+    --pill-border: color-mix(in oklch, var(--team-color) 55%, transparent);
+    --pill-glow: color-mix(in oklch, var(--team-color) 14%, transparent);
+    --pill-glow-strong: color-mix(
+      in oklch,
+      var(--team-color-strong) 35%,
+      transparent
+    );
+    border-color: var(--pill-border);
+    background: linear-gradient(135deg, var(--team-color-bg), transparent 70%);
+    box-shadow: 0 0 12px var(--pill-glow);
+    transition:
+      transform 0.2s ease-out,
+      box-shadow 0.2s ease-out,
+      border-color 0.2s ease-out;
+  }
+  .team-pill:hover {
+    transform: translateY(-2px);
+    border-color: var(--team-color-strong);
+    box-shadow: 0 0 22px var(--pill-glow-strong);
+  }
+
+  /*
+   * Player-pill reveal (#90): a brief slide + fade on mount, staggered
+   * via an inline `--reveal-index` set per child. Honours the user's
+   * reduced-motion preference — the rule is gated on
+   * `prefers-reduced-motion: no-preference` so reduced-motion gets the
+   * static layout with no animation at all.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes team-pill-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .team-pill-reveal {
+      animation: team-pill-reveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: calc(var(--reveal-index, 0) * 60ms);
+    }
   }
 
   /*
