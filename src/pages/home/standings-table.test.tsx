@@ -37,7 +37,7 @@ const rows: StandingsRow[] = [
 
 describe("StandingsTable", () => {
   it("shows Position and Ladder column headers", () => {
-    render(<StandingsTable rows={rows} />)
+    render(<StandingsTable rows={rows} tournamentStarted />)
     expect(
       screen.getByRole("columnheader", { name: "Position" })
     ).toBeInTheDocument()
@@ -47,7 +47,7 @@ describe("StandingsTable", () => {
   })
 
   it("numbers rows by tournament position, distinct from ladder rank", () => {
-    render(<StandingsTable rows={rows} />)
+    render(<StandingsTable rows={rows} tournamentStarted />)
     const bodyRows = screen.getAllByRole("row").slice(1) // drop the header row
 
     const positions = bodyRows.map(
@@ -62,7 +62,7 @@ describe("StandingsTable", () => {
   })
 
   it("shows the Games and Recent column headers", () => {
-    render(<StandingsTable rows={rows} />)
+    render(<StandingsTable rows={rows} tournamentStarted />)
     expect(
       screen.getByRole("columnheader", { name: "Games" })
     ).toBeInTheDocument()
@@ -83,6 +83,7 @@ describe("StandingsTable — recent results", () => {
             recentResults: ["win", "loss", "win"],
           }),
         ]}
+        tournamentStarted
       />
     )
     expect(screen.getAllByTitle("Win")).toHaveLength(2)
@@ -93,6 +94,7 @@ describe("StandingsTable — recent results", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", recentResults: [] })]}
+        tournamentStarted
       />
     )
     expect(screen.queryByTitle("Win")).not.toBeInTheDocument()
@@ -105,6 +107,7 @@ describe("StandingsTable — in-match indicator", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", inMatch: true })]}
+        tournamentStarted
       />
     )
     expect(screen.getByText("Live")).toBeInTheDocument()
@@ -114,6 +117,7 @@ describe("StandingsTable — in-match indicator", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", inMatch: false })]}
+        tournamentStarted
       />
     )
     expect(screen.queryByText("Live")).not.toBeInTheDocument()
@@ -125,6 +129,7 @@ describe("StandingsTable — games played", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", gamesPlayed: 14 })]}
+        tournamentStarted
       />
     )
     // Games is the 7th column: Position, Ladder, Player, Rating, Peak,
@@ -136,14 +141,14 @@ describe("StandingsTable — games played", () => {
 
 describe("StandingsTable — podium position chips", () => {
   it("renders position 1 as a filled brand chip", () => {
-    render(<StandingsTable rows={rows} />)
+    render(<StandingsTable rows={rows} tournamentStarted />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     const firstPos = within(bodyRows[0]).getAllByRole("cell")[0]
     expect(firstPos.querySelector("span")).toHaveClass("bg-brand")
   })
 
   it("renders positions 2 and 3 with descending brand-fill intensity", () => {
-    render(<StandingsTable rows={rows} />)
+    render(<StandingsTable rows={rows} tournamentStarted />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     const secondPos = within(bodyRows[1]).getAllByRole("cell")[0]
     const thirdPos = within(bodyRows[2]).getAllByRole("cell")[0]
@@ -156,7 +161,7 @@ describe("StandingsTable — podium position chips", () => {
       ...rows,
       row({ profileId: 4, alias: "Delta", currentRating: 2500, rank: 30 }),
     ]
-    render(<StandingsTable rows={fourRows} />)
+    render(<StandingsTable rows={fourRows} tournamentStarted />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     const fourthPos = within(bodyRows[3]).getAllByRole("cell")[0]
     const span = fourthPos.querySelector("span")
@@ -169,7 +174,7 @@ describe("StandingsTable — podium position chips", () => {
 
 describe("StandingsTable — rank-1 row spotlight", () => {
   it("applies the spotlight class to the leader's row only", () => {
-    render(<StandingsTable rows={rows} />)
+    render(<StandingsTable rows={rows} tournamentStarted />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     expect(bodyRows[0]).toHaveClass("rank-1-spotlight")
     expect(bodyRows[1]).not.toHaveClass("rank-1-spotlight")
@@ -180,7 +185,10 @@ describe("StandingsTable — rank-1 row spotlight", () => {
 describe("StandingsTable — alias link", () => {
   it("links the alias to an aoe2insights search for that alias in a new tab", () => {
     render(
-      <StandingsTable rows={[row({ profileId: 1819870, alias: "Alpha" })]} />
+      <StandingsTable
+        rows={[row({ profileId: 1819870, alias: "Alpha" })]}
+        tournamentStarted
+      />
     )
     const link = screen.getByRole("link", { name: /alpha/i })
     expect(link).toHaveAttribute(
@@ -192,11 +200,52 @@ describe("StandingsTable — alias link", () => {
   })
 })
 
+describe("StandingsTable — pre-tournament column gating", () => {
+  it("hides the Games and Recent column headers when tournamentStarted is false", () => {
+    render(<StandingsTable rows={rows} tournamentStarted={false} />)
+    expect(
+      screen.queryByRole("columnheader", { name: "Games" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("columnheader", { name: "Recent" })
+    ).not.toBeInTheDocument()
+    // The other columns continue to render.
+    expect(
+      screen.getByRole("columnheader", { name: "Rating" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("columnheader", { name: "Activity" })
+    ).toBeInTheDocument()
+  })
+
+  it("shows the Games and Recent column headers when tournamentStarted is true", () => {
+    render(<StandingsTable rows={rows} tournamentStarted />)
+    expect(
+      screen.getByRole("columnheader", { name: "Games" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("columnheader", { name: "Recent" })
+    ).toBeInTheDocument()
+  })
+
+  it("drops the Games + Recent cells from each row when tournamentStarted is false", () => {
+    render(
+      <StandingsTable
+        rows={[row({ profileId: 1, alias: "Alpha", gamesPlayed: 14 })]}
+        tournamentStarted={false}
+      />
+    )
+    // No row should render the games count (would be in a hidden td).
+    expect(screen.queryByText("14")).not.toBeInTheDocument()
+  })
+})
+
 describe("StandingsTable — rating cell", () => {
   it("renders the rating directly on first paint (count-up snaps on mount)", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", currentRating: 1850 })]}
+        tournamentStarted
       />
     )
     expect(screen.getByText("1850")).toBeInTheDocument()
@@ -208,6 +257,7 @@ describe("StandingsTable — country flag", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", country: "ca" })]}
+        tournamentStarted
       />
     )
     expect(screen.getByTitle("CA")).toHaveClass("fi", "fi-ca")
@@ -217,6 +267,7 @@ describe("StandingsTable — country flag", () => {
     const { container } = render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", country: null })]}
+        tournamentStarted
       />
     )
     expect(container.querySelector(".fi")).not.toBeInTheDocument()

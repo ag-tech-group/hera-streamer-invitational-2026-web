@@ -41,6 +41,21 @@ export function HomePage() {
   // renders nothing until a date is set.
   const tournament = useTournament()
 
+  // Has the tournament started? Used to gate the Games + Recent columns,
+  // which the API only populates within the tournament's date window —
+  // pre-tournament they're always zero / empty, so showing them reads as
+  // dead chrome. Null start date counts as "not started".
+  //
+  // `mountedAtMs` is captured once via `useState`'s lazy initializer so
+  // `Date.now()` lives outside the render pass (react-hooks/purity would
+  // flag a direct call). A manual reload is what flips the columns on
+  // when the tournament window opens — no ticking timer needed, the
+  // countdown right next to the table already signals when to refresh.
+  const [mountedAtMs] = useState(() => Date.now())
+  const tournamentStarted = tournament.data?.startDate
+    ? new Date(tournament.data.startDate).getTime() <= mountedAtMs
+    : false
+
   const analytics = useAnalytics()
 
   // Track view-tab switches so we can see which standings (Players vs Teams)
@@ -149,6 +164,7 @@ export function HomePage() {
               isError={standings.isError}
               error={standings.error}
               onRetry={handleRetryStandings}
+              tournamentStarted={tournamentStarted}
             />
           ) : (
             <TeamsSection
@@ -176,15 +192,17 @@ function StandingsSection({
   isError,
   error,
   onRetry,
+  tournamentStarted,
 }: {
   snapshot: StandingsSnapshot | undefined
   isPending: boolean
   isError: boolean
   error: unknown
   onRetry: () => void
+  tournamentStarted: boolean
 }) {
   if (isPending) {
-    return <StandingsTableSkeleton />
+    return <StandingsTableSkeleton tournamentStarted={tournamentStarted} />
   }
 
   if (isError || !snapshot) {
@@ -195,7 +213,12 @@ function StandingsSection({
     return <StandingsEmpty />
   }
 
-  return <StandingsTable rows={snapshot.rows} />
+  return (
+    <StandingsTable
+      rows={snapshot.rows}
+      tournamentStarted={tournamentStarted}
+    />
+  )
 }
 
 /** The teams counterpart of `StandingsSection`, with the same state precedence. */

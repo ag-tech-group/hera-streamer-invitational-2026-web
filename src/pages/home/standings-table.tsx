@@ -32,8 +32,20 @@ const SKELETON_ROW_COUNT = 6
  * The polished standings table. A pure presentation component: it renders the
  * rows it is handed and owns no fetching or query state — `HomePage` decides
  * when a populated table is the right thing to show (vs. loading/empty/error).
+ *
+ * `tournamentStarted` gates the Games + Recent columns: before the tournament
+ * begins, those columns are always zero / empty (the API scopes both to the
+ * tournament's date window), so they read as dead chrome. `HomePage` derives
+ * the flag from `tournament.startDate`; the column treatment is reversible
+ * the moment the start date passes.
  */
-export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
+export function StandingsTable({
+  rows,
+  tournamentStarted,
+}: {
+  rows: StandingsRow[]
+  tournamentStarted: boolean
+}) {
   const { t } = useTranslation()
   // One reference instant for the whole render, so every "time ago" in the
   // Activity column is measured against the same clock.
@@ -60,7 +72,13 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
     <TableShell
       caption={t("standings.caption")}
       bodyRef={containerRef}
-      headerRow={<StandingsHeaderRow sortState={sortState} onSort={sortBy} />}
+      headerRow={
+        <StandingsHeaderRow
+          sortState={sortState}
+          onSort={sortBy}
+          tournamentStarted={tournamentStarted}
+        />
+      }
     >
       {sortedRows.map((row) => {
         const position = positionMap.get(row.profileId) ?? 0
@@ -117,15 +135,19 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             <FlashCell value={row.streak} className="px-4 py-3 text-center">
               <StreakCell streak={row.streak} />
             </FlashCell>
-            <FlashCell
-              value={row.gamesPlayed}
-              className="text-muted-foreground px-4 py-3 text-right tabular-nums"
-            >
-              {row.gamesPlayed}
-            </FlashCell>
-            <td className="px-4 py-3">
-              <RecentResultsCell results={row.recentResults} />
-            </td>
+            {tournamentStarted && (
+              <>
+                <FlashCell
+                  value={row.gamesPlayed}
+                  className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+                >
+                  {row.gamesPlayed}
+                </FlashCell>
+                <td className="px-4 py-3">
+                  <RecentResultsCell results={row.recentResults} />
+                </td>
+              </>
+            )}
             <td className="px-4 py-3">
               <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
             </td>
@@ -201,9 +223,11 @@ function getSortValue(row: StandingsRow, key: string): SortableValue {
 function StandingsHeaderRow({
   sortState,
   onSort,
+  tournamentStarted,
 }: {
   sortState?: SortState | null
   onSort?: (key: string, defaultDirection: SortDirection) => void
+  tournamentStarted: boolean
 }) {
   const { t } = useTranslation()
   return (
@@ -247,15 +271,19 @@ function StandingsHeaderRow({
         sortState={sortState}
         onSort={onSort}
       />
-      <SortableTh
-        label={t("standings.headers.games")}
-        align="right"
-        sortKey="gamesPlayed"
-        defaultDirection="desc"
-        sortState={sortState}
-        onSort={onSort}
-      />
-      <SortableTh label={t("standings.headers.recent")} />
+      {tournamentStarted && (
+        <>
+          <SortableTh
+            label={t("standings.headers.games")}
+            align="right"
+            sortKey="gamesPlayed"
+            defaultDirection="desc"
+            sortState={sortState}
+            onSort={onSort}
+          />
+          <SortableTh label={t("standings.headers.recent")} />
+        </>
+      )}
       <SortableTh
         label={t("standings.headers.activity")}
         sortKey="lastMatchAt"
@@ -270,14 +298,19 @@ function StandingsHeaderRow({
 /**
  * Loading placeholder for the standings table. Renders through the same
  * `TableShell` and column count as the real table, so data arriving causes no
- * layout shift.
+ * layout shift. Takes the same `tournamentStarted` gate as the real table so
+ * the skeleton's column count matches what's about to appear.
  */
-export function StandingsTableSkeleton() {
+export function StandingsTableSkeleton({
+  tournamentStarted,
+}: {
+  tournamentStarted: boolean
+}) {
   const { t } = useTranslation()
   return (
     <TableShell
       caption={t("standings.captionLoading")}
-      headerRow={<StandingsHeaderRow />}
+      headerRow={<StandingsHeaderRow tournamentStarted={tournamentStarted} />}
     >
       {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
         <tr key={index} className="border-b last:border-b-0">
@@ -312,12 +345,16 @@ export function StandingsTableSkeleton() {
           <td className="px-4 py-3">
             <Skeleton className="mx-auto h-5 w-10" />
           </td>
-          <td className="px-4 py-3">
-            <Skeleton className="ml-auto h-4 w-8" />
-          </td>
-          <td className="px-4 py-3">
-            <Skeleton className="h-4 w-20" />
-          </td>
+          {tournamentStarted && (
+            <>
+              <td className="px-4 py-3">
+                <Skeleton className="ml-auto h-4 w-8" />
+              </td>
+              <td className="px-4 py-3">
+                <Skeleton className="h-4 w-20" />
+              </td>
+            </>
+          )}
           <td className="px-4 py-3">
             <Skeleton className="h-5 w-24 rounded-full" />
           </td>
