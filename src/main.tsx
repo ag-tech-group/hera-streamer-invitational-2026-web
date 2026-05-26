@@ -16,6 +16,10 @@ import { AnalyticsProvider } from "./lib/analytics"
 import { getUserMessage, parseApiError } from "./lib/api-errors"
 import { AuthProvider } from "./lib/auth"
 import { FeatureFlagProvider } from "./lib/feature-flags"
+// Side-effect import: bootstraps i18next before any component renders.
+// Components use the `useTranslation` hook (or `i18n.t` outside the
+// tree) once this has run.
+import "./lib/i18n"
 import { initPostHog, posthogBackend } from "./lib/posthog"
 import { initSentry } from "./lib/sentry"
 import { routeTree } from "./routeTree.gen"

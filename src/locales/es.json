@@ -1,0 +1,224 @@
+{
+  "language": {
+    "label": "Idioma",
+    "en": "English",
+    "es": "Español"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "auto": "Auto"
+  },
+  "nav": {
+    "brandAriaLabel": "Clasificación en vivo",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "profile": "Perfil",
+    "admin": "Admin",
+    "accountMenu": "Menú de cuenta"
+  },
+  "home": {
+    "title": "Clasificación en vivo",
+    "subtitleProduct": "Age of Empires 2: Definitive Edition",
+    "subtitleSuffix": "ranking en vivo",
+    "tabs": {
+      "players": "Jugadores",
+      "teams": "Equipos"
+    },
+    "viewTabsAria": "Vista de clasificación",
+    "lastUpdated": "Actualizado {{time}}",
+    "tournamentStartsIn": "El torneo comienza en",
+    "grandFinalsStartIn": "La gran final comienza en",
+    "noStandings": {
+      "title": "Aún no hay clasificación",
+      "body": "Los jugadores aparecerán aquí cuando se llene el ranking del torneo."
+    },
+    "noTeams": {
+      "title": "Aún no hay equipos",
+      "body": "Los equipos aparecerán aquí cuando estén configurados para este torneo."
+    },
+    "loadErrorStandings": {
+      "title": "No se pudo cargar la clasificación",
+      "body": "Algo salió mal al consultar el ranking."
+    },
+    "loadErrorTeams": {
+      "title": "No se pudieron cargar los equipos",
+      "body": "Algo salió mal al consultar la clasificación de equipos."
+    }
+  },
+  "standings": {
+    "caption": "Clasificación del torneo en vivo",
+    "captionLoading": "Cargando clasificación",
+    "headers": {
+      "position": "Posición",
+      "ladder": "Ladder",
+      "player": "Jugador",
+      "rating": "Puntos",
+      "peak": "Máximo",
+      "streak": "Racha",
+      "games": "Partidas",
+      "recent": "Reciente",
+      "activity": "Actividad"
+    },
+    "live": "En vivo",
+    "liveAriaLabel": "En partida en vivo",
+    "active": "Activo",
+    "idle": "Inactivo",
+    "recentAriaLabel": "Resultados recientes, más recientes primero: {{results}}",
+    "win": "Victoria",
+    "loss": "Derrota",
+    "viewOnAoe2insights": "Ver a {{alias}} en aoe2insights"
+  },
+  "teams": {
+    "caption": "Clasificación de equipos del torneo",
+    "captionLoading": "Cargando clasificación de equipos",
+    "headers": {
+      "team": "Equipo",
+      "combined": "Combinado",
+      "average": "Prom",
+      "members": "Integrantes"
+    }
+  },
+  "admin": {
+    "title": "Admin",
+    "backToStandings": "Volver a la clasificación",
+    "sections": {
+      "tournamentDetails": "Detalles del torneo",
+      "owners": "Propietarios",
+      "players": "Jugadores",
+      "teams": "Equipos"
+    },
+    "tournament": {
+      "nameLabel": "Nombre",
+      "startDate": "Fecha de inicio",
+      "grandFinalsDate": "Fecha de la gran final",
+      "save": "Guardar cambios",
+      "saving": "Guardando…",
+      "successToast": "Torneo actualizado.",
+      "loadError": "No se pudieron cargar los detalles del torneo."
+    },
+    "owners": {
+      "grantLabel": "Otorgar acceso",
+      "addPlaceholder": "Buscar por nombre o correo",
+      "addAction": "Otorgar",
+      "addingAction": "Otorgando…",
+      "grantedOn": "Otorgado {{date}}",
+      "removeAria": "Revocar a {{name}}",
+      "removeTitle": "¿Revocar acceso?",
+      "removeDescription": "{{name}} perderá acceso de administrador a este torneo.",
+      "removeConfirm": "Revocar",
+      "grantSuccess": "Acceso otorgado.",
+      "revokeSuccess": "Acceso revocado.",
+      "noOwners": "Aún no hay propietarios.",
+      "loadError": "No se pudieron cargar los propietarios — requiere iniciar sesión."
+    },
+    "players": {
+      "addLabel": "Añadir jugador",
+      "addPlaceholder": "profile_id de aoe2",
+      "addAction": "Añadir",
+      "addingAction": "Añadiendo…",
+      "removeAria": "Quitar a {{name}}",
+      "removeTitle": "¿Quitar a {{name}}?",
+      "removeDescription": "Esto quita al jugador del plantel del torneo. Su historial y puntuación permanecen intactos en la fuente.",
+      "removeConfirm": "Quitar",
+      "addSuccess": "Jugador añadido.",
+      "removeSuccess": "Jugador quitado.",
+      "noPlayers": "Aún no hay jugadores.",
+      "loadError": "No se pudo cargar el plantel.",
+      "profileHint": "Encuentra el <code>profile_id</code> del jugador en su URL de <link>aoe2insights</link> — p. ej. <code>aoe2insights.com/user/1819870</code> → <code>1819870</code>."
+    },
+    "teams": {
+      "createLabel": "Crear equipo",
+      "initialsPlaceholder": "Iniciales",
+      "namePlaceholder": "Nombre del equipo",
+      "createAction": "Crear",
+      "creatingAction": "Creando…",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "cancel": "Cancelar",
+      "editAria": "Editar {{name}}",
+      "deleteAria": "Eliminar {{name}}",
+      "deleteTitle": "¿Eliminar el equipo \"{{name}}\"?",
+      "deleteDescription": "Se elimina el equipo y todos sus integrantes. Los jugadores permanecen en el plantel del torneo.",
+      "deleteConfirm": "Eliminar equipo",
+      "addMember": "Añadir integrante",
+      "addMemberPlaceholder": "Elige un jugador",
+      "addMemberNone": "No hay jugadores disponibles",
+      "addMemberAction": "Añadir",
+      "addMemberAdding": "Añadiendo…",
+      "memberOnTeam": "(en {{name}})",
+      "noMembers": "Aún no hay integrantes.",
+      "removeMemberAria": "Quitar a {{name}} del equipo",
+      "removeMemberTitle": "¿Quitar a {{name}} de este equipo?",
+      "removeMemberDescription": "El jugador permanece en el plantel del torneo.",
+      "removeMemberConfirm": "Quitar",
+      "moveTitle": "¿Mover al jugador a este equipo?",
+      "moveDescription": "{{name}} está actualmente en {{from}}.",
+      "moveConfirm": "Mover jugador",
+      "noTeams": "Aún no hay equipos.",
+      "loadError": "No se pudieron cargar los equipos.",
+      "createSuccess": "Equipo creado.",
+      "updateSuccess": "Equipo actualizado.",
+      "deleteSuccess": "Equipo eliminado."
+    }
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "loading": "Cargando…",
+    "error": "Error",
+    "tryAgain": "Reintentar",
+    "reference": "Referencia: {{id}}",
+    "goHome": "Ir al inicio"
+  },
+  "userSearch": {
+    "placeholder": "Buscar por nombre o correo",
+    "clear": "Quitar usuario seleccionado",
+    "noMatches": "Ningún usuario coincide con la búsqueda.",
+    "searching": "Buscando…"
+  },
+  "countdown": {
+    "days": "días",
+    "hours": "hrs",
+    "minutes": "min",
+    "seconds": "seg"
+  },
+  "hostLinks": {
+    "defaultLabel": "Presentado por"
+  },
+  "notFound": {
+    "eyebrow": "Página no encontrada",
+    "code": "404",
+    "body": "Lo sentimos, no pudimos encontrar la página que buscas.",
+    "homeAction": "Volver al inicio"
+  },
+  "errorBoundary": {
+    "eyebrow": "Algo salió mal",
+    "heading": "Error",
+    "body": "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "home": "Ir al inicio"
+  },
+  "errors": {
+    "default": "Ocurrió un error inesperado.",
+    "400": "Solicitud no válida. Revisa los datos ingresados.",
+    "401": "Tu sesión ha expirado. Inicia sesión de nuevo.",
+    "403": "No tienes permiso para hacer eso.",
+    "404": "El recurso solicitado no fue encontrado.",
+    "409": "Hay un conflicto con un recurso existente.",
+    "422": "Revisa los datos ingresados e inténtalo de nuevo.",
+    "429": "Demasiadas solicitudes. Espera un momento.",
+    "500": "Algo salió mal de nuestro lado. Inténtalo más tarde.",
+    "idempotencyKeyReused": "Algo cambió — inténtalo de nuevo.",
+    "tournamentNotFound": "Torneo no encontrado.",
+    "sessionExpired": "Tu sesión expiró — inicia sesión de nuevo para continuar.",
+    "signInAction": "Iniciar sesión"
+  },
+  "footer": {
+    "criticalbitProject": "Un proyecto de <link>criticalbit.gg</link>.",
+    "microsoftDisclaimer": "Age of Empires II © Microsoft Corporation. Este sitio fue creado bajo las <link>Reglas de Uso de Contenido de Juegos</link> de Microsoft usando recursos de Age of Empires II y no está respaldado ni afiliado con Microsoft."
+  }
+}

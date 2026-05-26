@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 
+import i18n from "@/lib/i18n"
+
 /**
  * UI-facing error shape, decoupled from which response envelope the backend
  * happened to use. See issue #70 and the backend rollout in
@@ -47,35 +49,38 @@ interface LegacyValidationBody {
 }
 
 /**
- * Generic copy keyed by HTTP status, used as a fallback when no body can be
- * parsed (network failure, non-JSON response) or as the message for the
- * fallback `unknown_error` branch.
+ * Translation keys for the per-HTTP-status fallback copy. Used when no body
+ * can be parsed (network failure, non-JSON response) or as the message for
+ * the fallback `unknown_error` branch. Each key resolves through `i18n.t`
+ * at call time, so a language change is picked up by the next toast or
+ * `useNormalizedError` consumer without any cache to invalidate.
  */
-const STATUS_MESSAGES: Record<number, string> = {
-  400: "Invalid request. Please check your input.",
-  401: "Your session has expired. Please sign in again.",
-  403: "You don't have permission to do that.",
-  404: "The requested resource was not found.",
-  409: "This conflicts with an existing resource.",
-  422: "Please check your input and try again.",
-  429: "Too many requests. Please wait a moment.",
-  500: "Something went wrong on our end. Please try again later.",
+const STATUS_MESSAGE_KEYS: Record<number, string> = {
+  400: "errors.400",
+  401: "errors.401",
+  403: "errors.403",
+  404: "errors.404",
+  409: "errors.409",
+  422: "errors.422",
+  429: "errors.429",
+  500: "errors.500",
 }
 
 /**
- * User-facing copy keyed on the new envelope's `error_code`. Codes not listed
- * here fall back to the envelope's own `message`. Add an entry when a code
- * deserves a friendlier or more actionable message than the backend default.
+ * Translation keys keyed on the new envelope's `error_code`. Codes not
+ * listed here fall back to the envelope's own `message`. Add an entry
+ * when a code deserves a friendlier or more actionable message than the
+ * backend default.
  */
-const ERROR_CODE_MESSAGES: Record<string, string> = {
+const ERROR_CODE_MESSAGE_KEYS: Record<string, string> = {
   // The form changed mid-flight relative to a previous submit that reused
   // the same key. `useIdempotencyKey().resetOnReusedKey` advances the key
   // for us — the user just needs to submit again.
-  idempotency_key_reused: "Something changed — please try again.",
-  tournament_not_found: "Tournament not found.",
+  idempotency_key_reused: "errors.idempotencyKeyReused",
+  tournament_not_found: "errors.tournamentNotFound",
 }
 
-const DEFAULT_MESSAGE = "An unexpected error occurred."
+const DEFAULT_MESSAGE_KEY = "errors.default"
 
 /**
  * Parse an error thrown by ky / fetch into a `NormalizedError`. Recognises
@@ -92,7 +97,7 @@ const DEFAULT_MESSAGE = "An unexpected error occurred."
 export async function parseApiError(error: unknown): Promise<NormalizedError> {
   const response = (error as { response?: Response })?.response
   if (!response) {
-    return { errorCode: "unknown_error", message: DEFAULT_MESSAGE }
+    return { errorCode: "unknown_error", message: i18n.t(DEFAULT_MESSAGE_KEY) }
   }
 
   // X-Request-ID is the response-header counterpart of the envelope's
@@ -106,7 +111,7 @@ export async function parseApiError(error: unknown): Promise<NormalizedError> {
   } catch {
     return {
       errorCode: "unknown_error",
-      message: STATUS_MESSAGES[response.status] ?? DEFAULT_MESSAGE,
+      message: statusFallbackMessage(response.status),
       requestId: headerRequestId,
     }
   }
@@ -139,9 +144,14 @@ export async function parseApiError(error: unknown): Promise<NormalizedError> {
 
   return {
     errorCode: "unknown_error",
-    message: STATUS_MESSAGES[response.status] ?? DEFAULT_MESSAGE,
+    message: statusFallbackMessage(response.status),
     requestId: headerRequestId,
   }
+}
+
+function statusFallbackMessage(status: number): string {
+  const key = STATUS_MESSAGE_KEYS[status]
+  return key ? i18n.t(key) : i18n.t(DEFAULT_MESSAGE_KEY)
 }
 
 /**
@@ -156,13 +166,14 @@ export function getUserMessage(
   error: NormalizedError,
   fallback?: string
 ): string {
+  const curatedKey = ERROR_CODE_MESSAGE_KEYS[error.errorCode]
   // `||` (not `??`) so an empty `message` falls through to the fallback
   // instead of being treated as a valid display string.
   return (
-    ERROR_CODE_MESSAGES[error.errorCode] ||
+    (curatedKey ? i18n.t(curatedKey) : undefined) ||
     error.message ||
     fallback ||
-    DEFAULT_MESSAGE
+    i18n.t(DEFAULT_MESSAGE_KEY)
   )
 }
 

@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
+import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import {
@@ -55,16 +56,23 @@ function PlayersList({
   error: boolean
   players: PlayerRead[]
 }) {
+  const { t } = useTranslation()
   if (loading) {
-    return <p className="text-muted-foreground text-sm">Loading…</p>
+    return (
+      <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
+    )
   }
   if (error) {
     return (
-      <p className="text-destructive text-sm">Couldn&apos;t load roster.</p>
+      <p className="text-destructive text-sm">{t("admin.players.loadError")}</p>
     )
   }
   if (players.length === 0) {
-    return <p className="text-muted-foreground text-sm">No players yet.</p>
+    return (
+      <p className="text-muted-foreground text-sm">
+        {t("admin.players.noPlayers")}
+      </p>
+    )
   }
   return (
     <ul className="flex flex-col gap-2">
@@ -76,6 +84,7 @@ function PlayersList({
 }
 
 function PlayerRow({ player }: { player: PlayerRead }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
 
@@ -93,7 +102,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
                 activeTournament.apiTournamentSlug
               ),
           })
-          toast.success("Player removed.")
+          toast.success(t("admin.players.removeSuccess"))
         },
         onError: idempotencyKey.resetOnReusedKey,
       },
@@ -115,14 +124,14 @@ function PlayerRow({ player }: { player: PlayerRead }) {
             variant="outline"
             size="sm"
             disabled={mutation.isPending}
-            aria-label={`Remove ${player.alias}`}
+            aria-label={t("admin.players.removeAria", { name: player.alias })}
           >
             <Trash2 className="size-4" aria-hidden />
           </Button>
         }
-        title={`Remove ${player.alias}?`}
-        description="This removes the player from the tournament roster. Their match history and ratings stay intact upstream."
-        confirmLabel="Remove"
+        title={t("admin.players.removeTitle", { name: player.alias })}
+        description={t("admin.players.removeDescription")}
+        confirmLabel={t("admin.players.removeConfirm")}
         destructive
         onConfirm={() =>
           mutation.mutate({
@@ -136,6 +145,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
 }
 
 function AddPlayerForm() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [profileId, setProfileId] = useState("")
@@ -153,7 +163,7 @@ function AddPlayerForm() {
             activeTournament.apiTournamentSlug
           ),
         })
-        toast.success("Player added.")
+        toast.success(t("admin.players.addSuccess"))
       },
       onError: idempotencyKey.resetOnReusedKey,
     },
@@ -170,7 +180,9 @@ function AddPlayerForm() {
       }}
       className="border-border/60 flex flex-col gap-2 border-t pt-4"
     >
-      <Label htmlFor="add-player-profile-id">Add player</Label>
+      <Label htmlFor="add-player-profile-id">
+        {t("admin.players.addLabel")}
+      </Label>
       <div className="flex gap-2">
         <Input
           id="add-player-profile-id"
@@ -178,12 +190,14 @@ function AddPlayerForm() {
           inputMode="numeric"
           value={profileId}
           onChange={(event) => setProfileId(event.target.value)}
-          placeholder="aoe2 profile_id"
+          placeholder={t("admin.players.addPlaceholder")}
           min={1}
           required
         />
         <Button type="submit" disabled={mutation.isPending || !profileId}>
-          {mutation.isPending ? "Adding…" : "Add"}
+          {mutation.isPending
+            ? t("admin.players.addingAction")
+            : t("admin.players.addAction")}
         </Button>
       </div>
       <ProfileIdHint />
@@ -199,19 +213,20 @@ function AddPlayerForm() {
 export function ProfileIdHint() {
   return (
     <p className="text-muted-foreground text-xs">
-      Find a player&apos;s <code className="font-mono">profile_id</code> in
-      their{" "}
-      <a
-        href="https://www.aoe2insights.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:text-foreground underline underline-offset-2"
-      >
-        aoe2insights
-      </a>{" "}
-      URL — e.g.{" "}
-      <code className="font-mono">aoe2insights.com/user/1819870</code> →{" "}
-      <code className="font-mono">1819870</code>.
+      <Trans
+        i18nKey="admin.players.profileHint"
+        components={{
+          code: <code className="font-mono" />,
+          link: (
+            <a
+              href="https://www.aoe2insights.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground underline underline-offset-2"
+            />
+          ),
+        }}
+      />
     </p>
   )
 }

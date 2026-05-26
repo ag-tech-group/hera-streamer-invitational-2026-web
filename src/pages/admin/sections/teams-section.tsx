@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Pencil, Trash2 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { useListPlayersV1TournamentsTournamentSlugPlayersGet } from "@/api/generated/hooks/players/players"
@@ -47,6 +48,7 @@ import type { TeamMember, TeamStandingsRow } from "@/types"
  * public view picks up the change on its next render.
  */
 export function TeamsSection() {
+  const { t } = useTranslation()
   const teams = useTeamStandings(true)
   const playersQuery = useListPlayersV1TournamentsTournamentSlugPlayersGet(
     activeTournament.apiTournamentSlug
@@ -78,11 +80,13 @@ export function TeamsSection() {
   return (
     <div className="flex flex-col gap-4">
       {teams.isPending ? (
-        <p className="text-muted-foreground text-sm">Loading…</p>
+        <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
       ) : teams.isError ? (
-        <p className="text-destructive text-sm">Couldn&apos;t load teams.</p>
+        <p className="text-destructive text-sm">{t("admin.teams.loadError")}</p>
       ) : rows.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No teams yet.</p>
+        <p className="text-muted-foreground text-sm">
+          {t("admin.teams.noTeams")}
+        </p>
       ) : (
         <ul className="flex flex-col gap-3">
           {rows.map((team) => (
@@ -118,6 +122,7 @@ function TeamItem({
   allPlayers: PlayerRead[]
   playerTeamMap: PlayerTeamMap
 }) {
+  const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
 
   return (
@@ -138,7 +143,7 @@ function TeamItem({
               variant="outline"
               size="sm"
               onClick={() => setEditing(true)}
-              aria-label={`Edit ${team.name}`}
+              aria-label={t("admin.teams.editAria", { name: team.name })}
             >
               <Pencil className="size-4" aria-hidden />
             </Button>
@@ -164,6 +169,7 @@ function EditTeamForm({
   team: TeamStandingsRow
   onDone: () => void
 }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [name, setName] = useState(team.name)
@@ -175,7 +181,7 @@ function EditTeamForm({
       onSuccess: () => {
         idempotencyKey.reset()
         void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
-        toast.success("Team updated.")
+        toast.success(t("admin.teams.updateSuccess"))
         onDone()
       },
       onError: idempotencyKey.resetOnReusedKey,
@@ -201,22 +207,22 @@ function EditTeamForm({
           maxLength={8}
           required
           className="w-24"
-          aria-label="Initials"
+          aria-label={t("admin.teams.initialsPlaceholder")}
         />
         <Input
           value={name}
           onChange={(event) => setName(event.target.value)}
           maxLength={200}
           required
-          aria-label="Team name"
+          aria-label={t("admin.teams.namePlaceholder")}
         />
       </div>
       <div className="flex items-center justify-end gap-2">
         <Button type="button" variant="outline" size="sm" onClick={onDone}>
-          Cancel
+          {t("admin.teams.cancel")}
         </Button>
         <Button type="submit" size="sm" disabled={mutation.isPending}>
-          {mutation.isPending ? "Saving…" : "Save"}
+          {mutation.isPending ? t("admin.teams.saving") : t("admin.teams.save")}
         </Button>
       </div>
     </form>
@@ -224,6 +230,7 @@ function EditTeamForm({
 }
 
 function DeleteTeamButton({ team }: { team: TeamStandingsRow }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
 
@@ -233,7 +240,7 @@ function DeleteTeamButton({ team }: { team: TeamStandingsRow }) {
       onSuccess: () => {
         idempotencyKey.reset()
         void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
-        toast.success("Team deleted.")
+        toast.success(t("admin.teams.deleteSuccess"))
       },
       onError: idempotencyKey.resetOnReusedKey,
     },
@@ -247,14 +254,14 @@ function DeleteTeamButton({ team }: { team: TeamStandingsRow }) {
           variant="outline"
           size="sm"
           disabled={mutation.isPending}
-          aria-label={`Delete ${team.name}`}
+          aria-label={t("admin.teams.deleteAria", { name: team.name })}
         >
           <Trash2 className="size-4" aria-hidden />
         </Button>
       }
-      title={`Delete team "${team.name}"?`}
-      description="The team and all its members are removed. Players themselves stay on the tournament roster."
-      confirmLabel="Delete team"
+      title={t("admin.teams.deleteTitle", { name: team.name })}
+      description={t("admin.teams.deleteDescription")}
+      confirmLabel={t("admin.teams.deleteConfirm")}
       destructive
       onConfirm={() =>
         mutation.mutate({
@@ -277,10 +284,13 @@ function MembersBlock({
   allPlayers: PlayerRead[]
   playerTeamMap: PlayerTeamMap
 }) {
+  const { t } = useTranslation()
   return (
     <div className="border-border/40 flex flex-col gap-2 border-t pt-3">
       {members.length === 0 ? (
-        <p className="text-muted-foreground text-xs">No members yet.</p>
+        <p className="text-muted-foreground text-xs">
+          {t("admin.teams.noMembers")}
+        </p>
       ) : (
         <ul className="flex flex-wrap gap-1.5">
           {members.map((member) => (
@@ -309,6 +319,7 @@ function MemberChip({
   teamId: number
   member: TeamMember
 }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
 
@@ -334,7 +345,9 @@ function MemberChip({
             type="button"
             disabled={mutation.isPending}
             className="bg-muted/40 hover:bg-destructive/20 hover:text-destructive group inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs transition-colors disabled:opacity-50"
-            aria-label={`Remove ${member.alias} from team`}
+            aria-label={t("admin.teams.removeMemberAria", {
+              name: member.alias,
+            })}
           >
             <span>{member.alias}</span>
             <Trash2
@@ -343,9 +356,9 @@ function MemberChip({
             />
           </button>
         }
-        title={`Remove ${member.alias} from this team?`}
-        description="The player stays on the tournament roster."
-        confirmLabel="Remove"
+        title={t("admin.teams.removeMemberTitle", { name: member.alias })}
+        description={t("admin.teams.removeMemberDescription")}
+        confirmLabel={t("admin.teams.removeMemberConfirm")}
         destructive
         onConfirm={() =>
           mutation.mutate({
@@ -383,6 +396,7 @@ function AddMemberForm({
   allPlayers: PlayerRead[]
   playerTeamMap: PlayerTeamMap
 }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [selectedId, setSelectedId] = useState<string>("")
@@ -448,7 +462,7 @@ function AddMemberForm({
           htmlFor={`add-member-${teamId}`}
           className="text-muted-foreground text-xs"
         >
-          Add member
+          {t("admin.teams.addMember")}
         </Label>
         <div className="flex gap-2">
           <Select value={selectedId} onValueChange={setSelectedId}>
@@ -461,8 +475,8 @@ function AddMemberForm({
               <SelectValue
                 placeholder={
                   options.length === 0
-                    ? "No players available"
-                    : "Pick a player"
+                    ? t("admin.teams.addMemberNone")
+                    : t("admin.teams.addMemberPlaceholder")
                 }
               />
             </SelectTrigger>
@@ -477,7 +491,9 @@ function AddMemberForm({
                     <span>{player.alias}</span>
                     {existing ? (
                       <span className="text-muted-foreground ml-2 text-xs">
-                        (on {existing.teamName})
+                        {t("admin.teams.memberOnTeam", {
+                          name: existing.teamName,
+                        })}
                       </span>
                     ) : null}
                   </SelectItem>
@@ -490,7 +506,9 @@ function AddMemberForm({
             size="sm"
             disabled={mutation.isPending || !selectedId}
           >
-            {mutation.isPending ? "Adding…" : "Add"}
+            {mutation.isPending
+              ? t("admin.teams.addMemberAdding")
+              : t("admin.teams.addMemberAction")}
           </Button>
         </div>
       </form>
@@ -509,21 +527,24 @@ function AddMemberForm({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Move player to this team?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.teams.moveTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
               {pendingMove
-                ? `${pendingMove.alias} is currently on ${pendingMove.fromTeamName}.`
+                ? t("admin.teams.moveDescription", {
+                    name: pendingMove.alias,
+                    from: pendingMove.fromTeamName,
+                  })
                 : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (pendingMove) submit(pendingMove.profileId)
               }}
             >
-              Move player
+              {t("admin.teams.moveConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -533,6 +554,7 @@ function AddMemberForm({
 }
 
 function CreateTeamForm() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [name, setName] = useState("")
@@ -546,7 +568,7 @@ function CreateTeamForm() {
         setName("")
         setInitials("")
         void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
-        toast.success("Team created.")
+        toast.success(t("admin.teams.createSuccess"))
       },
       onError: idempotencyKey.resetOnReusedKey,
     },
@@ -563,7 +585,7 @@ function CreateTeamForm() {
       }}
       className="border-border/60 flex flex-col gap-2 border-t pt-4"
     >
-      <Label>Create team</Label>
+      <Label>{t("admin.teams.createLabel")}</Label>
       {/*
        * Stack the inputs + submit vertically on small viewports — the
        * initials, team name, and submit triplet can't share one row
@@ -573,25 +595,27 @@ function CreateTeamForm() {
         <Input
           value={initials}
           onChange={(event) => setInitials(event.target.value)}
-          placeholder="Initials"
+          placeholder={t("admin.teams.initialsPlaceholder")}
           maxLength={8}
           required
           className="sm:w-24"
-          aria-label="Initials"
+          aria-label={t("admin.teams.initialsPlaceholder")}
         />
         <Input
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Team name"
+          placeholder={t("admin.teams.namePlaceholder")}
           maxLength={200}
           required
-          aria-label="Team name"
+          aria-label={t("admin.teams.namePlaceholder")}
         />
         <Button
           type="submit"
           disabled={mutation.isPending || !name || !initials}
         >
-          {mutation.isPending ? "Creating…" : "Create"}
+          {mutation.isPending
+            ? t("admin.teams.creatingAction")
+            : t("admin.teams.createAction")}
         </Button>
       </div>
     </form>

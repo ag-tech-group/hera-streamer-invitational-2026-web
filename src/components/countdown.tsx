@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 
@@ -31,6 +32,7 @@ export function Countdown({
   variant?: Variant
   className?: string
 }) {
+  const { t } = useTranslation()
   const remainingMs = useTickingRemaining(target)
   // `target === null` is redundant at runtime (if remainingMs is null, target
   // was null) but narrows the type so `target` can be passed to the formatter
@@ -74,28 +76,28 @@ export function Countdown({
       >
         <Segment
           value={days}
-          unit="days"
+          unit={t("countdown.days")}
           variant={variant}
           highlighted={highlightIndex === 0}
         />
         <Separator variant={variant} />
         <Segment
           value={hours}
-          unit="hrs"
+          unit={t("countdown.hours")}
           variant={variant}
           highlighted={highlightIndex === 1}
         />
         <Separator variant={variant} />
         <Segment
           value={minutes}
-          unit="min"
+          unit={t("countdown.minutes")}
           variant={variant}
           highlighted={highlightIndex === 2}
         />
         <Separator variant={variant} />
         <Segment
           value={seconds}
-          unit="sec"
+          unit={t("countdown.seconds")}
           variant={variant}
           highlighted={highlightIndex === 3}
         />
@@ -189,6 +191,9 @@ function useTickingRemaining(target: string | null): number | null {
  * countdown reads as a concrete moment, not just a duration.
  */
 function formatTargetDateTime(iso: string): string {
+  // `undefined` locale → defers to the browser's resolved locale, so the
+  // formatted date and timezone abbreviation follow whichever language the
+  // user has selected via the navbar (i18next syncs `document.documentElement.lang`).
   return new Intl.DateTimeFormat(undefined, {
     month: "long",
     day: "numeric",

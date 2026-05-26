@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { formatTimeAgo } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -22,6 +23,7 @@ export function LastUpdatedBadge({
 }: {
   lastPolledAt: string | null
 }) {
+  const { t } = useTranslation()
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
@@ -51,7 +53,9 @@ export function LastUpdatedBadge({
           )}
         />
       </span>
-      Updated {formatTimeAgo(lastPolledAt, new Date(now))}
+      {t("home.lastUpdated", {
+        time: formatTimeAgo(lastPolledAt, new Date(now)),
+      })}
     </span>
   )
 }

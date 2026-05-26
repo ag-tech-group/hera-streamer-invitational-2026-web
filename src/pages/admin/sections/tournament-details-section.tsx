@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { useUpdateTournamentV1TournamentsTournamentSlugPatch } from "@/api/generated/hooks/tournaments/tournaments"
@@ -25,16 +26,19 @@ import type { TournamentInfo } from "@/types"
  * are passed as `null` to clear the corresponding field.
  */
 export function TournamentDetailsSection() {
+  const { t } = useTranslation()
   const tournament = useTournament()
 
   if (tournament.isPending) {
-    return <p className="text-muted-foreground text-sm">Loading…</p>
+    return (
+      <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
+    )
   }
 
   if (tournament.isError || !tournament.data) {
     return (
       <p className="text-destructive text-sm">
-        Couldn&apos;t load tournament details.
+        {t("admin.tournament.loadError")}
       </p>
     )
   }
@@ -51,6 +55,7 @@ function TournamentDetailsForm({
 }: {
   initialData: TournamentInfo
 }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [form, setForm] = useState<FormState>(() => toFormState(initialData))
@@ -75,7 +80,7 @@ function TournamentDetailsForm({
             activeTournament.apiTournamentSlug,
           ],
         })
-        toast.success("Tournament updated.")
+        toast.success(t("admin.tournament.successToast"))
       },
       onError: idempotencyKey.resetOnReusedKey,
     },
@@ -101,21 +106,21 @@ function TournamentDetailsForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
           id="tournament-name"
-          label="Name"
+          label={t("admin.tournament.nameLabel")}
           value={form.name}
           onChange={(v) => setForm({ ...form, name: v })}
           className="sm:col-span-2"
         />
         <Field
           id="tournament-start"
-          label="Start date"
+          label={t("admin.tournament.startDate")}
           type="datetime-local"
           value={form.startDate}
           onChange={(v) => setForm({ ...form, startDate: v })}
         />
         <Field
           id="tournament-finals"
-          label="Grand finals date"
+          label={t("admin.tournament.grandFinalsDate")}
           type="datetime-local"
           value={form.grandFinalsDate}
           onChange={(v) => setForm({ ...form, grandFinalsDate: v })}
@@ -123,7 +128,9 @@ function TournamentDetailsForm({
       </div>
       <div className="flex items-center justify-end">
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Saving…" : "Save changes"}
+          {mutation.isPending
+            ? t("admin.tournament.saving")
+            : t("admin.tournament.save")}
         </Button>
       </div>
     </form>

@@ -1,12 +1,11 @@
+import { useTranslation } from "react-i18next"
+
 import { cn } from "@/lib/utils"
 
 /** Which standings table the home page is showing. */
 export type StandingsView = "players" | "teams"
 
-const TABS: { view: StandingsView; label: string }[] = [
-  { view: "players", label: "Players" },
-  { view: "teams", label: "Teams" },
-]
+const TABS: StandingsView[] = ["players", "teams"]
 
 /**
  * Underline-indicator tab strip that switches between the players and team
@@ -26,16 +25,21 @@ export function ViewTabs({
   value: StandingsView
   onChange: (view: StandingsView) => void
 }) {
+  const { t } = useTranslation()
   return (
-    <div role="group" aria-label="Standings view" className="flex gap-6">
-      {TABS.map((tab) => {
-        const active = tab.view === value
+    <div
+      role="group"
+      aria-label={t("home.viewTabsAria")}
+      className="flex gap-6"
+    >
+      {TABS.map((view) => {
+        const active = view === value
         return (
           <button
-            key={tab.view}
+            key={view}
             type="button"
             aria-pressed={active}
-            onClick={() => onChange(tab.view)}
+            onClick={() => onChange(view)}
             className={cn(
               "font-display border-b-2 px-1 py-3 text-base tracking-wider uppercase transition-colors",
               active
@@ -43,7 +47,7 @@ export function ViewTabs({
                 : "text-muted-foreground hover:text-foreground border-transparent"
             )}
           >
-            {tab.label}
+            {t(`home.tabs.${view}`)}
           </button>
         )
       })}

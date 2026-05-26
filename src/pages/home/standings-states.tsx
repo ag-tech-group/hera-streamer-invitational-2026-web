@@ -1,4 +1,5 @@
 import { Shield, TriangleAlert, Users } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { useNormalizedError } from "@/lib/api-errors"
@@ -14,13 +15,14 @@ const PANEL_CLASS =
  * consistent with the populated table.
  */
 export function StandingsEmpty() {
+  const { t } = useTranslation()
   return (
     <div className={PANEL_CLASS}>
       <Users className="text-muted-foreground size-8" aria-hidden />
       <div className="space-y-1">
-        <p className="font-medium">No standings yet</p>
+        <p className="font-medium">{t("home.noStandings.title")}</p>
         <p className="text-muted-foreground text-sm">
-          Players will appear here once the tournament leaderboard is populated.
+          {t("home.noStandings.body")}
         </p>
       </div>
     </div>
@@ -40,23 +42,24 @@ export function StandingsError({
   error: unknown
   onRetry: () => void
 }) {
+  const { t } = useTranslation()
   const normalized = useNormalizedError(error)
   return (
     <div className={PANEL_CLASS}>
       <TriangleAlert className="text-destructive size-8" aria-hidden />
       <div className="space-y-1">
-        <p className="font-medium">Couldn't load standings</p>
+        <p className="font-medium">{t("home.loadErrorStandings.title")}</p>
         <p className="text-muted-foreground text-sm">
-          Something went wrong reaching the leaderboard.
+          {t("home.loadErrorStandings.body")}
         </p>
         {normalized?.requestId ? (
           <p className="text-muted-foreground/70 font-mono text-xs">
-            Reference: {normalized.requestId}
+            {t("common.reference", { id: normalized.requestId })}
           </p>
         ) : null}
       </div>
       <Button variant="outline" size="sm" onClick={onRetry}>
-        Try again
+        {t("common.tryAgain")}
       </Button>
     </div>
   )
@@ -68,13 +71,14 @@ export function StandingsError({
  * the card surface matches the populated team table at the same depth.
  */
 export function TeamsEmpty() {
+  const { t } = useTranslation()
   return (
     <div className={PANEL_CLASS}>
       <Shield className="text-muted-foreground size-8" aria-hidden />
       <div className="space-y-1">
-        <p className="font-medium">No teams yet</p>
+        <p className="font-medium">{t("home.noTeams.title")}</p>
         <p className="text-muted-foreground text-sm">
-          Teams will appear here once they are set up for this tournament.
+          {t("home.noTeams.body")}
         </p>
       </div>
     </div>
@@ -93,23 +97,24 @@ export function TeamsError({
   error: unknown
   onRetry: () => void
 }) {
+  const { t } = useTranslation()
   const normalized = useNormalizedError(error)
   return (
     <div className={PANEL_CLASS}>
       <TriangleAlert className="text-destructive size-8" aria-hidden />
       <div className="space-y-1">
-        <p className="font-medium">Couldn't load teams</p>
+        <p className="font-medium">{t("home.loadErrorTeams.title")}</p>
         <p className="text-muted-foreground text-sm">
-          Something went wrong reaching the team standings.
+          {t("home.loadErrorTeams.body")}
         </p>
         {normalized?.requestId ? (
           <p className="text-muted-foreground/70 font-mono text-xs">
-            Reference: {normalized.requestId}
+            {t("common.reference", { id: normalized.requestId })}
           </p>
         ) : null}
       </div>
       <Button variant="outline" size="sm" onClick={onRetry}>
-        Try again
+        {t("common.tryAgain")}
       </Button>
     </div>
   )
