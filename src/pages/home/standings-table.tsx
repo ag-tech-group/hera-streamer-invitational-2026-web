@@ -90,9 +90,19 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
                 inMatch={row.inMatch}
               />
             </td>
+            {/*
+             * Rating is the most-watched number on the page, so it takes
+             * the same Bebas Neue + size-bump treatment the team-panel
+             * combined-rating got in #119. Drops `font-medium` because
+             * the display face ships at weight 400 only; bumps to text-lg
+             * + tracking-wide so the condensed glyphs read at the same
+             * visual weight as the surrounding sans data — the rest of
+             * the row stays at text-sm so the rating still wins
+             * hierarchy.
+             */}
             <FlashCell
               value={row.currentRating}
-              className="px-4 py-3 text-right font-medium tabular-nums"
+              className="font-display px-4 py-3 text-right text-lg tracking-wide tabular-nums"
             >
               <CountUp value={row.currentRating} />
             </FlashCell>
@@ -286,8 +296,13 @@ export function StandingsTableSkeleton() {
               <Skeleton className="h-4 w-28" />
             </div>
           </td>
+          {/*
+           * Rating placeholder is taller (h-6) than peak (h-4) because the
+           * rendered rating now uses the display face at text-lg — keeping
+           * the skeleton at h-4 would shift the row taller on data arrival.
+           */}
           <td className="px-4 py-3">
-            <Skeleton className="ml-auto h-4 w-12" />
+            <Skeleton className="ml-auto h-6 w-14" />
           </td>
           <td className="px-4 py-3">
             <Skeleton className="ml-auto h-4 w-12" />
