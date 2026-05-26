@@ -58,11 +58,25 @@ export function Countdown({
   return (
     <section
       className={cn(
-        "bg-card shadow-card flex flex-col items-center gap-3 rounded-lg",
+        "bg-card shadow-card relative flex flex-col items-center gap-3 overflow-hidden rounded-lg",
         isHero ? "p-6" : "p-4",
         className
       )}
     >
+      {/*
+       * Broadcast-card chrome (#114): brand-blue accent stripe + soft
+       * upper-right corner glow, matching the team panels and the
+       * standings table. Same JSX recipe so every card on the page
+       * frames data the same way.
+       */}
+      <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        style={{
+          background: "color-mix(in oklch, var(--brand) 12%, transparent)",
+        }}
+      />
       {label ? (
         <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
           {label}
