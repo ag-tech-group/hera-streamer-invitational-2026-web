@@ -10,7 +10,11 @@ import {
   type SortDirection,
   type SortState,
 } from "@/hooks/use-table-sort"
-import { formatRelativeTime, normalizeCountryCode } from "@/lib/format"
+import {
+  aoe2insightsPlayerUrl,
+  formatRelativeTime,
+  normalizeCountryCode,
+} from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
 import type { MatchResult, StandingsRow } from "@/types"
@@ -69,6 +73,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
           </td>
           <td className="px-4 py-3">
             <PlayerCell
+              profileId={row.profileId}
               alias={row.alias}
               country={row.country}
               inMatch={row.inMatch}
@@ -306,13 +311,17 @@ function RankCell({ rank }: { rank: number | null }) {
 
 /**
  * Player identity: country flag (or a globe fallback) and alias, plus a
- * pulsing "Live" badge when the player is in a match right now.
+ * pulsing "Live" badge when the player is in a match right now. The alias is
+ * a link out to the player's aoe2insights profile (new tab, so visitors keep
+ * the live standings open).
  */
 function PlayerCell({
+  profileId,
   alias,
   country,
   inMatch,
 }: {
+  profileId: number
   alias: string
   country: string | null
   inMatch: boolean
@@ -329,7 +338,15 @@ function PlayerCell({
       ) : (
         <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
       )}
-      <span className="font-medium whitespace-nowrap">{alias}</span>
+      <a
+        href={aoe2insightsPlayerUrl(profileId)}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={`View ${alias} on aoe2insights`}
+        className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
+      >
+        {alias}
+      </a>
       {inMatch && <LiveBadge />}
     </span>
   )

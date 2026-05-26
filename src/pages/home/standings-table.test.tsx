@@ -152,6 +152,21 @@ describe("StandingsTable — rank-1 highlight", () => {
   })
 })
 
+describe("StandingsTable — alias link", () => {
+  it("links the alias to the player's aoe2insights profile in a new tab", () => {
+    render(
+      <StandingsTable rows={[row({ profileId: 1819870, alias: "Alpha" })]} />
+    )
+    const link = screen.getByRole("link", { name: /alpha/i })
+    expect(link).toHaveAttribute(
+      "href",
+      "https://www.aoe2insights.com/user/1819870"
+    )
+    expect(link).toHaveAttribute("target", "_blank")
+    expect(link).toHaveAttribute("rel", "noopener noreferrer")
+  })
+})
+
 describe("StandingsTable — country flag", () => {
   it("renders a country flag for a player with a country", () => {
     render(
