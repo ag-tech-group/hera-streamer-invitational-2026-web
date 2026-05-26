@@ -75,7 +75,6 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
           </td>
           <td className="px-4 py-3">
             <PlayerCell
-              profileId={row.profileId}
               alias={row.alias}
               country={row.country}
               inMatch={row.inMatch}
@@ -318,17 +317,15 @@ function RankCell({ rank }: { rank: number | null }) {
 
 /**
  * Player identity: country flag (or a globe fallback) and alias, plus a
- * pulsing "Live" badge when the player is in a match right now. The alias is
- * a link out to the player's aoe2insights profile (new tab, so visitors keep
- * the live standings open).
+ * pulsing "Live" badge when the player is in a match right now. The alias
+ * links out to an aoe2insights search for the player (new tab, so visitors
+ * keep the live standings open).
  */
 function PlayerCell({
-  profileId,
   alias,
   country,
   inMatch,
 }: {
-  profileId: number
   alias: string
   country: string | null
   inMatch: boolean
@@ -347,7 +344,7 @@ function PlayerCell({
         <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
       )}
       <a
-        href={aoe2insightsPlayerUrl(profileId)}
+        href={aoe2insightsPlayerUrl(alias)}
         target="_blank"
         rel="noopener noreferrer"
         title={t("standings.viewOnAoe2insights", { alias })}

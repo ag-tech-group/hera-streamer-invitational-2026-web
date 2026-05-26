@@ -153,14 +153,14 @@ describe("StandingsTable — rank-1 highlight", () => {
 })
 
 describe("StandingsTable — alias link", () => {
-  it("links the alias to the player's aoe2insights profile in a new tab", () => {
+  it("links the alias to an aoe2insights search for that alias in a new tab", () => {
     render(
       <StandingsTable rows={[row({ profileId: 1819870, alias: "Alpha" })]} />
     )
     const link = screen.getByRole("link", { name: /alpha/i })
     expect(link).toHaveAttribute(
       "href",
-      "https://www.aoe2insights.com/user/1819870"
+      "https://www.aoe2insights.com/search/?q=Alpha"
     )
     expect(link).toHaveAttribute("target", "_blank")
     expect(link).toHaveAttribute("rel", "noopener noreferrer")
