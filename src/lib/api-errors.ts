@@ -68,8 +68,10 @@ const STATUS_MESSAGES: Record<number, string> = {
  * deserves a friendlier or more actionable message than the backend default.
  */
 const ERROR_CODE_MESSAGES: Record<string, string> = {
-  idempotency_key_reused:
-    "This action was already taken with a different request. Refresh and try again.",
+  // The form changed mid-flight relative to a previous submit that reused
+  // the same key. `useIdempotencyKey().resetOnReusedKey` advances the key
+  // for us — the user just needs to submit again.
+  idempotency_key_reused: "Something changed — please try again.",
   tournament_not_found: "Tournament not found.",
 }
 

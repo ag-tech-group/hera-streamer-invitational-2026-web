@@ -178,6 +178,7 @@ function EditTeamForm({
         toast.success("Team updated.")
         onDone()
       },
+      onError: idempotencyKey.resetOnReusedKey,
     },
   })
 
@@ -234,6 +235,7 @@ function DeleteTeamButton({ team }: { team: TeamStandingsRow }) {
         void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
         toast.success("Team deleted.")
       },
+      onError: idempotencyKey.resetOnReusedKey,
     },
   })
 
@@ -319,6 +321,7 @@ function MemberChip({
             idempotencyKey.reset()
             void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
           },
+          onError: idempotencyKey.resetOnReusedKey,
         },
       }
     )
@@ -399,6 +402,7 @@ function AddMemberForm({
           setPendingMove(null)
           void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
         },
+        onError: idempotencyKey.resetOnReusedKey,
       },
     })
 
@@ -544,6 +548,7 @@ function CreateTeamForm() {
         void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
         toast.success("Team created.")
       },
+      onError: idempotencyKey.resetOnReusedKey,
     },
   })
 

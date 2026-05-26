@@ -101,6 +101,7 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
           })
           toast.success("Owner revoked.")
         },
+        onError: idempotencyKey.resetOnReusedKey,
       },
     })
 
@@ -205,6 +206,7 @@ function GrantOwnerForm() {
           })
           toast.success("Owner granted.")
         },
+        onError: idempotencyKey.resetOnReusedKey,
       },
     }
   )

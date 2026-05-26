@@ -29,7 +29,8 @@ const ADD_PLAYER_URL = `*/v1/tournaments/${TOURNAMENT_SLUG}/players`
 /**
  * Minimal test harness: wires the idempotency hook to a real mutation
  * hook, surfaces a submit button, and shows the latest status so tests
- * can wait on it.
+ * can wait on it. `onError` chains through `resetOnReusedKey` so the
+ * `idempotency_key_reused` recovery path is exercised end-to-end too.
  */
 function AddPlayerHarness() {
   const idempotencyKey = useIdempotencyKey()
@@ -39,6 +40,7 @@ function AddPlayerHarness() {
     },
     mutation: {
       onSuccess: () => idempotencyKey.reset(),
+      onError: idempotencyKey.resetOnReusedKey,
     },
   })
 
@@ -142,6 +144,53 @@ describe("idempotency key end-to-end", () => {
 
     await user.click(screen.getByText("submit"))
     await waitFor(() => expect(seenKeys).toHaveLength(2))
+    expect(seenKeys[1]).not.toBe(seenKeys[0])
+  })
+
+  it("advances the key after the server returns `idempotency_key_reused`", async () => {
+    // First call → server claims "same key, different body" (the form
+    // changed mid-flight from a prior attempt). The hook's onError
+    // handler should advance the key so the next submit gets a fresh one
+    // and succeeds.
+    const seenKeys: string[] = []
+    let callCount = 0
+    server.use(
+      http.post(ADD_PLAYER_URL, ({ request }) => {
+        seenKeys.push(request.headers.get("Idempotency-Key") ?? "")
+        callCount += 1
+        if (callCount === 1) {
+          return HttpResponse.json(
+            {
+              error_code: "idempotency_key_reused",
+              message: "Same key, different body.",
+            },
+            { status: 422 }
+          )
+        }
+        return HttpResponse.json({}, { status: 201 })
+      })
+    )
+
+    const user = userEvent.setup()
+    renderHarness()
+
+    await user.click(screen.getByText("submit"))
+    await waitFor(() =>
+      expect(screen.getByTestId("status")).toHaveTextContent("error")
+    )
+
+    // resetOnReusedKey runs async (parseApiError reads the response
+    // body), so let the state flush before clicking again.
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    await user.click(screen.getByText("submit"))
+    await waitFor(() =>
+      expect(screen.getByTestId("status")).toHaveTextContent("success")
+    )
+
+    expect(seenKeys).toHaveLength(2)
     expect(seenKeys[1]).not.toBe(seenKeys[0])
   })
 })

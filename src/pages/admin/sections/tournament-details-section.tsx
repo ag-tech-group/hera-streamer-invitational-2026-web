@@ -63,10 +63,11 @@ function TournamentDetailsForm({
       onSuccess: () => {
         // Fresh key for the next logical operation, plus refetch so any
         // backend-side normalisation (whitespace trimming, etc.) is
-        // reflected in `useTournament()` cache. Errors are handled
-        // centrally by `main.tsx`'s `MutationCache.onError` (toast with
-        // `Reference: <id>`) — no per-mutation `onError` here, or the
-        // toast would fire twice.
+        // reflected in `useTournament()` cache. The user-facing error
+        // toast is fired centrally by `main.tsx`'s `MutationCache.onError`
+        // — the per-mutation `onError` below is side-effect only (key
+        // recovery on `idempotency_key_reused`) and never toasts, so the
+        // two don't compete.
         idempotencyKey.reset()
         void queryClient.invalidateQueries({
           queryKey: [
@@ -76,6 +77,7 @@ function TournamentDetailsForm({
         })
         toast.success("Tournament updated.")
       },
+      onError: idempotencyKey.resetOnReusedKey,
     },
   })
 

@@ -134,7 +134,7 @@ describe("getUserMessage", () => {
         errorCode: "idempotency_key_reused",
         message: "raw backend message",
       })
-    ).toMatch(/refresh and try again/i)
+    ).toMatch(/something changed/i)
   })
 
   it("falls back to the normalized message when the code is unknown", () => {
