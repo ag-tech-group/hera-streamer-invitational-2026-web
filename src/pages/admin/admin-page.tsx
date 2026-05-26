@@ -1,9 +1,12 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import { ChevronLeft } from "lucide-react"
+import { useEffect, useRef } from "react"
+import { toast } from "sonner"
 
 import { NotFound } from "@/components/not-found"
 import { activeTournament } from "@/config/tournaments"
 import { useAuth } from "@/lib/auth"
+import { loginUrl } from "@/lib/auth-config"
 import { OwnersSection } from "@/pages/admin/sections/owners-section"
 import { PlayersSection } from "@/pages/admin/sections/players-section"
 import { TeamsSection } from "@/pages/admin/sections/teams-section"
@@ -21,9 +24,37 @@ import { TournamentDetailsSection } from "@/pages/admin/sections/tournament-deta
  * The page is scoped to this build's tournament: it edits *this*
  * tournament's metadata, roster, owners, and teams — not a general-purpose
  * multi-tournament admin (out of scope per #74).
+ *
+ * Session-expiry handling: when admin access is revoked *while the user
+ * is on this page* (a 401-then-refresh-fail flips `isAdmin` from true to
+ * false), the page redirects to `/` and surfaces a toast that re-opens
+ * the sign-in flow. Without this, the gate would just render
+ * `<NotFound />` in place, which is technically correct but reads as the
+ * admin route having mysteriously disappeared.
  */
 export function AdminPage() {
   const { isAdmin, isLoading } = useAuth()
+  const navigate = useNavigate()
+  const wasAdminRef = useRef(false)
+
+  useEffect(() => {
+    if (isLoading) return
+    if (wasAdminRef.current && !isAdmin) {
+      void navigate({ to: "/" })
+      toast.info("Your session expired — sign in again to continue.", {
+        action: {
+          label: "Sign in",
+          onClick: () => {
+            // Land back on the admin page after re-auth — that was the
+            // original intent before the session dropped.
+            window.location.href = loginUrl("/admin")
+          },
+        },
+      })
+    }
+    wasAdminRef.current = isAdmin
+  }, [isAdmin, isLoading, navigate])
+
   if (isLoading) return null
   if (!isAdmin) return <NotFound />
   return <AdminLayout />
