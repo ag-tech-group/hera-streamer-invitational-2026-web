@@ -7,9 +7,15 @@ import {
 } from "@/lib/format"
 
 describe("aoe2insightsPlayerUrl", () => {
-  it("builds the canonical /user/<id> URL", () => {
-    expect(aoe2insightsPlayerUrl(1819870)).toBe(
-      "https://www.aoe2insights.com/user/1819870"
+  it("builds a search URL for the given alias", () => {
+    expect(aoe2insightsPlayerUrl("ANKR.blve")).toBe(
+      "https://www.aoe2insights.com/search/?q=ANKR.blve"
+    )
+  })
+
+  it("URL-encodes aliases with reserved characters", () => {
+    expect(aoe2insightsPlayerUrl("Hera & Co")).toBe(
+      "https://www.aoe2insights.com/search/?q=Hera%20%26%20Co"
     )
   })
 })
