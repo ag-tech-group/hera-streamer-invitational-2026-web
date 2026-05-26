@@ -58,6 +58,15 @@ const queryClient = new QueryClient({
   }),
 })
 
+// Dev-only console affordance for hand-testing live-update animations: expose
+// the query client so the standings cache can be poked from DevTools (e.g.
+// to nudge ratings and watch the count-up + flash treatment). Stripped from
+// production builds by `import.meta.env.DEV`.
+if (import.meta.env.DEV) {
+  ;(window as unknown as { __queryClient: QueryClient }).__queryClient =
+    queryClient
+}
+
 const router = createRouter({
   routeTree,
   context: {

@@ -88,6 +88,13 @@
   --team-p2: oklch(0.55 0.21 28);
   --team-p2-strong: oklch(0.63 0.23 28);
   --team-p2-bg: oklch(0.55 0.21 28 / 0.08);
+  /*
+   * Cell-flash highlight (#114): the brand blue at low opacity, used as the
+   * starting frame of the WAAPI flash on a standings cell whose value just
+   * changed via an SSE refetch. Tinted against the card surface so the eye
+   * catches the change without losing legibility of the numeric content.
+   */
+  --cell-flash: color-mix(in oklch, var(--brand) 22%, transparent);
 }
 
 .dark {
@@ -157,6 +164,9 @@
   --team-p2: oklch(0.7 0.18 28);
   --team-p2-strong: oklch(0.78 0.21 28);
   --team-p2-bg: oklch(0.7 0.18 28 / 0.14);
+  /* Cell-flash highlight (#114): dark-theme variant carries a touch more
+     mix because the dark card surface absorbs more of the wash. */
+  --cell-flash: color-mix(in oklch, var(--brand) 28%, transparent);
 }
 
 @theme inline {

@@ -167,6 +167,17 @@ describe("StandingsTable — alias link", () => {
   })
 })
 
+describe("StandingsTable — rating cell", () => {
+  it("renders the rating directly on first paint (count-up snaps on mount)", () => {
+    render(
+      <StandingsTable
+        rows={[row({ profileId: 1, alias: "Alpha", currentRating: 1850 })]}
+      />
+    )
+    expect(screen.getByText("1850")).toBeInTheDocument()
+  })
+})
+
 describe("StandingsTable — country flag", () => {
   it("renders a country flag for a player with a country", () => {
     render(
