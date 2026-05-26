@@ -1,10 +1,12 @@
 import { Globe } from "lucide-react"
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 import type { ReactNode, Ref } from "react"
 import { useTranslation } from "react-i18next"
 
 import { SortableTh } from "@/components/sortable-th"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useCountUp } from "@/hooks/use-count-up"
+import { useFlashOnChange } from "@/hooks/use-flash-on-change"
 import {
   useTableSort,
   type SortableValue,
@@ -80,18 +82,27 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
               inMatch={row.inMatch}
             />
           </td>
-          <td className="px-4 py-3 text-right font-medium tabular-nums">
-            {row.currentRating}
-          </td>
-          <td className="text-muted-foreground px-4 py-3 text-right tabular-nums">
+          <FlashCell
+            value={row.currentRating}
+            className="px-4 py-3 text-right font-medium tabular-nums"
+          >
+            <CountUp value={row.currentRating} />
+          </FlashCell>
+          <FlashCell
+            value={row.maxRating}
+            className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+          >
             {row.maxRating}
-          </td>
-          <td className="px-4 py-3 text-center">
+          </FlashCell>
+          <FlashCell value={row.streak} className="px-4 py-3 text-center">
             <StreakCell streak={row.streak} />
-          </td>
-          <td className="text-muted-foreground px-4 py-3 text-right tabular-nums">
+          </FlashCell>
+          <FlashCell
+            value={row.gamesPlayed}
+            className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+          >
             {row.gamesPlayed}
-          </td>
+          </FlashCell>
           <td className="px-4 py-3">
             <RecentResultsCell results={row.recentResults} />
           </td>
@@ -102,6 +113,41 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
       ))}
     </TableShell>
   )
+}
+
+/**
+ * `<td>` that briefly flashes its background whenever `value` changes between
+ * renders — how the standings table draws the eye to a number that just
+ * shifted via an SSE refetch. Each cell tracks its own previous value
+ * internally, so newly-mounted cells (e.g. a player joining mid-tournament)
+ * don't flash on first paint. Padding and alignment come from the caller's
+ * `className`, so this is a drop-in for any of the numeric/badge cells.
+ */
+function FlashCell({
+  value,
+  className,
+  children,
+}: {
+  value: unknown
+  className: string
+  children: ReactNode
+}) {
+  const ref = useRef<HTMLTableCellElement>(null)
+  useFlashOnChange(ref, value)
+  return (
+    <td ref={ref} className={className}>
+      {children}
+    </td>
+  )
+}
+
+/**
+ * Renders a numeric value that tweens toward `value` whenever it changes.
+ * Wraps the standings table's rating cell so a change-by-12 reads as a
+ * count-up rather than a discrete jump.
+ */
+function CountUp({ value }: { value: number }) {
+  return <>{useCountUp(value)}</>
 }
 
 /** Maps a sort key onto the `StandingsRow` field it ranks by. */
