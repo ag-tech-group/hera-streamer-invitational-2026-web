@@ -216,7 +216,11 @@
     "signInAction": "Sign in"
   },
   "footer": {
-    "criticalbitProject": "A <link>criticalbit.gg</link> project.",
-    "microsoftDisclaimer": "Age of Empires II © Microsoft Corporation. This site was created under Microsoft's <link>Game Content Usage Rules</link> using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft."
+    "criticalbitProjectPrefix": "A ",
+    "criticalbitProjectLink": "criticalbit.gg",
+    "criticalbitProjectSuffix": " project.",
+    "microsoftDisclaimerPrefix": "Age of Empires II © Microsoft Corporation. This site was created under Microsoft's ",
+    "microsoftDisclaimerLink": "Game Content Usage Rules",
+    "microsoftDisclaimerSuffix": " using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft."
   }
 }
