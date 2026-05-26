@@ -35,10 +35,17 @@ export function LanguageToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/*
+         * aria-label starts with the visible code (e.g. "EN") so it
+         * matches the on-screen label — Lighthouse / WCAG flag a
+         * mismatch when an aria-label doesn't contain the visible text.
+         * The descriptor ("— Language") follows so a screen reader user
+         * still hears what the button controls.
+         */}
         <Button
           variant="ghost"
           size="sm"
-          aria-label={t("language.label")}
+          aria-label={`${current.toUpperCase()} — ${t("language.label")}`}
           title={t("language.label")}
         >
           <Languages className="h-4 w-4" aria-hidden />

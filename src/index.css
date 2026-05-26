@@ -42,6 +42,16 @@
   --accent-foreground: oklch(0.2 0.012 240);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
+  /*
+   * `*-deep` variants (#64): much darker text-suitable shades of chart-2
+   * and destructive, used by the streak + activity badges where the
+   * standard chart-2 / destructive lightness sits too close to a
+   * card-on-tint background to clear WCAG AA contrast (4.5:1 for small
+   * text). The badge background keeps the original chart-2 / destructive
+   * tint; only the text colour swaps to `-deep`.
+   */
+  --chart-2-deep: oklch(0.32 0.1 184.704);
+  --destructive-deep: oklch(0.4 0.2 27.325);
   --border: oklch(0.88 0.008 240);
   --input: oklch(0.88 0.008 240);
   --ring: oklch(0.5 0.15 240);
@@ -122,6 +132,15 @@
   --accent-foreground: oklch(0.96 0.003 240);
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
+  /*
+   * Dark-theme `*-deep` (#64): lighter chart-2 / destructive shades so
+   * the streak + activity badge text reads at AA contrast against the
+   * tinted backgrounds. The base chart-2 (0.696 L) and destructive
+   * (0.396 L) sit too close to the dark-theme card surface (0.21 L) to
+   * clear 4.5:1 on their own.
+   */
+  --chart-2-deep: oklch(0.88 0.16 162.48);
+  --destructive-deep: oklch(0.78 0.22 25.723);
   --border: oklch(0.3 0.014 240);
   --input: oklch(0.3 0.014 240);
   --ring: oklch(0.65 0.15 240);
@@ -186,6 +205,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-deep: var(--destructive-deep);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-border: var(--border);
@@ -193,6 +213,7 @@
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
+  --color-chart-2-deep: var(--chart-2-deep);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
