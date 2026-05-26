@@ -17,10 +17,11 @@ import { AUTH_URL, loginUrl } from "@/lib/auth-config"
 
 /**
  * Top-level app shell navbar — fixed to the top of the viewport on
- * every route. Carries the brand (logo + "Live Standings") with the
- * active tournament name as an eyebrow chip beside it on the left,
- * and the theme toggle + auth widget on the right; page-level headers
- * below shouldn't compete for that space.
+ * every route. Carries the logo + active tournament name on the left
+ * (the tournament name serves as the brand wordmark — it's what
+ * changes per deployment, so it earns the prime real estate), and the
+ * theme toggle + auth widget on the right; page-level headers below
+ * shouldn't compete for that space.
  *
  * Layout mirrors criticalbit-web's `Navbar`: full-width translucent
  * bar (`bg-background/80` + `backdrop-blur-sm`), `h-14`, content
@@ -38,29 +39,24 @@ export function Navbar() {
   return (
     <nav className="border-border/50 bg-background/80 fixed top-0 z-50 w-full border-b backdrop-blur-sm">
       <div className="mx-auto flex h-14 w-full max-w-[1536px] items-center justify-between gap-3 px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link
-            to="/"
-            className="flex items-center gap-2 transition-opacity hover:opacity-80"
-            aria-label="Live Standings"
-          >
-            <img src="/logo.png" alt="" className="size-8 shrink-0" />
-            <span className="font-display hidden text-lg tracking-wide sm:inline">
-              Live Standings
-            </span>
-          </Link>
+        {/*
+         * aria-label gives the link a stable accessible name during the
+         * loading window when `tournamentName` is null — the logo's
+         * alt="" makes it decorative, so without the label the link
+         * would have no accessible name at all.
+         */}
+        <Link
+          to="/"
+          className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-80"
+          aria-label="Live Standings"
+        >
+          <img src="/logo.png" alt="" className="size-8 shrink-0" />
           {tournamentName ? (
-            <>
-              <span
-                aria-hidden
-                className="bg-border hidden h-5 w-px shrink-0 sm:inline-block"
-              />
-              <span className="text-muted-foreground hidden truncate text-xs font-medium tracking-widest uppercase sm:inline">
-                {tournamentName}
-              </span>
-            </>
+            <span className="font-display hidden truncate text-lg tracking-wide sm:inline">
+              {tournamentName}
+            </span>
           ) : null}
-        </div>
+        </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <AuthWidget />
