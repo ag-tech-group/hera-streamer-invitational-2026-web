@@ -198,6 +198,48 @@ describe("TeamsView", () => {
     expect(screen.getAllByText(/in a live match/i)).toHaveLength(1)
   })
 
+  it("marks a panel's accent stripe as live when any member is in a match", () => {
+    const { container } = render(
+      <TeamsView
+        rows={[
+          teamRow({
+            teamId: 1,
+            name: "Live Team",
+            members: [
+              member({
+                profileId: 50,
+                alias: "Playing",
+                currentRating: 2400,
+                inMatch: true,
+                liveMatchId: 999,
+              }),
+              member({
+                profileId: 51,
+                alias: "Resting",
+                currentRating: 2300,
+              }),
+            ],
+          }),
+          teamRow({
+            teamId: 2,
+            name: "Idle Team",
+            members: [
+              member({
+                profileId: 60,
+                alias: "Bench",
+                currentRating: 2350,
+              }),
+            ],
+          }),
+        ]}
+      />
+    )
+    // Exactly one panel — the live team's — should carry the heartbeat
+    // class on its accent stripe. The idle team's accent stripe stays
+    // bare so the pulse reads as "this side is live right now".
+    expect(container.querySelectorAll(".team-heartbeat")).toHaveLength(1)
+  })
+
   it("falls back to a single-column layout when not a pair", () => {
     // Only one team — no coliseum, no VS pillar.
     render(<TeamsView rows={[rows[0]]} />)
