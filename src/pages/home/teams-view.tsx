@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Skeleton } from "@/components/ui/skeleton"
+import { normalizeCountryCode } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { TeamMember, TeamStandingsRow } from "@/types"
 
@@ -366,26 +367,62 @@ function PlayerRoster({
 }
 
 /**
- * One player on a team — a horizontal pill carrying their identity and
- * current rating. Pulls colour from the panel-level `--team-color` vars
- * via inline styles, so the pill never hard-codes blue or red.
+ * One player on a team — a horizontal pill carrying their identity,
+ * current rating, and (when applicable) a pulsing "in a live match"
+ * indicator. Pulls colour from the panel-level `--team-color` vars via
+ * inline styles, so the pill never hard-codes blue or red.
  *
- * Country + live status will join once the API ships `country` /
- * `in_match` on `TeamMemberRead` (web #114 / API #89); until then the
- * flag slot shows a neutral globe placeholder so the pill geometry
- * doesn't shift when those fields land.
+ * Country flag falls back to a globe icon when the country is missing
+ * or malformed — same treatment the standings table uses, so the two
+ * surfaces stay visually consistent for a given player.
  */
 function PlayerPill({ member }: { member: TeamMember }) {
+  const countryCode = normalizeCountryCode(member.country)
   return (
     <div className="team-pill flex items-center gap-3 rounded-md border px-3 py-2.5">
-      <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      {countryCode ? (
+        <span
+          className={`fi fi-${countryCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
+          title={countryCode.toUpperCase()}
+          aria-hidden
+        />
+      ) : (
+        <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      )}
       <span className="min-w-0 flex-1 truncate text-sm font-medium">
         {member.alias}
       </span>
+      {member.inMatch && <LiveDot />}
       <span className="text-muted-foreground shrink-0 text-sm font-semibold tabular-nums">
         {member.currentRating}
       </span>
     </div>
+  )
+}
+
+/**
+ * Compact "in a live match" indicator for a team pill — a brand-blue
+ * dot with a `ping` halo. Smaller than the standings table's full
+ * `LiveBadge` because the pill is tighter on horizontal space; the
+ * `sr-only` label preserves the accessible name.
+ */
+function LiveDot() {
+  const { t } = useTranslation()
+  return (
+    <span
+      className="relative flex size-2 shrink-0"
+      title={t("standings.liveAriaLabel")}
+    >
+      <span
+        aria-hidden
+        className="bg-brand absolute inline-flex size-full animate-ping rounded-full opacity-75"
+      />
+      <span
+        aria-hidden
+        className="bg-brand relative inline-flex size-2 rounded-full"
+      />
+      <span className="sr-only">{t("standings.liveAriaLabel")}</span>
+    </span>
   )
 }
 

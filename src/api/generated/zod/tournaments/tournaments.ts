@@ -191,8 +191,11 @@ export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetRespons
   "members": zod.array(zod.object({
   "profile_id": zod.number(),
   "alias": zod.string(),
-  "current_rating": zod.number()
-}).describe('One member of a team, with their current rating on the tournament\'s leaderboard.'))
+  "country": zod.union([zod.string(),zod.null()]),
+  "current_rating": zod.number(),
+  "in_match": zod.boolean(),
+  "live_match_id": zod.union([zod.number(),zod.null()])
+}).describe('One member of a team, with their current rating + live-match status.\n\nShape parallels the per-player ``StandingRow`` fields the web app\nalready renders on the standings tab: ``country`` for the flag pill,\n``in_match`` \/ ``live_match_id`` for the live badge. Same source as\n``StandingRow`` (see ``get_team_standings`` for the query), so a\nmember\'s status here matches their standings row in the same poll.'))
 }).describe('One row in a tournament\'s team standings.\n\n``combined_rating_sum`` is the sum of the members\' current ratings on\nthe tournament\'s leaderboard; ``combined_rating_average`` is that sum\nover the member count. Only members with a rating on that leaderboard\nare counted — a member the poller hasn\'t rated yet is omitted.'))
 })
 
