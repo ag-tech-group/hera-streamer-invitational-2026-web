@@ -20,7 +20,11 @@ import {
   StandingsTable,
   StandingsTableSkeleton,
 } from "@/pages/home/standings-table"
-import { TeamsView, TeamsViewSkeleton } from "@/pages/home/teams-view"
+import {
+  TeamsAtmosphere,
+  TeamsView,
+  TeamsViewSkeleton,
+} from "@/pages/home/teams-view"
 import { ViewTabs, type StandingsView } from "@/pages/home/view-tabs"
 import type { StandingsSnapshot, TeamStandingsSnapshot } from "@/types"
 
@@ -70,6 +74,14 @@ export function HomePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
+      {/*
+       * Teams-tab atmosphere (#114): only mounted when the Teams view is
+       * active, so the L/R team-colour wash never bleeds into the Players
+       * view's neutral page background. Fixed-positioned, so its location
+       * in the JSX tree just gates lifecycle — viewport coverage is the same
+       * regardless of where it sits here.
+       */}
+      {view === "teams" && <TeamsAtmosphere />}
       <header className="hero-divider flex flex-col gap-1 pb-4">
         {/*
          * Drops `font-bold` because Bebas Neue ships only weight 400 —

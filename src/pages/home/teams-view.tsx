@@ -41,6 +41,37 @@ type TeamColor = "p1" | "p2"
  * container query, so a narrow coliseum panel shows one pill per line
  * and a wide banner panel shows several.
  */
+/**
+ * Subtle team-coloured atmosphere layer behind the Teams view. A pair of
+ * wide radial gradients — blue blooming from the left, red from the right —
+ * built from the existing `--team-color-bg` tokens (≤ 8% in light, slightly
+ * higher in dark to compensate for the darker base) so the page background
+ * gets a directional team tint without competing with the data on top.
+ *
+ * Mirrors the panel colour assignment (lower teamId is P1/blue on the left;
+ * higher is P2/red on the right) at any viewport — including stacked layouts
+ * below 2xl, where the L/R split still reads as "team space" even though
+ * the panels themselves stack vertically.
+ *
+ * Fixed-positioned at `-z-10` so it sits behind page content but above the
+ * body's noise + spotlight backdrop. `aria-hidden` + `pointer-events-none`
+ * because it's pure atmosphere — screen readers and pointer interactions
+ * walk straight through.
+ */
+export function TeamsAtmosphere() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 -z-10"
+      style={{
+        background:
+          "radial-gradient(ellipse 70vw 80vh at 0% 50%, var(--team-p1-bg), transparent 65%)," +
+          "radial-gradient(ellipse 70vw 80vh at 100% 50%, var(--team-p2-bg), transparent 65%)",
+      }}
+    />
+  )
+}
+
 export function TeamsView({ rows }: { rows: TeamStandingsRow[] }) {
   // Standings position is the row's index in the API-ranked list (by
   // combined rating, desc). We freeze it into a map up-front so the
