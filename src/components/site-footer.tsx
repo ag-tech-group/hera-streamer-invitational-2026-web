@@ -1,7 +1,14 @@
 import { Trans } from "react-i18next"
 
+/**
+ * Footer links have a baseline underline (vs the in-content alias link
+ * pattern that's underline-on-hover). The footer copy is set in
+ * `text-muted-foreground`, so without a baseline underline the link
+ * would render as text indistinguishable from the surrounding prose
+ * until the user happens to hover it.
+ */
 const LINK_CLASS =
-  "hover:text-foreground underline-offset-2 transition-colors hover:underline"
+  "underline underline-offset-2 transition-colors hover:text-foreground"
 
 /**
  * Site-wide footer with the Microsoft Game Content Usage Rules disclaimer
