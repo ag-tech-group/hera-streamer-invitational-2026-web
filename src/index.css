@@ -318,6 +318,35 @@
   }
 
   /*
+   * Rank-1 row spotlight (#114): the tournament leader's row in the
+   * standings table picks up a soft brand-coloured background that
+   * breathes on a ~2.5s cycle — slower than the team-heartbeat pulse
+   * (1.5s) because this is a "tournament leader" cue rather than a
+   * "live action right now" signal.
+   *
+   * Reduced-motion users get the static base tint (the .rank-1-spotlight
+   * rule outside the media query) so the leader's row still reads
+   * differently from the rest, just without motion.
+   */
+  .rank-1-spotlight {
+    background-color: color-mix(in oklch, var(--brand) 5%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes rank-1-spotlight-pulse {
+      0%,
+      100% {
+        background-color: color-mix(in oklch, var(--brand) 3%, transparent);
+      }
+      50% {
+        background-color: color-mix(in oklch, var(--brand) 9%, transparent);
+      }
+    }
+    .rank-1-spotlight {
+      animation: rank-1-spotlight-pulse 2.5s ease-in-out infinite;
+    }
+  }
+
+  /*
    * Live-team heartbeat (#114): when any member of a team is in a live
    * match, the team-coloured accent stripe at the top of the panel
    * carries a soft team-coloured glow that breathes on a ~1.5s cycle.
