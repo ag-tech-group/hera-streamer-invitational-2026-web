@@ -123,7 +123,7 @@ Deployed to Netlify, served from `hera-streamer-invitational-2026.criticalbit.gg
 
 Netlify auto-builds on every push to `main` once the project is wired. The build runs `pnpm install` → `pnpm build` (which itself runs `generate-routes` → `tsc -b` → `vite build`) and serves the resulting `dist/` from the custom domain.
 
-`public/_headers` (Netlify's native format) sets the production CSP and standard security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy). `public/_redirects` provides the SPA fallback so deep links from the TanStack Router resolve through `index.html`.
+`netlify.toml` at the repo root configures production headers and routing in one place: the CSP and standard security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy), long-lived `Cache-Control` for `/assets/*` (Vite-hashed bundles are immutable per build) with `must-revalidate` on `/index.html`, and the SPA fallback so deep links from the TanStack Router resolve through `index.html`.
 
 ### Path-router routing (deferred)
 
