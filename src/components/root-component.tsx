@@ -3,6 +3,7 @@ import { Outlet, useRouter } from "@tanstack/react-router"
 import { Toaster } from "sonner"
 
 import { Navbar } from "@/components/navbar"
+import { SiteAtmosphere } from "@/components/site-atmosphere"
 import { SiteFooter } from "@/components/site-footer"
 import { useAnalytics } from "@/lib/analytics"
 
@@ -45,6 +46,15 @@ export function RootComponent() {
   return (
     <>
       <RouteTracker />
+      {/*
+       * Site-wide team-colour atmosphere wash (#114). Mounted here at the
+       * router root so it covers every route — Home (Players + Teams),
+       * Admin, and the not-found / error boundaries — rather than being
+       * scoped to a specific tab. Fixed-positioned, so its location in
+       * the JSX tree just decides lifecycle; viewport coverage is the
+       * same regardless.
+       */}
+      <SiteAtmosphere />
       <Navbar />
       {/*
        * Sticky-footer layout: `min-h-svh` on the wrapper plus `flex-1`

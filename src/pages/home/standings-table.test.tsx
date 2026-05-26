@@ -134,21 +134,46 @@ describe("StandingsTable — games played", () => {
   })
 })
 
-describe("StandingsTable — rank-1 highlight", () => {
-  it("applies the brand accent to the rank-1 position", () => {
+describe("StandingsTable — podium position chips", () => {
+  it("renders position 1 as a filled brand chip", () => {
     render(<StandingsTable rows={rows} />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     const firstPos = within(bodyRows[0]).getAllByRole("cell")[0]
-    expect(firstPos.querySelector("span")).toHaveClass("text-brand")
+    expect(firstPos.querySelector("span")).toHaveClass("bg-brand")
   })
 
-  it("does not apply the brand accent below rank 1", () => {
+  it("renders positions 2 and 3 with descending brand-fill intensity", () => {
     render(<StandingsTable rows={rows} />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     const secondPos = within(bodyRows[1]).getAllByRole("cell")[0]
     const thirdPos = within(bodyRows[2]).getAllByRole("cell")[0]
-    expect(secondPos.querySelector("span")).not.toHaveClass("text-brand")
-    expect(thirdPos.querySelector("span")).not.toHaveClass("text-brand")
+    expect(secondPos.querySelector("span")).toHaveClass("bg-brand/30")
+    expect(thirdPos.querySelector("span")).toHaveClass("bg-brand/15")
+  })
+
+  it("renders positions 4+ as plain muted text (no podium chip)", () => {
+    const fourRows: StandingsRow[] = [
+      ...rows,
+      row({ profileId: 4, alias: "Delta", currentRating: 2500, rank: 30 }),
+    ]
+    render(<StandingsTable rows={fourRows} />)
+    const bodyRows = screen.getAllByRole("row").slice(1)
+    const fourthPos = within(bodyRows[3]).getAllByRole("cell")[0]
+    const span = fourthPos.querySelector("span")
+    expect(span).not.toHaveClass("bg-brand")
+    expect(span).not.toHaveClass("bg-brand/30")
+    expect(span).not.toHaveClass("bg-brand/15")
+    expect(span).toHaveClass("text-muted-foreground")
+  })
+})
+
+describe("StandingsTable — rank-1 row spotlight", () => {
+  it("applies the spotlight class to the leader's row only", () => {
+    render(<StandingsTable rows={rows} />)
+    const bodyRows = screen.getAllByRole("row").slice(1)
+    expect(bodyRows[0]).toHaveClass("rank-1-spotlight")
+    expect(bodyRows[1]).not.toHaveClass("rank-1-spotlight")
+    expect(bodyRows[2]).not.toHaveClass("rank-1-spotlight")
   })
 })
 

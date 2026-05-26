@@ -62,55 +62,64 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
       bodyRef={containerRef}
       headerRow={<StandingsHeaderRow sortState={sortState} onSort={sortBy} />}
     >
-      {sortedRows.map((row) => (
-        <tr
-          key={row.profileId}
-          data-flip-id={row.profileId}
-          ref={registerRow}
-          className="hover:bg-muted/40 border-b transition-colors last:border-b-0"
-        >
-          <td className="px-4 py-3">
-            <PositionCell position={positionMap.get(row.profileId) ?? 0} />
-          </td>
-          <td className="px-4 py-3">
-            <RankCell rank={row.rank} />
-          </td>
-          <td className="px-4 py-3">
-            <PlayerCell
-              alias={row.alias}
-              country={row.country}
-              inMatch={row.inMatch}
-            />
-          </td>
-          <FlashCell
-            value={row.currentRating}
-            className="px-4 py-3 text-right font-medium tabular-nums"
+      {sortedRows.map((row) => {
+        const position = positionMap.get(row.profileId) ?? 0
+        const isLeader = position === 1
+        return (
+          <tr
+            key={row.profileId}
+            data-flip-id={row.profileId}
+            ref={registerRow}
+            className={cn(
+              "border-b transition-colors last:border-b-0",
+              // Leader row carries a pulsing brand-tinted bg; non-leaders
+              // get the standard hover treatment instead.
+              isLeader ? "rank-1-spotlight" : "hover:bg-muted/40"
+            )}
           >
-            <CountUp value={row.currentRating} />
-          </FlashCell>
-          <FlashCell
-            value={row.maxRating}
-            className="text-muted-foreground px-4 py-3 text-right tabular-nums"
-          >
-            {row.maxRating}
-          </FlashCell>
-          <FlashCell value={row.streak} className="px-4 py-3 text-center">
-            <StreakCell streak={row.streak} />
-          </FlashCell>
-          <FlashCell
-            value={row.gamesPlayed}
-            className="text-muted-foreground px-4 py-3 text-right tabular-nums"
-          >
-            {row.gamesPlayed}
-          </FlashCell>
-          <td className="px-4 py-3">
-            <RecentResultsCell results={row.recentResults} />
-          </td>
-          <td className="px-4 py-3">
-            <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
-          </td>
-        </tr>
-      ))}
+            <td className="px-4 py-3">
+              <PositionCell position={position} />
+            </td>
+            <td className="px-4 py-3">
+              <RankCell rank={row.rank} />
+            </td>
+            <td className="px-4 py-3">
+              <PlayerCell
+                alias={row.alias}
+                country={row.country}
+                inMatch={row.inMatch}
+              />
+            </td>
+            <FlashCell
+              value={row.currentRating}
+              className="px-4 py-3 text-right font-medium tabular-nums"
+            >
+              <CountUp value={row.currentRating} />
+            </FlashCell>
+            <FlashCell
+              value={row.maxRating}
+              className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+            >
+              {row.maxRating}
+            </FlashCell>
+            <FlashCell value={row.streak} className="px-4 py-3 text-center">
+              <StreakCell streak={row.streak} />
+            </FlashCell>
+            <FlashCell
+              value={row.gamesPlayed}
+              className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+            >
+              {row.gamesPlayed}
+            </FlashCell>
+            <td className="px-4 py-3">
+              <RecentResultsCell results={row.recentResults} />
+            </td>
+            <td className="px-4 py-3">
+              <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
+            </td>
+          </tr>
+        )
+      })}
     </TableShell>
   )
 }
@@ -260,8 +269,13 @@ export function StandingsTableSkeleton() {
     >
       {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
         <tr key={index} className="border-b last:border-b-0">
+          {/*
+           * Position placeholder is chip-shaped (h-5 w-7 rounded-md) so the
+           * loading state and the real podium chips share the same footprint,
+           * preventing a layout shift on data arrival.
+           */}
           <td className="px-4 py-3">
-            <Skeleton className="h-4 w-5" />
+            <Skeleton className="h-5 w-7 rounded-md" />
           </td>
           <td className="px-4 py-3">
             <Skeleton className="h-4 w-5" />
@@ -302,6 +316,12 @@ export function StandingsTableSkeleton() {
  * header row is passed in so each caller (populated vs. skeleton) can wire
  * sort state where appropriate; the broadcast caps treatment lives on the
  * `<tr>` itself (see `StandingsHeaderRow`).
+ *
+ * The frame mirrors the team-panel chrome (#114): a brand-coloured accent
+ * stripe along the top edge plus a soft brand-tinted glow blooming from
+ * the upper-right corner. The horizontal scroll lives on an inner wrapper
+ * so the chrome stays anchored to the card frame even when the table
+ * overflows its container on narrow viewports.
  */
 function TableShell({
   caption,
@@ -315,28 +335,48 @@ function TableShell({
   children: ReactNode
 }) {
   return (
-    <div className="bg-card shadow-card overflow-x-auto overflow-y-hidden rounded-lg">
-      <table className="w-full min-w-[800px] border-collapse text-sm">
-        <caption className="sr-only">{caption}</caption>
-        <thead>{headerRow}</thead>
-        <tbody ref={bodyRef}>{children}</tbody>
-      </table>
+    <div className="bg-card shadow-card relative overflow-hidden rounded-lg">
+      <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        style={{
+          background: "color-mix(in oklch, var(--brand) 12%, transparent)",
+        }}
+      />
+      <div className="overflow-x-auto overflow-y-hidden">
+        <table className="w-full min-w-[800px] border-collapse text-sm">
+          <caption className="sr-only">{caption}</caption>
+          <thead>{headerRow}</thead>
+          <tbody ref={bodyRef}>{children}</tbody>
+        </table>
+      </div>
     </div>
   )
 }
 
 /**
- * Tournament position — the row's 1-based place. The top three are
- * weighted; rank-1 also gets the brand accent so the leader stands out
- * at a glance.
+ * Tournament position — the row's 1-based place. The top three render
+ * as filled brand-blue podium chips with descending fill intensity
+ * (1st full, 2nd 30%, 3rd 15%); positions 4+ render as plain muted text
+ * so the podium reads as a distinct broadcast-style tier above the
+ * rest of the field.
  */
 function PositionCell({ position }: { position: number }) {
+  if (position < 1 || position > 3) {
+    return (
+      <span className="text-muted-foreground tabular-nums">
+        {position || "—"}
+      </span>
+    )
+  }
   return (
     <span
       className={cn(
-        "tabular-nums",
-        position <= 3 && "font-semibold",
-        position === 1 && "text-brand"
+        "inline-flex min-w-7 items-center justify-center rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums",
+        position === 1 && "bg-brand text-brand-foreground",
+        position === 2 && "bg-brand/30 text-brand",
+        position === 3 && "bg-brand/15 text-brand"
       )}
     >
       {position}
