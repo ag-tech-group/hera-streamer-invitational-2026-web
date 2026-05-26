@@ -5,6 +5,7 @@ import { Toaster } from "sonner"
 import { Navbar } from "@/components/navbar"
 import { SiteAtmosphere } from "@/components/site-atmosphere"
 import { SiteFooter } from "@/components/site-footer"
+import { SiteParticles } from "@/components/site-particles"
 import { useAnalytics } from "@/lib/analytics"
 
 const TanStackRouterDevtools = import.meta.env.PROD
@@ -55,6 +56,7 @@ export function RootComponent() {
        * same regardless.
        */}
       <SiteAtmosphere />
+      <SiteParticles />
       <Navbar />
       {/*
        * Sticky-footer layout: `min-h-svh` on the wrapper plus `flex-1`

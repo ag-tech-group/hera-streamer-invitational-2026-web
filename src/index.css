@@ -318,6 +318,46 @@
   }
 
   /*
+   * Site particles (#114 brainstorm): slow-drifting brand-tinted motes
+   * rising from the bottom of the viewport. Each particle is positioned
+   * via per-instance custom properties set inline by `SiteParticles`,
+   * so 20 spans share one keyframes rule. Gated entirely under
+   * `prefers-reduced-motion: no-preference` — reduced-motion users see
+   * no drifting particles at all, just the static SiteAtmosphere wash.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes site-particle-rise {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0);
+      }
+      12% {
+        opacity: 1;
+      }
+      88% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--particle-drift, 0), -120vh);
+      }
+    }
+    .site-particle {
+      position: absolute;
+      bottom: -10vh;
+      left: var(--particle-x);
+      width: var(--particle-size);
+      height: var(--particle-size);
+      border-radius: 9999px;
+      background: color-mix(in oklch, var(--brand) 65%, transparent);
+      filter: blur(1px);
+      animation: site-particle-rise var(--particle-duration) linear infinite;
+      animation-delay: var(--particle-delay);
+      will-change: transform, opacity;
+    }
+  }
+
+  /*
    * Rank-1 row spotlight (#114): the tournament leader's row in the
    * standings table picks up a soft brand-coloured background that
    * breathes on a ~2.5s cycle — slower than the team-heartbeat pulse
