@@ -22,7 +22,10 @@ function toTeamStandingsRow(dto: TeamStandingRow): TeamStandingsRow {
     members: dto.members.map((member) => ({
       profileId: member.profile_id,
       alias: member.alias,
+      country: member.country,
       currentRating: member.current_rating,
+      inMatch: member.in_match,
+      liveMatchId: member.live_match_id,
     })),
   }
 }

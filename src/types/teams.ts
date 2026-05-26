@@ -1,8 +1,20 @@
-/** One member of a team, with their current rating. */
+/**
+ * One member of a team, with their current rating and live-match status.
+ *
+ * Mirrors the per-player `StandingsRow` fields the standings table
+ * already renders, so a member's flag and "live" indicator on the
+ * teams tab match their row on the players tab in the same poll.
+ */
 export interface TeamMember {
   profileId: number
   alias: string
+  /** ISO 3166-1 alpha-2 country code (lowercase), or null if unknown. */
+  country: string | null
   currentRating: number
+  /** Whether the player is in a live match right now. */
+  inMatch: boolean
+  /** ID of the live match they're in, or null. */
+  liveMatchId: number | null
 }
 
 /**

@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import { TeamsView } from "@/pages/home/teams-view"
-import type { TeamStandingsRow } from "@/types"
+import type { TeamMember, TeamStandingsRow } from "@/types"
 
 /** Builds a `TeamStandingsRow`, requiring only the fields a test cares about. */
 function teamRow(
@@ -18,6 +18,23 @@ function teamRow(
   }
 }
 
+/**
+ * Builds a `TeamMember` with sensible inert defaults — country `null`,
+ * not in a match — so each test only spells out the fields it cares
+ * about.
+ */
+function member(
+  overrides: Partial<TeamMember> &
+    Pick<TeamMember, "profileId" | "alias" | "currentRating">
+): TeamMember {
+  return {
+    country: null,
+    inMatch: false,
+    liveMatchId: null,
+    ...overrides,
+  }
+}
+
 const rows: TeamStandingsRow[] = [
   teamRow({
     teamId: 1,
@@ -26,8 +43,8 @@ const rows: TeamStandingsRow[] = [
     combinedRatingSum: 5400,
     combinedRatingAverage: 2700,
     members: [
-      { profileId: 10, alias: "PlayerX", currentRating: 2720 },
-      { profileId: 11, alias: "PlayerY", currentRating: 2680 },
+      member({ profileId: 10, alias: "PlayerX", currentRating: 2720 }),
+      member({ profileId: 11, alias: "PlayerY", currentRating: 2680 }),
     ],
   }),
   teamRow({
@@ -37,8 +54,8 @@ const rows: TeamStandingsRow[] = [
     combinedRatingSum: 5100,
     combinedRatingAverage: 2550,
     members: [
-      { profileId: 20, alias: "PlayerZ", currentRating: 2610 },
-      { profileId: 21, alias: "PlayerQ", currentRating: 2490 },
+      member({ profileId: 20, alias: "PlayerZ", currentRating: 2610 }),
+      member({ profileId: 21, alias: "PlayerQ", currentRating: 2490 }),
     ],
   }),
 ]
@@ -98,7 +115,9 @@ describe("TeamsView", () => {
           teamRow({
             teamId: 2,
             name: "Other Team",
-            members: [{ profileId: 30, alias: "Solo", currentRating: 1800 }],
+            members: [
+              member({ profileId: 30, alias: "Solo", currentRating: 1800 }),
+            ],
           }),
         ]}
       />
@@ -108,6 +127,75 @@ describe("TeamsView", () => {
       .closest<HTMLElement>("[data-team-color]")
     expect(empty).not.toBeNull()
     expect(within(empty!).getByText(/no rated members/i)).toBeInTheDocument()
+  })
+
+  it("renders the country flag when one is set, falling back to a globe", () => {
+    render(
+      <TeamsView
+        rows={[
+          teamRow({
+            teamId: 1,
+            name: "Flagged",
+            members: [
+              member({
+                profileId: 40,
+                alias: "Flagged",
+                country: "kr",
+                currentRating: 2300,
+              }),
+              member({
+                profileId: 41,
+                alias: "Unflagged",
+                country: null,
+                currentRating: 2200,
+              }),
+            ],
+          }),
+          teamRow({ teamId: 2, name: "Other", members: [] }),
+        ]}
+      />
+    )
+    // flag-icons renders the flag as a decorative span with `fi-<code>`.
+    // The pill puts the lookup code in the title attribute, so that's
+    // the most stable selector for the flag node.
+    expect(screen.getByTitle("KR")).toBeInTheDocument()
+    // The fallback pill should still have a globe icon (the lucide
+    // <Globe /> renders as an svg with class "lucide-globe").
+    const unflaggedPill = screen.getByText("Unflagged").closest("div")
+    expect(unflaggedPill?.querySelector("svg.lucide-globe")).not.toBeNull()
+  })
+
+  it("shows a live indicator only on members currently in a match", () => {
+    render(
+      <TeamsView
+        rows={[
+          teamRow({
+            teamId: 1,
+            name: "Live Team",
+            members: [
+              member({
+                profileId: 50,
+                alias: "Playing",
+                currentRating: 2400,
+                inMatch: true,
+                liveMatchId: 999,
+              }),
+              member({
+                profileId: 51,
+                alias: "Resting",
+                currentRating: 2300,
+                inMatch: false,
+              }),
+            ],
+          }),
+          teamRow({ teamId: 2, name: "Other", members: [] }),
+        ]}
+      />
+    )
+    // The live dot's accessible name comes from the shared
+    // `standings.liveAriaLabel` string ("In a live match"). One member
+    // is live, so it appears exactly once.
+    expect(screen.getAllByText(/in a live match/i)).toHaveLength(1)
   })
 
   it("falls back to a single-column layout when not a pair", () => {
