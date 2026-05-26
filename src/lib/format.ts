@@ -37,6 +37,16 @@ export function formatRelativeTime(
 }
 
 /**
+ * Builds the canonical aoe2insights profile URL for a player. `profile_id` is
+ * the relic ID that aoe2insights uses as its `/user/<id>` path segment — the
+ * same identifier the API surfaces on every standings row. Used wherever a
+ * player alias should link out to their broader history.
+ */
+export function aoe2insightsPlayerUrl(profileId: number): string {
+  return `https://www.aoe2insights.com/user/${profileId}`
+}
+
+/**
  * Formats an ISO-8601 timestamp as a human "time ago" phrase with
  * second-level granularity — `"just now"`, `"8s ago"`, `"3m ago"`,
  * `"2h ago"`, `"5d ago"`. Future timestamps (clock skew) collapse to

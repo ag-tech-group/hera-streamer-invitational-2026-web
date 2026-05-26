@@ -1,6 +1,18 @@
 import { describe, expect, it } from "vitest"
 
-import { formatTimeAgo, normalizeCountryCode } from "@/lib/format"
+import {
+  aoe2insightsPlayerUrl,
+  formatTimeAgo,
+  normalizeCountryCode,
+} from "@/lib/format"
+
+describe("aoe2insightsPlayerUrl", () => {
+  it("builds the canonical /user/<id> URL", () => {
+    expect(aoe2insightsPlayerUrl(1819870)).toBe(
+      "https://www.aoe2insights.com/user/1819870"
+    )
+  })
+})
 
 describe("normalizeCountryCode", () => {
   it("returns a well-formed alpha-2 code unchanged", () => {
