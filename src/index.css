@@ -318,6 +318,36 @@
   }
 
   /*
+   * Live-team heartbeat (#114): when any member of a team is in a live
+   * match, the team-coloured accent stripe at the top of the panel
+   * carries a soft team-coloured glow that breathes on a ~1.5s cycle.
+   * Same visual language as the existing `LiveBadge`/`LiveDot` ping,
+   * adapted for the wider accent-bar form factor.
+   *
+   * The base rule (outside the reduced-motion media query) sets a small
+   * static glow on its own, so reduced-motion users still see "this
+   * team is live" as a state difference — the only thing the animation
+   * adds is the breathing motion.
+   */
+  .team-heartbeat {
+    box-shadow: 0 0 6px var(--team-color-strong);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes team-heartbeat-pulse {
+      0%,
+      100% {
+        box-shadow: 0 0 6px var(--team-color-strong);
+      }
+      50% {
+        box-shadow: 0 0 18px var(--team-color-strong);
+      }
+    }
+    .team-heartbeat {
+      animation: team-heartbeat-pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  /*
    * Player-pill reveal (#90): a brief slide + fade on mount, staggered
    * via an inline `--reveal-index` set per child. Honours the user's
    * reduced-motion preference — the rule is gated on

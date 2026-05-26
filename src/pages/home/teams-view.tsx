@@ -172,6 +172,11 @@ function TeamPanel({
   revealOffset: number
   className?: string
 }) {
+  // A team is "live" if any roster member is currently in a match. Drives
+  // the heartbeat treatment on the accent stripe (see `.team-heartbeat` in
+  // index.css) — derived client-side from the per-member `in_match` flag
+  // the API already surfaces, no extra endpoint needed.
+  const isLive = team.members.some((member) => member.inMatch)
   return (
     <section
       data-team-color={color}
@@ -185,11 +190,15 @@ function TeamPanel({
        * Atmosphere: a team-coloured accent stripe along the top edge
        * plus a soft glow blooming from the upper-right corner. Both
        * decorative, both keyed to the panel's `--team-color`, so the
-       * same JSX paints blue on one panel and red on the other.
+       * same JSX paints blue on one panel and red on the other. When the
+       * team is live, the stripe picks up the heartbeat-pulse animation.
        */}
       <span
         aria-hidden
-        className="absolute inset-x-0 top-0 h-[3px]"
+        className={cn(
+          "absolute inset-x-0 top-0 h-[3px]",
+          isLive && "team-heartbeat"
+        )}
         style={{ background: "var(--team-color)" }}
       />
       <span
