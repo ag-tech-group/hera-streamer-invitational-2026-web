@@ -43,15 +43,18 @@ export function Navbar() {
     <nav className="border-border/50 bg-background/80 fixed top-0 z-50 w-full border-b backdrop-blur-sm">
       <div className="mx-auto flex h-14 w-full max-w-[1536px] items-center justify-between gap-3 px-4">
         {/*
-         * aria-label gives the link a stable accessible name during the
-         * loading window when `tournamentName` is null — the logo's
-         * alt="" makes it decorative, so without the label the link
-         * would have no accessible name at all.
+         * aria-label uses the live tournament name once it's loaded so it
+         * matches the visible text rather than diverging into a stale
+         * fallback (Lighthouse flags a mismatch between accessible name
+         * and visible label as a WCAG violation). Falls back to the
+         * generic "Live Standings" while the metadata fetch is in
+         * flight, since the logo's alt="" makes the image decorative and
+         * the link otherwise has no accessible name during loading.
          */}
         <Link
           to="/"
           className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-80"
-          aria-label={t("nav.brandAriaLabel")}
+          aria-label={tournamentName ?? t("nav.brandAriaLabel")}
         >
           <img src="/logo.png" alt="" className="size-8 shrink-0" />
           {tournamentName ? (

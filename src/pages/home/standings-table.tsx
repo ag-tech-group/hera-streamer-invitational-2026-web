@@ -539,7 +539,12 @@ function StreakCell({ streak }: { streak: number }) {
     <span
       className={cn(
         "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums",
-        winning ? "text-chart-2" : "text-destructive",
+        // Text uses the `-deep` variant (darker in light theme, lighter
+        // in dark theme) so the W / L label clears WCAG AA contrast
+        // against the tinted background. Base chart-2 / destructive
+        // sit too close to the badge bg luminance for the small-text
+        // 4.5:1 threshold.
+        winning ? "text-chart-2-deep" : "text-destructive-deep",
         tier === "low" && (winning ? "bg-chart-2/10" : "bg-destructive/10"),
         tier === "med" && (winning ? "bg-chart-2/20" : "bg-destructive/20"),
         tier === "high" &&
@@ -615,7 +620,9 @@ function ActivityCell({
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
-        active ? "bg-chart-2/10 text-chart-2" : "bg-muted text-muted-foreground"
+        active
+          ? "bg-chart-2/10 text-chart-2-deep"
+          : "bg-muted text-muted-foreground"
       )}
     >
       <span

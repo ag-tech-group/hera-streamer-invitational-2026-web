@@ -1,0 +1,15 @@
+# Hera Streamer Invitational 2026 — Live Standings
+
+A real-time companion site for the Hera Streamer Invitational 2026 — an
+Age of Empires II: Definitive Edition tournament hosted by Hera.
+Surfaces live player ratings, team standings, and tournament progression
+as matches are played.
+
+## Pages
+
+- [Home / Players standings](https://hera-streamer-invitational-2026.criticalbit.gg/): live 1v1-ladder ratings + per-tournament games for every roster player, with a Teams tab for the same field grouped by team.
+
+## Source
+
+- [Frontend repository](https://github.com/ag-tech-group/hera-streamer-invitational-2026-web): React + Vite SPA.
+- [API repository](https://github.com/ag-tech-group/aoe2-live-standings-api): FastAPI service that polls the AoE2 ladder and exposes standings + an SSE nudge stream.
