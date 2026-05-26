@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { ChevronLeft } from "lucide-react"
 import { useEffect, useRef } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { NotFound } from "@/components/not-found"
 import { activeTournament } from "@/config/tournaments"
 import { useAuth } from "@/lib/auth"
 import { loginUrl } from "@/lib/auth-config"
+import i18n from "@/lib/i18n"
 import { OwnersSection } from "@/pages/admin/sections/owners-section"
 import { PlayersSection } from "@/pages/admin/sections/players-section"
 import { TeamsSection } from "@/pages/admin/sections/teams-section"
@@ -41,9 +43,12 @@ export function AdminPage() {
     if (isLoading) return
     if (wasAdminRef.current && !isAdmin) {
       void navigate({ to: "/" })
-      toast.info("Your session expired — sign in again to continue.", {
+      // `i18n.t` (not the hook) because the toast text is the last
+      // thing we render before navigating away — the component is
+      // about to unmount, so a re-render from the hook would be wasted.
+      toast.info(i18n.t("errors.sessionExpired"), {
         action: {
-          label: "Sign in",
+          label: i18n.t("errors.signInAction"),
           onClick: () => {
             // Land back on the admin page after re-auth — that was the
             // original intent before the session dropped.
@@ -61,6 +66,7 @@ export function AdminPage() {
 }
 
 function AdminLayout() {
+  const { t } = useTranslation()
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-8">
       <header className="border-border flex flex-col gap-2 border-b-2 pb-4">
@@ -69,25 +75,27 @@ function AdminLayout() {
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start text-sm transition-colors"
         >
           <ChevronLeft className="size-4" aria-hidden />
-          Back to standings
+          {t("admin.backToStandings")}
         </Link>
-        <h1 className="font-display text-4xl tracking-wide">Admin</h1>
+        <h1 className="font-display text-4xl tracking-wide">
+          {t("admin.title")}
+        </h1>
         <p className="text-muted-foreground text-sm">{activeTournament.name}</p>
       </header>
 
-      <AdminSection title="Tournament details">
+      <AdminSection title={t("admin.sections.tournamentDetails")}>
         <TournamentDetailsSection />
       </AdminSection>
 
-      <AdminSection title="Owners">
+      <AdminSection title={t("admin.sections.owners")}>
         <OwnersSection />
       </AdminSection>
 
-      <AdminSection title="Players">
+      <AdminSection title={t("admin.sections.players")}>
         <PlayersSection />
       </AdminSection>
 
-      <AdminSection title="Teams">
+      <AdminSection title={t("admin.sections.teams")}>
         <TeamsSection />
       </AdminSection>
     </div>

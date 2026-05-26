@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import {
@@ -59,18 +60,23 @@ function OwnersList({
   error: boolean
   owners: TournamentOwnerRead[]
 }) {
+  const { t } = useTranslation()
   if (loading) {
-    return <p className="text-muted-foreground text-sm">Loading…</p>
+    return (
+      <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
+    )
   }
   if (error) {
     return (
-      <p className="text-destructive text-sm">
-        Couldn&apos;t load owners — requires sign-in.
-      </p>
+      <p className="text-destructive text-sm">{t("admin.owners.loadError")}</p>
     )
   }
   if (owners.length === 0) {
-    return <p className="text-muted-foreground text-sm">No owners yet.</p>
+    return (
+      <p className="text-muted-foreground text-sm">
+        {t("admin.owners.noOwners")}
+      </p>
+    )
   }
   return (
     <ul className="flex flex-col gap-2">
@@ -82,6 +88,7 @@ function OwnersList({
 }
 
 function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
 
@@ -99,7 +106,7 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
                 activeTournament.apiTournamentSlug
               ),
           })
-          toast.success("Owner revoked.")
+          toast.success(t("admin.owners.revokeSuccess"))
         },
         onError: idempotencyKey.resetOnReusedKey,
       },
@@ -127,7 +134,9 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
       </div>
       <div className="flex items-center justify-between gap-3 sm:justify-end">
         <span className="text-muted-foreground shrink-0 text-xs">
-          Granted {new Date(owner.created_at).toLocaleDateString()}
+          {t("admin.owners.grantedOn", {
+            date: new Date(owner.created_at).toLocaleDateString(),
+          })}
         </span>
         <ConfirmDialog
           trigger={
@@ -136,19 +145,14 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
               variant="outline"
               size="sm"
               disabled={mutation.isPending}
-              aria-label={`Revoke ${primary}`}
+              aria-label={t("admin.owners.removeAria", { name: primary })}
             >
               <Trash2 className="size-4" aria-hidden />
             </Button>
           }
-          title="Revoke ownership?"
-          description={
-            <>
-              <strong>{primary}</strong> will lose admin access to this
-              tournament.
-            </>
-          }
-          confirmLabel="Revoke"
+          title={t("admin.owners.removeTitle")}
+          description={t("admin.owners.removeDescription", { name: primary })}
+          confirmLabel={t("admin.owners.removeConfirm")}
           destructive
           onConfirm={() =>
             mutation.mutate({
@@ -185,6 +189,7 @@ function ownerSecondaryIdentity(owner: TournamentOwnerRead): string | null {
 }
 
 function GrantOwnerForm() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [selected, setSelected] = useState<UserSearchResult | null>(null)
@@ -204,7 +209,7 @@ function GrantOwnerForm() {
                 activeTournament.apiTournamentSlug
               ),
           })
-          toast.success("Owner granted.")
+          toast.success(t("admin.owners.grantSuccess"))
         },
         onError: idempotencyKey.resetOnReusedKey,
       },
@@ -223,16 +228,18 @@ function GrantOwnerForm() {
       }}
       className="border-border/60 flex flex-col gap-2 border-t pt-4"
     >
-      <Label htmlFor="grant-owner-search">Grant ownership</Label>
+      <Label htmlFor="grant-owner-search">{t("admin.owners.grantLabel")}</Label>
       <div className="flex gap-2">
         <UserSearchPicker
           inputId="grant-owner-search"
           selected={selected}
           onSelect={setSelected}
-          placeholder="Search by name or email"
+          placeholder={t("admin.owners.addPlaceholder")}
         />
         <Button type="submit" disabled={mutation.isPending || !selected}>
-          {mutation.isPending ? "Granting…" : "Grant"}
+          {mutation.isPending
+            ? t("admin.owners.addingAction")
+            : t("admin.owners.addAction")}
         </Button>
       </div>
     </form>

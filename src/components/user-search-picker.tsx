@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { X } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,7 +30,7 @@ import { cn } from "@/lib/utils"
 export function UserSearchPicker({
   selected,
   onSelect,
-  placeholder = "Search by name or email",
+  placeholder,
   inputId,
 }: {
   selected: UserSearchResult | null
@@ -37,6 +38,7 @@ export function UserSearchPicker({
   placeholder?: string
   inputId?: string
 }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
   const debouncedQuery = useDebouncedValue(query.trim(), 250)
@@ -64,7 +66,7 @@ export function UserSearchPicker({
           size="icon-xs"
           className="ml-auto"
           onClick={() => onSelect(null)}
-          aria-label="Clear selected user"
+          aria-label={t("userSearch.clear")}
         >
           <X aria-hidden />
         </Button>
@@ -86,7 +88,7 @@ export function UserSearchPicker({
         // Slight delay so a click on a result fires *before* the input
         // loses focus and the dropdown unmounts.
         onBlur={() => setTimeout(() => setOpen(false), 150)}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t("userSearch.placeholder")}
         autoComplete="off"
       />
       {open && debouncedQuery.length > 0 ? (
@@ -113,6 +115,7 @@ function SearchResults({
   isFetching: boolean
   onSelect: (user: UserSearchResult) => void
 }) {
+  const { t } = useTranslation()
   return (
     <ul
       role="listbox"
@@ -120,11 +123,13 @@ function SearchResults({
     >
       {results.length === 0 && !isFetching ? (
         <li className="text-muted-foreground px-3 py-2 text-sm">
-          No users match that search.
+          {t("userSearch.noMatches")}
         </li>
       ) : null}
       {results.length === 0 && isFetching ? (
-        <li className="text-muted-foreground px-3 py-2 text-sm">Searching…</li>
+        <li className="text-muted-foreground px-3 py-2 text-sm">
+          {t("userSearch.searching")}
+        </li>
       ) : null}
       {results.map((user) => (
         <li

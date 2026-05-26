@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronDown, ExternalLink, LogOut, ShieldUser } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
+import { LanguageToggle } from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +32,7 @@ import { AUTH_URL, loginUrl } from "@/lib/auth-config"
  * fixed bar.
  */
 export function Navbar() {
+  const { t } = useTranslation()
   // Shares the cache entry with HomePage's own useTournament() call — both
   // hit the same query key, so the navbar piggybacks on whichever fetch
   // resolves first and re-renders when the name arrives.
@@ -48,7 +51,7 @@ export function Navbar() {
         <Link
           to="/"
           className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-80"
-          aria-label="Live Standings"
+          aria-label={t("nav.brandAriaLabel")}
         >
           <img src="/logo.png" alt="" className="size-8 shrink-0" />
           {tournamentName ? (
@@ -59,6 +62,7 @@ export function Navbar() {
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <LanguageToggle />
           <AuthWidget />
         </div>
       </div>
@@ -79,6 +83,7 @@ export function Navbar() {
  *   (only when `isAdmin`), Sign out.
  */
 function AuthWidget() {
+  const { t } = useTranslation()
   const {
     isLoading,
     isAuthenticated,
@@ -95,7 +100,7 @@ function AuthWidget() {
   if (!isAuthenticated) {
     return (
       <Button variant="outline" size="sm" asChild>
-        <a href={loginUrl(window.location.pathname)}>Sign in</a>
+        <a href={loginUrl(window.location.pathname)}>{t("nav.signIn")}</a>
       </Button>
     )
   }
@@ -103,7 +108,7 @@ function AuthWidget() {
   // Same identity-fallback chain as the owners list: prefer display_name,
   // then email, then the bare user_id as a last resort if the auth API
   // call somehow returned without identity fields.
-  const label = displayName ?? email ?? userId ?? "Profile"
+  const label = displayName ?? email ?? userId ?? t("nav.profile")
 
   return (
     <DropdownMenu>
@@ -111,7 +116,7 @@ function AuthWidget() {
         <button
           type="button"
           className="hover:bg-accent hover:text-accent-foreground inline-flex h-8 items-center gap-2 rounded-md px-2 text-sm transition-colors"
-          aria-label="Account menu"
+          aria-label={t("nav.accountMenu")}
         >
           <UserAvatar
             avatarUrl={avatarUrl}
@@ -132,21 +137,21 @@ function AuthWidget() {
             rel="noopener noreferrer"
           >
             <ExternalLink className="size-4" aria-hidden />
-            Profile
+            {t("nav.profile")}
           </a>
         </DropdownMenuItem>
         {isAdmin ? (
           <DropdownMenuItem asChild>
             <Link to="/admin">
               <ShieldUser className="size-4" aria-hidden />
-              Admin
+              {t("nav.admin")}
             </Link>
           </DropdownMenuItem>
         ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => void signOut()}>
           <LogOut className="size-4" aria-hidden />
-          Sign out
+          {t("nav.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,6 +1,7 @@
 import { Globe } from "lucide-react"
 import { useMemo } from "react"
 import type { ReactNode, Ref } from "react"
+import { useTranslation } from "react-i18next"
 
 import { SortableTh } from "@/components/sortable-th"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -31,6 +32,7 @@ const SKELETON_ROW_COUNT = 6
  * when a populated table is the right thing to show (vs. loading/empty/error).
  */
 export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
+  const { t } = useTranslation()
   // One reference instant for the whole render, so every "time ago" in the
   // Activity column is measured against the same clock.
   const now = new Date()
@@ -54,7 +56,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
 
   return (
     <TableShell
-      caption="Live tournament standings"
+      caption={t("standings.caption")}
       bodyRef={containerRef}
       headerRow={<StandingsHeaderRow sortState={sortState} onSort={sortBy} />}
     >
@@ -137,25 +139,26 @@ function StandingsHeaderRow({
   sortState?: SortState | null
   onSort?: (key: string, defaultDirection: SortDirection) => void
 }) {
+  const { t } = useTranslation()
   return (
     <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
-      <SortableTh label="Position" />
+      <SortableTh label={t("standings.headers.position")} />
       <SortableTh
-        label="Ladder"
+        label={t("standings.headers.ladder")}
         sortKey="rank"
         defaultDirection="asc"
         sortState={sortState}
         onSort={onSort}
       />
       <SortableTh
-        label="Player"
+        label={t("standings.headers.player")}
         sortKey="alias"
         defaultDirection="asc"
         sortState={sortState}
         onSort={onSort}
       />
       <SortableTh
-        label="Rating"
+        label={t("standings.headers.rating")}
         align="right"
         sortKey="currentRating"
         defaultDirection="desc"
@@ -163,7 +166,7 @@ function StandingsHeaderRow({
         onSort={onSort}
       />
       <SortableTh
-        label="Peak"
+        label={t("standings.headers.peak")}
         align="right"
         sortKey="maxRating"
         defaultDirection="desc"
@@ -171,7 +174,7 @@ function StandingsHeaderRow({
         onSort={onSort}
       />
       <SortableTh
-        label="Streak"
+        label={t("standings.headers.streak")}
         align="center"
         sortKey="streak"
         defaultDirection="desc"
@@ -179,16 +182,16 @@ function StandingsHeaderRow({
         onSort={onSort}
       />
       <SortableTh
-        label="Games"
+        label={t("standings.headers.games")}
         align="right"
         sortKey="gamesPlayed"
         defaultDirection="desc"
         sortState={sortState}
         onSort={onSort}
       />
-      <SortableTh label="Recent" />
+      <SortableTh label={t("standings.headers.recent")} />
       <SortableTh
-        label="Activity"
+        label={t("standings.headers.activity")}
         sortKey="lastMatchAt"
         defaultDirection="desc"
         sortState={sortState}
@@ -204,8 +207,12 @@ function StandingsHeaderRow({
  * layout shift.
  */
 export function StandingsTableSkeleton() {
+  const { t } = useTranslation()
   return (
-    <TableShell caption="Loading standings" headerRow={<StandingsHeaderRow />}>
+    <TableShell
+      caption={t("standings.captionLoading")}
+      headerRow={<StandingsHeaderRow />}
+    >
       {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
         <tr key={index} className="border-b last:border-b-0">
           <td className="px-4 py-3">
@@ -326,6 +333,7 @@ function PlayerCell({
   country: string | null
   inMatch: boolean
 }) {
+  const { t } = useTranslation()
   const countryCode = normalizeCountryCode(country)
   return (
     <span className="flex items-center gap-2">
@@ -342,7 +350,7 @@ function PlayerCell({
         href={aoe2insightsPlayerUrl(profileId)}
         target="_blank"
         rel="noopener noreferrer"
-        title={`View ${alias} on aoe2insights`}
+        title={t("standings.viewOnAoe2insights", { alias })}
         className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
       >
         {alias}
@@ -358,16 +366,17 @@ function PlayerCell({
  * `live` SSE nudge keeps fresh (see `useLiveUpdates`).
  */
 function LiveBadge() {
+  const { t } = useTranslation()
   return (
     <span
       className="bg-brand/15 text-brand inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
-      aria-label="In a live match"
+      aria-label={t("standings.liveAriaLabel")}
     >
       <span className="relative flex size-1.5" aria-hidden>
         <span className="bg-brand absolute inline-flex size-full animate-ping rounded-full opacity-75" />
         <span className="bg-brand relative inline-flex size-1.5 rounded-full" />
       </span>
-      Live
+      {t("standings.live")}
     </span>
   )
 }
@@ -402,19 +411,23 @@ function StreakCell({ streak }: { streak: number }) {
  * player with no completed match shows a neutral placeholder.
  */
 function RecentResultsCell({ results }: { results: MatchResult[] }) {
+  const { t } = useTranslation()
   if (results.length === 0) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
+  const labeled = results
+    .map((r) => (r === "win" ? t("standings.win") : t("standings.loss")))
+    .join(", ")
   return (
     <span
       className="flex items-center gap-1"
-      aria-label={`Recent results, most recent first: ${results.join(", ")}`}
+      aria-label={t("standings.recentAriaLabel", { results: labeled })}
     >
       {results.map((result, index) => (
         <span
           key={index}
           aria-hidden
-          title={result === "win" ? "Win" : "Loss"}
+          title={result === "win" ? t("standings.win") : t("standings.loss")}
           className={cn(
             "size-2 rounded-[2px]",
             result === "win" ? "bg-chart-2" : "bg-destructive"
@@ -437,6 +450,7 @@ function ActivityCell({
   lastMatchAt: string | null
   now: Date
 }) {
+  const { t } = useTranslation()
   if (!lastMatchAt) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
@@ -455,7 +469,7 @@ function ActivityCell({
           active ? "bg-chart-2" : "bg-muted-foreground/50"
         )}
       />
-      {active ? "Active" : "Idle"}
+      {active ? t("standings.active") : t("standings.idle")}
       <span className="tabular-nums opacity-70">
         {formatRelativeTime(lastMatchAt, now)}
       </span>

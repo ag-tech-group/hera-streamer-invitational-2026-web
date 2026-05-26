@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Countdown } from "@/components/countdown"
 import { HostLinksCard } from "@/components/host-links-card"
@@ -24,6 +25,7 @@ import { ViewTabs, type StandingsView } from "@/pages/home/view-tabs"
 import type { StandingsSnapshot, TeamStandingsSnapshot } from "@/types"
 
 export function HomePage() {
+  const { t } = useTranslation()
   const [view, setView] = useState<StandingsView>("players")
 
   const standings = useStandings()
@@ -73,7 +75,9 @@ export function HomePage() {
          * Drops `font-bold` because Bebas Neue ships only weight 400 —
          * forcing a synthetic 700 produces an ugly emboldened glyph.
          */}
-        <h1 className="font-display text-4xl tracking-wide">Live Standings</h1>
+        <h1 className="font-display text-4xl tracking-wide">
+          {t("home.title")}
+        </h1>
         <p className="text-muted-foreground text-sm">
           <a
             href="https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/"
@@ -81,9 +85,9 @@ export function HomePage() {
             rel="noopener noreferrer"
             className="hover:text-foreground underline-offset-2 transition-colors hover:underline"
           >
-            Age of Empires 2: Definitive Edition
+            {t("home.subtitleProduct")}
           </a>{" "}
-          live rankings
+          {t("home.subtitleSuffix")}
         </p>
       </header>
 
@@ -109,12 +113,12 @@ export function HomePage() {
         <div className="flex flex-col gap-6 2xl:w-1/4 2xl:shrink-0">
           <Countdown
             target={tournament.data?.startDate ?? null}
-            label="Tournament starts in"
+            label={t("home.tournamentStartsIn")}
             variant="compact"
           />
           <Countdown
             target={tournament.data?.grandFinalsDate ?? null}
-            label="Grand finals start in"
+            label={t("home.grandFinalsStartIn")}
             variant="compact"
           />
           <HostLinksCard

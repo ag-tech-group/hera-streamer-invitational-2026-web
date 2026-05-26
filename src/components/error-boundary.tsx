@@ -1,10 +1,13 @@
 import * as Sentry from "@sentry/react"
 import { Link } from "@tanstack/react-router"
 import type { ErrorComponentProps } from "@tanstack/react-router"
+import { useTranslation } from "react-i18next"
+
 import { Button } from "@/components/ui/button"
 import { logger } from "@/lib/logger"
 
 export function ErrorBoundary({ error, reset }: ErrorComponentProps) {
+  const { t } = useTranslation()
   logger.error("Uncaught error in route component", {
     message: error.message,
     stack: error.stack,
@@ -19,16 +22,18 @@ export function ErrorBoundary({ error, reset }: ErrorComponentProps) {
     // footer visible while the error state is up.
     <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
       <p className="text-muted-foreground text-sm font-medium tracking-widest uppercase">
-        Something went wrong
+        {t("errorBoundary.eyebrow")}
       </p>
-      <h1 className="text-primary text-7xl font-bold tracking-tight">Error</h1>
+      <h1 className="text-primary text-7xl font-bold tracking-tight">
+        {t("errorBoundary.heading")}
+      </h1>
       <p className="text-muted-foreground text-base">
-        An unexpected error occurred. Please try again.
+        {t("errorBoundary.body")}
       </p>
       <div className="flex gap-3">
-        <Button onClick={reset}>Try again</Button>
+        <Button onClick={reset}>{t("errorBoundary.retry")}</Button>
         <Button variant="outline" asChild>
-          <Link to="/">Go home</Link>
+          <Link to="/">{t("errorBoundary.home")}</Link>
         </Button>
       </div>
     </div>

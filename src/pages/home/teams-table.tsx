@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import type { ReactNode, Ref } from "react"
+import { useTranslation } from "react-i18next"
 
 import { SortableTh } from "@/components/sortable-th"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -22,6 +23,7 @@ const SKELETON_ROW_COUNT = 4
  * ratings); each row carries the team identity and its full roster.
  */
 export function TeamsTable({ rows }: { rows: TeamStandingsRow[] }) {
+  const { t } = useTranslation()
   const { sortedRows, sortState, sortBy } = useTableSort(rows, getSortValue)
 
   // FLIP animation: rows slide to their new spots when the ranked order
@@ -40,7 +42,7 @@ export function TeamsTable({ rows }: { rows: TeamStandingsRow[] }) {
 
   return (
     <TeamsTableShell
-      caption="Tournament team standings"
+      caption={t("teams.caption")}
       bodyRef={containerRef}
       headerRow={<TeamsHeaderRow sortState={sortState} onSort={sortBy} />}
     >
@@ -97,18 +99,19 @@ function TeamsHeaderRow({
   sortState?: SortState | null
   onSort?: (key: string, defaultDirection: SortDirection) => void
 }) {
+  const { t } = useTranslation()
   return (
     <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
-      <SortableTh label="Position" />
+      <SortableTh label={t("standings.headers.position")} />
       <SortableTh
-        label="Team"
+        label={t("teams.headers.team")}
         sortKey="name"
         defaultDirection="asc"
         sortState={sortState}
         onSort={onSort}
       />
       <SortableTh
-        label="Combined"
+        label={t("teams.headers.combined")}
         align="right"
         sortKey="combinedRatingSum"
         defaultDirection="desc"
@@ -116,14 +119,14 @@ function TeamsHeaderRow({
         onSort={onSort}
       />
       <SortableTh
-        label="Avg"
+        label={t("teams.headers.average")}
         align="right"
         sortKey="combinedRatingAverage"
         defaultDirection="desc"
         sortState={sortState}
         onSort={onSort}
       />
-      <SortableTh label="Members" />
+      <SortableTh label={t("teams.headers.members")} />
     </tr>
   )
 }
@@ -134,9 +137,10 @@ function TeamsHeaderRow({
  * causes no layout shift.
  */
 export function TeamsTableSkeleton() {
+  const { t } = useTranslation()
   return (
     <TeamsTableShell
-      caption="Loading team standings"
+      caption={t("teams.captionLoading")}
       headerRow={<TeamsHeaderRow />}
     >
       {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (

@@ -1,4 +1,8 @@
 import { handlers } from "@/api/handlers"
+// Side-effect import: bootstraps i18next so components rendered in
+// tests get real translations (English by default) instead of falling
+// through to raw key strings.
+import "@/lib/i18n"
 import { MockEventSource } from "@/test/mock-event-source"
 import "@testing-library/jest-dom/vitest"
 import { cleanup } from "@testing-library/react"

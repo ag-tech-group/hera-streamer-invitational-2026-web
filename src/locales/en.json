@@ -1,0 +1,224 @@
+{
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "es": "Español"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "auto": "Auto"
+  },
+  "nav": {
+    "brandAriaLabel": "Live Standings",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "profile": "Profile",
+    "admin": "Admin",
+    "accountMenu": "Account menu"
+  },
+  "home": {
+    "title": "Live Standings",
+    "subtitleProduct": "Age of Empires 2: Definitive Edition",
+    "subtitleSuffix": "live rankings",
+    "tabs": {
+      "players": "Players",
+      "teams": "Teams"
+    },
+    "viewTabsAria": "Standings view",
+    "lastUpdated": "Updated {{time}}",
+    "tournamentStartsIn": "Tournament starts in",
+    "grandFinalsStartIn": "Grand finals start in",
+    "noStandings": {
+      "title": "No standings yet",
+      "body": "Players will appear here once the tournament leaderboard is populated."
+    },
+    "noTeams": {
+      "title": "No teams yet",
+      "body": "Teams will appear here once they are set up for this tournament."
+    },
+    "loadErrorStandings": {
+      "title": "Couldn't load standings",
+      "body": "Something went wrong reaching the leaderboard."
+    },
+    "loadErrorTeams": {
+      "title": "Couldn't load teams",
+      "body": "Something went wrong reaching the team standings."
+    }
+  },
+  "standings": {
+    "caption": "Live tournament standings",
+    "captionLoading": "Loading standings",
+    "headers": {
+      "position": "Position",
+      "ladder": "Ladder",
+      "player": "Player",
+      "rating": "Rating",
+      "peak": "Peak",
+      "streak": "Streak",
+      "games": "Games",
+      "recent": "Recent",
+      "activity": "Activity"
+    },
+    "live": "Live",
+    "liveAriaLabel": "In a live match",
+    "active": "Active",
+    "idle": "Idle",
+    "recentAriaLabel": "Recent results, most recent first: {{results}}",
+    "win": "Win",
+    "loss": "Loss",
+    "viewOnAoe2insights": "View {{alias}} on aoe2insights"
+  },
+  "teams": {
+    "caption": "Tournament team standings",
+    "captionLoading": "Loading team standings",
+    "headers": {
+      "team": "Team",
+      "combined": "Combined",
+      "average": "Avg",
+      "members": "Members"
+    }
+  },
+  "admin": {
+    "title": "Admin",
+    "backToStandings": "Back to standings",
+    "sections": {
+      "tournamentDetails": "Tournament details",
+      "owners": "Owners",
+      "players": "Players",
+      "teams": "Teams"
+    },
+    "tournament": {
+      "nameLabel": "Name",
+      "startDate": "Start date",
+      "grandFinalsDate": "Grand finals date",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "successToast": "Tournament updated.",
+      "loadError": "Couldn't load tournament details."
+    },
+    "owners": {
+      "grantLabel": "Grant ownership",
+      "addPlaceholder": "Search by name or email",
+      "addAction": "Grant",
+      "addingAction": "Granting…",
+      "grantedOn": "Granted {{date}}",
+      "removeAria": "Revoke {{name}}",
+      "removeTitle": "Revoke ownership?",
+      "removeDescription": "{{name}} will lose admin access to this tournament.",
+      "removeConfirm": "Revoke",
+      "grantSuccess": "Owner granted.",
+      "revokeSuccess": "Owner revoked.",
+      "noOwners": "No owners yet.",
+      "loadError": "Couldn't load owners — requires sign-in."
+    },
+    "players": {
+      "addLabel": "Add player",
+      "addPlaceholder": "aoe2 profile_id",
+      "addAction": "Add",
+      "addingAction": "Adding…",
+      "removeAria": "Remove {{name}}",
+      "removeTitle": "Remove {{name}}?",
+      "removeDescription": "This removes the player from the tournament roster. Their match history and ratings stay intact upstream.",
+      "removeConfirm": "Remove",
+      "addSuccess": "Player added.",
+      "removeSuccess": "Player removed.",
+      "noPlayers": "No players yet.",
+      "loadError": "Couldn't load roster.",
+      "profileHint": "Find a player's <code>profile_id</code> in their <link>aoe2insights</link> URL — e.g. <code>aoe2insights.com/user/1819870</code> → <code>1819870</code>."
+    },
+    "teams": {
+      "createLabel": "Create team",
+      "initialsPlaceholder": "Initials",
+      "namePlaceholder": "Team name",
+      "createAction": "Create",
+      "creatingAction": "Creating…",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "editAria": "Edit {{name}}",
+      "deleteAria": "Delete {{name}}",
+      "deleteTitle": "Delete team \"{{name}}\"?",
+      "deleteDescription": "The team and all its members are removed. Players themselves stay on the tournament roster.",
+      "deleteConfirm": "Delete team",
+      "addMember": "Add member",
+      "addMemberPlaceholder": "Pick a player",
+      "addMemberNone": "No players available",
+      "addMemberAction": "Add",
+      "addMemberAdding": "Adding…",
+      "memberOnTeam": "(on {{name}})",
+      "noMembers": "No members yet.",
+      "removeMemberAria": "Remove {{name}} from team",
+      "removeMemberTitle": "Remove {{name}} from this team?",
+      "removeMemberDescription": "The player stays on the tournament roster.",
+      "removeMemberConfirm": "Remove",
+      "moveTitle": "Move player to this team?",
+      "moveDescription": "{{name}} is currently on {{from}}.",
+      "moveConfirm": "Move player",
+      "noTeams": "No teams yet.",
+      "loadError": "Couldn't load teams.",
+      "createSuccess": "Team created.",
+      "updateSuccess": "Team updated.",
+      "deleteSuccess": "Team deleted."
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "saving": "Saving…",
+    "loading": "Loading…",
+    "error": "Error",
+    "tryAgain": "Try again",
+    "reference": "Reference: {{id}}",
+    "goHome": "Go home"
+  },
+  "userSearch": {
+    "placeholder": "Search by name or email",
+    "clear": "Clear selected user",
+    "noMatches": "No users match that search.",
+    "searching": "Searching…"
+  },
+  "countdown": {
+    "days": "days",
+    "hours": "hrs",
+    "minutes": "min",
+    "seconds": "sec"
+  },
+  "hostLinks": {
+    "defaultLabel": "Hosted by"
+  },
+  "notFound": {
+    "eyebrow": "Page not found",
+    "code": "404",
+    "body": "Sorry, we couldn't find the page you're looking for.",
+    "homeAction": "Go back home"
+  },
+  "errorBoundary": {
+    "eyebrow": "Something went wrong",
+    "heading": "Error",
+    "body": "An unexpected error occurred. Please try again.",
+    "retry": "Try again",
+    "home": "Go home"
+  },
+  "errors": {
+    "default": "An unexpected error occurred.",
+    "400": "Invalid request. Please check your input.",
+    "401": "Your session has expired. Please sign in again.",
+    "403": "You don't have permission to do that.",
+    "404": "The requested resource was not found.",
+    "409": "This conflicts with an existing resource.",
+    "422": "Please check your input and try again.",
+    "429": "Too many requests. Please wait a moment.",
+    "500": "Something went wrong on our end. Please try again later.",
+    "idempotencyKeyReused": "Something changed — please try again.",
+    "tournamentNotFound": "Tournament not found.",
+    "sessionExpired": "Your session expired — sign in again to continue.",
+    "signInAction": "Sign in"
+  },
+  "footer": {
+    "criticalbitProject": "A <link>criticalbit.gg</link> project.",
+    "microsoftDisclaimer": "Age of Empires II © Microsoft Corporation. This site was created under Microsoft's <link>Game Content Usage Rules</link> using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft."
+  }
+}

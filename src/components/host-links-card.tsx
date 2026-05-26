@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { ComponentType, SVGProps } from "react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import type { HostLink, HostLinkKind } from "@/types"
@@ -33,13 +34,14 @@ const KIND_ICON: Record<HostLinkKind, IconComponent> = {
 
 export function HostLinksCard({
   links,
-  label = "Hosted by",
+  label,
   className,
 }: {
   links: HostLink[] | undefined
   label?: string
   className?: string
 }) {
+  const { t } = useTranslation()
   if (!links || links.length === 0) return null
   return (
     <section
@@ -49,7 +51,7 @@ export function HostLinksCard({
       )}
     >
       <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-        {label}
+        {label ?? t("hostLinks.defaultLabel")}
       </p>
       <ul className="grid grid-cols-2 gap-1">
         {links.map((link) => {
