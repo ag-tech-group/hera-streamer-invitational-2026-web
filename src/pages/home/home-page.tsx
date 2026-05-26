@@ -83,7 +83,7 @@ export function HomePage() {
             href="https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-foreground underline-offset-2 transition-colors hover:underline"
+            className="hover:text-foreground underline underline-offset-2 transition-colors"
           >
             {t("home.subtitleProduct")}
           </a>{" "}
