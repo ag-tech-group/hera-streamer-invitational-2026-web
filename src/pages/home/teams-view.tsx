@@ -1,4 +1,4 @@
-import { Globe } from "lucide-react"
+import { Globe, Swords } from "lucide-react"
 import { useMemo } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -443,9 +443,9 @@ function LiveDot() {
 /**
  * The central pillar between the two team panels in coliseum view. A
  * thin gradient column that fades from one team colour to the other,
- * with a small AoE2-themed keep silhouette + "VS" caption centred
- * vertically. Purely decorative: aria-hidden so screen readers walk
- * straight from one panel to the next.
+ * with crossed swords + a "VS" caption centred vertically. Purely
+ * decorative: aria-hidden so screen readers walk straight from one
+ * panel to the next.
  */
 function VersusPillar({ className }: { className?: string }) {
   const { t } = useTranslation()
@@ -459,7 +459,7 @@ function VersusPillar({ className }: { className?: string }) {
     >
       <div className="from-team-p1 via-border to-team-p2 h-full w-px bg-gradient-to-b opacity-60" />
       <div className="bg-background ring-border my-3 flex flex-col items-center gap-1 rounded-full px-2 py-3 ring-1">
-        <KeepIcon className="text-muted-foreground size-6" />
+        <Swords className="text-muted-foreground size-5" />
         <span
           className="font-display text-muted-foreground text-xs tracking-widest"
           aria-label={t("teams.versus")}
@@ -469,27 +469,5 @@ function VersusPillar({ className }: { className?: string }) {
       </div>
       <div className="from-team-p1 via-border to-team-p2 h-full w-px bg-gradient-to-b opacity-60" />
     </div>
-  )
-}
-
-/**
- * Three-tower keep silhouette used in the coliseum VS pillar (#114).
- * A custom AoE2-feel mark — taller central donjon flanked by two
- * shorter walls, all topped with crenellations — drawn as a single
- * filled path so it picks up `currentColor` and inverts cleanly
- * between light and dark themes. Sized via the standard `size-*`
- * Tailwind utility, matching the surrounding icon chrome.
- */
-function KeepIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden
-    >
-      <path d="M3 22 L3 8 L4 8 L4 10 L5 10 L5 8 L6 8 L6 10 L7 10 L7 8 L8 8 L8 10 L9 10 L9 5 L10 5 L10 7 L11 7 L11 5 L13 5 L13 7 L14 7 L14 5 L15 5 L15 10 L16 10 L16 8 L17 8 L17 10 L18 10 L18 8 L19 8 L19 10 L20 10 L20 8 L21 8 L21 22 Z" />
-    </svg>
   )
 }
