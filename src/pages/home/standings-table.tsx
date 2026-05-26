@@ -1,4 +1,4 @@
-import { Globe } from "lucide-react"
+import { Flame, Globe } from "lucide-react"
 import { useMemo, useRef } from "react"
 import type { ReactNode, Ref } from "react"
 import { useTranslation } from "react-i18next"
@@ -498,10 +498,15 @@ function StreakCell({ streak }: { streak: number }) {
   const winning = streak > 0
   const magnitude = Math.abs(streak)
   const tier = magnitude >= 5 ? "high" : magnitude >= 3 ? "med" : "low"
+  // High-tier win streaks get a small flame glyph as a broadcast-y "on fire"
+  // cue. Losing streaks at the same tier don't get a symmetric "down arrow"
+  // or skull — the deepening red + halo already convey "in trouble"; piling
+  // on a doom icon would feel mean-spirited for a tournament leaderboard.
+  const showFlame = tier === "high" && winning
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums",
+        "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums",
         winning ? "text-chart-2" : "text-destructive",
         tier === "low" && (winning ? "bg-chart-2/10" : "bg-destructive/10"),
         tier === "med" && (winning ? "bg-chart-2/20" : "bg-destructive/20"),
@@ -518,8 +523,8 @@ function StreakCell({ streak }: { streak: number }) {
           : undefined
       }
     >
-      {winning ? "W" : "L"}
-      {magnitude}
+      {showFlame && <Flame className="size-3" aria-hidden />}
+      <span>{`${winning ? "W" : "L"} ${magnitude}`}</span>
     </span>
   )
 }
