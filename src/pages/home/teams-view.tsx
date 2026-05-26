@@ -283,7 +283,12 @@ function TeamHeader({ team, rank }: { team: TeamStandingsRow; rank: number }) {
         <RankBadge rank={rank} />
       </div>
       <p className="text-muted-foreground flex flex-wrap items-baseline gap-x-2 text-sm">
-        <span className="text-foreground text-2xl font-semibold tabular-nums @md:text-3xl">
+        {/*
+         * Drops `font-semibold` because Bebas Neue ships only weight 400 —
+         * forcing a synthetic 600 emboldens the glyph (same reason the page
+         * h1 in home-page.tsx avoids `font-bold`).
+         */}
+        <span className="font-display text-foreground text-3xl tracking-wide tabular-nums @md:text-4xl">
           {Math.round(team.combinedRatingAverage).toLocaleString()}
         </span>
         <span className="text-xs tracking-widest uppercase">

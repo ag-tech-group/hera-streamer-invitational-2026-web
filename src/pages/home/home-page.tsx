@@ -70,7 +70,7 @@ export function HomePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
-      <header className="border-border flex flex-col gap-1 border-b-2 pb-4">
+      <header className="hero-divider flex flex-col gap-1 pb-4">
         {/*
          * Drops `font-bold` because Bebas Neue ships only weight 400 —
          * forcing a synthetic 700 produces an ugly emboldened glyph.
