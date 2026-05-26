@@ -73,8 +73,10 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             className={cn(
               "border-b transition-colors last:border-b-0",
               // Leader row carries a pulsing brand-tinted bg; non-leaders
-              // get the standard hover treatment instead.
-              isLeader ? "rank-1-spotlight" : "hover:bg-muted/40"
+              // get a brand-tinted hover (was muted before — the brand
+              // tint matches the broadcast atmosphere on the rest of the
+              // page rather than fading to neutral gray).
+              isLeader ? "rank-1-spotlight" : "hover:bg-brand/6"
             )}
           >
             <td className="px-4 py-3">
@@ -482,23 +484,41 @@ function LiveBadge() {
 /**
  * Win/loss streak. The upstream ladder reports a signed integer: positive is a
  * run of wins, negative a run of losses, zero none.
+ *
+ * Visual intensity scales with magnitude: streaks of 1–2 stay at the original
+ * subtle tint, 3–4 step up to a stronger fill, and 5+ pick up a ring and a
+ * coloured halo so a "hot streak" reads from across the room. Same colour
+ * language as the recent-results pips (chart-2 for wins, destructive for
+ * losses) — only the saturation escalates.
  */
 function StreakCell({ streak }: { streak: number }) {
   if (streak === 0) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
   const winning = streak > 0
+  const magnitude = Math.abs(streak)
+  const tier = magnitude >= 5 ? "high" : magnitude >= 3 ? "med" : "low"
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums",
-        winning
-          ? "bg-chart-2/10 text-chart-2"
-          : "bg-destructive/10 text-destructive"
+        winning ? "text-chart-2" : "text-destructive",
+        tier === "low" && (winning ? "bg-chart-2/10" : "bg-destructive/10"),
+        tier === "med" && (winning ? "bg-chart-2/20" : "bg-destructive/20"),
+        tier === "high" &&
+          (winning
+            ? "bg-chart-2/30 ring-chart-2/40 ring-1 ring-inset"
+            : "bg-destructive/30 ring-destructive/40 ring-1 ring-inset")
       )}
+      style={
+        tier === "high"
+          ? {
+              boxShadow: `0 0 10px color-mix(in oklch, var(${winning ? "--chart-2" : "--destructive"}) 50%, transparent)`,
+            }
+          : undefined
+      }
     >
-      {winning ? "W" : "L"}
-      {Math.abs(streak)}
+      {`${winning ? "W" : "L"} ${magnitude}`}
     </span>
   )
 }
