@@ -71,14 +71,12 @@
     "viewOnAoe2insights": "Ver a {{alias}} en aoe2insights"
   },
   "teams": {
-    "caption": "Clasificación de equipos del torneo",
-    "captionLoading": "Cargando clasificación de equipos",
-    "headers": {
-      "team": "Equipo",
-      "combined": "Combinado",
-      "average": "Prom",
-      "members": "Integrantes"
-    }
+    "average": "prom",
+    "playersCount_one": "{{count}} jugador",
+    "playersCount_other": "{{count}} jugadores",
+    "noMembers": "Aún no hay integrantes con clasificación.",
+    "rosterAriaLabel": "Plantilla del equipo",
+    "versus": "VS"
   },
   "admin": {
     "title": "Admin",
