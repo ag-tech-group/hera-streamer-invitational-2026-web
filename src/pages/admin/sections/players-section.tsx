@@ -95,6 +95,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
           })
           toast.success("Player removed.")
         },
+        onError: idempotencyKey.resetOnReusedKey,
       },
     })
 
@@ -154,6 +155,7 @@ function AddPlayerForm() {
         })
         toast.success("Player added.")
       },
+      onError: idempotencyKey.resetOnReusedKey,
     },
   })
 
