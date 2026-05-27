@@ -11,7 +11,16 @@ import {
 import { setOnUnauthorized } from "@/api/api"
 import { getMeV1MeGet } from "@/api/generated/hooks/me/me"
 import { activeTournament } from "@/config/tournaments"
-import { getAuthMe, logoutFromAuthApi } from "@/lib/auth-config"
+import { AUTH_URL, getAuthMe, logoutFromAuthApi } from "@/lib/auth-config"
+
+/**
+ * localStorage flag set the first time `/v1/me` + `/auth/me` succeed,
+ * cleared on signout. The boot-time `refresh()` skips both probes when
+ * the flag is absent (and the user isn't arriving from the auth origin),
+ * so first-time / never-signed-in visitors don't trip a "Failed to load
+ * resource: 401" console error on every page load — see #134.
+ */
+const AUTH_HINT_KEY = "criticalbit_auth_hint"
 
 /**
  * Auth state derived from a single probe against `GET /v1/me` at app
@@ -96,9 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (meResponse.status !== 200 || !authMe) {
         clearAuthFields()
+        clearAuthHint()
         return
       }
       const me = meResponse.data
+      setAuthHint()
       setIsAuthenticated(true)
       setUserId(me.user_id)
       setOwnedSlugs(new Set(me.owned_tournaments.map((t) => t.slug)))
@@ -107,8 +118,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAvatarUrl(authMe.avatar_url)
     } catch {
       // ky throws on non-2xx (the 401 path here) and on network failures.
-      // Either way: drop to the public/unauthenticated state.
+      // Either way: drop to the public/unauthenticated state and clear
+      // the hint so the next page load doesn't try the probe again.
       clearAuthFields()
+      clearAuthHint()
     } finally {
       setIsLoading(false)
     }
@@ -123,12 +136,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // been cleared anyway, and reloading is the simplest "make
       // everything anonymous" gesture.
     }
+    // Clear the auth hint so the post-reload boot skips the probes
+    // and renders the public surface without firing a guaranteed 401.
+    clearAuthHint()
     window.location.reload()
   }, [])
 
   useEffect(() => {
+    // Boot-time probe gate (#134): skip the auth requests entirely when
+    // there's no signal this browser has ever authenticated with us —
+    // they'd just yield 401s that the browser logs as console errors
+    // for every never-signed-in visitor. The hint is set on a successful
+    // `refresh` and cleared on signout / 401 / refresh failure. The
+    // auth-origin referrer check covers the first-page-load-after-sign-in
+    // case where the hint hasn't been set yet but the user just came
+    // through a real sign-in flow.
+    //
+    // The gate intentionally lives here rather than inside `refresh`
+    // itself so explicit `refresh()` callers (post-redirect handshake,
+    // pre-write permission checks, etc.) always re-probe regardless of
+    // the hint state.
+    if (!hasAuthHint() && !cameFromAuthOrigin()) {
+      clearAuthFields()
+      setIsLoading(false)
+      return
+    }
     void refresh()
-  }, [refresh])
+  }, [refresh, clearAuthFields])
 
   // Subscribe to permanently-401 responses from anywhere in the app
   // (any standings API call whose refresh attempt also failed). When
@@ -138,6 +172,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setOnUnauthorized(() => {
       clearAuthFields()
+      // Mid-session 401 (expired token, refresh failed): clear the hint
+      // so the next page load goes through the public-visitor skip path
+      // instead of immediately re-probing and re-logging the same 401.
+      clearAuthHint()
       setIsLoading(false)
     })
     return () => setOnUnauthorized(null)
@@ -182,4 +220,37 @@ export function useAuth(): AuthContextValue {
     throw new Error("useAuth must be used within an AuthProvider")
   }
   return ctx
+}
+
+function hasAuthHint(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.localStorage.getItem(AUTH_HINT_KEY) !== null
+  )
+}
+
+function setAuthHint(): void {
+  if (typeof window === "undefined") return
+  window.localStorage.setItem(AUTH_HINT_KEY, "1")
+}
+
+function clearAuthHint(): void {
+  if (typeof window === "undefined") return
+  window.localStorage.removeItem(AUTH_HINT_KEY)
+}
+
+/**
+ * Did the user arrive via the criticalbit auth frontend? Used to fire
+ * the auth probes on the first page load following a sign-in flow even
+ * when the localStorage hint hasn't been set yet (e.g. private-browsing
+ * mode, or first-ever sign-in on this device). Guarded against the
+ * empty / opaque referrer that Referrer-Policy may produce.
+ */
+function cameFromAuthOrigin(): boolean {
+  if (typeof document === "undefined" || !document.referrer) return false
+  try {
+    return new URL(document.referrer).hostname === new URL(AUTH_URL).hostname
+  } catch {
+    return false
+  }
 }

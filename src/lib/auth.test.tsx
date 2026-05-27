@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 
 import { AuthProvider, useAuth } from "@/lib/auth"
 import { server } from "@/test/setup"
@@ -12,7 +12,25 @@ import { server } from "@/test/setup"
  * (the active tournament's API slug is `"default"` for this build).
  */
 
-function renderAuth() {
+const AUTH_HINT_KEY = "criticalbit_auth_hint"
+
+afterEach(() => {
+  // Auth tests share a jsdom localStorage — clear the hint between
+  // cases so a test that wants the "first-time visitor" path doesn't
+  // inherit a stale flag from a previous case.
+  window.localStorage.removeItem(AUTH_HINT_KEY)
+})
+
+/**
+ * `withHint: true` (default) pre-seeds the localStorage flag that
+ * `AuthProvider.refresh()` checks before firing the auth probes — most
+ * existing tests need this so the probes actually run. Pass
+ * `{ withHint: false }` for cases that exercise the no-hint skip path.
+ */
+function renderAuth({ withHint = true }: { withHint?: boolean } = {}) {
+  if (withHint) {
+    window.localStorage.setItem(AUTH_HINT_KEY, "1")
+  }
   // Each test gets its own QueryClient so caches don't leak between cases.
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -25,6 +43,54 @@ function renderAuth() {
     ),
   })
 }
+
+describe("AuthProvider — first-time visitor skip path (#134)", () => {
+  it("skips both probes when no localStorage hint is set", async () => {
+    // Track whether the probes fire — they shouldn't, because the visitor
+    // has no signal of ever having been authenticated with us.
+    let meCalled = false
+    let authMeCalled = false
+    server.use(
+      http.get("*/v1/me", () => {
+        meCalled = true
+        return HttpResponse.json(
+          { detail: "Not authenticated" },
+          { status: 401 }
+        )
+      }),
+      http.get("*/auth/me", () => {
+        authMeCalled = true
+        return HttpResponse.json(
+          { detail: "Not authenticated" },
+          { status: 401 }
+        )
+      })
+    )
+    const { result } = renderAuth({ withHint: false })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.isAuthenticated).toBe(false)
+    expect(meCalled).toBe(false)
+    expect(authMeCalled).toBe(false)
+  })
+
+  it("fires the probes when the hint is present (returning visitor)", async () => {
+    let meCalled = false
+    server.use(
+      http.get("*/v1/me", () => {
+        meCalled = true
+        return HttpResponse.json(
+          { detail: "Not authenticated" },
+          { status: 401 }
+        )
+      })
+    )
+    // withHint: true (default) — simulates a returning visitor whose
+    // previous session set the hint.
+    const { result } = renderAuth()
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(meCalled).toBe(true)
+  })
+})
 
 describe("AuthProvider", () => {
   it("settles to unauthenticated when /v1/me returns 401", async () => {
