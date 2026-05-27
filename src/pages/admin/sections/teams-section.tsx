@@ -377,9 +377,16 @@ function MemberChip({
  * roster (filtered to exclude players who are already on *this* team).
  * Each option badges its existing team if the player is on one. When
  * the chosen player is on another team, an AlertDialog appears asking
- * whether to move them — only the API knows whether the underlying
- * write actually performs a move or fails with a conflict, so the
- * confirmation is the safety net regardless.
+ * whether to move them; on confirm the picker explicitly removes the
+ * player from the source team before adding to the destination. The
+ * add-member API doesn't enforce single-team-per-tournament on its own,
+ * so without this DELETE-then-POST the move would silently double-add.
+ *
+ * Not atomic — if the DELETE succeeds but the POST fails, the player
+ * lands on neither team. The global mutation-error toast surfaces the
+ * failure and the admin can re-add. A transaction-safe fix would live
+ * on the backend (UNIQUE constraint + auto-move on add); revisiting
+ * that is tracked separately.
  *
  * The free-form profile_id input was the previous shape; revisiting
  * that approach is tracked in #83 as the side-by-side drag-and-drop
@@ -398,27 +405,43 @@ function AddMemberForm({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const idempotencyKey = useIdempotencyKey()
+  const addIdempotencyKey = useIdempotencyKey()
+  const removeIdempotencyKey = useIdempotencyKey()
   const [selectedId, setSelectedId] = useState<string>("")
   const [pendingMove, setPendingMove] = useState<{
     profileId: number
     alias: string
+    fromTeamId: number
     fromTeamName: string
   } | null>(null)
 
-  const mutation =
+  const addMutation =
     useAddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPost({
-      request: { headers: { "Idempotency-Key": idempotencyKey.current } },
+      request: { headers: { "Idempotency-Key": addIdempotencyKey.current } },
       mutation: {
         onSuccess: () => {
-          idempotencyKey.reset()
+          addIdempotencyKey.reset()
           setSelectedId("")
           setPendingMove(null)
           void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
         },
-        onError: idempotencyKey.resetOnReusedKey,
+        onError: addIdempotencyKey.resetOnReusedKey,
       },
     })
+
+  // Used only for the DELETE leg of a move. Not invalidating on its own
+  // onSuccess: the chained POST's onSuccess does the single invalidation
+  // for the whole move, so the UI sees the consistent post-move state in
+  // one render rather than briefly seeing the player on neither team.
+  const removeMutation =
+    useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete(
+      {
+        request: {
+          headers: { "Idempotency-Key": removeIdempotencyKey.current },
+        },
+        mutation: { onError: removeIdempotencyKey.resetOnReusedKey },
+      }
+    )
 
   // Members already on *this* team are excluded from the dropdown so
   // the user can't pick a no-op. Players on *other* teams stay in the
@@ -430,12 +453,28 @@ function AddMemberForm({
   )
   const options = allPlayers.filter((p) => !memberIds.has(p.profile_id))
 
-  const submit = (profileId: number) => {
-    mutation.mutate({
+  const submitAdd = (profileId: number) => {
+    addMutation.mutate({
       tournamentSlug: activeTournament.apiTournamentSlug,
       teamId,
       data: { profile_id: profileId },
     })
+  }
+
+  const submitMove = (move: { profileId: number; fromTeamId: number }) => {
+    removeMutation.mutate(
+      {
+        tournamentSlug: activeTournament.apiTournamentSlug,
+        teamId: move.fromTeamId,
+        profileId: move.profileId,
+      },
+      {
+        onSuccess: () => {
+          removeIdempotencyKey.reset()
+          submitAdd(move.profileId)
+        },
+      }
+    )
   }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -448,11 +487,12 @@ function AddMemberForm({
       setPendingMove({
         profileId,
         alias: player?.alias ?? String(profileId),
+        fromTeamId: existing.teamId,
         fromTeamName: existing.teamName,
       })
       return
     }
-    submit(profileId)
+    submitAdd(profileId)
   }
 
   return (
@@ -504,9 +544,11 @@ function AddMemberForm({
           <Button
             type="submit"
             size="sm"
-            disabled={mutation.isPending || !selectedId}
+            disabled={
+              addMutation.isPending || removeMutation.isPending || !selectedId
+            }
           >
-            {mutation.isPending
+            {addMutation.isPending || removeMutation.isPending
               ? t("admin.teams.addMemberAdding")
               : t("admin.teams.addMemberAction")}
           </Button>
@@ -541,7 +583,11 @@ function AddMemberForm({
             <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (pendingMove) submit(pendingMove.profileId)
+                if (pendingMove)
+                  submitMove({
+                    profileId: pendingMove.profileId,
+                    fromTeamId: pendingMove.fromTeamId,
+                  })
               }}
             >
               {t("admin.teams.moveConfirm")}
