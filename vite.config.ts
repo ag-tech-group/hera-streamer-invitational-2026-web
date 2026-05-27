@@ -30,6 +30,11 @@ const sentryUpload =
       }
     : null
 
+// Netlify-provided build context: "production" | "deploy-preview" |
+// "branch-deploy". Falls back to "local" if a developer sets the SENTRY_*
+// vars on their machine, so Sentry can still distinguish those builds.
+const deployEnv = process.env.CONTEXT || "local"
+
 export default defineConfig({
   plugins: [
     TanStackRouterVite({
@@ -39,7 +44,23 @@ export default defineConfig({
     react(),
     tailwindcss(),
     ...(sentryUpload
-      ? [sentryVitePlugin({ ...sentryUpload, release: { name: releaseSha } })]
+      ? [
+          sentryVitePlugin({
+            ...sentryUpload,
+            release: {
+              name: releaseSha,
+              // Marks each release as deployed to a specific environment so
+              // Sentry's UI can show "this release went to production at T"
+              // separately from preview/branch builds that share the SHA.
+              deploy: { env: deployEnv },
+              // Auto-associates commits between this release and the prior
+              // one so Sentry can surface "suspect commits" for new errors.
+              // ignoreMissing keeps builds green if the repo isn't yet linked
+              // to Sentry via the GitHub integration.
+              setCommits: { auto: true, ignoreMissing: true },
+            },
+          }),
+        ]
       : []),
   ],
   resolve: {
