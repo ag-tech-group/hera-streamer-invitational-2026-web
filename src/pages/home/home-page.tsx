@@ -114,7 +114,7 @@ export function HomePage() {
       </header>
 
       {/*
-       * Two-column flex layout on 2xl+; stacks vertically on smaller
+       * Two-column flex layout on xl+; stacks vertically on smaller
        * screens. Left column carries the stacked context cards (countdowns
        * + host links); right column carries the view tabs and the
        * standings table. Each column flows top-down from its own top, so
@@ -127,12 +127,17 @@ export function HomePage() {
        * coming next" and "where to follow the host" both beat data the
        * user already sees by scrolling.
        *
-       * Side-by-side kicks in at `2xl:` (1536px) because the cards plus
-       * a usable table only fit comfortably starting around there; below
-       * that, stacked gives the table the full page width.
+       * Side-by-side kicks in at `xl:` (1280px). The prior `2xl:` (1536px)
+       * threshold left common laptop viewports stacked — 14" MBP at default
+       * scaling reports 1512 CSS px, 13" MBA reports 1470, both below 1536
+       * despite ample horizontal space — so the intended side-by-side never
+       * showed for most viewers. `xl` covers those laptops while leaving the
+       * 1024–1279 range (landscape tablets, partially-maximised browser
+       * windows) stacked, where the cards column at `lg` would otherwise
+       * compress to a cramped ~240px.
        */}
-      <div className="flex flex-col gap-6 2xl:flex-row 2xl:items-start">
-        <div className="flex flex-col gap-6 2xl:w-1/4 2xl:shrink-0">
+      <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+        <div className="flex flex-col gap-6 xl:w-1/4 xl:shrink-0">
           <Countdown
             target={tournament.data?.startDate ?? null}
             isLoading={tournament.isPending}

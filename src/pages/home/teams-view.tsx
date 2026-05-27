@@ -10,7 +10,7 @@ import type { TeamMember, TeamStandingsRow } from "@/types"
 
 /**
  * Number of teams above which we no longer pair into a coliseum
- * face-off. With exactly two teams, the layout opens up at 2xl into a
+ * face-off. With exactly two teams, the layout opens up at xl into a
  * side-by-side ALPHA / VS / OMEGA arrangement; with one team or three+
  * it stays stacked banners at every width.
  */
@@ -34,8 +34,8 @@ type TeamColor = "p1" | "p2"
  * team, red for the second — with the team name + headline stats up top
  * and the roster as a stack of horizontal player pills below.
  *
- * Layout is hybrid: at 2xl+ with exactly two teams the panels sit
- * side-by-side around a VS pillar (the "coliseum" view); below 2xl, or
+ * Layout is hybrid: at xl+ with exactly two teams the panels sit
+ * side-by-side around a VS pillar (the "coliseum" view); below xl, or
  * with any other team count, they stack as full-width banners. Either
  * way the inside of each panel is the same — pills reflow via a
  * container query, so a narrow coliseum panel shows one pill per line
@@ -70,16 +70,12 @@ export function TeamsView({ rows }: { rows: TeamStandingsRow[] }) {
           rank={positionMap.get(team.teamId) ?? 0}
           revealOffset={i * team.members.length}
           className={
-            isPair
-              ? i === 0
-                ? "2xl:col-start-1"
-                : "2xl:col-start-3"
-              : undefined
+            isPair ? (i === 0 ? "xl:col-start-1" : "xl:col-start-3") : undefined
           }
         />
       ))}
       {isPair && (
-        <VersusPillar className="hidden 2xl:col-start-2 2xl:row-start-1 2xl:flex" />
+        <VersusPillar className="hidden xl:col-start-2 xl:row-start-1 xl:flex" />
       )}
     </TeamsLayout>
   )
@@ -99,23 +95,23 @@ export function TeamsViewSkeleton() {
           key={i}
           color={teamColorFor(i)}
           rosterSize={size}
-          className={i === 0 ? "2xl:col-start-1" : "2xl:col-start-3"}
+          className={i === 0 ? "xl:col-start-1" : "xl:col-start-3"}
         />
       ))}
-      <VersusPillar className="hidden 2xl:col-start-2 2xl:row-start-1 2xl:flex" />
+      <VersusPillar className="hidden xl:col-start-2 xl:row-start-1 xl:flex" />
     </TeamsLayout>
   )
 }
 
 /**
  * Shared grid wrapper for the populated view and the skeleton. The
- * three-column track only activates at 2xl and only with a pair —
+ * three-column track only activates at xl and only with a pair —
  * otherwise it collapses to a single column so each panel takes the
  * full content width.
  *
  * `minmax(0, 1fr)` on the side tracks (instead of bare `1fr`) keeps
  * narrow team names from forcing the grid to overflow on viewports
- * just past the 2xl breakpoint.
+ * just past the xl breakpoint.
  */
 function TeamsLayout({
   isPair,
@@ -129,7 +125,7 @@ function TeamsLayout({
       className={cn(
         "grid gap-6",
         isPair &&
-          "2xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] 2xl:items-stretch"
+          "xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] xl:items-stretch"
       )}
     >
       {children}
