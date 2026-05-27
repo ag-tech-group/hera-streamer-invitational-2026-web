@@ -12,6 +12,7 @@ const sample: UserSearchResult = {
   id: "abc-123",
   display_name: "Hera",
   avatar_url: null,
+  email: "hera@example.com",
 }
 
 function renderPicker(initial: UserSearchResult | null = null) {
@@ -55,8 +56,18 @@ describe("UserSearchPicker", () => {
     server.use(
       http.get("*/users/search", () =>
         HttpResponse.json([
-          { id: "abc-123", display_name: "Hera", avatar_url: null },
-          { id: "def-456", display_name: "TheViper", avatar_url: null },
+          {
+            id: "abc-123",
+            display_name: "Hera",
+            avatar_url: null,
+            email: "hera@example.com",
+          },
+          {
+            id: "def-456",
+            display_name: "TheViper",
+            avatar_url: null,
+            email: "viper@example.com",
+          },
         ])
       )
     )
@@ -75,7 +86,60 @@ describe("UserSearchPicker", () => {
       id: "abc-123",
       display_name: "Hera",
       avatar_url: null,
+      email: "hera@example.com",
     })
+  })
+
+  it("falls back to email as the label when display_name is null", async () => {
+    server.use(
+      http.get("*/users/search", () =>
+        HttpResponse.json([
+          {
+            id: "ghi-789",
+            display_name: null,
+            avatar_url: null,
+            email: "namedless@example.com",
+          },
+        ])
+      )
+    )
+    renderPicker(null)
+    await userEvent.type(
+      screen.getByPlaceholderText(/search by name or email/i),
+      "name"
+    )
+    expect(await screen.findByText("namedless@example.com")).toBeInTheDocument()
+  })
+
+  it("filters out users with both display_name and email null", async () => {
+    server.use(
+      http.get("*/users/search", () =>
+        HttpResponse.json([
+          {
+            id: "abc-123",
+            display_name: "Hera",
+            avatar_url: null,
+            email: "hera@example.com",
+          },
+          // Steam-OAuth pre-tos-gate user — must NOT render. The picker's
+          // contract is "never surface a raw UUID," so this row gets dropped
+          // entirely rather than falling back to the id.
+          {
+            id: "stm-000",
+            display_name: null,
+            avatar_url: null,
+            email: null,
+          },
+        ])
+      )
+    )
+    renderPicker(null)
+    await userEvent.type(
+      screen.getByPlaceholderText(/search by name or email/i),
+      "anyone"
+    )
+    expect(await screen.findByText("Hera")).toBeInTheDocument()
+    expect(screen.queryByText(/stm-000/i)).not.toBeInTheDocument()
   })
 
   it("shows the empty-state copy when the search returns no matches", async () => {

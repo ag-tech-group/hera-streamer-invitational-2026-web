@@ -10,10 +10,13 @@ import { searchUsers, type UserSearchResult } from "@/lib/auth-config"
 import { cn } from "@/lib/utils"
 
 /**
- * Type-ahead picker for criticalbit users (see web #82). Debounces the
- * input, hits `GET /users/search` on the auth API, and surfaces matches
- * in a dropdown rendered with `display_name` (or the user id as a
- * fallback) plus optional avatar.
+ * Type-ahead picker for criticalbit users (see web #82, #142). Debounces
+ * the input, hits `GET /users/search` on the auth API, and surfaces
+ * matches in a dropdown rendered with `display_name ?? email` plus the
+ * optional avatar. Rows with both display_name AND email null (Steam-
+ * OAuth users pre-tos-gate) are filtered out — admins shouldn't grant
+ * ownership to someone they can't identify, and the picker must never
+ * fall back to rendering a raw UUID.
  *
  * Two display modes:
  *   - **Empty** (no `selected`): the search input with an absolute-
@@ -50,6 +53,16 @@ export function UserSearchPicker({
     staleTime: 30_000,
   })
 
+  // Drop rows the picker can't render readably — Steam-OAuth users
+  // pre-tos-gate carry both display_name=null and email=null, and the
+  // contract is "never render a raw UUID." Defensive: today the API
+  // can't even return such a row (search matches against display_name
+  // OR email server-side, both null means nothing to match), but the
+  // filter keeps the rule local to the consumer.
+  const visibleResults = results.filter(
+    (user) => user.display_name !== null || user.email !== null
+  )
+
   if (selected) {
     return (
       <div className="border-input bg-muted/30 flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border px-2 text-sm">
@@ -58,7 +71,7 @@ export function UserSearchPicker({
           displayName={selected.display_name}
         />
         <span className="min-w-0 truncate">
-          {selected.display_name ?? selected.id}
+          {selected.display_name ?? selected.email}
         </span>
         <Button
           type="button"
@@ -93,7 +106,7 @@ export function UserSearchPicker({
       />
       {open && debouncedQuery.length > 0 ? (
         <SearchResults
-          results={results}
+          results={visibleResults}
           isFetching={isFetching}
           onSelect={(user) => {
             onSelect(user)
@@ -151,7 +164,7 @@ function SearchResults({
             displayName={user.display_name}
           />
           <span className="min-w-0 truncate">
-            {user.display_name ?? user.id}
+            {user.display_name ?? user.email}
           </span>
         </li>
       ))}
