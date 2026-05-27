@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { LanguageToggle } from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +62,10 @@ export function Navbar() {
             <span className="font-display hidden truncate text-lg tracking-wide sm:inline">
               {tournamentName}
             </span>
+          ) : tournament.isPending ? (
+            // Same-width skeleton while the metadata fetch is in flight so the
+            // wordmark slot doesn't pop in from nothing once the name arrives.
+            <Skeleton className="hidden h-5 w-48 sm:block" />
           ) : null}
         </Link>
         <div className="flex items-center gap-2">

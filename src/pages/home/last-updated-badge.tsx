@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { Skeleton } from "@/components/ui/skeleton"
 import { formatTimeAgo } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
@@ -58,4 +59,16 @@ export function LastUpdatedBadge({
       })}
     </span>
   )
+}
+
+/**
+ * Loading-state counterpart of `LastUpdatedBadge`. Mirrors the live badge's
+ * pill chrome (border + rounded-full + padding + height) so the badge slot
+ * doesn't pop in from nothing when the standings/teams snapshot finally
+ * resolves. The width is approximate — close enough to the live "Updated
+ * 5s ago" text that any micro-shift on swap-in stays well under the CLS
+ * threshold.
+ */
+export function LastUpdatedBadgeSkeleton() {
+  return <Skeleton aria-busy className="h-7 w-32 rounded-full border" />
 }
