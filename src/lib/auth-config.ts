@@ -46,15 +46,17 @@ export async function logoutFromAuthApi(): Promise<void> {
 }
 
 /**
- * Public identity surface returned by `GET /users/search`. Intentionally
- * minimal — email is matched server-side as an input convenience but
- * never returned, so the type-ahead picker can't accidentally surface
- * other users' email addresses to a curious admin.
+ * Public identity surface returned by `GET /users/search`. Includes
+ * `email` (added in auth-api#42) so consumers can render a readable
+ * label when `display_name` is null — a Steam-OAuth user pre-tos-gate
+ * has `email = null` too, and any picker is expected to filter those
+ * rows out rather than ever rendering the raw UUID.
  */
 export interface UserSearchResult {
   id: string
   display_name: string | null
   avatar_url: string | null
+  email: string | null
 }
 
 /**
@@ -103,11 +105,11 @@ export async function getAuthMe(): Promise<AuthApiMe | null> {
 /**
  * Type-ahead user search against the auth API's `/users/search`.
  *
- * Matches case-insensitive against both display_name and email (the
- * email match key is a convenience for admins who know the address;
- * the email itself isn't echoed back). Requires auth — a stale access
- * token triggers a single refresh-and-retry before propagating the
- * failure.
+ * Matches case-insensitive against both display_name and email and
+ * returns both (email since auth-api#42, so the picker can render a
+ * readable label when display_name is null). Requires auth — a stale
+ * access token triggers a single refresh-and-retry before propagating
+ * the failure.
  */
 export async function searchUsers(
   q: string,
