@@ -23,9 +23,12 @@ const DIST = "dist/assets"
 
 const BUDGETS = [
   // Initial JS bundle (eager). PostHog has been lazy-loaded out of it
-  // (#65); the headroom over the current ~100 KB covers near-term growth
-  // without flapping on every small dep update.
-  { pattern: /^index-.*\.js$/, maxGzip: 130_000, label: "main JS" },
+  // (#65); Sentry's SDK + browser-tracing + replay integrations ship in
+  // this chunk (~40 KB gzip) once VITE_SENTRY_DSN is set at build time —
+  // before that, the runtime DSN check tree-shakes the whole SDK out.
+  // Headroom over the current ~170 KB covers near-term growth without
+  // flapping on every small dep update.
+  { pattern: /^index-.*\.js$/, maxGzip: 185_000, label: "main JS" },
   // Orval-generated API client + Zod schemas — chunked separately by
   // Rolldown because it's only imported from hooks the lazy router resolves.
   { pattern: /^api-.*\.js$/, maxGzip: 35_000, label: "API client chunk" },
