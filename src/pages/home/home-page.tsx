@@ -9,7 +9,10 @@ import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
 import { useAnalytics } from "@/lib/analytics"
-import { LastUpdatedBadge } from "@/pages/home/last-updated-badge"
+import {
+  LastUpdatedBadge,
+  LastUpdatedBadgeSkeleton,
+} from "@/pages/home/last-updated-badge"
 import {
   StandingsEmpty,
   StandingsError,
@@ -82,6 +85,10 @@ export function HomePage() {
 
   // The "last updated" badge reflects whichever view is on screen.
   const activeData = view === "players" ? standings.data : teams.data
+  // Loading state for the same view, so the badge slot can render a
+  // skeleton instead of an empty hole while the snapshot is in flight.
+  const activeIsPending =
+    view === "players" ? standings.isPending : teams.isPending
 
   return (
     <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
@@ -153,11 +160,16 @@ export function HomePage() {
            */}
           <div className="flex flex-wrap items-center gap-3">
             <ViewTabs value={view} onChange={handleViewChange} />
-            {activeData ? (
-              <div className="ml-auto">
+            <div className="ml-auto">
+              {activeData ? (
                 <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
-              </div>
-            ) : null}
+              ) : activeIsPending ? (
+                // Skeleton while the snapshot is in flight so the badge
+                // slot doesn't pop into existence once the first poll
+                // lands — same pill chrome, same height.
+                <LastUpdatedBadgeSkeleton />
+              ) : null}
+            </div>
           </div>
           {view === "players" ? (
             <StandingsSection
