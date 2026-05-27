@@ -128,11 +128,13 @@ export function HomePage() {
         <div className="flex flex-col gap-6 2xl:w-1/4 2xl:shrink-0">
           <Countdown
             target={tournament.data?.startDate ?? null}
+            isLoading={tournament.isPending}
             label={t("home.tournamentStartsIn")}
             variant="compact"
           />
           <Countdown
             target={tournament.data?.grandFinalsDate ?? null}
+            isLoading={tournament.isPending}
             label={t("home.grandFinalsStartIn")}
             variant="compact"
           />

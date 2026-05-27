@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
@@ -19,6 +20,7 @@ export function Countdown({
   target,
   label,
   variant = "hero",
+  isLoading = false,
   className,
 }: {
   /** ISO-8601 timestamp to count down to. `null` renders nothing. */
@@ -30,10 +32,28 @@ export function Countdown({
    * `compact`: smaller digits + tighter padding for sidebar / secondary use.
    */
   variant?: Variant
+  /**
+   * Reserve the countdown's layout slot with a skeleton placeholder
+   * while the tournament metadata is still in flight. Without this,
+   * the parent's `target={data?.startDate ?? null}` pattern collapses
+   * the slot to `null` during the brief data-loading window and the
+   * page content below shifts by the countdown's full height once the
+   * fetch resolves — a CLS-killing layout shift. The flag separates
+   * "loading" (reserve space) from "no target" (genuinely no slot
+   * needed, the default `null` path).
+   */
+  isLoading?: boolean
   className?: string
 }) {
   const { t } = useTranslation()
   const remainingMs = useTickingRemaining(target)
+  // Loading state takes precedence over a null target: render the
+  // same-size skeleton so the layout slot stays reserved across the
+  // load. Once the fetch resolves, either real `target` content or a
+  // null return takes over without shifting anything below.
+  if (isLoading && target === null) {
+    return <CountdownSkeleton variant={variant} className={className} />
+  }
   // `target === null` is redundant at runtime (if remainingMs is null, target
   // was null) but narrows the type so `target` can be passed to the formatter
   // below as a non-null string.
@@ -179,6 +199,57 @@ function Separator({ variant }: { variant: Variant }) {
     >
       :
     </span>
+  )
+}
+
+/**
+ * Loading-state counterpart of `Countdown`. Mirrors the live component's
+ * chrome (card + accent stripe + corner glow) and segment layout so the
+ * skeleton-to-data transition is a content swap rather than a layout shift.
+ *
+ * Dimensions are intentionally hard-coded against the live segment sizes
+ * (`text-3xl sm:text-4xl` digits for compact, `text-5xl sm:text-6xl` for
+ * hero) so a copy-paste tweak to the live component doesn't silently break
+ * the skeleton's height match — if you change segment sizing there, mirror
+ * the placeholder size here.
+ */
+function CountdownSkeleton({
+  variant,
+  className,
+}: {
+  variant: Variant
+  className?: string
+}) {
+  const isHero = variant === "hero"
+  return (
+    <section
+      aria-busy
+      className={cn(
+        "bg-card shadow-card relative flex flex-col items-center gap-3 overflow-hidden rounded-lg",
+        isHero ? "p-6" : "p-4",
+        className
+      )}
+    >
+      {/* Mirror the live brand-blue accent stripe + corner glow so the
+          skeleton's chrome doesn't pop into existence when data arrives. */}
+      <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        style={{
+          background: "color-mix(in oklch, var(--brand) 12%, transparent)",
+        }}
+      />
+      {/* Eyebrow label placeholder. */}
+      <Skeleton className="h-3 w-32" />
+      {/* Digits row placeholder. Width matches roughly four 2-digit segments
+          + three colon separators at the variant's font size. */}
+      <Skeleton
+        className={cn("rounded-md", isHero ? "h-14 w-60" : "h-10 w-44")}
+      />
+      {/* Date footer placeholder. */}
+      <Skeleton className={cn("h-3", isHero ? "w-56" : "w-40")} />
+    </section>
   )
 }
 
