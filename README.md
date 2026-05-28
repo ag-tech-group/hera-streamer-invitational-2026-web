@@ -80,6 +80,8 @@ src/
 | Variable                                   | Description                                                       | Default                           |
 | ------------------------------------------ | ----------------------------------------------------------------- | --------------------------------- |
 | `VITE_API_URL`                             | Backend API URL                                                   | `/api`                            |
+| `VITE_AUTH_URL`                            | Auth frontend URL (sign-in, profile management)                   | `https://auth.criticalbit.gg`     |
+| `VITE_AUTH_API_URL`                        | Auth API URL (logout, token refresh, user search)                 | `https://auth-api.criticalbit.gg` |
 | `VITE_TOURNAMENT_SLUG`                     | Tournament config this build serves                               | `hera-streamer-invitational-2026` |
 | `VITE_LOG_LEVEL`                           | Minimum log level (debug/info/warn/error)                         | `debug` (dev), `warn` (prod)      |
 | `VITE_SENTRY_DSN`                          | Sentry project DSN — unset = SDK never initialises (zero events)  | unset                             |
@@ -91,13 +93,13 @@ src/
 
 ### Build-time (used by tooling, not bundled)
 
-| Variable            | Description                                                                                                    |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `OPENAPI_URL`       | OpenAPI spec URL for `pnpm generate-api` (defaults to `http://localhost:8000/openapi.json`).                   |
-| `COMMIT_REF`        | Auto-set by Netlify per build; baked into the bundle as Sentry's `release` tag. Locally falls back to `"dev"`. |
-| `SENTRY_AUTH_TOKEN` | Sentry auth token for source-map upload at build time. Source maps are not generated when unset.               |
-| `SENTRY_ORG`        | Sentry org slug — required together with `SENTRY_AUTH_TOKEN` + `SENTRY_PROJECT` to enable upload.              |
-| `SENTRY_PROJECT`    | Sentry project slug — required together with the other two.                                                    |
+| Variable            | Description                                                                                                                                                                                                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENAPI_URL`       | OpenAPI spec URL for `pnpm generate-api` (defaults to `http://localhost:8000/openapi.json`).                                                                                                                                                                                     |
+| `COMMIT_REF`        | Auto-set by Netlify per build; baked into the bundle as Sentry's `release` tag. Locally falls back to `"dev"`.                                                                                                                                                                   |
+| `SENTRY_AUTH_TOKEN` | Sentry auth token. With `SENTRY_ORG` + `SENTRY_PROJECT` set, the build creates a Sentry release, uploads source maps, tags the deploy environment (`deploy.env` from Netlify's `CONTEXT`), and associates commits for suspect-commit detection. All of it is skipped when unset. |
+| `SENTRY_ORG`        | Sentry org slug — required together with `SENTRY_AUTH_TOKEN` + `SENTRY_PROJECT`.                                                                                                                                                                                                 |
+| `SENTRY_PROJECT`    | Sentry project slug — required together with the other two.                                                                                                                                                                                                                      |
 
 ## Deploy
 
