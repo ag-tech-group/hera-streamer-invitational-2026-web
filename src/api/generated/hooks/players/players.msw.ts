@@ -79,9 +79,20 @@ export const getRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDel
       })
   }, options)
 }
+
+export const getUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.patch('*/v1/tournaments/:tournamentSlug/players/:profileId', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+  
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
 export const getPlayersMock = () => [
   getListPlayersV1TournamentsTournamentSlugPlayersGetMockHandler(),
   getAddRosterPlayerV1TournamentsTournamentSlugPlayersPostMockHandler(),
   getGetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetMockHandler(),
-  getRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDeleteMockHandler()
+  getRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDeleteMockHandler(),
+  getUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchMockHandler()
 ]

@@ -163,3 +163,26 @@ export const RemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDelete
   "tournament_slug": zod.string()
 })
 
+/**
+ * Edit a roster entry's curated fields — owner-gated.
+
+Currently just ``stream_url``: the player's official stream link, shown
+in the standings "Watch Live" column. Pass a URL to set it, or ``null``
+to clear it. 404 if the profile isn't on this tournament's roster. The
+polled ``Player`` / rating rows are untouched — this writes only the
+organizer-curated roster row.
+ * @summary Update Roster Player
+ */
+export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchParams = zod.object({
+  "profile_id": zod.number(),
+  "tournament_slug": zod.string()
+})
+
+export const updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchBodyStreamUrlOneMax = 2048;
+
+
+
+export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchBody = zod.object({
+  "stream_url": zod.union([zod.string().max(updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchBodyStreamUrlOneMax),zod.null()])
+}).describe('Owner edit for a roster entry\'s curated fields.\n\nCurrently just the player\'s official stream link, shown in the\nstandings \"Watch Live\" column. ``stream_url`` is required in the body\nbut nullable: pass an ``http(s)`` URL to set it, or ``null`` to clear it.')
+

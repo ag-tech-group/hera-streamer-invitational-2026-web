@@ -34,7 +34,8 @@ import type {
   ListEnvelopePlayerRead,
   ListPlayersV1TournamentsTournamentSlugPlayersGetParams,
   PlayerDetail,
-  RosterPlayerCreate
+  RosterPlayerCreate,
+  RosterPlayerUpdate
 } from '../../types';
 
 import { orvalClient } from '../../../orval-client';
@@ -515,5 +516,104 @@ export const useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDel
         TContext
       > => {
       return useMutation(getRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDeleteMutationOptions(options), queryClient);
+    }
+    /**
+ * Edit a roster entry's curated fields — owner-gated.
+
+Currently just ``stream_url``: the player's official stream link, shown
+in the standings "Watch Live" column. Pass a URL to set it, or ``null``
+to clear it. 404 if the profile isn't on this tournament's roster. The
+polled ``Player`` / rating rows are untouched — this writes only the
+organizer-curated roster row.
+ * @summary Update Roster Player
+ */
+export type updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponse204 = {
+  data: void
+  status: 204
+}
+
+export type updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponseSuccess = (updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponse204) & {
+  headers: Headers;
+};
+export type updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponseError = (updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponse422) & {
+  headers: Headers;
+};
+
+export type updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponse = (updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponseSuccess | updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponseError)
+
+export const getUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchUrl = (tournamentSlug: string,
+    profileId: number,) => {
+
+
+  
+
+  return `/v1/tournaments/${tournamentSlug}/players/${profileId}`
+}
+
+export const updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch = async (tournamentSlug: string,
+    profileId: number,
+    rosterPlayerUpdate: RosterPlayerUpdate, options?: RequestInit): Promise<updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponse> => {
+  
+  return orvalClient<updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponse>(getUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchUrl(tournamentSlug,profileId),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      rosterPlayerUpdate,)
+  }
+);}
+  
+
+
+
+export const getUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch>>, TError,{tournamentSlug: string;profileId: number;data: RosterPlayerUpdate}, TContext>, request?: SecondParameter<typeof orvalClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch>>, TError,{tournamentSlug: string;profileId: number;data: RosterPlayerUpdate}, TContext> => {
+
+const mutationKey = ['updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch>>, {tournamentSlug: string;profileId: number;data: RosterPlayerUpdate}> = (props) => {
+          const {tournamentSlug,profileId,data} = props ?? {};
+
+          return  updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch(tournamentSlug,profileId,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch>>>
+    export type UpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchMutationBody = RosterPlayerUpdate
+    export type UpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchMutationError = HTTPValidationError
+
+    /**
+ * @summary Update Roster Player
+ */
+export const useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch>>, TError,{tournamentSlug: string;profileId: number;data: RosterPlayerUpdate}, TContext>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch>>,
+        TError,
+        {tournamentSlug: string;profileId: number;data: RosterPlayerUpdate},
+        TContext
+      > => {
+      return useMutation(getUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchMutationOptions(options), queryClient);
     }
     
