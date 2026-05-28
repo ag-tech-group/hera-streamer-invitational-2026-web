@@ -10,6 +10,7 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  * OpenAPI spec version: 0.0.1
  */
 import type { MatchOutcome } from './matchOutcome';
+import type { StandingTeam } from './standingTeam';
 import type { TournamentRecord } from './tournamentRecord';
 
 /**
@@ -26,6 +27,8 @@ export interface StandingRow {
   profile_id: number;
   alias: string;
   country: string | null;
+  team: StandingTeam | null;
+  stream_url: string | null;
   current_rating: number;
   max_rating: number;
   wins: number;

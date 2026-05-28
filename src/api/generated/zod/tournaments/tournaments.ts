@@ -16,7 +16,9 @@ import * as zod from 'zod';
  * Every tournament this deployment serves, newest first.
 
 Tournaments are configuration rather than polled data, so the response
-is a plain list — no ``last_polled_at`` envelope.
+is a plain list — no ``last_polled_at`` envelope, and the static
+config split-cache rather than the auth-aware polled-data helper
+(see ``_TOURNAMENT_CONFIG_CACHE_CONTROL``).
  * @summary List Tournaments
  */
 export const ListTournamentsV1TournamentsGetResponseItem = zod.object({
@@ -144,6 +146,12 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "profile_id": zod.number(),
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),
+  "team": zod.union([zod.object({
+  "team_id": zod.number(),
+  "name": zod.string(),
+  "initials": zod.string()
+}).describe('The team a standings row\'s player belongs to, if any.\n\nA compact reference — id + display strings, no aggregates — folded\nonto each ``StandingRow`` so the standings table can show a player\'s\nteam where it would otherwise show their global ladder rank. A player\nbelongs to at most one team per tournament; an un-teamed player\'s row\ncarries ``team = null``.'),zod.null()]),
+  "stream_url": zod.union([zod.string(),zod.null()]),
   "current_rating": zod.number(),
   "max_rating": zod.number(),
   "wins": zod.number(),

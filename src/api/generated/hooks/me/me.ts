@@ -45,8 +45,8 @@ has an owner row, newest first. Empty list is the common case
 for a non-admin user.
 
 Cheap on prod scale (one indexed join), so the frontend can call
-on every page load. If that ever becomes a hot path, layer a
-short-TTL `Cache-Control: private` here.
+on every page load. See ``_ME_CACHE_CONTROL`` above for why we
+can't fall through to the middleware default here.
  * @summary Get Me
  */
 export type getMeV1MeGetResponse200 = {

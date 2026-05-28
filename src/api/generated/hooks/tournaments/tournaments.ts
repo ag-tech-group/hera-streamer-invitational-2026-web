@@ -48,7 +48,9 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * Every tournament this deployment serves, newest first.
 
 Tournaments are configuration rather than polled data, so the response
-is a plain list — no ``last_polled_at`` envelope.
+is a plain list — no ``last_polled_at`` envelope, and the static
+config split-cache rather than the auth-aware polled-data helper
+(see ``_TOURNAMENT_CONFIG_CACHE_CONTROL``).
  * @summary List Tournaments
  */
 export type listTournamentsV1TournamentsGetResponse200 = {
