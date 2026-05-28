@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Skeleton } from "@/components/ui/skeleton"
@@ -25,8 +25,11 @@ export function Countdown({
 }: {
   /** ISO-8601 timestamp to count down to. `null` renders nothing. */
   target: string | null
-  /** Optional eyebrow above the digits, e.g. `"Tournament starts in"`. */
-  label?: string
+  /**
+   * Optional eyebrow above the digits. Accepts a `ReactNode` so callers can
+   * pass a rich label — e.g. a `<Trans>` that brand-highlights one word.
+   */
+  label?: ReactNode
   /**
    * `hero` (default): page-anchoring big digits, generous padding.
    * `compact`: smaller digits + tighter padding for sidebar / secondary use.

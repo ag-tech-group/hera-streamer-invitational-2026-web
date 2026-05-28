@@ -28,8 +28,14 @@
     },
     "viewTabsAria": "Standings view",
     "lastUpdated": "Updated {{time}}",
-    "tournamentStartsIn": "Tournament starts in",
-    "grandFinalsStartIn": "Grand finals start in",
+    "ladderRace": {
+      "begins": "Ladder Race <accent>Begins</accent>",
+      "ends": "Ladder Race <accent>Ends</accent>",
+      "active": {
+        "title": "Ladder Race <accent>Active</accent>",
+        "body": "Players are divided into 4 teams and will be competing to achieve the highest combined elo possible. Only Peak Elos are considered for the final rankings."
+      }
+    },
     "noStandings": {
       "title": "No standings yet",
       "body": "Players will appear here once the tournament leaderboard is populated."
