@@ -12,6 +12,26 @@
       content="Live ratings, team standings, and tournament progression for the Hera Streamer Invitational 2026 — Age of Empires II: Definitive Edition."
     />
     <title>Live Standings</title>
+    <!--
+      Apply the saved (or default) theme before first paint to avoid a flash
+      of the wrong theme. Must mirror src/components/theme-provider.tsx: same
+      storage key ("app_theme") and same default ("dark"). The provider
+      re-applies this on mount, so this only covers the pre-hydration gap.
+    -->
+    <script>
+      ;(function () {
+        try {
+          var theme = localStorage.getItem("app_theme") || "dark"
+          var isDark =
+            theme === "dark" ||
+            (theme === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches)
+          document.documentElement.classList.add(isDark ? "dark" : "light")
+        } catch (e) {
+          document.documentElement.classList.add("dark")
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

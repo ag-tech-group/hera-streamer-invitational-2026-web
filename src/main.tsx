@@ -95,7 +95,7 @@ declare module "@tanstack/react-query" {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="app_theme">
+      <ThemeProvider defaultTheme="dark" storageKey="app_theme">
         <AnalyticsProvider backend={posthogBackend}>
           <AuthProvider>
             <FeatureFlagProvider>
