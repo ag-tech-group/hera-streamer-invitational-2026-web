@@ -103,6 +103,15 @@ const tournament: TournamentRead = {
   created_at: "2026-05-01T00:00:00Z",
 }
 
+// The countdown labels brand-highlight one word, so `<Trans>` splits the
+// text across a text node + a <span>. Match the containing <p>'s full
+// textContent — and filter to <p> so we don't collide with the standings
+// table's "Active" status cells.
+const fullLabel =
+  (text: string) =>
+  (_content: string, el: Element | null): boolean =>
+    el !== null && el.tagName === "P" && el.textContent === text
+
 describe("HomePage", () => {
   it("renders the page heading", async () => {
     server.use(standingsHandler(standings), tournamentHandler(tournament))
@@ -172,7 +181,7 @@ describe("HomePage", () => {
     expect(await screen.findByText("Team One")).toBeInTheDocument()
   })
 
-  it("shows the hero countdown when the tournament has a future start date", async () => {
+  it("shows the 'Ladder Race Begins' countdown before the race starts", async () => {
     // 7 days ahead — far enough that digits don't tick to zero mid-test.
     const startDate = new Date(Date.now() + 7 * 86_400_000).toISOString()
     server.use(
@@ -182,20 +191,51 @@ describe("HomePage", () => {
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
-    expect(await screen.findByText(/tournament starts in/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(fullLabel("Ladder Race Begins"))
+    ).toBeInTheDocument()
   })
 
-  it("hides the countdown when the tournament has no start date", async () => {
+  it("hides the start countdown when the tournament has no start date", async () => {
     server.use(standingsHandler(standings), tournamentHandler(tournament))
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
     // Wait for the page to render so the countdown has its chance to appear.
     await screen.findByText("Player One")
-    expect(screen.queryByText(/tournament starts in/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(fullLabel("Ladder Race Begins"))
+    ).not.toBeInTheDocument()
   })
 
-  it("shows the grand-finals countdown when grand_finals_date is set", async () => {
+  it("swaps the start slot for the 'Ladder Race Active' panel once the race has started", async () => {
+    // Start 1 day in the past, grand finals 14 days ahead: the race is
+    // underway, so the start countdown gives way to the active panel while
+    // the "Ladder Race Ends" countdown keeps running.
+    const startDate = new Date(Date.now() - 86_400_000).toISOString()
+    const grandFinals = new Date(Date.now() + 14 * 86_400_000).toISOString()
+    server.use(
+      standingsHandler(standings),
+      tournamentHandler({
+        ...tournament,
+        start_date: startDate,
+        grand_finals_date: grandFinals,
+      })
+    )
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/" })
+
+    expect(
+      await screen.findByText(fullLabel("Ladder Race Active"))
+    ).toBeInTheDocument()
+    expect(screen.getByText(fullLabel("Ladder Race Ends"))).toBeInTheDocument()
+    // The pre-start countdown is gone — the panel has taken its slot.
+    expect(
+      screen.queryByText(fullLabel("Ladder Race Begins"))
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows the 'Ladder Race Ends' countdown when grand_finals_date is set", async () => {
     // 30 days ahead — clearly in the future so the countdown stays rendered.
     const grandFinals = new Date(Date.now() + 30 * 86_400_000).toISOString()
     server.use(
@@ -206,18 +246,20 @@ describe("HomePage", () => {
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
     expect(
-      await screen.findByText(/grand finals start in/i)
+      await screen.findByText(fullLabel("Ladder Race Ends"))
     ).toBeInTheDocument()
   })
 
-  it("hides the grand-finals countdown when grand_finals_date is null", async () => {
+  it("hides the end countdown when grand_finals_date is null", async () => {
     server.use(standingsHandler(standings), tournamentHandler(tournament))
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
     // Wait for the page to render so the countdown has its chance to appear.
     await screen.findByText("Player One")
-    expect(screen.queryByText(/grand finals start in/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(fullLabel("Ladder Race Ends"))
+    ).not.toBeInTheDocument()
   })
 
   it("shows a theme toggle in the header", async () => {

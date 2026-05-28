@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 
 import { Countdown } from "@/components/countdown"
 import { HostLinksCard } from "@/components/host-links-card"
+import { LadderRaceActiveCard } from "@/components/ladder-race-active-card"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
@@ -44,10 +45,12 @@ export function HomePage() {
   // renders nothing until a date is set.
   const tournament = useTournament()
 
-  // Has the tournament started? Used to gate the Games + Recent columns,
-  // which the API only populates within the tournament's date window —
-  // pre-tournament they're always zero / empty, so showing them reads as
-  // dead chrome. Null start date counts as "not started".
+  // Has the tournament started? Drives two things: it gates the Games +
+  // Recent columns (the API only populates them within the tournament's
+  // date window — pre-tournament they're always zero / empty, so showing
+  // them reads as dead chrome), and it flips the left column's start slot
+  // from the "Ladder Race Begins" countdown to the "Ladder Race Active"
+  // panel (#147). Null start date counts as "not started".
   //
   // `mountedAtMs` is captured once via `useState`'s lazy initializer so
   // `Date.now()` lives outside the render pass (react-hooks/purity would
@@ -138,16 +141,44 @@ export function HomePage() {
        */}
       <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
         <div className="flex flex-col gap-6 xl:w-1/4 xl:shrink-0">
-          <Countdown
-            target={tournament.data?.startDate ?? null}
-            isLoading={tournament.isPending}
-            label={t("home.tournamentStartsIn")}
-            variant="compact"
-          />
+          {/*
+           * Start slot: counts down to the race start, then — once it's
+           * underway — swaps to the "Ladder Race Active" info panel and
+           * stays there (the default post-end behavior in #147). The
+           * grand-finals countdown below keeps running and self-retires
+           * when its own target passes.
+           */}
+          {tournamentStarted ? (
+            <LadderRaceActiveCard />
+          ) : (
+            <Countdown
+              target={tournament.data?.startDate ?? null}
+              isLoading={tournament.isPending}
+              label={
+                <Trans
+                  i18nKey="home.ladderRace.begins"
+                  components={{
+                    accent: <span className="text-brand font-semibold" />,
+                  }}
+                />
+              }
+              variant="compact"
+            />
+          )}
           <Countdown
             target={tournament.data?.grandFinalsDate ?? null}
             isLoading={tournament.isPending}
-            label={t("home.grandFinalsStartIn")}
+            label={
+              <Trans
+                i18nKey="home.ladderRace.ends"
+                components={{
+                  // Red "team P2" accent — a go/stop colour contrast against
+                  // the brand-blue "Begins". Deliberately the team red, not
+                  // --destructive (which would read as an error).
+                  accent: <span className="text-team-p2 font-semibold" />,
+                }}
+              />
+            }
             variant="compact"
           />
           <HostLinksCard
