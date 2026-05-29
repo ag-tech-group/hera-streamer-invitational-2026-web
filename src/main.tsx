@@ -67,8 +67,20 @@ if (import.meta.env.DEV) {
     queryClient
 }
 
+// Vite exposes its `base` config as `import.meta.env.BASE_URL` (always
+// trailing-slashed). TanStack Router's `basepath` wants no trailing slash,
+// and a root mount needs no value at all — normalise both: "/" → undefined,
+// "/foo/" → "/foo". Keeps the SPA's route tree at "/" while the basepath
+// is added transparently to outgoing <Link> hrefs and stripped from
+// incoming URLs (#161).
+const basepath =
+  import.meta.env.BASE_URL === "/"
+    ? undefined
+    : import.meta.env.BASE_URL.replace(/\/$/, "")
+
 const router = createRouter({
   routeTree,
+  basepath,
   context: {
     queryClient,
   },

@@ -35,7 +35,20 @@ const sentryUpload =
 // vars on their machine, so Sentry can still distinguish those builds.
 const deployEnv = process.env.CONTEXT || "local"
 
+/**
+ * Public-facing base path this build is served under. Maps to Vite's `base`
+ * (asset URLs in the built HTML, hashed asset references) and the TanStack
+ * Router's `basepath` (read via `import.meta.env.BASE_URL` in main.tsx) so
+ * client-side navigation hrefs line up with where the assets land. Set
+ * `VITE_BASE_PATH = "/<slug>/"` in the Netlify dashboard's production-context
+ * env vars; leave it unset for deploy previews, branch deploys, and local
+ * dev so they keep mounting at root. The slug itself stays out of the repo
+ * — see #161 for the rationale.
+ */
+const basePath = process.env.VITE_BASE_PATH || "/"
+
 export default defineConfig({
+  base: basePath,
   plugins: [
     TanStackRouterVite({
       target: "react",

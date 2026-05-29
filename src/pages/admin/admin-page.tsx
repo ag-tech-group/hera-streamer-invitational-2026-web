@@ -51,8 +51,13 @@ export function AdminPage() {
           label: i18n.t("errors.signInAction"),
           onClick: () => {
             // Land back on the admin page after re-auth — that was the
-            // original intent before the session dropped.
-            window.location.href = loginUrl("/admin")
+            // original intent before the session dropped. Prefix Vite's
+            // base path (trimmed of its trailing slash) so the redirect
+            // resolves under the production /<base>/admin (#161); locally
+            // BASE_URL is "/" so this collapses to plain "/admin".
+            window.location.href = loginUrl(
+              `${import.meta.env.BASE_URL.replace(/\/$/, "")}/admin`
+            )
           },
         },
       })
