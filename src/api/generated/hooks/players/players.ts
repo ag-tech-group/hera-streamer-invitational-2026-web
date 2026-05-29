@@ -518,13 +518,13 @@ export const useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDel
       return useMutation(getRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDeleteMutationOptions(options), queryClient);
     }
     /**
- * Edit a roster entry's curated fields — owner-gated.
+ * Replace a roster entry's presentation bag — owner-gated.
 
-Currently just ``stream_url``: the player's official stream link, shown
-in the standings "Watch Live" column. Pass a URL to set it, or ``null``
-to clear it. 404 if the profile isn't on this tournament's roster. The
-polled ``Player`` / rating rows are untouched — this writes only the
-organizer-curated roster row.
+``presentation`` is opaque per-player display data (stream links, bio,
+etc.) the consumer renders; the whole object is replaced (read-modify-
+write to change one key). 404 if the profile isn't on this tournament's
+roster. The polled ``Player`` / rating rows are untouched — this writes
+only the organizer-curated roster row.
  * @summary Update Roster Player
  */
 export type updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchResponse204 = {

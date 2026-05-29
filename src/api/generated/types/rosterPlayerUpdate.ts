@@ -9,14 +9,17 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
+import type { RosterPlayerUpdatePresentation } from './rosterPlayerUpdatePresentation';
 
 /**
- * Owner edit for a roster entry's curated fields.
+ * Owner edit for a roster entry's presentation data.
 
-Currently just the player's official stream link, shown in the
-standings "Watch Live" column. ``stream_url`` is required in the body
-but nullable: pass an ``http(s)`` URL to set it, or ``null`` to clear it.
+``presentation`` is an opaque per-player bag the consumer renders —
+stream links, bio text, whatever the frontend defines. The API stores
+it verbatim and never interprets its keys. The body must include it (an
+empty object clears the bag); the whole object is replaced, so callers
+read-modify-write.
  */
 export interface RosterPlayerUpdate {
-  stream_url: string | null;
+  presentation: RosterPlayerUpdatePresentation;
 }

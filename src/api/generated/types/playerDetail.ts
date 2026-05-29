@@ -10,6 +10,7 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  * OpenAPI spec version: 0.0.1
  */
 import type { MatchRead } from './matchRead';
+import type { PlayerDetailPresentation } from './playerDetailPresentation';
 import type { PlayerRatingRead } from './playerRatingRead';
 
 /**
@@ -31,6 +32,7 @@ export interface PlayerDetail {
   region_id: number;
   clan_name: string | null;
   updated_at: string;
+  presentation?: PlayerDetailPresentation;
   ratings: PlayerRatingRead[];
   last_polled_at?: string | null;
   recent_matches?: MatchRead[];

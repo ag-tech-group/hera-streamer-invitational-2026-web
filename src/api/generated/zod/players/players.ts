@@ -41,6 +41,7 @@ export const ListPlayersV1TournamentsTournamentSlugPlayersGetResponse = zod.obje
   "region_id": zod.number(),
   "clan_name": zod.union([zod.string(),zod.null()]),
   "updated_at": zod.iso.datetime({}),
+  "presentation": zod.record(zod.string(), zod.unknown()).optional(),
   "ratings": zod.array(zod.object({
   "leaderboard_id": zod.number(),
   "current_rating": zod.number(),
@@ -112,6 +113,7 @@ export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse = z
   "region_id": zod.number(),
   "clan_name": zod.union([zod.string(),zod.null()]),
   "updated_at": zod.iso.datetime({}),
+  "presentation": zod.record(zod.string(), zod.unknown()).optional(),
   "ratings": zod.array(zod.object({
   "leaderboard_id": zod.number(),
   "current_rating": zod.number(),
@@ -164,13 +166,13 @@ export const RemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDelete
 })
 
 /**
- * Edit a roster entry's curated fields — owner-gated.
+ * Replace a roster entry's presentation bag — owner-gated.
 
-Currently just ``stream_url``: the player's official stream link, shown
-in the standings "Watch Live" column. Pass a URL to set it, or ``null``
-to clear it. 404 if the profile isn't on this tournament's roster. The
-polled ``Player`` / rating rows are untouched — this writes only the
-organizer-curated roster row.
+``presentation`` is opaque per-player display data (stream links, bio,
+etc.) the consumer renders; the whole object is replaced (read-modify-
+write to change one key). 404 if the profile isn't on this tournament's
+roster. The polled ``Player`` / rating rows are untouched — this writes
+only the organizer-curated roster row.
  * @summary Update Roster Player
  */
 export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchParams = zod.object({
@@ -178,11 +180,7 @@ export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchP
   "tournament_slug": zod.string()
 })
 
-export const updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchBodyStreamUrlOneMax = 2048;
-
-
-
 export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchBody = zod.object({
-  "stream_url": zod.union([zod.string().max(updateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatchBodyStreamUrlOneMax),zod.null()])
-}).describe('Owner edit for a roster entry\'s curated fields.\n\nCurrently just the player\'s official stream link, shown in the\nstandings \"Watch Live\" column. ``stream_url`` is required in the body\nbut nullable: pass an ``http(s)`` URL to set it, or ``null`` to clear it.')
+  "presentation": zod.record(zod.string(), zod.unknown())
+}).describe('Owner edit for a roster entry\'s presentation data.\n\n``presentation`` is an opaque per-player bag the consumer renders —\nstream links, bio text, whatever the frontend defines. The API stores\nit verbatim and never interprets its keys. The body must include it (an\nempty object clears the bag); the whole object is replaced, so callers\nread-modify-write.')
 

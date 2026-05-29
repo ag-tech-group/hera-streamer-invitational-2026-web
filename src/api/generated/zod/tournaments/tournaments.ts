@@ -151,7 +151,7 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "name": zod.string(),
   "initials": zod.string()
 }).describe('The team a standings row\'s player belongs to, if any.\n\nA compact reference — id + display strings, no aggregates — folded\nonto each ``StandingRow`` so the standings table can show a player\'s\nteam where it would otherwise show their global ladder rank. A player\nbelongs to at most one team per tournament; an un-teamed player\'s row\ncarries ``team = null``.'),zod.null()]),
-  "stream_url": zod.union([zod.string(),zod.null()]),
+  "presentation": zod.record(zod.string(), zod.unknown()),
   "current_rating": zod.number(),
   "max_rating": zod.number(),
   "wins": zod.number(),
