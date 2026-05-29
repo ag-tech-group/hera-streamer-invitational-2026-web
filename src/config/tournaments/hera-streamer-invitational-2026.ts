@@ -15,6 +15,8 @@ export const heraStreamerInvitational2026: Tournament = {
   // the typical AoE2 invitational prize-pool currency; override per build
   // if this tournament's pool is in a different currency. (#156)
   prizeCurrency: "USD",
+  // Sponsor credited under the prize-pool amount on `PrizePoolCard` (#156).
+  prizeSponsor: "Microsoft",
   hostLinks: [
     { label: "Twitch", url: "https://twitch.tv/hera", kind: "twitch" },
     {

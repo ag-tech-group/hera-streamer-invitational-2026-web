@@ -53,7 +53,8 @@
       "body": "Something went wrong reaching the team standings."
     },
     "prizePool": {
-      "label": "Prize pool"
+      "label": "Prize pool",
+      "sponsoredBy": "Sponsored by {{sponsor}}"
     }
   },
   "standings": {
