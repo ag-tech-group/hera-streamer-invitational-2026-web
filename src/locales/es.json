@@ -112,6 +112,7 @@
       "removeTitle": "¿Revocar acceso?",
       "removeDescription": "{{name}} perderá acceso de administrador a este torneo.",
       "removeConfirm": "Revocar",
+      "soleOwnerHint": "Eres el único propietario — otorga acceso a otro usuario antes de quitarte a ti mismo.",
       "grantSuccess": "Acceso otorgado.",
       "revokeSuccess": "Acceso revocado.",
       "noOwners": "Aún no hay propietarios.",

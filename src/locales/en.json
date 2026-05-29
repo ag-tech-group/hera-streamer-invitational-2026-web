@@ -112,6 +112,7 @@
       "removeTitle": "Revoke ownership?",
       "removeDescription": "{{name}} will lose admin access to this tournament.",
       "removeConfirm": "Revoke",
+      "soleOwnerHint": "You're the only owner — grant ownership to another user before removing yourself.",
       "grantSuccess": "Owner granted.",
       "revokeSuccess": "Owner revoked.",
       "noOwners": "No owners yet.",
