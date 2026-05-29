@@ -18,6 +18,7 @@ import { UserAvatar } from "@/components/user-avatar"
 import { UserSearchPicker } from "@/components/user-search-picker"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
+import { useAuth } from "@/lib/auth"
 import type { UserSearchResult } from "@/lib/auth-config"
 
 /**
@@ -81,14 +82,25 @@ function OwnersList({
   return (
     <ul className="flex flex-col gap-2">
       {owners.map((owner) => (
-        <OwnerRow key={owner.user_id} owner={owner} />
+        <OwnerRow
+          key={owner.user_id}
+          owner={owner}
+          ownerCount={owners.length}
+        />
       ))}
     </ul>
   )
 }
 
-function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
+function OwnerRow({
+  owner,
+  ownerCount,
+}: {
+  owner: TournamentOwnerRead
+  ownerCount: number
+}) {
   const { t } = useTranslation()
+  const { userId } = useAuth()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
 
@@ -115,6 +127,12 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
   const primary = ownerPrimaryIdentity(owner)
   const secondary = ownerSecondaryIdentity(owner)
 
+  // You can't revoke your own ownership when you're the last owner — the API
+  // 422s (it would leave the tournament uneditable). Mirror that up-front so
+  // the click never hits the error (#123); the global mutation-error toast in
+  // main.tsx still covers the race where a second owner was removed elsewhere.
+  const isSoleOwnerSelf = owner.user_id === userId && ownerCount === 1
+
   return (
     <li className="bg-muted/30 flex flex-col gap-2 rounded-md px-3 py-2 sm:flex-row sm:items-center sm:gap-3">
       <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -138,29 +156,45 @@ function OwnerRow({ owner }: { owner: TournamentOwnerRead }) {
             date: new Date(owner.created_at).toLocaleDateString(),
           })}
         </span>
-        <ConfirmDialog
-          trigger={
+        {isSoleOwnerSelf ? (
+          // The title sits on the wrapper, not the button: a disabled button
+          // is `pointer-events-none`, so it wouldn't surface its own tooltip.
+          <span title={t("admin.owners.soleOwnerHint")} className="shrink-0">
             <Button
               type="button"
               variant="outline"
               size="sm"
-              disabled={mutation.isPending}
+              disabled
               aria-label={t("admin.owners.removeAria", { name: primary })}
             >
               <Trash2 className="size-4" aria-hidden />
             </Button>
-          }
-          title={t("admin.owners.removeTitle")}
-          description={t("admin.owners.removeDescription", { name: primary })}
-          confirmLabel={t("admin.owners.removeConfirm")}
-          destructive
-          onConfirm={() =>
-            mutation.mutate({
-              tournamentSlug: activeTournament.apiTournamentSlug,
-              userId: owner.user_id,
-            })
-          }
-        />
+          </span>
+        ) : (
+          <ConfirmDialog
+            trigger={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={mutation.isPending}
+                aria-label={t("admin.owners.removeAria", { name: primary })}
+              >
+                <Trash2 className="size-4" aria-hidden />
+              </Button>
+            }
+            title={t("admin.owners.removeTitle")}
+            description={t("admin.owners.removeDescription", { name: primary })}
+            confirmLabel={t("admin.owners.removeConfirm")}
+            destructive
+            onConfirm={() =>
+              mutation.mutate({
+                tournamentSlug: activeTournament.apiTournamentSlug,
+                userId: owner.user_id,
+              })
+            }
+          />
+        )}
       </div>
     </li>
   )
