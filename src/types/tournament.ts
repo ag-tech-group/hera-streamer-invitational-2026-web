@@ -34,6 +34,16 @@ export interface Tournament {
    * unset, the component falls back to a generic `"Hosted by"`.
    */
   hostLabel?: string
+  /**
+   * ISO 4217 currency code (e.g. `"USD"`, `"EUR"`) used to format the
+   * tournament's prize-pool display (#156). The amount itself is mutable
+   * tournament metadata served by the API as integer minor units
+   * (`TournamentInfo.prizePoolCents`); the currency is fixed for the
+   * event so it lives in the per-build config — the API stays
+   * currency-agnostic and generic. When unset, `PrizePoolCard` renders
+   * nothing even if the API has a value.
+   */
+  prizeCurrency?: string
 }
 
 /** A single host-channel / donation / social link rendered on the standings page. */
