@@ -37,8 +37,11 @@ const standings: ListEnvelopeStandingRow = {
       rank_total: 47834,
       in_match: false,
       live_match_id: null,
+      stream_live: false,
       last_match_at: "2026-05-20T04:54:36Z",
       updated_at: "2026-05-20T17:26:34Z",
+      games: 12,
+      win_pct: 75.0,
     },
     {
       profile_id: 102,
@@ -57,8 +60,11 @@ const standings: ListEnvelopeStandingRow = {
       rank_total: 47834,
       in_match: false,
       live_match_id: null,
+      stream_live: false,
       last_match_at: "2026-05-05T02:02:27Z",
       updated_at: "2026-05-20T17:26:34Z",
+      games: 7,
+      win_pct: 42.9,
     },
   ],
 }
@@ -104,6 +110,7 @@ const tournament: TournamentRead = {
   leaderboard_id: 3,
   start_date: null,
   grand_finals_date: null,
+  prize_pool_cents: null,
   created_at: "2026-05-01T00:00:00Z",
 }
 

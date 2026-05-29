@@ -27,4 +27,5 @@ export interface TournamentUpdate {
   leaderboard_id?: number | null;
   start_date?: string | null;
   grand_finals_date?: string | null;
+  prize_pool_cents?: number | null;
 }

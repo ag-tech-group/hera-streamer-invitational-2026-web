@@ -30,6 +30,7 @@ import type {
 
 import type {
   HTTPValidationError,
+  ListEnvelopePlayerProgression,
   ListEnvelopeStandingRow,
   ListEnvelopeTeamStandingRow,
   TournamentCreate,
@@ -678,6 +679,132 @@ export function useGetStandingsV1TournamentsTournamentSlugStandingsGet<TData = A
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryOptions(tournamentSlug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * Per-player rating-over-time for the tournament's roster.
+
+One series per roster player who has completed-match history on the
+tournament's leaderboard: a list of ``(completed_at, rating)`` points
+oldest-first, where ``rating`` is the post-match value. The consumer
+plots rating against ``completed_at`` for a by-date view, or against
+point index for a by-games-played view. Players with no such history
+are omitted, and points reach back only as far as the poller's match
+record — not a player's whole career.
+ * @summary Get Progression
+ */
+export type getProgressionV1TournamentsTournamentSlugProgressionGetResponse200 = {
+  data: ListEnvelopePlayerProgression
+  status: 200
+}
+
+export type getProgressionV1TournamentsTournamentSlugProgressionGetResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type getProgressionV1TournamentsTournamentSlugProgressionGetResponseSuccess = (getProgressionV1TournamentsTournamentSlugProgressionGetResponse200) & {
+  headers: Headers;
+};
+export type getProgressionV1TournamentsTournamentSlugProgressionGetResponseError = (getProgressionV1TournamentsTournamentSlugProgressionGetResponse422) & {
+  headers: Headers;
+};
+
+export type getProgressionV1TournamentsTournamentSlugProgressionGetResponse = (getProgressionV1TournamentsTournamentSlugProgressionGetResponseSuccess | getProgressionV1TournamentsTournamentSlugProgressionGetResponseError)
+
+export const getGetProgressionV1TournamentsTournamentSlugProgressionGetUrl = (tournamentSlug: string,) => {
+
+
+  
+
+  return `/v1/tournaments/${tournamentSlug}/progression`
+}
+
+export const getProgressionV1TournamentsTournamentSlugProgressionGet = async (tournamentSlug: string, options?: RequestInit): Promise<getProgressionV1TournamentsTournamentSlugProgressionGetResponse> => {
+  
+  return orvalClient<getProgressionV1TournamentsTournamentSlugProgressionGetResponse>(getGetProgressionV1TournamentsTournamentSlugProgressionGetUrl(tournamentSlug),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetProgressionV1TournamentsTournamentSlugProgressionGetQueryKey = (tournamentSlug: string,) => {
+    return [
+    `/v1/tournaments/${tournamentSlug}/progression`
+    ] as const;
+    }
+
+    
+export const getGetProgressionV1TournamentsTournamentSlugProgressionGetQueryOptions = <TData = Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError = HTTPValidationError>(tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressionV1TournamentsTournamentSlugProgressionGetQueryKey(tournamentSlug);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>> = ({ signal }) => getProgressionV1TournamentsTournamentSlugProgressionGet(tournamentSlug, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(tournamentSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetProgressionV1TournamentsTournamentSlugProgressionGetQueryResult = NonNullable<Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>>
+export type GetProgressionV1TournamentsTournamentSlugProgressionGetQueryError = HTTPValidationError
+
+
+export function useGetProgressionV1TournamentsTournamentSlugProgressionGet<TData = Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>,
+          TError,
+          Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProgressionV1TournamentsTournamentSlugProgressionGet<TData = Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>,
+          TError,
+          Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProgressionV1TournamentsTournamentSlugProgressionGet<TData = Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Progression
+ */
+
+export function useGetProgressionV1TournamentsTournamentSlugProgressionGet<TData = Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProgressionV1TournamentsTournamentSlugProgressionGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetProgressionV1TournamentsTournamentSlugProgressionGetQueryOptions(tournamentSlug,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -9,20 +9,9 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
+import type { PlayerProgression } from './playerProgression';
 
-/**
- * A tournament — a named roster of players tracked on one leaderboard.
-
-Configuration rather than polled data: a tournament's standings,
-matches, and live state are served under ``/v1/tournaments/{slug}/...``.
- */
-export interface TournamentRead {
-  id: number;
-  slug: string;
-  name: string;
-  leaderboard_id: number;
-  start_date: string | null;
-  grand_finals_date: string | null;
-  prize_pool_cents: number | null;
-  created_at: string;
+export interface ListEnvelopePlayerProgression {
+  last_polled_at: string | null;
+  items: PlayerProgression[];
 }

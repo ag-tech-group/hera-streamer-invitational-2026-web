@@ -41,6 +41,10 @@ export interface StandingRow {
   rank_total: number | null;
   in_match: boolean;
   live_match_id: number | null;
+  stream_live: boolean;
   last_match_at: string | null;
   updated_at: string;
+  readonly games: number;
+  /** Win percentage (0–100, 1 dp), or null when the player has no games. */
+  readonly win_pct: number | null;
 }
