@@ -17,6 +17,13 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     profileId: dto.profile_id,
     alias: dto.alias,
     country: dto.country,
+    team: dto.team
+      ? {
+          teamId: dto.team.team_id,
+          name: dto.team.name,
+          initials: dto.team.initials,
+        }
+      : null,
     currentRating: dto.current_rating,
     maxRating: dto.max_rating,
     wins: dto.wins,
