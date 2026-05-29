@@ -90,6 +90,29 @@ describe("UserSearchPicker", () => {
     })
   })
 
+  it("shows the email on a second line beside the display name", async () => {
+    server.use(
+      http.get("*/users/search", () =>
+        HttpResponse.json([
+          {
+            id: "abc-123",
+            display_name: "Hera",
+            avatar_url: null,
+            email: "hera@example.com",
+          },
+        ])
+      )
+    )
+    renderPicker(null)
+    await userEvent.type(
+      screen.getByPlaceholderText(/search by name or email/i),
+      "her"
+    )
+    // A user with both a name and an email shows both in the dropdown.
+    expect(await screen.findByText("Hera")).toBeInTheDocument()
+    expect(screen.getByText("hera@example.com")).toBeInTheDocument()
+  })
+
   it("falls back to email as the label when display_name is null", async () => {
     server.use(
       http.get("*/users/search", () =>
