@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils"
 /**
  * Type-ahead picker for criticalbit users (see web #82, #142). Debounces
  * the input, hits `GET /users/search` on the auth API, and surfaces
- * matches in a dropdown rendered with `display_name ?? email` plus the
+ * matches in a dropdown showing the display name with the email on a
+ * second line (or the email alone when there's no display name), plus the
  * optional avatar. Rows with both display_name AND email null (Steam-
  * OAuth users pre-tos-gate) are filtered out — admins shouldn't grant
  * ownership to someone they can't identify, and the picker must never
@@ -163,9 +164,17 @@ function SearchResults({
             avatarUrl={user.avatar_url}
             displayName={user.display_name}
           />
-          <span className="min-w-0 truncate">
-            {user.display_name ?? user.email}
-          </span>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate">{user.display_name ?? user.email}</span>
+            {/* Email on a second line when there's a display name — gives
+                admins a unique identifier to disambiguate same-named users.
+                Skipped when the name is already the email (no duplicate). */}
+            {user.display_name && user.email ? (
+              <span className="text-muted-foreground truncate text-xs">
+                {user.email}
+              </span>
+            ) : null}
+          </div>
         </li>
       ))}
     </ul>
