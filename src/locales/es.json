@@ -53,7 +53,8 @@
       "body": "Algo salió mal al consultar la clasificación de equipos."
     },
     "prizePool": {
-      "label": "Premio total"
+      "label": "Premio total",
+      "sponsoredBy": "Patrocinado por {{sponsor}}"
     }
   },
   "standings": {

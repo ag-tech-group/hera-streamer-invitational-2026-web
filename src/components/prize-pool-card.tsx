@@ -19,18 +19,21 @@ import { cn } from "@/lib/utils"
 export function PrizePoolCard({
   prizePoolCents,
   currency,
+  sponsor,
   isLoading,
   className,
 }: {
   prizePoolCents: number | null | undefined
   currency: string | undefined
+  /** Optional sponsor credited as muted text under the amount (#156). */
+  sponsor?: string
   isLoading: boolean
   className?: string
 }) {
   const { t } = useTranslation()
 
   if (isLoading) {
-    return <PrizePoolCardSkeleton className={className} />
+    return <PrizePoolCardSkeleton sponsor={sponsor} className={className} />
   }
   // No currency configured for this build, or the DB has no value yet —
   // either way, nothing to render.
@@ -50,7 +53,7 @@ export function PrizePoolCard({
   return (
     <section
       className={cn(
-        "bg-card shadow-card relative flex flex-col gap-1 overflow-hidden rounded-lg p-4",
+        "bg-card shadow-card relative flex flex-col items-center gap-2 overflow-hidden rounded-lg p-4",
         className
       )}
     >
@@ -58,6 +61,8 @@ export function PrizePoolCard({
        * Broadcast-card chrome (#114): same brand-blue stripe + soft
        * upper-right glow recipe as the countdowns, host-links, and team
        * panels — every sidebar card frames its data the same way.
+       * `items-center` centres the eyebrow / amount / sponsor stack so the
+       * card reads as a single unit alongside the centred countdowns.
        */}
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <span
@@ -71,31 +76,44 @@ export function PrizePoolCard({
         {t("home.prizePool.label")}
       </p>
       {/*
-       * Display face at text-3xl, tabular-nums so digits stay visually
-       * locked when the admin bumps the value — same treatment the
-       * standings rating cell got in #119. Bebas Neue ships at weight 400
-       * only, so `font-display` carries the broadcast weight without a
-       * synthetic bold.
+       * Display face at text-4xl, tabular-nums so digits stay visually
+       * locked when the admin bumps the value. Sized up from the
+       * standings rating cell's text-lg (#119) because the prize pool is
+       * this card's headline number, not a stat in a row. Bebas Neue
+       * ships at weight 400 only, so `font-display` carries the broadcast
+       * weight without a synthetic bold.
        */}
-      <p className="font-display text-3xl tracking-wide tabular-nums">
+      <p className="font-display text-4xl tracking-wide tabular-nums">
         {formatted}
       </p>
+      {sponsor && (
+        <p className="text-muted-foreground text-xs">
+          {t("home.prizePool.sponsoredBy", { sponsor })}
+        </p>
+      )}
     </section>
   )
 }
 
-function PrizePoolCardSkeleton({ className }: { className?: string }) {
+function PrizePoolCardSkeleton({
+  sponsor,
+  className,
+}: {
+  sponsor?: string
+  className?: string
+}) {
   return (
     <section
       aria-hidden
       className={cn(
-        "bg-card shadow-card relative flex flex-col gap-1 overflow-hidden rounded-lg p-4",
+        "bg-card shadow-card relative flex flex-col items-center gap-2 overflow-hidden rounded-lg p-4",
         className
       )}
     >
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <Skeleton className="h-3 w-20" />
-      <Skeleton className="mt-1 h-9 w-32" />
+      <Skeleton className="h-10 w-32" />
+      {sponsor && <Skeleton className="h-3 w-24" />}
     </section>
   )
 }

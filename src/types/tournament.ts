@@ -44,6 +44,13 @@ export interface Tournament {
    * nothing even if the API has a value.
    */
   prizeCurrency?: string
+  /**
+   * Optional sponsor name credited as a muted line under the prize-pool
+   * amount (#156). Rendered via the `home.prizePool.sponsoredBy` i18n
+   * template, so the name itself isn't translated — "Sponsored by
+   * Microsoft" in EN, "Patrocinado por Microsoft" in ES.
+   */
+  prizeSponsor?: string
 }
 
 /** A single host-channel / donation / social link rendered on the standings page. */
