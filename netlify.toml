@@ -19,10 +19,40 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Parallel of the rule above for the path-prefixed asset URLs the SPA emits
+# under the production deploy's base path (#167). Netlify matches header rules
+# on the request URL, not the rewritten path, so without this the hashed
+# JS/CSS at /kings-gauntlet/assets/* would miss the immutable cache header.
+[[headers]]
+  for = "/kings-gauntlet/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 [[headers]]
   for = "/index.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# Cutover prefix-stripping (#167). Vite's `base = "/kings-gauntlet/"` rewrites
+# URLs in the built HTML to include the prefix, but doesn't physically move
+# files under a `/kings-gauntlet/` subdirectory in `dist/`. With Netlify
+# serving `aoe2.criticalbit.gg/*` directly via custom-domain (no upstream
+# router stripping the prefix), these rules map the prefixed URLs the browser
+# requests back to the actual file layout on disk.
+#
+# Order matters: the specific asset rule has to land before the broader
+# `/kings-gauntlet/*` SPA fallback so JS/CSS get the file rather than the
+# app shell. The unprefixed catch-all stays as the final fallback for any
+# request that doesn't carry the prefix.
+[[redirects]]
+  from = "/kings-gauntlet/assets/*"
+  to = "/assets/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/kings-gauntlet/*"
+  to = "/index.html"
+  status = 200
 
 [[redirects]]
   from = "/*"
