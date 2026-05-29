@@ -18,6 +18,7 @@ import {
   formatRelativeTime,
   normalizeCountryCode,
 } from "@/lib/format"
+import { teamColorSlot } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
 import type { MatchResult, StandingsRow, StandingsTeam } from "@/types"
@@ -449,27 +450,12 @@ function PositionCell({ position }: { position: number }) {
   )
 }
 
-/** AoE2 team-colour slot: blue (P1) / red (P2). */
-type TeamColorSlot = "p1" | "p2"
-
 /**
- * Stable blue/red slot for a team, keyed on teamId parity so a player's team
- * colour never shifts with the rankings. For the tournament's consecutively
- * numbered teams this yields the same blue-first / red-second pairing the
- * Teams tab shows (which colours by teamId-sorted order), so the two views
- * agree. A third team would need the palette to grow past P1/P2 — see
- * `teams-view.tsx`.
- */
-function teamColorSlot(teamId: number): TeamColorSlot {
-  return teamId % 2 === 1 ? "p1" : "p2"
-}
-
-/**
- * The player's team: initials in a team-coloured chip (blue / red, matching the
- * Teams tab), full team name on hover. A player with no team shows a neutral
- * placeholder. Replaces the global ladder rank (#146) — team affiliation is
- * more relevant than overall ladder position for a team event, and the Position
- * column already carries tournament place.
+ * The player's team: initials in a team-coloured chip (the team's AoE2 colour,
+ * matching the Teams tab), full team name on hover. A player with no team shows
+ * a neutral placeholder. Replaces the global ladder rank (#146) — team
+ * affiliation is more relevant than overall ladder position for a team event,
+ * and the Position column already carries tournament place.
  */
 function TeamCell({ team }: { team: StandingsTeam | null }) {
   if (team === null) {

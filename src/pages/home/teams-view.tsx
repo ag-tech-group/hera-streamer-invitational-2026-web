@@ -5,6 +5,11 @@ import { useTranslation } from "react-i18next"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { normalizeCountryCode } from "@/lib/format"
+import {
+  TEAM_COLOR_SLOTS,
+  teamColorSlot,
+  type TeamColorSlot,
+} from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
 import type { TeamMember, TeamStandingsRow } from "@/types"
 
@@ -18,15 +23,6 @@ const COLISEUM_TEAM_COUNT = 2
 
 /** Placeholder roster sizes used by the loading skeleton, one per team panel. */
 const SKELETON_TEAM_SIZES = [4, 4]
-
-/**
- * Team-colour slot. The tournament is scoped to two teams, so today this
- * is just the AoE2 player-1 (blue) and player-2 (red) palettes. If a
- * third team ever appears we'd extend with the remaining AoE2 player
- * colours (P3 green, P4 yellow, …) rather than letting two teams share
- * a hue.
- */
-type TeamColor = "p1" | "p2"
 
 /**
  * Replaces the flat team-standings table (#90) with a roster-first
@@ -66,7 +62,7 @@ export function TeamsView({ rows }: { rows: TeamStandingsRow[] }) {
         <TeamPanel
           key={team.teamId}
           team={team}
-          color={teamColorFor(i)}
+          color={teamColorSlot(team.teamId)}
           rank={positionMap.get(team.teamId) ?? 0}
           revealOffset={i * team.members.length}
           className={
@@ -93,7 +89,7 @@ export function TeamsViewSkeleton() {
       {SKELETON_TEAM_SIZES.map((size, i) => (
         <TeamPanelSkeleton
           key={i}
-          color={teamColorFor(i)}
+          color={TEAM_COLOR_SLOTS[i]}
           rosterSize={size}
           className={i === 0 ? "xl:col-start-1" : "xl:col-start-3"}
         />
@@ -134,15 +130,6 @@ function TeamsLayout({
 }
 
 /**
- * Maps a team's display-order index onto the colour slot it occupies.
- * Two-team tournaments get a clean blue/red pair; the alternation
- * fallback for 3+ is best-effort until the palette grows past P1/P2.
- */
-function teamColorFor(index: number): TeamColor {
-  return index % 2 === 0 ? "p1" : "p2"
-}
-
-/**
  * One team's panel — coloured surface carrying the header (name, rank,
  * headline stats) and the roster of player pills. The colour is set
  * via `data-team-color`, which the CSS in `index.css` aliases to the
@@ -157,7 +144,7 @@ function TeamPanel({
   className,
 }: {
   team: TeamStandingsRow
-  color: TeamColor
+  color: TeamColorSlot
   rank: number
   /**
    * Starting index for the staggered pill reveal animation — added to
@@ -220,7 +207,7 @@ function TeamPanelSkeleton({
   rosterSize,
   className,
 }: {
-  color: TeamColor
+  color: TeamColorSlot
   rosterSize: number
   className?: string
 }) {

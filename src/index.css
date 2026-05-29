@@ -99,6 +99,30 @@
   --team-p2-strong: oklch(0.63 0.23 28);
   --team-p2-bg: oklch(0.55 0.21 28 / 0.08);
   /*
+   * AoE2 player colours P3–P8 (#146 palette extension): green, yellow, cyan,
+   * pink, gray, orange. Same shape as P1/P2 — base, `-strong` (hover/glow
+   * accent), `-bg` (0.08 wash). Light theme runs a little darker for chip-text
+   * contrast on the pale card; the `.dark` block lifts the lightness.
+   */
+  --team-p3: oklch(0.56 0.15 150);
+  --team-p3-strong: oklch(0.62 0.17 150);
+  --team-p3-bg: oklch(0.56 0.15 150 / 0.08);
+  --team-p4: oklch(0.68 0.14 100);
+  --team-p4-strong: oklch(0.72 0.15 100);
+  --team-p4-bg: oklch(0.68 0.14 100 / 0.08);
+  --team-p5: oklch(0.62 0.12 200);
+  --team-p5-strong: oklch(0.66 0.13 200);
+  --team-p5-bg: oklch(0.62 0.12 200 / 0.08);
+  --team-p6: oklch(0.6 0.19 350);
+  --team-p6-strong: oklch(0.65 0.21 350);
+  --team-p6-bg: oklch(0.6 0.19 350 / 0.08);
+  --team-p7: oklch(0.55 0.02 256);
+  --team-p7-strong: oklch(0.58 0.03 256);
+  --team-p7-bg: oklch(0.55 0.02 256 / 0.08);
+  --team-p8: oklch(0.62 0.16 55);
+  --team-p8-strong: oklch(0.66 0.18 55);
+  --team-p8-bg: oklch(0.62 0.16 55 / 0.08);
+  /*
    * Cell-flash highlight (#114): the brand blue at low opacity, used as the
    * starting frame of the WAAPI flash on a standings cell whose value just
    * changed via an SSE refetch. Tinted against the card surface so the eye
@@ -183,6 +207,26 @@
   --team-p2: oklch(0.7 0.18 28);
   --team-p2-strong: oklch(0.78 0.21 28);
   --team-p2-bg: oklch(0.7 0.18 28 / 0.14);
+  /* AoE2 player colours P3–P8 — dark-theme variants (lifted lightness +
+     0.14 wash to read on the stone base), matching the light set's hues. */
+  --team-p3: oklch(0.74 0.14 150);
+  --team-p3-strong: oklch(0.82 0.16 150);
+  --team-p3-bg: oklch(0.74 0.14 150 / 0.14);
+  --team-p4: oklch(0.84 0.13 100);
+  --team-p4-strong: oklch(0.9 0.15 100);
+  --team-p4-bg: oklch(0.84 0.13 100 / 0.14);
+  --team-p5: oklch(0.76 0.1 200);
+  --team-p5-strong: oklch(0.82 0.12 200);
+  --team-p5-bg: oklch(0.76 0.1 200 / 0.14);
+  --team-p6: oklch(0.74 0.16 350);
+  --team-p6-strong: oklch(0.82 0.18 350);
+  --team-p6-bg: oklch(0.74 0.16 350 / 0.14);
+  --team-p7: oklch(0.72 0.02 256);
+  --team-p7-strong: oklch(0.8 0.03 256);
+  --team-p7-bg: oklch(0.72 0.02 256 / 0.14);
+  --team-p8: oklch(0.76 0.14 55);
+  --team-p8-strong: oklch(0.82 0.16 55);
+  --team-p8-bg: oklch(0.76 0.14 55 / 0.14);
   /* Cell-flash highlight (#114): dark-theme variant carries a touch more
      mix because the dark card surface absorbs more of the wash. */
   --cell-flash: color-mix(in oklch, var(--brand) 28%, transparent);
@@ -253,6 +297,24 @@
   --color-team-p2: var(--team-p2);
   --color-team-p2-strong: var(--team-p2-strong);
   --color-team-p2-bg: var(--team-p2-bg);
+  --color-team-p3: var(--team-p3);
+  --color-team-p3-strong: var(--team-p3-strong);
+  --color-team-p3-bg: var(--team-p3-bg);
+  --color-team-p4: var(--team-p4);
+  --color-team-p4-strong: var(--team-p4-strong);
+  --color-team-p4-bg: var(--team-p4-bg);
+  --color-team-p5: var(--team-p5);
+  --color-team-p5-strong: var(--team-p5-strong);
+  --color-team-p5-bg: var(--team-p5-bg);
+  --color-team-p6: var(--team-p6);
+  --color-team-p6-strong: var(--team-p6-strong);
+  --color-team-p6-bg: var(--team-p6-bg);
+  --color-team-p7: var(--team-p7);
+  --color-team-p7-strong: var(--team-p7-strong);
+  --color-team-p7-bg: var(--team-p7-bg);
+  --color-team-p8: var(--team-p8);
+  --color-team-p8-strong: var(--team-p8-strong);
+  --color-team-p8-bg: var(--team-p8-bg);
 }
 
 @layer base {
@@ -277,6 +339,36 @@
     --team-color: var(--team-p2);
     --team-color-strong: var(--team-p2-strong);
     --team-color-bg: var(--team-p2-bg);
+  }
+  [data-team-color="p3"] {
+    --team-color: var(--team-p3);
+    --team-color-strong: var(--team-p3-strong);
+    --team-color-bg: var(--team-p3-bg);
+  }
+  [data-team-color="p4"] {
+    --team-color: var(--team-p4);
+    --team-color-strong: var(--team-p4-strong);
+    --team-color-bg: var(--team-p4-bg);
+  }
+  [data-team-color="p5"] {
+    --team-color: var(--team-p5);
+    --team-color-strong: var(--team-p5-strong);
+    --team-color-bg: var(--team-p5-bg);
+  }
+  [data-team-color="p6"] {
+    --team-color: var(--team-p6);
+    --team-color-strong: var(--team-p6-strong);
+    --team-color-bg: var(--team-p6-bg);
+  }
+  [data-team-color="p7"] {
+    --team-color: var(--team-p7);
+    --team-color-strong: var(--team-p7-strong);
+    --team-color-bg: var(--team-p7-bg);
+  }
+  [data-team-color="p8"] {
+    --team-color: var(--team-p8);
+    --team-color-strong: var(--team-p8-strong);
+    --team-color-bg: var(--team-p8-bg);
   }
 
   /*
