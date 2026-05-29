@@ -35,6 +35,7 @@ export const GetMeV1MeGetResponse = zod.object({
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.'))
 }).describe('The authenticated user\'s identity + everything they can manage.\n\nOne round-trip the frontend can hit on app load to answer \"who am\nI and what can I admin?\" — replaces probing per-tournament owner\nendpoints to derive the admin-UI map.')

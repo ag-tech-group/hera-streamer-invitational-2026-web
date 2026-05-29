@@ -11,18 +11,9 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  */
 
 /**
- * A tournament — a named roster of players tracked on one leaderboard.
-
-Configuration rather than polled data: a tournament's standings,
-matches, and live state are served under ``/v1/tournaments/{slug}/...``.
+ * One rating observation: the player's post-match rating and when that match finished.
  */
-export interface TournamentRead {
-  id: number;
-  slug: string;
-  name: string;
-  leaderboard_id: number;
-  start_date: string | null;
-  grand_finals_date: string | null;
-  prize_pool_cents: number | null;
-  created_at: string;
+export interface RatingPoint {
+  completed_at: string;
+  rating: number;
 }

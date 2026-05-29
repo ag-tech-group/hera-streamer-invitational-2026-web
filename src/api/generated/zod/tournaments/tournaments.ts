@@ -28,6 +28,7 @@ export const ListTournamentsV1TournamentsGetResponseItem = zod.object({
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
 export const ListTournamentsV1TournamentsGetResponse = zod.array(ListTournamentsV1TournamentsGetResponseItem)
@@ -50,6 +51,8 @@ export const createTournamentV1TournamentsPostBodyNameMax = 200;
 
 export const createTournamentV1TournamentsPostBodyLeaderboardIdExclusiveMin = 0;
 
+export const createTournamentV1TournamentsPostBodyPrizePoolCentsOneMin = 0;
+
 
 
 export const CreateTournamentV1TournamentsPostBody = zod.object({
@@ -57,7 +60,8 @@ export const CreateTournamentV1TournamentsPostBody = zod.object({
   "name": zod.string().min(1).max(createTournamentV1TournamentsPostBodyNameMax),
   "leaderboard_id": zod.number().gt(createTournamentV1TournamentsPostBodyLeaderboardIdExclusiveMin),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
-  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional()
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "prize_pool_cents": zod.union([zod.number().min(createTournamentV1TournamentsPostBodyPrizePoolCentsOneMin),zod.null()]).optional()
 }).describe('Body for ``POST \/v1\/tournaments`` — create a new tournament.\n\nRequired fields back non-nullable columns; the optional date fields\nbehave the same way as on ``TournamentUpdate`` (omit to leave unset,\nexplicit ``null`` is just an unset). ``slug`` is the routing key\nconsumers\' URLs are built from — restricted to lowercase alphanumeric\n+ internal hyphens so the value drops into a path segment unchanged.')
 
 /**
@@ -75,6 +79,7 @@ export const GetTournamentDetailV1TournamentsTournamentSlugGetResponse = zod.obj
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
 
@@ -96,13 +101,16 @@ export const updateTournamentV1TournamentsTournamentSlugPatchBodyNameOneMax = 20
 
 export const updateTournamentV1TournamentsTournamentSlugPatchBodyLeaderboardIdOneExclusiveMin = 0;
 
+export const updateTournamentV1TournamentsTournamentSlugPatchBodyPrizePoolCentsOneMin = 0;
+
 
 
 export const UpdateTournamentV1TournamentsTournamentSlugPatchBody = zod.object({
   "name": zod.union([zod.string().min(1).max(updateTournamentV1TournamentsTournamentSlugPatchBodyNameOneMax),zod.null()]).optional(),
   "leaderboard_id": zod.union([zod.number().gt(updateTournamentV1TournamentsTournamentSlugPatchBodyLeaderboardIdOneExclusiveMin),zod.null()]).optional(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
-  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional()
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "prize_pool_cents": zod.union([zod.number().min(updateTournamentV1TournamentsTournamentSlugPatchBodyPrizePoolCentsOneMin),zod.null()]).optional()
 }).describe('Partial update for a tournament\'s metadata (``PATCH``).\n\nEvery field is optional; only the fields present in the request body\nare applied. ``start_date`` \/ ``grand_finals_date`` may be set to\n``null`` to clear them. ``name`` and ``leaderboard_id`` back non-\nnullable columns, so an explicit ``null`` for either is rejected\nwith 422.\n\n``slug`` is intentionally not updatable — it is the routing key\nconsumers\' URLs are built from.')
 
 export const UpdateTournamentV1TournamentsTournamentSlugPatchResponse = zod.object({
@@ -112,6 +120,7 @@ export const UpdateTournamentV1TournamentsTournamentSlugPatchResponse = zod.obje
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
 
@@ -168,9 +177,40 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "rank_total": zod.union([zod.number(),zod.null()]),
   "in_match": zod.boolean(),
   "live_match_id": zod.union([zod.number(),zod.null()]),
+  "stream_live": zod.boolean(),
   "last_match_at": zod.union([zod.iso.datetime({}),zod.null()]),
-  "updated_at": zod.iso.datetime({})
+  "updated_at": zod.iso.datetime({}),
+  "games": zod.number(),
+  "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp), or null when the player has no games.')
 }).describe('One row in a tournament\'s standings list.\n\nA denormalized read model: a join of ``Player`` and ``PlayerRating``\nplus folded-in derived fields, so a consumer renders a full standings\ntable from one response with no per-player fan-out. ``recent_results``\nis completed-match form; ``tournament_record`` is the player\'s record\nwithin the tournament\'s date window; ``in_match`` \/ ``live_match_id``\nare current live-match status. Sorted by ``current_rating`` desc.'))
+})
+
+/**
+ * Per-player rating-over-time for the tournament's roster.
+
+One series per roster player who has completed-match history on the
+tournament's leaderboard: a list of ``(completed_at, rating)`` points
+oldest-first, where ``rating`` is the post-match value. The consumer
+plots rating against ``completed_at`` for a by-date view, or against
+point index for a by-games-played view. Players with no such history
+are omitted, and points reach back only as far as the poller's match
+record — not a player's whole career.
+ * @summary Get Progression
+ */
+export const GetProgressionV1TournamentsTournamentSlugProgressionGetParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const GetProgressionV1TournamentsTournamentSlugProgressionGetResponse = zod.object({
+  "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
+  "items": zod.array(zod.object({
+  "profile_id": zod.number(),
+  "alias": zod.string(),
+  "points": zod.array(zod.object({
+  "completed_at": zod.iso.datetime({}),
+  "rating": zod.number()
+}).describe('One rating observation: the player\'s post-match rating and when that match finished.'))
+}).describe('A single player\'s rating-over-time series for a tournament.\n\n``points`` are completed-match rating observations on the tournament\'s\nleaderboard, oldest-first — the consumer plots ``rating`` against\n``completed_at`` for a by-date view, or against point index for a\nby-games-played view. A player with no completed-match history on the\nleaderboard is omitted from the series list entirely.'))
 })
 
 /**
