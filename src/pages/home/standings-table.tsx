@@ -563,6 +563,9 @@ function StreakCell({ streak }: { streak: number }) {
     <span
       className={cn(
         "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums",
+        // Thin muted outline to gently define the badge edge — the app's
+        // subtle border token (same ring as the team chips), not a hard white.
+        "ring-border ring-1 ring-inset",
         // Text uses the `-deep` variant (darker in light theme, lighter
         // in dark theme) so the W / L label clears WCAG AA contrast
         // against the tinted background. Base chart-2 / destructive
@@ -571,10 +574,9 @@ function StreakCell({ streak }: { streak: number }) {
         winning ? "text-chart-2-deep" : "text-destructive-deep",
         tier === "low" && (winning ? "bg-chart-2/10" : "bg-destructive/10"),
         tier === "med" && (winning ? "bg-chart-2/20" : "bg-destructive/20"),
-        tier === "high" &&
-          (winning
-            ? "bg-chart-2/30 ring-chart-2/40 ring-1 ring-inset"
-            : "bg-destructive/30 ring-destructive/40 ring-1 ring-inset")
+        // High tier keeps its coloured glow (box-shadow, below); the muted
+        // outline above stands in for the previous coloured ring.
+        tier === "high" && (winning ? "bg-chart-2/30" : "bg-destructive/30")
       )}
       style={
         tier === "high"
