@@ -51,6 +51,9 @@
     "loadErrorTeams": {
       "title": "No se pudieron cargar los equipos",
       "body": "Algo salió mal al consultar la clasificación de equipos."
+    },
+    "prizePool": {
+      "label": "Premio total"
     }
   },
   "standings": {
@@ -100,7 +103,8 @@
       "save": "Guardar cambios",
       "saving": "Guardando…",
       "successToast": "Torneo actualizado.",
-      "loadError": "No se pudieron cargar los detalles del torneo."
+      "loadError": "No se pudieron cargar los detalles del torneo.",
+      "prizePoolLabel": "Premio total"
     },
     "owners": {
       "grantLabel": "Otorgar acceso",

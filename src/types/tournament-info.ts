@@ -23,6 +23,14 @@ export interface TournamentInfo {
    * upper bound now that `end_date` is gone (aoe2-live-standings-api#76).
    */
   grandFinalsDate: string | null
+  /**
+   * Total prize pool, in integer minor units of the build's display
+   * currency (cents for USD/EUR/etc.) — `5000.00` is stored as `500000`.
+   * Mutable metadata the tournament owner edits live via the admin
+   * surface; `null` when no prize pool has been set, in which case the
+   * `PrizePoolCard` collapses out of the sidebar (#156).
+   */
+  prizePoolCents: number | null
   /** ISO-8601 timestamp when the tournament record was created. */
   createdAt: string
 }

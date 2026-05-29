@@ -125,6 +125,26 @@ function TournamentDetailsForm({
           value={form.grandFinalsDate}
           onChange={(v) => setForm({ ...form, grandFinalsDate: v })}
         />
+        {/*
+         * Label is the i18n key plus the build's display currency, so the
+         * admin sees `Prize pool (USD)` rather than guessing the unit.
+         * `activeTournament.prizeCurrency` is unset for builds that don't
+         * surface a prize pool; the bare key reads fine there too.
+         */}
+        <Field
+          id="tournament-prize-pool"
+          label={
+            activeTournament.prizeCurrency
+              ? `${t("admin.tournament.prizePoolLabel")} (${activeTournament.prizeCurrency})`
+              : t("admin.tournament.prizePoolLabel")
+          }
+          type="number"
+          min={0}
+          step={0.01}
+          placeholder="0.00"
+          value={form.prizePool}
+          onChange={(v) => setForm({ ...form, prizePool: v })}
+        />
       </div>
       <div className="flex items-center justify-end">
         <Button type="submit" disabled={mutation.isPending}>
@@ -149,6 +169,12 @@ interface FormState {
   /** `datetime-local` value: `"YYYY-MM-DDTHH:mm"` in the viewer's local clock. */
   startDate: string
   grandFinalsDate: string
+  /**
+   * Decimal display of the prize-pool amount in the build's currency (e.g.
+   * `"5000.00"`). Empty string maps to a `null` `prize_pool_cents` on
+   * submit — cleared, not zero.
+   */
+  prizePool: string
 }
 
 function toFormState(tournament: TournamentInfo): FormState {
@@ -156,15 +182,17 @@ function toFormState(tournament: TournamentInfo): FormState {
     name: tournament.name,
     startDate: toDatetimeLocal(tournament.startDate),
     grandFinalsDate: toDatetimeLocal(tournament.grandFinalsDate),
+    prizePool: toPrizePoolInput(tournament.prizePoolCents),
   }
 }
 
-/** Builds the PATCH body. Blank date fields become `null` (clears them). */
+/** Builds the PATCH body. Blank date / prize-pool fields become `null` (cleared). */
 function toUpdateBody(form: FormState): TournamentUpdate {
   return {
     name: form.name,
     start_date: fromDatetimeLocal(form.startDate),
     grand_finals_date: fromDatetimeLocal(form.grandFinalsDate),
+    prize_pool_cents: fromPrizePoolInput(form.prizePool),
   }
 }
 
@@ -182,6 +210,29 @@ function fromDatetimeLocal(value: string): string | null {
   return new Date(value).toISOString()
 }
 
+/**
+ * Integer cents → fixed-2-decimal display string (e.g. `512750` → `"5127.50"`).
+ * Null comes through as an empty string so the form treats it as cleared.
+ */
+function toPrizePoolInput(cents: number | null): string {
+  if (cents === null) return ""
+  return (cents / 100).toFixed(2)
+}
+
+/**
+ * Decimal display string → integer cents (e.g. `"5127.50"` → `512750`).
+ * Empty input maps to `null` (clears the field). Non-numeric inputs also
+ * collapse to `null` rather than ever emitting `NaN` to the API —
+ * `parseFloat` is permissive, so the round-trip stays defensive at the
+ * edge.
+ */
+function fromPrizePoolInput(value: string): number | null {
+  if (!value) return null
+  const dollars = parseFloat(value)
+  if (Number.isNaN(dollars)) return null
+  return Math.round(dollars * 100)
+}
+
 function Field({
   id,
   label,
@@ -189,6 +240,9 @@ function Field({
   value,
   onChange,
   className,
+  min,
+  step,
+  placeholder,
 }: {
   id: string
   label: string
@@ -196,6 +250,9 @@ function Field({
   value: string
   onChange: (next: string) => void
   className?: string
+  min?: string | number
+  step?: string | number
+  placeholder?: string
 }) {
   return (
     <div className={`flex flex-col gap-1.5 ${className ?? ""}`}>
@@ -205,6 +262,9 @@ function Field({
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        min={min}
+        step={step}
+        placeholder={placeholder}
       />
     </div>
   )

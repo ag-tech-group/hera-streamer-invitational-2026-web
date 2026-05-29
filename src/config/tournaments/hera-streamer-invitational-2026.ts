@@ -11,6 +11,10 @@ export const heraStreamerInvitational2026: Tournament = {
   name: "AoE2: DE 1v1 Invitational",
   apiTournamentSlug: "default",
   hostLabel: "Hosted by Hera",
+  // Currency that the API's `prize_pool_cents` is denominated in. USD is
+  // the typical AoE2 invitational prize-pool currency; override per build
+  // if this tournament's pool is in a different currency. (#156)
+  prizeCurrency: "USD",
   hostLinks: [
     { label: "Twitch", url: "https://twitch.tv/hera", kind: "twitch" },
     {

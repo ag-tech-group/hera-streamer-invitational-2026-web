@@ -4,6 +4,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { Countdown } from "@/components/countdown"
 import { HostLinksCard } from "@/components/host-links-card"
 import { LadderRaceActiveCard } from "@/components/ladder-race-active-card"
+import { PrizePoolCard } from "@/components/prize-pool-card"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
@@ -180,6 +181,17 @@ export function HomePage() {
               />
             }
             variant="compact"
+          />
+          {/*
+           * Prize pool slot (#156): between the countdowns and the host
+           * links. The card returns null when the API has no pool set, so
+           * pre-launch and tournaments without a published pool collapse
+           * cleanly.
+           */}
+          <PrizePoolCard
+            prizePoolCents={tournament.data?.prizePoolCents}
+            currency={activeTournament.prizeCurrency}
+            isLoading={tournament.isPending}
           />
           <HostLinksCard
             label={activeTournament.hostLabel}

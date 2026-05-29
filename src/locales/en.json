@@ -51,6 +51,9 @@
     "loadErrorTeams": {
       "title": "Couldn't load teams",
       "body": "Something went wrong reaching the team standings."
+    },
+    "prizePool": {
+      "label": "Prize pool"
     }
   },
   "standings": {
@@ -100,7 +103,8 @@
       "save": "Save changes",
       "saving": "Saving…",
       "successToast": "Tournament updated.",
-      "loadError": "Couldn't load tournament details."
+      "loadError": "Couldn't load tournament details.",
+      "prizePoolLabel": "Prize pool"
     },
     "owners": {
       "grantLabel": "Grant ownership",
