@@ -54,9 +54,15 @@ export function TeamsSection() {
     activeTournament.apiTournamentSlug
   )
 
-  // Memoised so the `[]` fallback doesn't change identity on every render
-  // when there's no data — keeps `playerTeamMap`'s `useMemo` stable too.
-  const rows = useMemo(() => teams.data?.rows ?? [], [teams.data?.rows])
+  // Sorted by teamId (≈ creation order) so the admin list stays put when a
+  // roster edit changes a team's combined rating. The standings endpoint
+  // returns teams rating-ranked, so without this the list reshuffles on every
+  // add/remove — confusing while managing rosters. Also memoised so the `[]`
+  // fallback keeps a stable identity for the `playerTeamMap` useMemo below.
+  const rows = useMemo(
+    () => [...(teams.data?.rows ?? [])].sort((a, b) => a.teamId - b.teamId),
+    [teams.data?.rows]
+  )
 
   const allPlayers: PlayerRead[] =
     playersQuery.data?.status === 200 ? playersQuery.data.data.items : []
