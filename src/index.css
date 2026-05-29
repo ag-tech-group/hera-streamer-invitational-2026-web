@@ -280,6 +280,36 @@
   }
 
   /*
+   * Team-tinted standings rows (#146): a soft wash of the player's team
+   * colour behind the row. Painted by a pseudo-element overlay rather than
+   * the row's own background-color, so it layers cleanly *over* the rank-1
+   * spotlight, the row hover, and the cell change-flash (all background-color
+   * driven) instead of replacing them. `isolation` scopes the z-index:-1
+   * overlay to the row — above the row background, below the cell content.
+   *
+   * `--team-row-tint` is theme-tuned: full --team-color-bg in light (the
+   * dark token already sits higher, so it's dialled to 70% there).
+   */
+  [data-team-color] {
+    --team-row-tint: var(--team-color-bg);
+  }
+  .dark [data-team-color] {
+    --team-row-tint: color-mix(in oklch, var(--team-color-bg) 70%, transparent);
+  }
+  tr[data-team-color] {
+    position: relative;
+    isolation: isolate;
+  }
+  tr[data-team-color]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--team-row-tint);
+    pointer-events: none;
+  }
+
+  /*
    * Player pill (#90): the team-coloured roster row. Reads the
    * `--team-color*` aliases the parent panel exposes via
    * `data-team-color`, so the same `.team-pill` paints blue inside a P1

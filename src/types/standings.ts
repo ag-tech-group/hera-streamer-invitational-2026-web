@@ -2,6 +2,19 @@
 export type MatchResult = "win" | "loss"
 
 /**
+ * The team a player belongs to, folded onto their standings row — a compact
+ * reference (id + display strings, no aggregates). Null when the player isn't
+ * on a team. The richer per-team aggregates live on `TeamStandingsRow`.
+ */
+export interface StandingsTeam {
+  teamId: number
+  /** Display name of the team, shown on hover over the initials chip. */
+  name: string
+  /** Short team initials, shown as a chip in the standings Team column. */
+  initials: string
+}
+
+/**
  * One player's row in the standings, ready for display.
  *
  * UI-facing counterpart of the generated `StandingRow` DTO: camelCased and
@@ -13,6 +26,8 @@ export interface StandingsRow {
   alias: string
   /** ISO 3166-1 alpha-2 country code (lowercase), or null if unknown. */
   country: string | null
+  /** The player's team, or null if they aren't on one. */
+  team: StandingsTeam | null
   currentRating: number
   maxRating: number
   wins: number

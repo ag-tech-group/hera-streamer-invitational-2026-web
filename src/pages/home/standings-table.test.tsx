@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
 import { StandingsTable } from "@/pages/home/standings-table"
@@ -10,6 +11,7 @@ function row(
 ): StandingsRow {
   return {
     country: null,
+    team: null,
     currentRating: 2500,
     maxRating: 2600,
     wins: 100,
@@ -26,9 +28,9 @@ function row(
   }
 }
 
-// Generic placeholder rows in standings order (rating descending). The ladder
-// `rank` values are deliberately not 1/2/3 — so a passing test proves the
-// Position column shows the row's place here, not the global ladder rank.
+// Generic placeholder rows in standings order (rating descending). The `rank`
+// values are deliberately not 1/2/3 — Position is derived from row order, not
+// the (no-longer-displayed) ladder rank, and the position test below proves it.
 const rows: StandingsRow[] = [
   row({ profileId: 1, alias: "Alpha", currentRating: 2800, rank: 7 }),
   row({ profileId: 2, alias: "Bravo", currentRating: 2700, rank: 2 }),
@@ -36,29 +38,27 @@ const rows: StandingsRow[] = [
 ]
 
 describe("StandingsTable", () => {
-  it("shows Position and Ladder column headers", () => {
+  it("shows Position and Team column headers", () => {
     render(<StandingsTable rows={rows} tournamentStarted />)
     expect(
       screen.getByRole("columnheader", { name: "Position" })
     ).toBeInTheDocument()
     expect(
-      screen.getByRole("columnheader", { name: "Ladder" })
+      screen.getByRole("columnheader", { name: "Team" })
     ).toBeInTheDocument()
   })
 
-  it("numbers rows by tournament position, distinct from ladder rank", () => {
+  it("numbers rows by tournament position from row order, not ladder rank", () => {
     render(<StandingsTable rows={rows} tournamentStarted />)
     const bodyRows = screen.getAllByRole("row").slice(1) // drop the header row
 
     const positions = bodyRows.map(
       (r) => within(r).getAllByRole("cell")[0].textContent
     )
-    const ladders = bodyRows.map(
-      (r) => within(r).getAllByRole("cell")[1].textContent
-    )
 
+    // Rows carry non-1/2/3 `rank` values; Position still reads 1/2/3 from row
+    // order, proving it isn't derived from the (now-unshown) ladder rank.
     expect(positions).toEqual(["1", "2", "3"])
-    expect(ladders).toEqual(["7", "2", "15"])
   })
 
   it("shows the Games and Recent column headers", () => {
@@ -69,6 +69,95 @@ describe("StandingsTable", () => {
     expect(
       screen.getByRole("columnheader", { name: "Recent" })
     ).toBeInTheDocument()
+  })
+})
+
+describe("StandingsTable — team column", () => {
+  it("shows the team initials as a chip with the full name on hover", () => {
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            team: { teamId: 3, name: "Team Grubby", initials: "G" },
+          }),
+        ]}
+        tournamentStarted
+      />
+    )
+    const chip = screen.getByTitle("Team Grubby")
+    expect(chip).toHaveTextContent("G")
+  })
+
+  it("shows a placeholder in the Team cell when the player has no team", () => {
+    render(
+      <StandingsTable
+        rows={[row({ profileId: 1, alias: "Alpha", team: null })]}
+        tournamentStarted
+      />
+    )
+    // Team is the 2nd column (Position, Team, Player, ...).
+    const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell")
+    expect(cells[1]).toHaveTextContent("—")
+  })
+
+  it("colours the chip blue for odd team ids and red for even", () => {
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            team: { teamId: 1, name: "Blue", initials: "B" },
+          }),
+          row({
+            profileId: 2,
+            alias: "Bravo",
+            team: { teamId: 2, name: "Red", initials: "R" },
+          }),
+        ]}
+        tournamentStarted
+      />
+    )
+    expect(screen.getByTitle("Blue")).toHaveAttribute("data-team-color", "p1")
+    expect(screen.getByTitle("Red")).toHaveAttribute("data-team-color", "p2")
+  })
+
+  it("groups rows by team when the Team header is sorted", async () => {
+    const user = userEvent.setup()
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            currentRating: 2800,
+            team: { teamId: 2, name: "Red", initials: "R" },
+          }),
+          row({
+            profileId: 2,
+            alias: "Bravo",
+            currentRating: 2700,
+            team: { teamId: 1, name: "Blue", initials: "B" },
+          }),
+          row({
+            profileId: 3,
+            alias: "Charlie",
+            currentRating: 2600,
+            team: { teamId: 2, name: "Red", initials: "R" },
+          }),
+        ]}
+        tournamentStarted
+      />
+    )
+    await user.click(screen.getByRole("button", { name: "Team" }))
+    const teamCells = screen
+      .getAllByRole("row")
+      .slice(1)
+      .map((r) => within(r).getAllByRole("cell")[1].textContent)
+    // Ascending by initials groups Blue (team 1) ahead of Red (team 2).
+    expect(teamCells).toEqual(["B", "R", "R"])
   })
 })
 
@@ -132,7 +221,7 @@ describe("StandingsTable — games played", () => {
         tournamentStarted
       />
     )
-    // Games is the 7th column: Position, Ladder, Player, Rating, Peak,
+    // Games is the 7th column: Position, Team, Player, Rating, Peak,
     // Streak, Games, Recent, Activity.
     const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell")
     expect(cells[6]).toHaveTextContent("14")

@@ -58,7 +58,7 @@
     "captionLoading": "Loading standings",
     "headers": {
       "position": "Position",
-      "ladder": "Ladder",
+      "team": "Team",
       "player": "Player",
       "rating": "Rating",
       "peak": "Peak",

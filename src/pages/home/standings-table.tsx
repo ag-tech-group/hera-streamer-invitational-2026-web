@@ -20,7 +20,7 @@ import {
 } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
-import type { MatchResult, StandingsRow } from "@/types"
+import type { MatchResult, StandingsRow, StandingsTeam } from "@/types"
 
 /** A player's last match counts as "active" if it landed within this window. */
 const ACTIVE_WITHIN_MS = 24 * 60 * 60 * 1000
@@ -88,6 +88,14 @@ export function StandingsTable({
             key={row.profileId}
             data-flip-id={row.profileId}
             ref={registerRow}
+            // Tint the whole row with the player's team colour (#146). The
+            // wash is painted in index.css via a pseudo-element layer keyed on
+            // this attribute, so it composes over the leader spotlight, the
+            // row hover, and the cell change-flash instead of replacing them;
+            // here we just tag the row with its team's colour slot.
+            data-team-color={
+              row.team ? teamColorSlot(row.team.teamId) : undefined
+            }
             className={cn(
               "border-b transition-colors last:border-b-0",
               // Leader row carries a pulsing brand-tinted bg; non-leaders
@@ -101,7 +109,7 @@ export function StandingsTable({
               <PositionCell position={position} />
             </td>
             <td className="px-4 py-3">
-              <RankCell rank={row.rank} />
+              <TeamCell team={row.team} />
             </td>
             <td className="px-4 py-3">
               <PlayerCell
@@ -196,8 +204,9 @@ function CountUp({ value }: { value: number }) {
 /** Maps a sort key onto the `StandingsRow` field it ranks by. */
 function getSortValue(row: StandingsRow, key: string): SortableValue {
   switch (key) {
-    case "rank":
-      return row.rank
+    case "team":
+      // Sort groups players by team (by initials); the un-teamed sort last.
+      return row.team?.initials ?? null
     case "alias":
       return row.alias
     case "currentRating":
@@ -234,8 +243,8 @@ function StandingsHeaderRow({
     <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
       <SortableTh label={t("standings.headers.position")} />
       <SortableTh
-        label={t("standings.headers.ladder")}
-        sortKey="rank"
+        label={t("standings.headers.team")}
+        sortKey="team"
         defaultDirection="asc"
         sortState={sortState}
         onSort={onSort}
@@ -323,7 +332,9 @@ export function StandingsTableSkeleton({
             <Skeleton className="h-5 w-7 rounded-md" />
           </td>
           <td className="px-4 py-3">
-            <Skeleton className="h-4 w-5" />
+            {/* Team-initials chip placeholder — matches the TeamCell chip
+                footprint so data arrival doesn't shift the row. */}
+            <Skeleton className="h-5 w-8 rounded-md" />
           </td>
           <td className="px-4 py-3">
             <div className="flex items-center gap-2">
@@ -438,19 +449,46 @@ function PositionCell({ position }: { position: number }) {
   )
 }
 
-/** Global ladder rank, with the top three given a touch more weight. */
-function RankCell({ rank }: { rank: number | null }) {
-  if (rank === null) {
+/** AoE2 team-colour slot: blue (P1) / red (P2). */
+type TeamColorSlot = "p1" | "p2"
+
+/**
+ * Stable blue/red slot for a team, keyed on teamId parity so a player's team
+ * colour never shifts with the rankings. For the tournament's consecutively
+ * numbered teams this yields the same blue-first / red-second pairing the
+ * Teams tab shows (which colours by teamId-sorted order), so the two views
+ * agree. A third team would need the palette to grow past P1/P2 — see
+ * `teams-view.tsx`.
+ */
+function teamColorSlot(teamId: number): TeamColorSlot {
+  return teamId % 2 === 1 ? "p1" : "p2"
+}
+
+/**
+ * The player's team: initials in a team-coloured chip (blue / red, matching the
+ * Teams tab), full team name on hover. A player with no team shows a neutral
+ * placeholder. Replaces the global ladder rank (#146) — team affiliation is
+ * more relevant than overall ladder position for a team event, and the Position
+ * column already carries tournament place.
+ */
+function TeamCell({ team }: { team: StandingsTeam | null }) {
+  if (team === null) {
     return <span className="text-muted-foreground">—</span>
   }
   return (
     <span
-      className={cn(
-        "tabular-nums",
-        rank <= 3 ? "font-semibold" : "text-muted-foreground"
-      )}
+      // `data-team-color` aliases the generic --team-color-* vars (index.css),
+      // the same recipe the Teams-tab panels use, so the chip paints blue or
+      // red without per-team styling here.
+      data-team-color={teamColorSlot(team.teamId)}
+      className="ring-border inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold tracking-wide ring-1 ring-inset"
+      style={{
+        background: "var(--team-color-bg)",
+        color: "var(--team-color-strong)",
+      }}
+      title={team.name}
     >
-      {rank}
+      {team.initials}
     </span>
   )
 }
