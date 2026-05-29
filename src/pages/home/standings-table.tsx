@@ -89,11 +89,11 @@ export function StandingsTable({
             key={row.profileId}
             data-flip-id={row.profileId}
             ref={registerRow}
-            // Tint the whole row with the player's team colour (#146). The
-            // wash is painted in index.css via a pseudo-element layer keyed on
-            // this attribute, so it composes over the leader spotlight, the
-            // row hover, and the cell change-flash instead of replacing them;
-            // here we just tag the row with its team's colour slot.
+            // Tag the row with its team's colour slot (#146). A thin left
+            // accent bar is painted in index.css via a pseudo-element layer
+            // keyed on this attribute, so it composes over the leader
+            // spotlight, the row hover, and the cell change-flash instead of
+            // replacing them; here we just tag the row.
             data-team-color={
               row.team ? teamColorSlot(row.team.teamId) : undefined
             }
