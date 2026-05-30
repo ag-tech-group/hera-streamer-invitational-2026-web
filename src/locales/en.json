@@ -20,8 +20,7 @@
   },
   "home": {
     "title": "Live Standings",
-    "subtitleProduct": "Age of Empires 2: Definitive Edition",
-    "subtitleSuffix": "live rankings",
+    "subtitle": "Live ratings, team standings, and tournament progression — <product>Age of Empires 2: Definitive Edition</product>, hosted by Hera.",
     "tabs": {
       "players": "Players",
       "teams": "Teams"
