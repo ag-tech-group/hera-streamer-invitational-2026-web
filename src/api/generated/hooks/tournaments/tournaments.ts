@@ -569,9 +569,12 @@ export const useDeleteTournamentV1TournamentsTournamentSlugDelete = <TError = HT
     /**
  * The tournament's players, ranked by current rating on its leaderboard.
 
-Scoped two ways: to the tournament's roster (``TournamentPlayer``) and
-to its ``leaderboard_id``. ``recent_results`` and live-match status are
-folded in by two further queries over the same standing set.
+Scoped to the tournament's roster (``TournamentPlayer``) and joined left
+to ``PlayerRating`` on its ``leaderboard_id`` — a roster member without
+a rating row on that leaderboard (typically a brand-new account that
+hasn't played its first ranked match) still surfaces, with null rating
+fields and a zero record, sorted to the tail. ``recent_results`` and
+live-match status are folded in by further queries over the same set.
  * @summary Get Standings
  */
 export type getStandingsV1TournamentsTournamentSlugStandingsGetResponse200 = {

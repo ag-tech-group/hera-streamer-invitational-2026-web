@@ -17,12 +17,14 @@ import type { TournamentRecord } from './tournamentRecord';
 /**
  * One row in a tournament's standings list.
 
-A denormalized read model: a join of ``Player`` and ``PlayerRating``
+A denormalized read model: a left join of ``Player`` and ``PlayerRating``
 plus folded-in derived fields, so a consumer renders a full standings
 table from one response with no per-player fan-out. ``recent_results``
 is completed-match form; ``tournament_record`` is the player's record
 within the tournament's date window; ``in_match`` / ``live_match_id``
-are current live-match status. Sorted by ``current_rating`` desc.
+are current live-match status. Sorted by ``current_rating`` desc, with
+unrated roster members (no rating row on the tournament's leaderboard
+— typically brand-new accounts) at the tail, ordered by ``profile_id``.
  */
 export interface StandingRow {
   profile_id: number;
@@ -30,8 +32,8 @@ export interface StandingRow {
   country: string | null;
   team: StandingTeam | null;
   presentation: StandingRowPresentation;
-  current_rating: number;
-  max_rating: number;
+  current_rating: number | null;
+  max_rating: number | null;
   wins: number;
   losses: number;
   streak: number;

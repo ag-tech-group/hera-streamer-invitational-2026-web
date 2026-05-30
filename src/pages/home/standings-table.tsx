@@ -133,13 +133,27 @@ export function StandingsTable({
               value={row.currentRating}
               className="font-display px-4 py-3 text-right text-lg tracking-wide tabular-nums"
             >
-              <CountUp value={row.currentRating} />
+              {/*
+               * Null currentRating = unrated roster member (left-joined onto
+               * the standings; the API sorts these to the tail). Render the
+               * same muted em-dash the streak / recent / activity cells use
+               * for their empty state rather than a count-up of nothing.
+               */}
+              {row.currentRating === null ? (
+                <span className="text-muted-foreground text-xs">—</span>
+              ) : (
+                <CountUp value={row.currentRating} />
+              )}
             </FlashCell>
             <FlashCell
               value={row.maxRating}
               className="text-muted-foreground px-4 py-3 text-right tabular-nums"
             >
-              {row.maxRating}
+              {row.maxRating === null ? (
+                <span className="text-muted-foreground text-xs">—</span>
+              ) : (
+                row.maxRating
+              )}
             </FlashCell>
             <FlashCell value={row.streak} className="px-4 py-3 text-center">
               <StreakCell streak={row.streak} />
