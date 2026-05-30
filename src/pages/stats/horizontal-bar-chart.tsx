@@ -8,11 +8,13 @@ import { CanvasRenderer } from "echarts/renderers"
 import ReactEChartsCore from "echarts-for-react/esm/core"
 import { useMemo } from "react"
 
+import {
+  useChartColors,
+  type ChartColors,
+} from "@/pages/stats/use-chart-colors"
+
 // Trimmed echarts registration for the ranking bars.
 echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer])
-
-const AXIS = "#94a3b8"
-const GRID_LINE = "rgba(148,163,184,0.12)"
 
 /** One bar: a labelled, coloured value (e.g. a team's combined elo). */
 export interface BarDatum {
@@ -21,7 +23,7 @@ export interface BarDatum {
   color: string
 }
 
-function buildOption(data: BarDatum[]): EChartsCoreOption {
+function buildOption(data: BarDatum[], colors: ChartColors): EChartsCoreOption {
   // Ascending so the largest lands at the top of the (bottom-origin) category
   // axis — the chart reads as a top-down ranking.
   const sorted = [...data].sort((a, b) => a.value - b.value)
@@ -42,13 +44,13 @@ function buildOption(data: BarDatum[]): EChartsCoreOption {
       // `hideOverlap` drops value labels that would collide rather than
       // letting them smear together — the tight `scale: true` range packs
       // too many ticks for a narrow (mobile) plot width otherwise.
-      axisLabel: { color: AXIS, hideOverlap: true },
-      splitLine: { lineStyle: { color: GRID_LINE } },
+      axisLabel: { color: colors.axis, hideOverlap: true },
+      splitLine: { lineStyle: { color: colors.gridLine } },
     },
     yAxis: {
       type: "category",
       data: sorted.map((d) => d.label),
-      axisLabel: { color: "#cbd5e1" },
+      axisLabel: { color: colors.label },
       axisLine: { show: false },
       axisTick: { show: false },
     },
@@ -64,7 +66,7 @@ function buildOption(data: BarDatum[]): EChartsCoreOption {
         label: {
           show: true,
           position: "right",
-          color: "#cbd5e1",
+          color: colors.label,
           fontSize: 11,
         },
       },
@@ -85,7 +87,8 @@ export function HorizontalBarChart({
   data: BarDatum[]
   height?: number
 }) {
-  const option = useMemo(() => buildOption(data), [data])
+  const colors = useChartColors()
+  const option = useMemo(() => buildOption(data, colors), [data, colors])
   return (
     <ReactEChartsCore
       echarts={echarts}
