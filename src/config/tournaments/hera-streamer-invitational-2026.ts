@@ -9,6 +9,8 @@ import type { Tournament } from "@/types"
 export const heraStreamerInvitational2026: Tournament = {
   slug: "hera-streamer-invitational-2026",
   name: "The King's Gauntlet",
+  // Appended to the document/SEO title after the host label (#179).
+  game: "Age of Empires II",
   apiTournamentSlug: "default",
   hostLabel: "Hosted by Hera",
   // Currency that the API's `prize_pool_cents` is denominated in. USD is

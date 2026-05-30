@@ -35,7 +35,9 @@ function metaContent(
 describe("index.html SEO metadata", () => {
   it("keeps a keyword-bearing title and description", () => {
     const title = html.match(/<title>([^<]*)<\/title>/)?.[1]
-    expect(title).toBe("The King's Gauntlet (Hosted by Hera)")
+    expect(title).toBe(
+      "The King's Gauntlet (Hosted by Hera) — Age of Empires II"
+    )
     expect(metaContent("name", "description")).toContain("Age of Empires II")
   })
 
@@ -53,7 +55,7 @@ describe("index.html SEO metadata", () => {
     expect(metaContent("property", "og:site_name")).toBeTruthy()
     // og:title mirrors <title> on purpose — keep them in lockstep.
     expect(metaContent("property", "og:title")).toBe(
-      "The King's Gauntlet (Hosted by Hera)"
+      "The King's Gauntlet (Hosted by Hera) — Age of Empires II"
     )
     expect(metaContent("property", "og:description")).toContain(
       "Age of Empires II"

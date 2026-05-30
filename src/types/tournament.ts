@@ -14,6 +14,15 @@ export interface Tournament {
    */
   name: string
   /**
+   * Game this tournament is played in, appended to the document / SEO title
+   * for search context — `"Age of Empires II"` yields a title like
+   * `"<name> (<hostLabel>) — Age of Empires II"` (#179). Kept short on
+   * purpose (no "Definitive Edition") so the title stays under the ~60-char
+   * SERP truncation; the full product name lives in the meta description.
+   * When unset, the title stays brand-only.
+   */
+  game?: string
+  /**
    * Tournament slug used in the API path (`GET /v1/tournaments/{slug}/...`).
    *
    * Distinct from `slug` above: `slug` selects this build's config, while
