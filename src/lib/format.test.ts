@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { formatTimeAgo, normalizeCountryCode } from "@/lib/format"
+import {
+  countryCodeToFlagEmoji,
+  flagEmojiToCountryCode,
+  formatTimeAgo,
+  normalizeCountryCode,
+} from "@/lib/format"
 
 describe("normalizeCountryCode", () => {
   it("returns a well-formed alpha-2 code unchanged", () => {
@@ -24,6 +29,30 @@ describe("normalizeCountryCode", () => {
     expect(normalizeCountryCode("usa")).toBeNull()
     expect(normalizeCountryCode("x")).toBeNull()
     expect(normalizeCountryCode("12")).toBeNull()
+  })
+})
+
+describe("countryCodeToFlagEmoji", () => {
+  it("converts a lowercase alpha-2 code to its flag emoji", () => {
+    expect(countryCodeToFlagEmoji("us")).toBe("🇺🇸")
+    expect(countryCodeToFlagEmoji("kr")).toBe("🇰🇷")
+  })
+
+  it("normalizes case and surrounding whitespace before converting", () => {
+    expect(countryCodeToFlagEmoji("US")).toBe("🇺🇸")
+    expect(countryCodeToFlagEmoji("  ca ")).toBe("🇨🇦")
+  })
+
+  it("round-trips with flagEmojiToCountryCode", () => {
+    const emoji = countryCodeToFlagEmoji("de")
+    expect(emoji).not.toBeNull()
+    expect(flagEmojiToCountryCode(emoji as string)).toBe("de")
+  })
+
+  it("returns null for a malformed code", () => {
+    expect(countryCodeToFlagEmoji("usa")).toBeNull()
+    expect(countryCodeToFlagEmoji("")).toBeNull()
+    expect(countryCodeToFlagEmoji("1")).toBeNull()
   })
 })
 

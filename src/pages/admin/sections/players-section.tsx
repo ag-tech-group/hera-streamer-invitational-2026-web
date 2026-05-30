@@ -13,6 +13,7 @@ import {
 } from "@/api/generated/hooks/players/players"
 import type { PlayerRead } from "@/api/generated/types"
 import { ConfirmDialog } from "@/components/confirm-dialog"
+import { CountryCombobox } from "@/components/country-combobox"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -328,7 +329,7 @@ function PresentationForm({
       <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
         {t("admin.players.presentation.title")}
       </p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`presentation-name-${lookup}`}>
             {t("admin.players.presentation.displayName")}
@@ -349,16 +350,10 @@ function PresentationForm({
           <Label htmlFor={`presentation-flag-${lookup}`}>
             {t("admin.players.presentation.flag")}
           </Label>
-          <Input
+          <CountryCombobox
             id={`presentation-flag-${lookup}`}
             value={form.flag}
-            onChange={(event) => setForm({ ...form, flag: event.target.value })}
-            placeholder={t("admin.players.presentation.flagPlaceholder")}
-            className="w-20 text-center text-base"
-            // A country emoji is two regional-indicator codepoints (~8 UTF-16
-            // units); 16 leaves headroom for a flag-with-modifier (e.g.
-            // England's flag uses a tag sequence) without inviting essays.
-            maxLength={16}
+            onChange={(flag) => setForm({ ...form, flag })}
           />
         </div>
       </div>
