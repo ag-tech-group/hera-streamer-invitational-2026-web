@@ -20,6 +20,7 @@ export function Countdown({
   target,
   label,
   variant = "hero",
+  accentClassName = "text-brand",
   isLoading = false,
   className,
 }: {
@@ -35,6 +36,12 @@ export function Countdown({
    * `compact`: smaller digits + tighter padding for sidebar / secondary use.
    */
   variant?: Variant
+  /**
+   * Tailwind text-colour class for the highlighted (leftmost non-zero) digit
+   * segment. Defaults to brand blue; the grand-finals countdown passes the
+   * team red so its digits match its red "Ends" label (#202).
+   */
+  accentClassName?: string
   /**
    * Reserve the countdown's layout slot with a skeleton placeholder
    * while the tournament metadata is still in flight. Without this,
@@ -116,6 +123,7 @@ export function Countdown({
           unit={t("countdown.days")}
           variant={variant}
           highlighted={highlightIndex === 0}
+          accentClassName={accentClassName}
         />
         <Separator variant={variant} />
         <Segment
@@ -123,6 +131,7 @@ export function Countdown({
           unit={t("countdown.hours")}
           variant={variant}
           highlighted={highlightIndex === 1}
+          accentClassName={accentClassName}
         />
         <Separator variant={variant} />
         <Segment
@@ -130,6 +139,7 @@ export function Countdown({
           unit={t("countdown.minutes")}
           variant={variant}
           highlighted={highlightIndex === 2}
+          accentClassName={accentClassName}
         />
         <Separator variant={variant} />
         <Segment
@@ -137,6 +147,7 @@ export function Countdown({
           unit={t("countdown.seconds")}
           variant={variant}
           highlighted={highlightIndex === 3}
+          accentClassName={accentClassName}
         />
       </div>
       <p
@@ -156,11 +167,13 @@ function Segment({
   unit,
   variant,
   highlighted,
+  accentClassName,
 }: {
   value: number
   unit: string
   variant: Variant
   highlighted: boolean
+  accentClassName: string
 }) {
   const isHero = variant === "hero"
   return (
@@ -173,7 +186,7 @@ function Segment({
         className={cn(
           "font-display leading-none transition-colors",
           isHero ? "text-5xl sm:text-6xl" : "text-3xl sm:text-4xl",
-          highlighted && "text-brand"
+          highlighted && accentClassName
         )}
       >
         {value.toString().padStart(2, "0")}

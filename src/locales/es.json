@@ -20,7 +20,7 @@
   },
   "home": {
     "title": "Clasificación en vivo",
-    "subtitle": "Puntuaciones en vivo, clasificación por equipos y progreso del torneo — <product>Age of Empires 2: Definitive Edition</product>, presentado por Hera.",
+    "subtitle": "Puntuaciones en vivo, clasificación por equipos y progreso del torneo — <product>Age of Empires 2: Definitive Edition</product>.",
     "tabs": {
       "players": "Jugadores",
       "teams": "Equipos",
@@ -157,7 +157,6 @@
       "addAction": "Añadir",
       "addingAction": "Añadiendo…",
       "addSuccess": "Jugador añadido.",
-      "addHint": "Añade un nombre para crear un reservado, o un profile ID para seguir a un jugador clasificado. Puedes añadir el ID más tarde para promover un reservado.",
       "addErrorProfileId": "El ID de perfil debe ser un número positivo.",
       "addErrorNumericName": "Eso parece un ID de perfil — ingrésalo en el campo ID de perfil.",
       "removeAria": "Quitar a {{name}}",

@@ -39,7 +39,10 @@ function buildOption(data: BarDatum[]): EChartsCoreOption {
     xAxis: {
       type: "value",
       scale: true,
-      axisLabel: { color: AXIS },
+      // `hideOverlap` drops value labels that would collide rather than
+      // letting them smear together — the tight `scale: true` range packs
+      // too many ticks for a narrow (mobile) plot width otherwise.
+      axisLabel: { color: AXIS, hideOverlap: true },
       splitLine: { lineStyle: { color: GRID_LINE } },
     },
     yAxis: {

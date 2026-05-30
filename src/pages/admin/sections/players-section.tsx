@@ -660,9 +660,6 @@ export function AddPlayerForm() {
       {errorKey ? (
         <p className="text-destructive text-xs">{t(errorKey)}</p>
       ) : null}
-      <p className="text-muted-foreground text-xs">
-        {t("admin.players.addHint")}
-      </p>
     </form>
   )
 }
