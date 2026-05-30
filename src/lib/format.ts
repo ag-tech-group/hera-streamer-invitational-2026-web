@@ -53,6 +53,24 @@ export function flagEmojiToCountryCode(flag: string): string | null {
 }
 
 /**
+ * Converts a lowercase ISO 3166-1 alpha-2 code to its country flag emoji (two
+ * regional-indicator codepoints) — the inverse of `flagEmojiToCountryCode`.
+ * Returns `null` for a code that isn't a well-formed alpha-2.
+ *
+ * The admin country picker stores the emoji this returns, so the presentation
+ * bag's `flag` value keeps the exact format a host would otherwise type by
+ * hand and the standings rendering path stays unchanged.
+ */
+export function countryCodeToFlagEmoji(code: string): string | null {
+  const normalized = normalizeCountryCode(code)
+  if (!normalized) return null
+  const REGIONAL_A = 0x1f1e6
+  return [...normalized]
+    .map((ch) => String.fromCodePoint(REGIONAL_A + (ch.charCodeAt(0) - 0x61)))
+    .join("")
+}
+
+/**
  * Formats an ISO-8601 timestamp as a short "time ago" string relative to
  * `now` — e.g. `"5m"`, `"3h"`, `"12d"`. Sub-minute and future timestamps both
  * collapse to `"now"`. Used for the recency of a player's last match.
