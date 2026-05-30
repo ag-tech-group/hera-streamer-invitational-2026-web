@@ -897,8 +897,11 @@ function WatchCell({
       {streamLive && (
         // Pulsing dot mirrors the in-match `LiveBadge` ring above — same
         // "right now" signal vocabulary, smaller because the icons next to
-        // it already carry the click affordance.
+        // it already carry the click affordance. `role="img"` lets the
+        // wrapper carry the "Streaming live" label for assistive tech — a
+        // bare <span> can't (aria-prohibited-attr, flagged in the #65 audit).
         <span
+          role="img"
           className="relative inline-flex size-1.5"
           aria-label={t("standings.streamingLive")}
         >
