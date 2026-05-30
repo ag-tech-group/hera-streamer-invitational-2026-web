@@ -101,7 +101,16 @@ export function StandingsTable({
   // Activity column is measured against the same clock.
   const now = new Date()
 
-  const { sortedRows, sortState, sortBy } = useTableSort(rows, getSortValue)
+  // Tournament position ranks by peak (max) rating (#197), so re-rank the
+  // incoming rows here rather than trusting the API's order — this drives both
+  // the default view order and the Position column. `rows` stays the source of
+  // truth; `rankedRows` is a stable, derived ordering.
+  const rankedRows = useMemo(() => [...rows].sort(comparePeakRank), [rows])
+
+  const { sortedRows, sortState, sortBy } = useTableSort(
+    rankedRows,
+    getSortValue
+  )
 
   // FLIP animation: rows slide to their new spots whenever the order
   // changes (either from a live SSE refresh or a header click). Keyed off
@@ -110,17 +119,17 @@ export function StandingsTable({
   const orderKey = sortedRows.map(rowKey).join(",")
   const { containerRef, registerRow } = useFlipRows(orderKey)
 
-  // The Position column shows the row's tournament rank, which is the
-  // index in the *original* (unsorted) row list — not the current sorted
-  // view. Without this, sorting by another column would relabel "Position 1"
-  // as the top of that sort instead of the tournament leader. Keyed by
-  // `rowKey` so multiple placeholder rows (all with `profileId: null`)
-  // each get their own position rather than overwriting one Map entry.
+  // The Position column shows the row's tournament rank — its place in the
+  // peak-rating order (`rankedRows`), not the current sorted view. Without
+  // this, sorting by another column would relabel "Position 1" as the top of
+  // that sort instead of the tournament leader. Keyed by `rowKey` so multiple
+  // placeholder rows (all with `profileId: null`) each get their own position
+  // rather than overwriting one Map entry.
   const positionMap = useMemo(() => {
     const map = new Map<string, number>()
-    rows.forEach((row, i) => map.set(rowKey(row), i + 1))
+    rankedRows.forEach((row, i) => map.set(rowKey(row), i + 1))
     return map
-  }, [rows])
+  }, [rankedRows])
 
   return (
     <TableShell
@@ -178,39 +187,40 @@ export function StandingsTable({
               />
             </td>
             {/*
-             * Rating is the most-watched number on the page, so it takes
-             * the same Bebas Neue + size-bump treatment the team-panel
-             * combined-rating got in #119. Drops `font-medium` because
-             * the display face ships at weight 400 only; bumps to text-lg
-             * + tracking-wide so the condensed glyphs read at the same
-             * visual weight as the surrounding sans data — the rest of
-             * the row stays at text-sm so the rating still wins
-             * hierarchy.
+             * Peak (max) rating is the ranked, headline number (#197), so it
+             * takes the same Bebas Neue + size-bump treatment the team-panel
+             * combined-rating got in #119. Drops `font-medium` because the
+             * display face ships at weight 400 only; bumps to text-lg +
+             * tracking-wide so the condensed glyphs read at the same visual
+             * weight as the surrounding sans data — the rest of the row stays
+             * at text-sm so the peak still wins hierarchy.
              */}
             <FlashCell
-              value={row.currentRating}
+              value={row.maxRating}
               className="font-display px-4 py-3 text-right text-lg tracking-wide tabular-nums"
             >
               {/*
-               * Null currentRating = unrated roster member (left-joined onto
-               * the standings; the API sorts these to the tail). Render the
-               * same muted em-dash the streak / recent / activity cells use
-               * for their empty state rather than a count-up of nothing.
+               * Null peak = unrated roster member (left-joined onto the
+               * standings; the API sorts these to the tail). Render the same
+               * muted em-dash the streak / recent / activity cells use for
+               * their empty state rather than a count-up of nothing.
                */}
-              {row.currentRating === null ? (
-                <span className="text-muted-foreground text-xs">—</span>
-              ) : (
-                <CountUp value={row.currentRating} />
-              )}
-            </FlashCell>
-            <FlashCell
-              value={row.maxRating}
-              className="text-muted-foreground px-4 py-3 text-right tabular-nums"
-            >
               {row.maxRating === null ? (
                 <span className="text-muted-foreground text-xs">—</span>
               ) : (
-                row.maxRating
+                <CountUp value={row.maxRating} />
+              )}
+            </FlashCell>
+            {/* Current rating drops to the muted secondary column to the
+                right of the headline peak (#197). */}
+            <FlashCell
+              value={row.currentRating}
+              className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+            >
+              {row.currentRating === null ? (
+                <span className="text-muted-foreground text-xs">—</span>
+              ) : (
+                row.currentRating
               )}
             </FlashCell>
             <FlashCell value={row.streak} className="px-4 py-3 text-center">
@@ -304,6 +314,33 @@ function getSortValue(row: StandingsRow, key: string): SortableValue {
 }
 
 /**
+ * Ranks two rows for tournament position by peak (max) rating, descending
+ * (#197). Nulls (unrated roster members) pin to the tail, matching the sort
+ * hook's null handling; ties break on current rating, then alias, so a shared
+ * peak still orders by who's higher right now and the result is deterministic.
+ */
+function comparePeakRank(a: StandingsRow, b: StandingsRow): number {
+  return (
+    descNullsLast(a.maxRating, b.maxRating) ||
+    descNullsLast(a.currentRating, b.currentRating) ||
+    a.alias.localeCompare(b.alias)
+  )
+}
+
+/**
+ * Descending numeric compare that always sorts `null` last regardless of the
+ * other operand, so unrated rows sink to the tail instead of floating to the
+ * top of a descending order. Returns 0 for equal (or both-null) values so
+ * callers can chain to a tiebreaker with `||`.
+ */
+function descNullsLast(a: number | null, b: number | null): number {
+  if (a === b) return 0
+  if (a === null) return 1
+  if (b === null) return -1
+  return b - a
+}
+
+/**
  * Header row for the players standings, shared between the populated
  * table (passes sort state + handler) and the loading skeleton (omits
  * both, so `SortableTh` renders plain headers).
@@ -336,17 +373,17 @@ function StandingsHeaderRow({
         onSort={onSort}
       />
       <SortableTh
-        label={t("standings.headers.rating")}
+        label={t("standings.headers.peak")}
         align="right"
-        sortKey="currentRating"
+        sortKey="maxRating"
         defaultDirection="desc"
         sortState={sortState}
         onSort={onSort}
       />
       <SortableTh
-        label={t("standings.headers.peak")}
+        label={t("standings.headers.rating")}
         align="right"
-        sortKey="maxRating"
+        sortKey="currentRating"
         defaultDirection="desc"
         sortState={sortState}
         onSort={onSort}
@@ -423,9 +460,10 @@ export function StandingsTableSkeleton({
             </div>
           </td>
           {/*
-           * Rating placeholder is taller (h-6) than peak (h-4) because the
-           * rendered rating now uses the display face at text-lg — keeping
-           * the skeleton at h-4 would shift the row taller on data arrival.
+           * Peak placeholder is taller (h-6) than the current-rating one
+           * (h-4) because the headline peak now uses the display face at
+           * text-lg (#197) — keeping the skeleton at h-4 would shift the row
+           * taller on data arrival.
            */}
           <td className="px-4 py-3">
             <Skeleton className="ml-auto h-6 w-14" />
