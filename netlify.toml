@@ -54,6 +54,21 @@
   to = "/index.html"
   status = 200
 
+# Bare apex → tournament path. Visitors who land on `aoe2.criticalbit.gg/`
+# directly (e.g. from a bookmark of the host domain) get bounced into the
+# tournament rather than seeing the SPA mounted at root, which wouldn't
+# match the build's `base = "/kings-gauntlet/"` and would render NotFound.
+# 302 (temporary) so a future hub page at the bare apex can take over
+# without aggressive browser/CDN caching of this redirect.
+#
+# Composes harmlessly with `criticalbit-router#5` if that ever fires —
+# both target the same path, so whichever is reached first wins and the
+# other becomes a no-op.
+[[redirects]]
+  from = "/"
+  to = "/kings-gauntlet/"
+  status = 302
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
