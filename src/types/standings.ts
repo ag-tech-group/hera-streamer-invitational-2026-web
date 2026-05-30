@@ -2,6 +2,27 @@
 export type MatchResult = "win" | "loss"
 
 /**
+ * Per-player presentation overrides (#152). The API treats `presentation`
+ * as an opaque bag and never interprets its keys; the frontend shapes it
+ * at the adapter boundary into the keys it knows about, dropping anything
+ * unrecognised. All keys are optional — the standings UI falls back to
+ * the raw `alias` / `country` fields when an override isn't set.
+ */
+export interface PlayerPresentation {
+  /** Display name shown in place of the raw ladder alias when set. */
+  displayName?: string
+  /**
+   * Flag glyph (typically a country emoji) shown in place of the ISO-code
+   * flag SVG when set. Frontend doesn't interpret the value — whatever the
+   * bag carries is rendered as-is so the host can switch between, say, a
+   * national flag and a rainbow flag without a frontend change.
+   */
+  flag?: string
+  /** Channel URLs the player streams from, in display order. */
+  streamUrls?: string[]
+}
+
+/**
  * The team a player belongs to, folded onto their standings row — a compact
  * reference (id + display strings, no aggregates). Null when the player isn't
  * on a team. The richer per-team aggregates live on `TeamStandingsRow`.
@@ -61,6 +82,18 @@ export interface StandingsRow {
   lastMatchAt: string | null
   /** ISO-8601 timestamp of when this row was last refreshed upstream. */
   updatedAt: string
+  /**
+   * Frontend-defined overrides for how the row renders (display name, flag,
+   * stream URLs). Shape comes from the adapter — see `PlayerPresentation`.
+   * Empty when the API has no presentation set for the player.
+   */
+  presentation: PlayerPresentation
+  /**
+   * Whether one of the player's `presentation.streamUrls` is currently
+   * broadcasting live (#112). Used by the Watch column to highlight an
+   * actionable "watch them right now" affordance.
+   */
+  streamLive: boolean
 }
 
 /**

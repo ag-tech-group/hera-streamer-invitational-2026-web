@@ -1,6 +1,13 @@
 import type { getStandingsV1TournamentsTournamentSlugStandingsGetResponse } from "@/api/generated/hooks/tournaments/tournaments"
-import type { StandingRow } from "@/api/generated/types"
-import type { StandingsRow, StandingsSnapshot } from "@/types"
+import type {
+  StandingRow,
+  StandingRowPresentation,
+} from "@/api/generated/types"
+import type {
+  PlayerPresentation,
+  StandingsRow,
+  StandingsSnapshot,
+} from "@/types"
 
 /**
  * Adapter at the network boundary: maps generated standings DTOs to the
@@ -36,7 +43,32 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     inMatch: dto.in_match,
     lastMatchAt: dto.last_match_at,
     updatedAt: dto.updated_at,
+    presentation: toPlayerPresentation(dto.presentation),
+    streamLive: dto.stream_live,
   }
+}
+
+/**
+ * The API treats `presentation` as an opaque record (`Record<string,
+ * unknown>` in the generated type), so the adapter is the one place that
+ * narrows the bag down to the keys the frontend knows about. Anything else
+ * the bag carries is dropped — by design, since the API has no schema on it
+ * and we don't want unrecognised keys leaking into UI components.
+ */
+function toPlayerPresentation(
+  raw: StandingRowPresentation
+): PlayerPresentation {
+  if (!raw || typeof raw !== "object") return {}
+  const bag = raw as Record<string, unknown>
+  const out: PlayerPresentation = {}
+  if (typeof bag.displayName === "string") out.displayName = bag.displayName
+  if (typeof bag.flag === "string") out.flag = bag.flag
+  if (Array.isArray(bag.streamUrls)) {
+    out.streamUrls = bag.streamUrls.filter(
+      (u): u is string => typeof u === "string"
+    )
+  }
+  return out
 }
 
 /**

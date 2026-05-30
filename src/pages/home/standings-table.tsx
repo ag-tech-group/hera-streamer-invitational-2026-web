@@ -1,4 +1,5 @@
-import { Globe } from "lucide-react"
+import { ExternalLink, Globe, Twitch, Youtube } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { useMemo, useRef } from "react"
 import type { ReactNode, Ref } from "react"
 import { useTranslation } from "react-i18next"
@@ -28,6 +29,39 @@ const ACTIVE_WITHIN_MS = 24 * 60 * 60 * 1000
 
 /** Placeholder row count rendered while the standings request is in flight. */
 const SKELETON_ROW_COUNT = 6
+
+/**
+ * Stream-platform classification for `presentation.streamUrls` (#152, #112) —
+ * Twitch and YouTube get their brand icons; everything else falls back to a
+ * generic external-link glyph. Same icon vocabulary `HostLinksCard` uses for
+ * the sidebar's promotional links.
+ */
+type StreamPlatform = "twitch" | "youtube" | "other"
+
+const STREAM_ICON: Record<StreamPlatform, LucideIcon> = {
+  twitch: Twitch,
+  youtube: Youtube,
+  other: ExternalLink,
+}
+
+function streamPlatform(url: string): StreamPlatform {
+  try {
+    const host = new URL(url).hostname.toLowerCase()
+    if (host === "twitch.tv" || host.endsWith(".twitch.tv")) return "twitch"
+    if (
+      host === "youtube.com" ||
+      host.endsWith(".youtube.com") ||
+      host === "youtu.be"
+    ) {
+      return "youtube"
+    }
+    return "other"
+  } catch {
+    // Malformed URLs fall back to the generic link icon rather than throwing
+    // — the API doesn't validate the bag contents.
+    return "other"
+  }
+}
 
 /**
  * The polished standings table. A pure presentation component: it renders the
@@ -115,7 +149,9 @@ export function StandingsTable({
             <td className="px-4 py-3">
               <PlayerCell
                 alias={row.alias}
+                displayName={row.presentation.displayName}
                 country={row.country}
+                flagOverride={row.presentation.flag}
                 inMatch={row.inMatch}
               />
             </td>
@@ -173,6 +209,12 @@ export function StandingsTable({
             )}
             <td className="px-4 py-3">
               <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
+            </td>
+            <td className="px-4 py-3 text-center">
+              <WatchCell
+                streamUrls={row.presentation.streamUrls}
+                streamLive={row.streamLive}
+              />
             </td>
           </tr>
         )
@@ -315,6 +357,7 @@ function StandingsHeaderRow({
         sortState={sortState}
         onSort={onSort}
       />
+      <SortableTh label={t("standings.headers.watch")} align="center" />
     </tr>
   )
 }
@@ -383,6 +426,12 @@ export function StandingsTableSkeleton({
           )}
           <td className="px-4 py-3">
             <Skeleton className="h-5 w-24 rounded-full" />
+          </td>
+          {/* Watch column placeholder — two icon-sized chips for the typical
+              "Twitch + YouTube" layout. Width matches the populated cell so
+              loading doesn't shift the table. */}
+          <td className="px-4 py-3">
+            <Skeleton className="mx-auto h-4 w-14" />
           </td>
         </tr>
       ))}
@@ -494,25 +543,45 @@ function TeamCell({ team }: { team: StandingsTeam | null }) {
 }
 
 /**
- * Player identity: country flag (or a globe fallback) and alias, plus a
- * pulsing "Live" badge when the player is in a match right now. The alias
- * links out to an aoe2insights search for the player (new tab, so visitors
- * keep the live standings open).
+ * Player identity: flag (or globe fallback) and visible name, plus a pulsing
+ * "Live" badge when the player is in a match right now. The visible name
+ * comes from `displayName` when the host has set a presentation override
+ * (#152); otherwise it falls back to the raw ladder `alias`. The aoe2insights
+ * link always uses the raw `alias` so the search lands on the actual ladder
+ * profile, even when the host is displaying a friendlier name.
+ *
+ * `flagOverride` is rendered as-is — typically a country emoji from the
+ * presentation bag — and wins over the ISO-code SVG flag when set. The
+ * frontend doesn't interpret what the override carries so the host can swap
+ * in a non-national glyph (rainbow flag, regional emoji, etc.) without a
+ * code change.
  */
 function PlayerCell({
   alias,
+  displayName,
   country,
+  flagOverride,
   inMatch,
 }: {
   alias: string
+  displayName?: string
   country: string | null
+  flagOverride?: string
   inMatch: boolean
 }) {
   const { t } = useTranslation()
   const countryCode = normalizeCountryCode(country)
+  const visibleName = displayName ?? alias
   return (
     <span className="flex items-center gap-2">
-      {countryCode ? (
+      {flagOverride ? (
+        <span
+          className="shrink-0 text-base leading-none"
+          aria-label={visibleName}
+        >
+          {flagOverride}
+        </span>
+      ) : countryCode ? (
         <span
           className={`fi fi-${countryCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
           title={countryCode.toUpperCase()}
@@ -528,7 +597,7 @@ function PlayerCell({
         title={t("standings.viewOnAoe2insights", { alias })}
         className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
       >
-        {alias}
+        {visibleName}
       </a>
       {inMatch && <LiveBadge />}
     </span>
@@ -675,6 +744,62 @@ function ActivityCell({
       <span className="tabular-nums opacity-70">
         {formatRelativeTime(lastMatchAt, now)}
       </span>
+    </span>
+  )
+}
+
+/**
+ * "Watch Live" affordance: a row of platform-icon links to the player's
+ * stream channels (from `presentation.streamUrls`, #152). When the API
+ * reports `stream_live` (#112) the icons brighten to the brand colour and a
+ * small pulsing dot appears alongside — signalling "they're broadcasting
+ * right now, click to go watch." Players with no channels show the same
+ * muted em-dash the table's other empty cells use.
+ */
+function WatchCell({
+  streamUrls,
+  streamLive,
+}: {
+  streamUrls: string[] | undefined
+  streamLive: boolean
+}) {
+  const { t } = useTranslation()
+  if (!streamUrls || streamUrls.length === 0) {
+    return <span className="text-muted-foreground text-xs">—</span>
+  }
+  return (
+    <span className="inline-flex items-center justify-center gap-1.5">
+      {streamUrls.map((url) => {
+        const platform = streamPlatform(url)
+        const Icon = STREAM_ICON[platform]
+        return (
+          <a
+            key={url}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t(`standings.watchOn.${platform}`)}
+            className={cn(
+              "hover:text-brand transition-colors",
+              streamLive ? "text-brand" : "text-muted-foreground"
+            )}
+          >
+            <Icon className="size-4" aria-hidden />
+          </a>
+        )
+      })}
+      {streamLive && (
+        // Pulsing dot mirrors the in-match `LiveBadge` ring above — same
+        // "right now" signal vocabulary, smaller because the icons next to
+        // it already carry the click affordance.
+        <span
+          className="relative inline-flex size-1.5"
+          aria-label={t("standings.streamingLive")}
+        >
+          <span className="bg-brand absolute inline-flex size-full animate-ping rounded-full opacity-75" />
+          <span className="bg-brand relative inline-flex size-1.5 rounded-full" />
+        </span>
+      )}
     </span>
   )
 }
