@@ -30,9 +30,10 @@ function row(
   }
 }
 
-// Generic placeholder rows in standings order (rating descending). The `rank`
-// values are deliberately not 1/2/3 — Position is derived from row order, not
-// the (no-longer-displayed) ladder rank, and the position test below proves it.
+// Generic rows whose default `maxRating` ties, so the peak-rank tiebreak
+// (current rating descending) sets their 1/2/3 Position order. The `rank`
+// values are deliberately not 1/2/3 — Position comes from peak rating, not the
+// (no-longer-displayed) ladder rank, as the tests below prove.
 const rows: StandingsRow[] = [
   row({ profileId: 1, alias: "Alpha", currentRating: 2800, rank: 7 }),
   row({ profileId: 2, alias: "Bravo", currentRating: 2700, rank: 2 }),
@@ -50,7 +51,7 @@ describe("StandingsTable", () => {
     ).toBeInTheDocument()
   })
 
-  it("numbers rows by tournament position from row order, not ladder rank", () => {
+  it("numbers rows by tournament position from peak rating, not ladder rank", () => {
     render(<StandingsTable rows={rows} tournamentStarted />)
     const bodyRows = screen.getAllByRole("row").slice(1) // drop the header row
 
@@ -58,9 +59,58 @@ describe("StandingsTable", () => {
       (r) => within(r).getAllByRole("cell")[0].textContent
     )
 
-    // Rows carry non-1/2/3 `rank` values; Position still reads 1/2/3 from row
-    // order, proving it isn't derived from the (now-unshown) ladder rank.
+    // Rows carry non-1/2/3 `rank` values; Position still reads 1/2/3 from the
+    // peak-rating order, proving it isn't derived from the (now-unshown)
+    // ladder rank.
     expect(positions).toEqual(["1", "2", "3"])
+  })
+
+  it("ranks tournament position by peak rating, not current rating", () => {
+    // Bravo has the higher *current* rating, but Alpha's higher *peak* (max)
+    // rating takes position 1 (#197).
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            currentRating: 2500,
+            maxRating: 2900,
+          }),
+          row({
+            profileId: 2,
+            alias: "Bravo",
+            currentRating: 2700,
+            maxRating: 2750,
+          }),
+        ]}
+        tournamentStarted
+      />
+    )
+    const bodyRows = screen.getAllByRole("row").slice(1)
+    expect(bodyRows[0]).toHaveTextContent("Alpha")
+    expect(within(bodyRows[0]).getAllByRole("cell")[0]).toHaveTextContent("1")
+    expect(bodyRows[1]).toHaveTextContent("Bravo")
+  })
+
+  it("shows peak rating in the headline column, current rating beside it", () => {
+    // Columns after #197: Position, Team, Player, Peak, Rating, …
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            currentRating: 2500,
+            maxRating: 2900,
+          }),
+        ]}
+        tournamentStarted
+      />
+    )
+    const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell")
+    expect(cells[3]).toHaveTextContent("2900") // Peak (headline)
+    expect(cells[4]).toHaveTextContent("2500") // current Rating (secondary)
   })
 
   it("shows the Games and Recent column headers", () => {
@@ -223,7 +273,7 @@ describe("StandingsTable — games played", () => {
         tournamentStarted
       />
     )
-    // Games is the 7th column: Position, Team, Player, Rating, Peak,
+    // Games is the 7th column: Position, Team, Player, Peak, Rating,
     // Streak, Games, Recent, Activity.
     const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell")
     expect(cells[6]).toHaveTextContent("14")
