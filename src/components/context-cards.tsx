@@ -60,6 +60,7 @@ export function ContextCards() {
             }}
           />
         }
+        accentClassName="text-team-p2"
         variant="compact"
       />
       <PrizePoolCard

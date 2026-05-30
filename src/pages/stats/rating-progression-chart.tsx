@@ -14,6 +14,10 @@ import { CanvasRenderer } from "echarts/renderers"
 import ReactEChartsCore from "echarts-for-react/esm/core"
 import { useMemo } from "react"
 
+import {
+  useChartColors,
+  type ChartColors,
+} from "@/pages/stats/use-chart-colors"
 import type { PlayerSeries } from "@/types"
 
 // Register only the pieces the rating chart uses, so the lazy /stats chunk
@@ -29,10 +33,10 @@ echarts.use([
 ])
 
 /**
- * Vivid-on-dark line palette, cycled across players. Distinguishability beats
+ * Vivid line palette, cycled across players. Distinguishability beats
  * brand-matching here — with a full roster the eye needs to separate adjacent
- * lines. The chart is styled for the app's default dark theme; light-theme
- * token-matching is a follow-up (noted on the PR).
+ * lines. The saturated hues read on both themes; the axis / legend text
+ * colours adapt to the active theme via `useChartColors` (#207).
  */
 const LINE_PALETTE = [
   "#60a5fa",
@@ -47,10 +51,10 @@ const LINE_PALETTE = [
   "#f97316",
 ]
 
-const AXIS = "#94a3b8"
-const GRID_LINE = "rgba(148,163,184,0.12)"
-
-function buildOption(series: PlayerSeries[]): EChartsCoreOption {
+function buildOption(
+  series: PlayerSeries[],
+  colors: ChartColors
+): EChartsCoreOption {
   return {
     color: LINE_PALETTE,
     backgroundColor: "transparent",
@@ -58,11 +62,11 @@ function buildOption(series: PlayerSeries[]): EChartsCoreOption {
     legend: {
       type: "scroll",
       bottom: 0,
-      textStyle: { color: "#cbd5e1" },
-      inactiveColor: "#475569",
-      pageTextStyle: { color: AXIS },
-      pageIconColor: AXIS,
-      pageIconInactiveColor: "#475569",
+      textStyle: { color: colors.label },
+      inactiveColor: colors.legendInactive,
+      pageTextStyle: { color: colors.axis },
+      pageIconColor: colors.axis,
+      pageIconInactiveColor: colors.legendInactive,
     },
     // A slider rail along the bottom: drag the edges to focus a window of the
     // timeline; once zoomed in, grab the middle to pan. `inside` adds
@@ -76,7 +80,7 @@ function buildOption(series: PlayerSeries[]): EChartsCoreOption {
         borderColor: "transparent",
         backgroundColor: "rgba(148,163,184,0.08)",
         fillerColor: "rgba(96,165,250,0.15)",
-        textStyle: { color: AXIS },
+        textStyle: { color: colors.axis },
       },
     ],
     tooltip: {
@@ -91,8 +95,8 @@ function buildOption(series: PlayerSeries[]): EChartsCoreOption {
     },
     xAxis: {
       type: "time",
-      axisLabel: { color: AXIS, hideOverlap: true },
-      axisLine: { lineStyle: { color: "rgba(148,163,184,0.25)" } },
+      axisLabel: { color: colors.axis, hideOverlap: true },
+      axisLine: { lineStyle: { color: colors.gridLine } },
       splitLine: { show: false },
     },
     yAxis: {
@@ -100,8 +104,8 @@ function buildOption(series: PlayerSeries[]): EChartsCoreOption {
       // and a top-anchored name clips against the grid edge.
       type: "value",
       scale: true,
-      axisLabel: { color: AXIS },
-      splitLine: { lineStyle: { color: GRID_LINE } },
+      axisLabel: { color: colors.axis },
+      splitLine: { lineStyle: { color: colors.gridLine } },
     },
     series: series.map((s) => ({
       type: "line",
@@ -140,7 +144,8 @@ function buildOption(series: PlayerSeries[]): EChartsCoreOption {
  * wrapper so no full-echarts import sneaks in.
  */
 export function RatingProgressionChart({ series }: { series: PlayerSeries[] }) {
-  const option = useMemo(() => buildOption(series), [series])
+  const colors = useChartColors()
+  const option = useMemo(() => buildOption(series, colors), [series, colors])
   return (
     <ReactEChartsCore
       echarts={echarts}

@@ -20,7 +20,7 @@
   },
   "home": {
     "title": "Live Standings",
-    "subtitle": "Live ratings, team standings, and tournament progression — <product>Age of Empires 2: Definitive Edition</product>, hosted by Hera.",
+    "subtitle": "Live ratings, team standings, and tournament progression — <product>Age of Empires 2: Definitive Edition</product>.",
     "tabs": {
       "players": "Players",
       "teams": "Teams",
@@ -157,7 +157,6 @@
       "addAction": "Add",
       "addingAction": "Adding…",
       "addSuccess": "Player added.",
-      "addHint": "Add a name to create a placeholder, or a profile ID to track a ranked player. You can add the ID later to promote a placeholder.",
       "addErrorProfileId": "Profile ID must be a positive number.",
       "addErrorNumericName": "That looks like a profile ID — enter it in the Profile ID field.",
       "removeAria": "Remove {{name}}",
