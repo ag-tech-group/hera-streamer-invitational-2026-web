@@ -46,7 +46,6 @@ export function PlayersSection() {
         players={players}
       />
       <AddPlayerForm />
-      <AddPlaceholderForm />
     </div>
   )
 }
@@ -546,10 +545,21 @@ function playerLookup(player: PlayerRead): string {
     : player.alias
 }
 
-function AddPlayerForm() {
+/**
+ * Add a roster entry — polled player or placeholder, one form (#198). A roster
+ * member is one logical entity; whether it has a relic profile_id is just an
+ * attribute, so adding is the same action either way. The single
+ * `POST /v1/tournaments/{slug}/players` endpoint takes `profile_id` XOR `name`
+ * (422 on both/neither, or a name that parses as an integer), so the form
+ * dispatches on which fields are filled: a profile ID adds a polled identity
+ * (with the typed name, if any, riding along as a `displayName` override); a
+ * name alone adds a placeholder to promote later.
+ */
+export function AddPlayerForm() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
+  const [name, setName] = useState("")
   const [profileId, setProfileId] = useState("")
 
   const mutation = useAddRosterPlayerV1TournamentsTournamentSlugPlayersPost({
@@ -559,6 +569,7 @@ function AddPlayerForm() {
     mutation: {
       onSuccess: () => {
         idempotencyKey.reset()
+        setName("")
         setProfileId("")
         void queryClient.invalidateQueries({
           queryKey: getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
@@ -571,108 +582,91 @@ function AddPlayerForm() {
     },
   })
 
-  return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault()
-        mutation.mutate({
-          tournamentSlug: activeTournament.apiTournamentSlug,
-          data: { profile_id: Number(profileId) },
-        })
-      }}
-      className="border-border/60 flex flex-col gap-2 border-t pt-4"
-    >
-      <Label htmlFor="add-player-profile-id">
-        {t("admin.players.addLabel")}
-      </Label>
-      <div className="flex gap-2">
-        <Input
-          id="add-player-profile-id"
-          type="number"
-          inputMode="numeric"
-          value={profileId}
-          onChange={(event) => setProfileId(event.target.value)}
-          placeholder={t("admin.players.addPlaceholder")}
-          min={1}
-          required
-        />
-        <Button type="submit" disabled={mutation.isPending || !profileId}>
-          {mutation.isPending
-            ? t("admin.players.addingAction")
-            : t("admin.players.addAction")}
-        </Button>
-      </div>
-      <ProfileIdHint />
-    </form>
-  )
-}
+  const trimmedName = name.trim()
+  const trimmedId = profileId.trim()
+  const hasName = trimmedName.length > 0
+  const hasId = trimmedId.length > 0
+  const validId =
+    hasId && Number.isInteger(Number(trimmedId)) && Number(trimmedId) > 0
+  // A digits-only name with no profile ID would 422 — the API reserves integer
+  // lookups for profile IDs — and almost always means an ID typed into the
+  // wrong field. (A numeric name *with* an ID is fine: it rides along as a
+  // displayName override, not a top-level `name`.)
+  const numericNameBlocked = !hasId && hasName && /^\d+$/.test(trimmedName)
 
-/**
- * Add a placeholder roster entry by host-given display name (#185). Uses
- * the same `POST /v1/tournaments/{slug}/players` endpoint the polled-add
- * form uses; the API distinguishes by which key is populated in the body
- * (`profile_id` vs `name`, XOR — 422 if both or neither, 422 if the name
- * parses as an integer). The trimmed name is the row's lookup key for
- * the lifetime of the placeholder, until it's promoted by setting a profile
- * ID in its edit form.
- */
-function AddPlaceholderForm() {
-  const { t } = useTranslation()
-  const queryClient = useQueryClient()
-  const idempotencyKey = useIdempotencyKey()
-  const [name, setName] = useState("")
+  const errorKey =
+    hasId && !validId
+      ? "admin.players.addErrorProfileId"
+      : numericNameBlocked
+        ? "admin.players.addErrorNumericName"
+        : null
+  // Need at least one of name / ID, a valid ID when one is given, and not a
+  // digits-only placeholder name.
+  const canSubmit = (hasId ? validId : hasName) && !numericNameBlocked
 
-  const mutation = useAddRosterPlayerV1TournamentsTournamentSlugPlayersPost({
-    request: {
-      headers: { "Idempotency-Key": idempotencyKey.current },
-    },
-    mutation: {
-      onSuccess: () => {
-        idempotencyKey.reset()
-        setName("")
-        void queryClient.invalidateQueries({
-          queryKey: getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
-            activeTournament.apiTournamentSlug
-          ),
-        })
-        toast.success(t("admin.players.addPlaceholderSuccess"))
-      },
-      onError: idempotencyKey.resetOnReusedKey,
-    },
-  })
-
-  const trimmed = name.trim()
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!canSubmit) return
+    // `profile_id` XOR top-level `name`; a name alongside an ID becomes a
+    // display override rather than a second identity key.
+    const data = hasId
+      ? {
+          profile_id: Number(trimmedId),
+          ...(hasName ? { presentation: { displayName: trimmedName } } : {}),
+        }
+      : { name: trimmedName }
+    mutation.mutate({
+      tournamentSlug: activeTournament.apiTournamentSlug,
+      data,
+    })
+  }
 
   return (
     <form
-      onSubmit={(event) => {
-        event.preventDefault()
-        mutation.mutate({
-          tournamentSlug: activeTournament.apiTournamentSlug,
-          data: { name: trimmed },
-        })
-      }}
-      className="border-border/60 flex flex-col gap-2 border-t pt-4"
+      onSubmit={handleSubmit}
+      className="border-border/60 flex flex-col gap-3 border-t pt-4"
     >
-      <Label htmlFor="add-placeholder-name">
-        {t("admin.players.addPlaceholderLabel")}
-      </Label>
-      <div className="flex gap-2">
+      <p className="text-sm font-medium">{t("admin.players.addLabel")}</p>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="add-player-name">
+          {t("admin.players.addNameLabel")}
+        </Label>
         <Input
-          id="add-placeholder-name"
+          id="add-player-name"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder={t("admin.players.addPlaceholderPlaceholder")}
-          required
+          placeholder={t("admin.players.addNamePlaceholder")}
+          aria-invalid={numericNameBlocked}
         />
-        <Button type="submit" disabled={mutation.isPending || !trimmed}>
-          {mutation.isPending
-            ? t("admin.players.addPlaceholderAdding")
-            : t("admin.players.addPlaceholderAction")}
-        </Button>
       </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="add-player-profile-id">
+          {t("admin.players.addProfileIdLabel")}
+        </Label>
+        <div className="flex gap-2">
+          <Input
+            id="add-player-profile-id"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            value={profileId}
+            onChange={(event) => setProfileId(event.target.value)}
+            placeholder={t("admin.players.addProfileIdPlaceholder")}
+            aria-invalid={hasId && !validId}
+          />
+          <Button type="submit" disabled={mutation.isPending || !canSubmit}>
+            {mutation.isPending
+              ? t("admin.players.addingAction")
+              : t("admin.players.addAction")}
+          </Button>
+        </div>
+        <ProfileIdHint />
+      </div>
+      {errorKey ? (
+        <p className="text-destructive text-xs">{t(errorKey)}</p>
+      ) : null}
       <p className="text-muted-foreground text-xs">
-        {t("admin.players.addPlaceholderHint")}
+        {t("admin.players.addHint")}
       </p>
     </form>
   )
