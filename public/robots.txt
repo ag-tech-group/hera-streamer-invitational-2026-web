@@ -1,3 +1,12 @@
 User-agent: *
 Allow: /
+
+# The authenticated admin surface. In production the app is served under the
+# /kings-gauntlet/ base path, so admin lives at /kings-gauntlet/admin; on
+# root-mounted preview/local builds it's at /admin. Disallow both so neither
+# is crawled. (Crawlers fetch robots.txt from the host root regardless of the
+# app's base path, so the rules are written against the host-absolute paths.)
 Disallow: /admin
+Disallow: /kings-gauntlet/admin
+
+Sitemap: https://aoe2.criticalbit.gg/sitemap.xml
