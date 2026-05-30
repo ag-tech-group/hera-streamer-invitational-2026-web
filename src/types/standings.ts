@@ -20,6 +20,12 @@ export interface PlayerPresentation {
   flag?: string
   /** Channel URLs the player streams from, in display order. */
   streamUrls?: string[]
+  /**
+   * Host-authored background blurb, revealed in a hover/tap affordance next
+   * to the player's name — broadcast flavour (e.g. "2× champion, plays
+   * aggressive Scouts"). Plain text; newlines are preserved on render.
+   */
+  bio?: string
 }
 
 /**

@@ -85,7 +85,8 @@
       "youtube": "Watch on YouTube",
       "other": "Watch stream"
     },
-    "streamingLive": "Streaming live"
+    "streamingLive": "Streaming live",
+    "bioLabel": "About {{name}}"
   },
   "teams": {
     "average": "avg",
@@ -173,6 +174,8 @@
         "addStreamUrl": "Add stream URL",
         "removeStreamUrlAria": "Remove a stream URL for {{name}}",
         "invalidUrl": "Enter a valid http(s) URL",
+        "bio": "Bio",
+        "bioPlaceholder": "Short background shown to viewers — e.g. 2× champion, plays aggressive Scouts.",
         "cancel": "Cancel",
         "save": "Save",
         "saving": "Saving…",

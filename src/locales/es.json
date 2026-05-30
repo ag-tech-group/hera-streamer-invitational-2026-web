@@ -85,7 +85,8 @@
       "youtube": "Ver en YouTube",
       "other": "Ver canal"
     },
-    "streamingLive": "Transmitiendo en vivo"
+    "streamingLive": "Transmitiendo en vivo",
+    "bioLabel": "Sobre {{name}}"
   },
   "teams": {
     "average": "prom",
@@ -173,6 +174,8 @@
         "addStreamUrl": "Añadir URL de stream",
         "removeStreamUrlAria": "Quitar una URL de stream para {{name}}",
         "invalidUrl": "Ingresa una URL http(s) válida",
+        "bio": "Biografía",
+        "bioPlaceholder": "Contexto breve visible para los espectadores — p. ej. 2× campeón, juega Exploradores agresivos.",
         "cancel": "Cancelar",
         "save": "Guardar",
         "saving": "Guardando…",

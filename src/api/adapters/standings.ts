@@ -68,6 +68,7 @@ function toPlayerPresentation(
       (u): u is string => typeof u === "string"
     )
   }
+  if (typeof bag.bio === "string") out.bio = bag.bio
   return out
 }
 
