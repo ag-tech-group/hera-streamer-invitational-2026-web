@@ -1,6 +1,7 @@
 import { Swords, TrendingUp, Trophy } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useMemo } from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { SidePanel } from "@/components/side-panel"
@@ -9,21 +10,38 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useProgression } from "@/hooks/use-progression"
+import { useStandings } from "@/hooks/use-standings"
+import { useTeamStandings } from "@/hooks/use-team-standings"
+import { teamColorSlot } from "@/lib/team-colors"
+import type { TeamColorSlot } from "@/lib/team-colors"
 import { ViewTabs } from "@/pages/home/view-tabs"
+import {
+  HorizontalBarChart,
+  type BarDatum,
+} from "@/pages/stats/horizontal-bar-chart"
 import { RatingProgressionChart } from "@/pages/stats/rating-progression-chart"
-import type { PlayerSeries, ProgressionSnapshot } from "@/types"
+import type { PlayerSeries, StandingsRow, TeamStandingsRow } from "@/types"
 
 /**
  * Tournament-wide stats (#164), mounted at `/stats` as the third top-level
- * route alongside `/` and `/teams` (#163). Centres on a rating-progression
- * line chart fed by `GET /v1/tournaments/{slug}/progression`, with a few
- * headline stat cards derived from the same series. The route is lazy
- * (`stats.lazy.tsx`) so echarts ships in its own chunk.
+ * route alongside `/` and `/teams` (#163). A stack of sections: headline
+ * cards, the team combined-elo board (the tournament's scoring metric), the
+ * per-player rating-over-time chart, and the peak-rating board. The route is
+ * lazy (`stats.lazy.tsx`) so echarts ships in its own chunk.
+ *
+ * Each board draws from a different endpoint, so a shared `ChartSection`
+ * handles each query's loading / empty / error independently rather than
+ * gating the whole page on one of them.
  */
 export function StatsPage() {
   const { t } = useTranslation()
   useDocumentTitle(t("stats.title"))
   const progression = useProgression()
+  const teams = useTeamStandings(true)
+  const standings = useStandings()
+
+  const teamData = teams.data ? teamBars(teams.data.rows) : []
+  const peakData = standings.data ? peakBars(standings.data.rows) : []
 
   return (
     <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
@@ -34,80 +52,142 @@ export function StatsPage() {
           <div className="flex flex-wrap items-center gap-3">
             <ViewTabs value="stats" />
           </div>
-          <StatsContent
-            snapshot={progression.data}
-            isPending={progression.isPending}
-            isError={progression.isError}
-            onRetry={() => void progression.refetch()}
-          />
+
+          {progression.isPending ? (
+            <div className="grid gap-4 sm:grid-cols-3">
+              {Array.from({ length: 3 }, (_, i) => (
+                <Skeleton key={i} className="h-24 rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <SummaryCards series={progression.data?.series ?? []} />
+          )}
+
+          <ChartSection
+            title={t("stats.teamEloTitle")}
+            query={teams}
+            isEmpty={teamData.length === 0}
+            skeletonHeight={260}
+          >
+            <HorizontalBarChart
+              data={teamData}
+              height={Math.max(180, teamData.length * 56)}
+            />
+          </ChartSection>
+
+          <ChartSection
+            title={t("stats.chartTitle")}
+            query={progression}
+            isEmpty={!progression.data || progression.data.series.length === 0}
+            skeletonHeight={460}
+          >
+            {progression.data ? (
+              <RatingProgressionChart series={progression.data.series} />
+            ) : null}
+          </ChartSection>
+
+          <ChartSection
+            title={t("stats.peakRatingTitle")}
+            query={standings}
+            isEmpty={peakData.length === 0}
+            skeletonHeight={400}
+          >
+            <HorizontalBarChart
+              data={peakData}
+              height={Math.max(180, peakData.length * 28)}
+            />
+          </ChartSection>
         </div>
       </div>
     </div>
   )
 }
 
-/**
- * Picks the stats view matching the current query state, mirroring
- * `StandingsSection`'s precedence: an in-flight request shows a skeleton (not
- * empty/error), a failed request shows the error (not an empty leaderboard),
- * and only a settled, populated snapshot reaches the chart.
- */
-function StatsContent({
-  snapshot,
-  isPending,
-  isError,
-  onRetry,
-}: {
-  snapshot: ProgressionSnapshot | undefined
-  isPending: boolean
-  isError: boolean
-  onRetry: () => void
-}) {
-  if (isPending) {
-    return (
-      <div className="flex flex-col gap-6">
-        <div className="grid gap-4 sm:grid-cols-3">
-          {Array.from({ length: 3 }, (_, i) => (
-            <Skeleton key={i} className="h-24 rounded-lg" />
-          ))}
-        </div>
-        <Skeleton className="h-[480px] rounded-lg" />
-      </div>
+/** AoE2 player-colour slots (#146) as concrete hex for the echarts canvas. */
+const TEAM_HEX: Record<TeamColorSlot, string> = {
+  p1: "#3b82f6",
+  p2: "#ef4444",
+  p3: "#22c55e",
+  p4: "#eab308",
+  p5: "#06b6d4",
+  p6: "#ec4899",
+  p7: "#94a3b8",
+  p8: "#f97316",
+}
+
+/** Per-player peak-rating bars share a single brand-blue (no team join). */
+const PEAK_COLOR = "#60a5fa"
+
+/** Teams ranked by combined elo — the tournament's actual scoring metric. */
+function teamBars(rows: TeamStandingsRow[]): BarDatum[] {
+  return rows.map((r) => ({
+    label: r.name,
+    value: r.combinedRatingSum,
+    color: TEAM_HEX[teamColorSlot(r.teamId)],
+  }))
+}
+
+/** Players ranked by peak rating — the "only peak elos count" figure. */
+function peakBars(rows: StandingsRow[]): BarDatum[] {
+  return rows
+    .filter(
+      (r): r is StandingsRow & { maxRating: number } => r.maxRating !== null
     )
-  }
-
-  if (isError || !snapshot) {
-    return <StatsError onRetry={onRetry} />
-  }
-
-  if (snapshot.series.length === 0) {
-    return <StatsEmpty />
-  }
-
-  return (
-    <div className="flex flex-col gap-6">
-      <SummaryCards series={snapshot.series} />
-      <ChartFrame>
-        <RatingProgressionChart series={snapshot.series} />
-      </ChartFrame>
-    </div>
-  )
+    .map((r) => ({
+      // Prefer the host's display-name override (matches the standings table)
+      // over the raw ladder alias.
+      label: r.presentation.displayName ?? r.alias,
+      value: r.maxRating,
+      color: PEAK_COLOR,
+    }))
 }
 
 /**
- * Card frame mirroring the standings `TableShell` chrome — a brand accent
- * stripe along the top edge over the card surface — so the chart reads as
- * part of the same broadcast furniture as the tables.
+ * A titled card frame around one chart, mirroring the standings `TableShell`
+ * chrome (brand accent stripe over the card surface). Owns the section's
+ * loading / empty / error states so each board resolves on its own.
  */
-function ChartFrame({ children }: { children: React.ReactNode }) {
+function ChartSection({
+  title,
+  query,
+  isEmpty,
+  skeletonHeight,
+  children,
+}: {
+  title: string
+  query: { isPending: boolean; isError: boolean; refetch: () => void }
+  isEmpty: boolean
+  skeletonHeight: number
+  children: ReactNode
+}) {
   const { t } = useTranslation()
   return (
     <section className="bg-card shadow-card relative overflow-hidden rounded-lg p-4 pt-5">
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
-      <h2 className="text-muted-foreground font-display mb-2 px-1 text-sm tracking-widest uppercase">
-        {t("stats.chartTitle")}
+      <h2 className="text-muted-foreground font-display mb-3 px-1 text-sm tracking-widest uppercase">
+        {title}
       </h2>
-      {children}
+      {query.isPending ? (
+        <Skeleton className="rounded-md" style={{ height: skeletonHeight }} />
+      ) : query.isError ? (
+        <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <p className="text-destructive text-sm">{t("stats.error")}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => query.refetch()}
+          >
+            {t("stats.retry")}
+          </Button>
+        </div>
+      ) : isEmpty ? (
+        <p className="text-muted-foreground py-10 text-center text-sm">
+          {t("stats.noData")}
+        </p>
+      ) : (
+        children
+      )}
     </section>
   )
 }
@@ -215,27 +295,6 @@ function StatCard({
           </p>
         ) : null}
       </div>
-    </div>
-  )
-}
-
-function StatsEmpty() {
-  const { t } = useTranslation()
-  return (
-    <div className="bg-card shadow-card rounded-lg border p-8 text-center">
-      <p className="text-muted-foreground text-sm">{t("stats.empty")}</p>
-    </div>
-  )
-}
-
-function StatsError({ onRetry }: { onRetry: () => void }) {
-  const { t } = useTranslation()
-  return (
-    <div className="bg-card shadow-card flex flex-col items-center gap-3 rounded-lg border p-8 text-center">
-      <p className="text-destructive text-sm">{t("stats.error")}</p>
-      <Button type="button" variant="outline" size="sm" onClick={onRetry}>
-        {t("stats.retry")}
-      </Button>
     </div>
   )
 }

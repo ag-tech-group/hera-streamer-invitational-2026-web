@@ -1,5 +1,6 @@
 import { LineChart } from "echarts/charts"
 import {
+  DataZoomComponent,
   GridComponent,
   LegendComponent,
   TooltipComponent,
@@ -23,6 +24,7 @@ echarts.use([
   GridComponent,
   TooltipComponent,
   LegendComponent,
+  DataZoomComponent,
   CanvasRenderer,
 ])
 
@@ -52,16 +54,31 @@ function buildOption(series: PlayerSeries[]): EChartsCoreOption {
   return {
     color: LINE_PALETTE,
     backgroundColor: "transparent",
-    grid: { left: 8, right: 18, top: 28, bottom: 48, containLabel: true },
+    grid: { left: 8, right: 18, top: 28, bottom: 78, containLabel: true },
     legend: {
       type: "scroll",
-      bottom: 8,
+      bottom: 0,
       textStyle: { color: "#cbd5e1" },
       inactiveColor: "#475569",
       pageTextStyle: { color: AXIS },
       pageIconColor: AXIS,
       pageIconInactiveColor: "#475569",
     },
+    // A slider rail along the bottom: drag the edges to focus a window of the
+    // timeline; once zoomed in, grab the middle to pan. `inside` adds
+    // wheel-zoom over the plot area.
+    dataZoom: [
+      { type: "inside" },
+      {
+        type: "slider",
+        bottom: 36,
+        height: 16,
+        borderColor: "transparent",
+        backgroundColor: "rgba(148,163,184,0.08)",
+        fillerColor: "rgba(96,165,250,0.15)",
+        textStyle: { color: AXIS },
+      },
+    ],
     tooltip: {
       trigger: "axis",
       // Rank the hovered instant's players high-to-low — turns the tooltip
@@ -89,6 +106,10 @@ function buildOption(series: PlayerSeries[]): EChartsCoreOption {
     series: series.map((s) => ({
       type: "line",
       name: s.alias,
+      // Filled-circle symbol so the legend marker reads as a solid coloured
+      // dot — the default `emptyCircle` shows a hollow white centre.
+      // `showSymbol` stays false, so the line itself carries no point markers.
+      symbol: "circle",
       showSymbol: false,
       // Gentle smoothing reads as a trend rather than jagged match-to-match
       // noise; a soft drop shadow lifts the lines off the dark card.
