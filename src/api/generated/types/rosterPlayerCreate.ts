@@ -9,11 +9,22 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
+import type { RosterPlayerCreatePresentation } from './rosterPlayerCreatePresentation';
 
 /**
- * Request body for adding a profile to a tournament's roster.
+ * Request body for adding a roster entry — polled identity or placeholder.
+
+Pass ``profile_id`` for a polled identity, or ``name`` for an
+announced placeholder. Exactly one of the two — sending both or
+neither is a 422. ``presentation`` is optional in both cases and can
+be set later via PATCH.
+
+``name`` is rejected if it parses as an integer so the API can
+polymorphically dispatch URL lookups (``/players/{12345}`` →
+profile_id, ``/players/{iyouxin}`` → name) without ambiguity.
  */
 export interface RosterPlayerCreate {
-  /** @exclusiveMinimum 0 */
-  profile_id: number;
+  profile_id?: number | null;
+  name?: string | null;
+  presentation?: RosterPlayerCreatePresentation;
 }

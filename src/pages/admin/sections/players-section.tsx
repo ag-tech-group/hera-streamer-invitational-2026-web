@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { Pencil, Plus, Trash2, X } from "lucide-react"
+import { Pencil, Plus, Trash2, UserCheck, X } from "lucide-react"
 import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -8,8 +8,8 @@ import {
   getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey,
   useAddRosterPlayerV1TournamentsTournamentSlugPlayersPost,
   useListPlayersV1TournamentsTournamentSlugPlayersGet,
-  useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDelete,
-  useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch,
+  useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersLookupDelete,
+  useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatch,
 } from "@/api/generated/hooks/players/players"
 import type { PlayerRead } from "@/api/generated/types"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -44,6 +44,7 @@ export function PlayersSection() {
         players={players}
       />
       <AddPlayerForm />
+      <AddPlaceholderForm />
     </div>
   )
 }
@@ -78,7 +79,7 @@ function PlayersList({
   return (
     <ul className="flex flex-col gap-2">
       {players.map((player) => (
-        <PlayerRow key={player.profile_id} player={player} />
+        <PlayerRow key={playerLookup(player)} player={player} />
       ))}
     </ul>
   )
@@ -89,9 +90,11 @@ function PlayerRow({ player }: { player: PlayerRead }) {
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [editing, setEditing] = useState(false)
+  const [promoting, setPromoting] = useState(false)
+  const isPlaceholder = player.profile_id === null
 
   const mutation =
-    useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdDelete({
+    useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersLookupDelete({
       request: {
         headers: { "Idempotency-Key": idempotencyKey.current },
       },
@@ -114,13 +117,39 @@ function PlayerRow({ player }: { player: PlayerRead }) {
     <li className="bg-muted/30 flex flex-col gap-3 rounded-md px-3 py-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col">
-          <span className="text-sm font-medium">{player.alias}</span>
-          <span className="text-muted-foreground font-mono text-xs">
-            profile_id {player.profile_id}
-            {player.country ? ` · ${player.country}` : null}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">{player.alias}</span>
+            {isPlaceholder && (
+              <span
+                className="bg-muted-foreground/15 text-muted-foreground rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wider uppercase"
+                title={t("admin.players.placeholderBadgeTitle")}
+              >
+                {t("admin.players.placeholder")}
+              </span>
+            )}
+          </div>
+          {!isPlaceholder && (
+            <span className="text-muted-foreground font-mono text-xs">
+              profile_id {player.profile_id}
+              {player.country ? ` · ${player.country}` : null}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
+          {isPlaceholder && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPromoting((open) => !open)}
+              aria-label={t("admin.players.promoteAria", {
+                name: player.alias,
+              })}
+              aria-expanded={promoting}
+            >
+              <UserCheck className="size-4" aria-hidden />
+            </Button>
+          )}
           <Button
             type="button"
             variant="outline"
@@ -152,7 +181,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
             onConfirm={() =>
               mutation.mutate({
                 tournamentSlug: activeTournament.apiTournamentSlug,
-                profileId: player.profile_id,
+                lookup: playerLookup(player),
               })
             }
           />
@@ -160,7 +189,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
       </div>
       {editing && (
         <PresentationForm
-          profileId={player.profile_id}
+          lookup={playerLookup(player)}
           alias={player.alias}
           presentation={
             (player.presentation as Record<string, unknown> | undefined) ?? {}
@@ -168,7 +197,100 @@ function PlayerRow({ player }: { player: PlayerRead }) {
           onDone={() => setEditing(false)}
         />
       )}
+      {promoting && (
+        <PromoteForm alias={player.alias} onDone={() => setPromoting(false)} />
+      )}
     </li>
+  )
+}
+
+/**
+ * Inline promote form for a placeholder row (#185). Atomic transition
+ * via `PATCH /v1/tournaments/{slug}/players/{name}` with `{ profile_id }`
+ * — the placeholder's name clears, the polled `profile_id` sets, and the
+ * row's `presentation` carries through unchanged. Re-uses the same
+ * `useUpdate…LookupPatch` hook the presentation editor uses, so promote
+ * and presentation edits share idempotency / mutation surface.
+ */
+function PromoteForm({
+  alias,
+  onDone,
+}: {
+  /** The placeholder's host-given name, used as the lookup in the URL. */
+  alias: string
+  onDone: () => void
+}) {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const idempotencyKey = useIdempotencyKey()
+  const [profileId, setProfileId] = useState("")
+
+  const mutation =
+    useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatch({
+      request: {
+        headers: { "Idempotency-Key": idempotencyKey.current },
+      },
+      mutation: {
+        onSuccess: () => {
+          idempotencyKey.reset()
+          void queryClient.invalidateQueries({
+            queryKey:
+              getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
+                activeTournament.apiTournamentSlug
+              ),
+          })
+          toast.success(t("admin.players.promote.successToast"))
+          onDone()
+        },
+        onError: idempotencyKey.resetOnReusedKey,
+      },
+    })
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    mutation.mutate({
+      tournamentSlug: activeTournament.apiTournamentSlug,
+      lookup: alias,
+      data: { profile_id: Number(profileId) },
+    })
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="border-border/60 flex flex-col gap-3 border-t pt-3"
+    >
+      <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+        {t("admin.players.promote.title")}
+      </p>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={`promote-profile-id-${alias}`}>
+          {t("admin.players.promote.profileIdLabel")}
+        </Label>
+        <Input
+          id={`promote-profile-id-${alias}`}
+          type="number"
+          inputMode="numeric"
+          value={profileId}
+          onChange={(event) => setProfileId(event.target.value)}
+          placeholder={t("admin.players.promote.profileIdPlaceholder")}
+          min={1}
+          required
+          autoFocus
+        />
+      </div>
+      <ProfileIdHint />
+      <div className="flex items-center justify-end gap-2">
+        <Button type="button" variant="outline" onClick={onDone}>
+          {t("admin.players.promote.cancel")}
+        </Button>
+        <Button type="submit" disabled={mutation.isPending || !profileId}>
+          {mutation.isPending
+            ? t("admin.players.promote.confirming")
+            : t("admin.players.promote.confirm")}
+        </Button>
+      </div>
+    </form>
   )
 }
 
@@ -186,12 +308,17 @@ function PlayerRow({ player }: { player: PlayerRead }) {
  * three fields can reach in practice.
  */
 function PresentationForm({
-  profileId,
+  lookup,
   alias,
   presentation,
   onDone,
 }: {
-  profileId: number
+  /**
+   * Polymorphic lookup the API's `/players/{lookup}` URL family uses —
+   * `profile_id` (numeric string) for polled rows, `alias` for placeholder
+   * rows. See `playerLookup` for the derivation.
+   */
+  lookup: string
   alias: string
   presentation: Record<string, unknown>
   onDone: () => void
@@ -204,7 +331,7 @@ function PresentationForm({
   )
 
   const mutation =
-    useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersProfileIdPatch({
+    useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatch({
       request: {
         headers: { "Idempotency-Key": idempotencyKey.current },
       },
@@ -234,7 +361,7 @@ function PresentationForm({
     event.preventDefault()
     mutation.mutate({
       tournamentSlug: activeTournament.apiTournamentSlug,
-      profileId,
+      lookup,
       data: { presentation: toPresentationUpdate(presentation, form) },
     })
   }
@@ -267,11 +394,11 @@ function PresentationForm({
       </p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`presentation-name-${profileId}`}>
+          <Label htmlFor={`presentation-name-${lookup}`}>
             {t("admin.players.presentation.displayName")}
           </Label>
           <Input
-            id={`presentation-name-${profileId}`}
+            id={`presentation-name-${lookup}`}
             value={form.displayName}
             onChange={(event) =>
               setForm({ ...form, displayName: event.target.value })
@@ -283,11 +410,11 @@ function PresentationForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`presentation-flag-${profileId}`}>
+          <Label htmlFor={`presentation-flag-${lookup}`}>
             {t("admin.players.presentation.flag")}
           </Label>
           <Input
-            id={`presentation-flag-${profileId}`}
+            id={`presentation-flag-${lookup}`}
             value={form.flag}
             onChange={(event) => setForm({ ...form, flag: event.target.value })}
             placeholder={t("admin.players.presentation.flagPlaceholder")}
@@ -413,6 +540,19 @@ function toPresentationUpdate(
 }
 
 /**
+ * Polymorphic lookup string for the `/players/{lookup}` URL family
+ * (#185). Polled rows use the `profile_id` (a numeric string); placeholder
+ * rows use the host-given `alias`. The API rejects integer-looking names
+ * on POST so the routing key stays unambiguous: a numeric path segment
+ * is always a `profile_id`, a non-numeric segment is always a name.
+ */
+function playerLookup(player: PlayerRead): string {
+  return player.profile_id !== null
+    ? player.profile_id.toString()
+    : player.alias
+}
+
+/**
  * Lightweight URL guard for stream channel links. Requires `http(s)`
  * specifically — other protocols (`javascript:`, `data:`, etc.) are
  * rejected so a bag value can't smuggle in an XSS vector when rendered as
@@ -485,6 +625,76 @@ function AddPlayerForm() {
         </Button>
       </div>
       <ProfileIdHint />
+    </form>
+  )
+}
+
+/**
+ * Add a placeholder roster entry by host-given display name (#185). Uses
+ * the same `POST /v1/tournaments/{slug}/players` endpoint the polled-add
+ * form uses; the API distinguishes by which key is populated in the body
+ * (`profile_id` vs `name`, XOR — 422 if both or neither, 422 if the name
+ * parses as an integer). The trimmed name is the row's lookup key for
+ * the lifetime of the placeholder, until promoted via `PromoteForm`.
+ */
+function AddPlaceholderForm() {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const idempotencyKey = useIdempotencyKey()
+  const [name, setName] = useState("")
+
+  const mutation = useAddRosterPlayerV1TournamentsTournamentSlugPlayersPost({
+    request: {
+      headers: { "Idempotency-Key": idempotencyKey.current },
+    },
+    mutation: {
+      onSuccess: () => {
+        idempotencyKey.reset()
+        setName("")
+        void queryClient.invalidateQueries({
+          queryKey: getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
+            activeTournament.apiTournamentSlug
+          ),
+        })
+        toast.success(t("admin.players.addPlaceholderSuccess"))
+      },
+      onError: idempotencyKey.resetOnReusedKey,
+    },
+  })
+
+  const trimmed = name.trim()
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        mutation.mutate({
+          tournamentSlug: activeTournament.apiTournamentSlug,
+          data: { name: trimmed },
+        })
+      }}
+      className="border-border/60 flex flex-col gap-2 border-t pt-4"
+    >
+      <Label htmlFor="add-placeholder-name">
+        {t("admin.players.addPlaceholderLabel")}
+      </Label>
+      <div className="flex gap-2">
+        <Input
+          id="add-placeholder-name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder={t("admin.players.addPlaceholderPlaceholder")}
+          required
+        />
+        <Button type="submit" disabled={mutation.isPending || !trimmed}>
+          {mutation.isPending
+            ? t("admin.players.addPlaceholderAdding")
+            : t("admin.players.addPlaceholderAction")}
+        </Button>
+      </div>
+      <p className="text-muted-foreground text-xs">
+        {t("admin.players.addPlaceholderHint")}
+      </p>
     </form>
   )
 }

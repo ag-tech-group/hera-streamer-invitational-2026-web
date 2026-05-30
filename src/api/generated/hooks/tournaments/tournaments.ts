@@ -567,14 +567,22 @@ export const useDeleteTournamentV1TournamentsTournamentSlugDelete = <TError = HT
       return useMutation(getDeleteTournamentV1TournamentsTournamentSlugDeleteMutationOptions(options), queryClient);
     }
     /**
- * The tournament's players, ranked by current rating on its leaderboard.
+ * The tournament's roster — polled identities ranked, placeholders at tail.
 
-Scoped to the tournament's roster (``TournamentPlayer``) and joined left
-to ``PlayerRating`` on its ``leaderboard_id`` — a roster member without
-a rating row on that leaderboard (typically a brand-new account that
-hasn't played its first ranked match) still surfaces, with null rating
-fields and a zero record, sorted to the tail. ``recent_results`` and
-live-match status are folded in by further queries over the same set.
+One query over ``tournament_players`` left-joined to ``Player`` (the
+polled identity, when one exists) and ``PlayerRating`` (when the
+polled identity has a rating on the tournament's leaderboard). Three
+row shapes fall out of the same SELECT, ordered by:
+
+1. ranked polled rows first, by current_rating DESC (NULLS LAST);
+2. unrated polled rows next, by profile_id ASC;
+3. placeholder rows last, by name ASC.
+
+The leaderboard filter lives in the join condition, not the WHERE
+clause — putting it in WHERE would re-filter the outer-join right
+back to inner-join behaviour. The outer filter keeps a real entry
+visible only once its ``Player`` row has been polled (no half-state
+where a newly-added profile_id surfaces without an alias).
  * @summary Get Standings
  */
 export type getStandingsV1TournamentsTournamentSlugStandingsGetResponse200 = {

@@ -13,18 +13,26 @@ import type { PlayerRatingRead } from './playerRatingRead';
 import type { PlayerReadPresentation } from './playerReadPresentation';
 
 /**
- * Tracked player plus their ratings on every leaderboard we've seen them on.
+ * A roster entry — either a polled identity or an announced placeholder.
+
+``profile_id`` / ``alias`` / polled fields (``country``, ``steam_id``,
+``level``, ``xp``, ``region_id``, ``clan_name``, ``updated_at``,
+``ratings``) are populated from a ``Player`` row when the entry has a
+polled identity. For an announced placeholder (no ``profile_id`` yet),
+``alias`` is the host-given display name and the polled fields are
+null/empty — there's nothing to poll until the player's
+``profile_id`` mints.
  */
 export interface PlayerRead {
-  profile_id: number;
+  profile_id: number | null;
   alias: string;
   country: string | null;
   steam_id: string | null;
-  level: number;
-  xp: number;
-  region_id: number;
+  level: number | null;
+  xp: number | null;
+  region_id: number | null;
   clan_name: string | null;
-  updated_at: string;
+  updated_at: string | null;
   presentation?: PlayerReadPresentation;
-  ratings: PlayerRatingRead[];
+  ratings?: PlayerRatingRead[];
 }
