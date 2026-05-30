@@ -1,6 +1,8 @@
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { SidePanel } from "@/components/side-panel"
+import { TournamentHero } from "@/components/tournament-hero"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -23,23 +25,21 @@ export function StatsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
-      <header className="hero-divider flex flex-col gap-1 pb-4">
-        <h1 className="font-display text-4xl tracking-wide">
-          {t("stats.title")}
-        </h1>
-        <p className="text-muted-foreground text-sm">{t("stats.subtitle")}</p>
-      </header>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <ViewTabs value="stats" />
+      <TournamentHero />
+      <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+        <SidePanel />
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <ViewTabs value="stats" />
+          </div>
+          <StatsContent
+            snapshot={progression.data}
+            isPending={progression.isPending}
+            isError={progression.isError}
+            onRetry={() => void progression.refetch()}
+          />
+        </div>
       </div>
-
-      <StatsContent
-        snapshot={progression.data}
-        isPending={progression.isPending}
-        isError={progression.isError}
-        onRetry={() => void progression.refetch()}
-      />
     </div>
   )
 }
