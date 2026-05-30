@@ -35,10 +35,12 @@ const KIND_ICON: Record<HostLinkKind, IconComponent> = {
 export function HostLinksCard({
   links,
   label,
+  logo,
   className,
 }: {
   links: HostLink[] | undefined
   label?: string
+  logo?: string
   className?: string
 }) {
   const { t } = useTranslation()
@@ -64,9 +66,17 @@ export function HostLinksCard({
           background: "color-mix(in oklch, var(--brand) 12%, transparent)",
         }}
       />
-      <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-        {label ?? t("hostLinks.defaultLabel")}
-      </p>
+      {/*
+       * Host brand mark + eyebrow label. The logo is decorative — the
+       * adjacent label already names the host — so alt="" keeps screen
+       * readers from announcing it twice (mirrors the navbar logo).
+       */}
+      <div className="flex items-center gap-2.5">
+        {logo ? <img src={logo} alt="" className="size-8 shrink-0" /> : null}
+        <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+          {label ?? t("hostLinks.defaultLabel")}
+        </p>
+      </div>
       <ul className="grid grid-cols-2 gap-1">
         {links.map((link) => {
           const Icon = KIND_ICON[link.kind] ?? ExternalLink

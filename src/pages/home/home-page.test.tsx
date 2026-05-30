@@ -8,6 +8,7 @@ import type {
   ListEnvelopeTeamStandingRow,
   TournamentRead,
 } from "@/api/generated/types"
+import { activeTournament } from "@/config/tournaments"
 import { renderWithFileRoutes } from "@/test/renderers"
 import { server } from "@/test/setup"
 import { screen } from "@testing-library/react"
@@ -124,14 +125,22 @@ const fullLabel =
     el !== null && el.tagName === "P" && el.textContent === text
 
 describe("HomePage", () => {
-  it("renders the page heading", async () => {
+  it("shows the logo lockup as the heading and the live name in the navbar", async () => {
     server.use(standingsHandler(standings), tournamentHandler(tournament))
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
-    // The heading is the live tournament name once the metadata loads.
+    // The hero <h1> is the full tournament lockup (#180); its accessible name
+    // comes from the build-time config (the image alt), not the live
+    // metadata, so it's present immediately without awaiting the fetch.
     expect(
-      await screen.findByRole("heading", { name: "Test Tournament" })
+      screen.getByRole("heading", { name: activeTournament.name })
+    ).toBeInTheDocument()
+
+    // The live tournament name headlines the navbar instead, as the home
+    // link — it resolves to the fetched name once the metadata loads.
+    expect(
+      await screen.findByRole("link", { name: "Test Tournament" })
     ).toBeInTheDocument()
   })
 

@@ -44,6 +44,14 @@ export interface Tournament {
    */
   hostLabel?: string
   /**
+   * Optional host brand mark shown beside `hostLabel` on the
+   * `HostLinksCard` — an absolute `public/` path (e.g. `"/hera-logo.png"`).
+   * Keeps the host's own logo on the promo card while the component stays
+   * generic (it takes no host-specific knowledge). When unset, the card
+   * shows the label alone (#180).
+   */
+  hostLogo?: string
+  /**
    * ISO 4217 currency code (e.g. `"USD"`, `"EUR"`) used to format the
    * tournament's prize-pool display (#156). The amount itself is mutable
    * tournament metadata served by the API as integer minor units

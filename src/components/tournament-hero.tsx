@@ -1,32 +1,45 @@
-import { Trans, useTranslation } from "react-i18next"
+import { Trans } from "react-i18next"
 
-import { Skeleton } from "@/components/ui/skeleton"
-import { useTournament } from "@/hooks/use-tournament"
+import { activeTournament } from "@/config/tournaments"
 
 /**
- * The shared page hero across the standings views (#164): the live tournament
- * name as the headline with the AoE2:DE-linked description beneath. Self-
- * contained — reads `useTournament()` (shared query cache) so `/`, `/teams`,
- * and `/stats` all show the same hero without threading props.
+ * The shared page hero across the standings views (#164, #180): the full
+ * tournament lockup as the centerpiece, with the AoE2:DE-linked tagline
+ * beneath. Centered banner over the (left-aligned) standings body below.
  *
- * Drops `font-bold` because Bebas Neue ships only weight 400 — a synthetic
- * 700 emboldens the glyphs badly. Skeleton while the name loads so the row
- * doesn't jump; the generic "Live Standings" shows only if the metadata
- * never lands.
+ * The lockup art carries the tournament name in its wordmark, so it *is* the
+ * page `<h1>` — the name reaches assistive tech and search via the image
+ * `alt`, not a duplicate text line. The navbar keeps a plain-text wordmark
+ * for when this hero scrolls out of view. The asset is static (build-time
+ * config), so there's no metadata fetch and no skeleton — it paints at once.
  */
 export function TournamentHero() {
-  const { t } = useTranslation()
-  const tournament = useTournament()
   return (
-    <header className="hero-divider flex flex-col gap-1 pb-4">
-      {tournament.isPending ? (
-        <Skeleton className="h-10 w-72 max-w-full" />
-      ) : (
-        <h1 className="font-display text-4xl tracking-wide">
-          {tournament.data?.name ?? t("home.title")}
-        </h1>
-      )}
-      <p className="text-muted-foreground text-sm">
+    <header className="relative flex flex-col items-center gap-4 pb-6 text-center">
+      {/*
+       * Soft brand-blue glow behind the crest — the same elevated-card chrome
+       * recipe as the standings/countdown cards (#114), so the hero frames
+       * the logo the way the rest of the page frames its data.
+       */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-8 left-1/2 size-72 max-w-full -translate-x-1/2 rounded-full opacity-70 blur-3xl"
+        style={{
+          background: "color-mix(in oklch, var(--brand) 16%, transparent)",
+        }}
+      />
+      <h1 className="relative m-0">
+        {/* width/height match the asset so the row reserves space before the
+            image loads (no layout shift); max-width caps the display size. */}
+        <img
+          src="/logo-full.png"
+          alt={activeTournament.name}
+          width={1000}
+          height={614}
+          className="h-auto w-full max-w-[30rem]"
+        />
+      </h1>
+      <p className="text-muted-foreground relative max-w-2xl text-sm">
         <Trans
           i18nKey="home.subtitle"
           components={{

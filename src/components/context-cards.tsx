@@ -9,17 +9,18 @@ import { activeTournament } from "@/config/tournaments"
 import { useTournament } from "@/hooks/use-tournament"
 
 /**
- * The shared left-hand context column across the standings views (#164): the
- * start / grand-finals countdowns (the start slot swaps to the "Ladder Race
- * Active" panel once the race is underway, #147), the prize-pool card (#156),
- * and the host links. Self-contained — reads `useTournament()` (shared cache)
- * so it renders identically on `/`, `/teams`, and `/stats`.
+ * The horizontal context-card strip shown below the hero on every tournament
+ * view (#164, #180): the start / grand-finals countdowns (the start slot swaps
+ * to the "Ladder Race Active" panel once the race is underway, #147), the
+ * prize-pool card (#156), and the host links. Lays out as a responsive grid
+ * (1 col → 2 → 4). Self-contained — reads `useTournament()` (shared cache) so
+ * it renders identically on `/`, `/teams`, and `/stats`.
  *
  * `mountedAtMs` is captured once via `useState`'s lazy initialiser so
  * `Date.now()` stays out of the render pass (react-hooks/purity); a manual
  * reload re-evaluates whether the race has started.
  */
-export function SidePanel() {
+export function ContextCards() {
   const tournament = useTournament()
   const [mountedAtMs] = useState(() => Date.now())
   const tournamentStarted = tournament.data?.startDate
@@ -27,7 +28,7 @@ export function SidePanel() {
     : false
 
   return (
-    <div className="flex flex-col gap-6 xl:w-1/4 xl:shrink-0">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {tournamentStarted ? (
         <LadderRaceActiveCard />
       ) : (
@@ -70,6 +71,7 @@ export function SidePanel() {
       />
       <HostLinksCard
         label={activeTournament.hostLabel}
+        logo={activeTournament.hostLogo}
         links={activeTournament.hostLinks}
       />
     </div>

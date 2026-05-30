@@ -13,6 +13,9 @@ export const heraStreamerInvitational2026: Tournament = {
   game: "Age of Empires II",
   apiTournamentSlug: "default",
   hostLabel: "Hosted by Hera",
+  // Host brand mark headlining the promo card, demoted here from the navbar
+  // when the tournament logo took over the site chrome (#180).
+  hostLogo: "/hera-logo.png",
   // Currency that the API's `prize_pool_cents` is denominated in. USD is
   // the typical AoE2 invitational prize-pool currency; override per build
   // if this tournament's pool is in a different currency. (#156)
