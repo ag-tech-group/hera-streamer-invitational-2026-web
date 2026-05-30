@@ -143,6 +143,23 @@
       "removeSuccess": "Player removed.",
       "noPlayers": "No players yet.",
       "loadError": "Couldn't load roster.",
+      "editAria": "Edit display overrides for {{name}}",
+      "presentation": {
+        "title": "Display overrides",
+        "displayName": "Display name",
+        "displayNamePlaceholder": "Streamer handle (e.g. uThermal)",
+        "flag": "Flag",
+        "flagPlaceholder": "🇺🇸",
+        "streamUrls": "Stream URLs",
+        "streamUrlPlaceholder": "https://twitch.tv/handle",
+        "addStreamUrl": "Add stream URL",
+        "removeStreamUrlAria": "Remove a stream URL for {{name}}",
+        "invalidUrl": "Enter a valid http(s) URL",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving…",
+        "saveSuccess": "Display overrides updated."
+      },
       "profileHint": "Find a player's <code>profile_id</code> in their <link>aoe2insights</link> URL — e.g. <code>aoe2insights.com/user/1819870</code> → <code>1819870</code>."
     },
     "teams": {

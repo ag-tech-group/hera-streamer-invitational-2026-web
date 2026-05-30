@@ -143,6 +143,23 @@
       "removeSuccess": "Jugador quitado.",
       "noPlayers": "Aún no hay jugadores.",
       "loadError": "No se pudo cargar el plantel.",
+      "editAria": "Editar sobrescrituras de visualización para {{name}}",
+      "presentation": {
+        "title": "Sobrescrituras de visualización",
+        "displayName": "Nombre visible",
+        "displayNamePlaceholder": "Apodo del streamer (p. ej. uThermal)",
+        "flag": "Bandera",
+        "flagPlaceholder": "🇺🇸",
+        "streamUrls": "URLs de stream",
+        "streamUrlPlaceholder": "https://twitch.tv/handle",
+        "addStreamUrl": "Añadir URL de stream",
+        "removeStreamUrlAria": "Quitar una URL de stream para {{name}}",
+        "invalidUrl": "Ingresa una URL http(s) válida",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "Guardando…",
+        "saveSuccess": "Sobrescrituras actualizadas."
+      },
       "profileHint": "Encuentra el <code>profile_id</code> del jugador en su URL de <link>aoe2insights</link> — p. ej. <code>aoe2insights.com/user/1819870</code> → <code>1819870</code>."
     },
     "teams": {
