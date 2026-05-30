@@ -65,6 +65,20 @@ function streamPlatform(url: string): StreamPlatform {
 }
 
 /**
+ * Stable per-row identifier for React keys, FLIP animation tracking, and
+ * the position map. Real roster members key off their `profileId`;
+ * placeholder rows (`profileId: null`) — announced-but-unjoined streamers
+ * — fall back to their `alias`, which the API guarantees is unique within
+ * a tournament's roster. The `id:` / `placeholder:` prefixes prevent a
+ * profile id that happens to equal another row's alias from colliding.
+ */
+function rowKey(row: StandingsRow): string {
+  return row.profileId !== null
+    ? `id:${row.profileId}`
+    : `placeholder:${row.alias}`
+}
+
+/**
  * The polished standings table. A pure presentation component: it renders the
  * rows it is handed and owns no fetching or query state — `HomePage` decides
  * when a populated table is the right thing to show (vs. loading/empty/error).
@@ -90,17 +104,21 @@ export function StandingsTable({
   const { sortedRows, sortState, sortBy } = useTableSort(rows, getSortValue)
 
   // FLIP animation: rows slide to their new spots whenever the order
-  // changes (either from a live SSE refresh or a header click).
-  const orderKey = sortedRows.map((row) => row.profileId).join(",")
+  // changes (either from a live SSE refresh or a header click). Keyed off
+  // the same `rowKey` the `<tr>` uses so placeholder rows (null
+  // `profileId`) don't collide on a single `null` identifier.
+  const orderKey = sortedRows.map(rowKey).join(",")
   const { containerRef, registerRow } = useFlipRows(orderKey)
 
   // The Position column shows the row's tournament rank, which is the
   // index in the *original* (unsorted) row list — not the current sorted
   // view. Without this, sorting by another column would relabel "Position 1"
-  // as the top of that sort instead of the tournament leader.
+  // as the top of that sort instead of the tournament leader. Keyed by
+  // `rowKey` so multiple placeholder rows (all with `profileId: null`)
+  // each get their own position rather than overwriting one Map entry.
   const positionMap = useMemo(() => {
-    const map = new Map<number, number>()
-    rows.forEach((row, i) => map.set(row.profileId, i + 1))
+    const map = new Map<string, number>()
+    rows.forEach((row, i) => map.set(rowKey(row), i + 1))
     return map
   }, [rows])
 
@@ -117,12 +135,13 @@ export function StandingsTable({
       }
     >
       {sortedRows.map((row) => {
-        const position = positionMap.get(row.profileId) ?? 0
+        const key = rowKey(row)
+        const position = positionMap.get(key) ?? 0
         const isLeader = position === 1
         return (
           <tr
-            key={row.profileId}
-            data-flip-id={row.profileId}
+            key={key}
+            data-flip-id={key}
             ref={registerRow}
             // Tag the row with its team's colour slot (#146). A thin left
             // accent bar is painted in index.css via a pseudo-element layer
@@ -154,6 +173,7 @@ export function StandingsTable({
                 country={row.country}
                 flagOverride={row.presentation.flag}
                 inMatch={row.inMatch}
+                linkable={row.profileId !== null}
               />
             </td>
             {/*
@@ -563,12 +583,19 @@ function PlayerCell({
   country,
   flagOverride,
   inMatch,
+  linkable,
 }: {
   alias: string
   displayName?: string
   country: string | null
   flagOverride?: string
   inMatch: boolean
+  /**
+   * `false` for placeholder rows whose `profile_id` hasn't minted on the
+   * ladder yet — the aoe2insights search by alias would land on no result.
+   * Render the visible name as plain text in that case rather than a link.
+   */
+  linkable: boolean
 }) {
   const { t } = useTranslation()
   const countryCode = normalizeCountryCode(country)
@@ -602,15 +629,22 @@ function PlayerCell({
       ) : (
         <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
       )}
-      <a
-        href={aoe2insightsPlayerUrl(alias)}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={t("standings.viewOnAoe2insights", { alias })}
-        className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
-      >
-        {visibleName}
-      </a>
+      {linkable ? (
+        <a
+          href={aoe2insightsPlayerUrl(alias)}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={t("standings.viewOnAoe2insights", { alias })}
+          className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
+        >
+          {visibleName}
+        </a>
+      ) : (
+        // Placeholder row: no ladder profile to link to. Keep the same
+        // weight + nowrap so the column rhythm doesn't shift, but drop
+        // the brand colour so the row reads as non-interactive.
+        <span className="font-medium whitespace-nowrap">{visibleName}</span>
+      )}
       {inMatch && <LiveBadge />}
     </span>
   )
