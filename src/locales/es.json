@@ -23,7 +23,8 @@
     "subtitle": "Puntuaciones en vivo, clasificación por equipos y progreso del torneo — <product>Age of Empires 2: Definitive Edition</product>, presentado por Hera.",
     "tabs": {
       "players": "Jugadores",
-      "teams": "Equipos"
+      "teams": "Equipos",
+      "stats": "Estadísticas"
     },
     "viewTabsAria": "Vista de clasificación",
     "lastUpdated": "Actualizado {{time}}",
@@ -54,6 +55,20 @@
     "prizePool": {
       "label": "Premio total",
       "sponsoredBy": "Patrocinado por "
+    }
+  },
+  "stats": {
+    "title": "Estadísticas",
+    "subtitle": "Progreso de puntuación a lo largo del torneo.",
+    "chartTitle": "Puntuación a lo largo del tiempo",
+    "ratingAxis": "Puntuación",
+    "empty": "Aún no hay partidas completadas — el progreso aparece cuando los jugadores empiezan a terminar partidas clasificatorias.",
+    "error": "No se pudieron cargar las estadísticas.",
+    "retry": "Reintentar",
+    "cards": {
+      "biggestClimber": "Mayor ascenso",
+      "highestPeak": "Punto más alto",
+      "mostMatches": "Más partidas"
     }
   },
   "standings": {

@@ -23,7 +23,8 @@
     "subtitle": "Live ratings, team standings, and tournament progression — <product>Age of Empires 2: Definitive Edition</product>, hosted by Hera.",
     "tabs": {
       "players": "Players",
-      "teams": "Teams"
+      "teams": "Teams",
+      "stats": "Stats"
     },
     "viewTabsAria": "Standings view",
     "lastUpdated": "Updated {{time}}",
@@ -54,6 +55,20 @@
     "prizePool": {
       "label": "Prize pool",
       "sponsoredBy": "Sponsored by "
+    }
+  },
+  "stats": {
+    "title": "Stats",
+    "subtitle": "Rating progression across the tournament.",
+    "chartTitle": "Rating over time",
+    "ratingAxis": "Rating",
+    "empty": "No completed matches yet — progression appears once players start finishing ranked games.",
+    "error": "Couldn't load stats.",
+    "retry": "Retry",
+    "cards": {
+      "biggestClimber": "Biggest climber",
+      "highestPeak": "Highest peak",
+      "mostMatches": "Most matches"
     }
   },
   "standings": {
