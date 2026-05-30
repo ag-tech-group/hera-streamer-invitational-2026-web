@@ -847,7 +847,11 @@ function ActivityCell({
         )}
       />
       {active ? t("standings.active") : t("standings.idle")}
-      <span className="tabular-nums opacity-70">
+      {/* No opacity on the time: the badge text colour already meets AA on its
+          background, but opacity-70 dropped it under the 4.5:1 ratio for this
+          small text (#73 / #65 audit). The dot + status word still lead the
+          hierarchy. */}
+      <span className="tabular-nums">
         {formatRelativeTime(lastMatchAt, now)}
       </span>
     </span>
