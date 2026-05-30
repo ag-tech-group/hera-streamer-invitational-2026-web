@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { LanguageToggle } from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,7 +70,8 @@ export function Navbar() {
 
 /**
  * The right-side auth widget. Three states:
- * - **Loading**: render nothing (no flash of sign-in then sign-out).
+ * - **Loading**: a neutral avatar skeleton — no empty slot, and no flash of
+ *   sign-in then account menu (#188).
  * - **Unauthenticated**: outline Sign in button linking to the shared
  *   auth frontend, with the current pathname as the post-auth redirect.
  *   Matches the criticalbit-web / vagrant-story-web pattern — plain
@@ -92,7 +94,12 @@ function AuthWidget() {
     signOut,
   } = useAuth()
 
-  if (isLoading) return null
+  // A neutral avatar-sized skeleton while the auth probe resolves — better
+  // than an empty slot, and it sidesteps the sign-in-then-account-menu flash
+  // that optimistically rendering either state would cause (#188).
+  if (isLoading) {
+    return <Skeleton className="size-8 rounded-full" />
+  }
 
   if (!isAuthenticated) {
     return (
