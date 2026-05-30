@@ -11,7 +11,7 @@ export type StandingsView = "players" | "teams"
  * The tab bar also points at the stats route (#164), which isn't a standings
  * view — so its value type is the standings views plus "stats".
  */
-type NavView = StandingsView | "stats"
+export type NavView = StandingsView | "stats"
 
 /** The three top-level views and the path-based routes that back them. */
 const TABS: { view: NavView; to: "/" | "/teams" | "/stats" }[] = [
@@ -21,8 +21,8 @@ const TABS: { view: NavView; to: "/" | "/teams" | "/stats" }[] = [
 ]
 
 /**
- * Underline-indicator tab strip switching between the players and team
- * standings. Each tab is a router `<Link>` to its own path-based route
+ * Underline-indicator tab strip switching between the players, teams, and
+ * stats views. Each tab is a router `<Link>` to its own path-based route
  * (`/` and `/teams`, #163), so the active view is URL-driven — deep-linkable,
  * and browser back/forward toggles between them. The active tab (matched
  * against the route-derived `value`) carries a brand-blue 2px bottom border

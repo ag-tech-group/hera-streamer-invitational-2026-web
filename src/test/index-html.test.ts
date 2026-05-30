@@ -68,6 +68,17 @@ describe("index.html SEO metadata", () => {
     expect(metaContent("name", "twitter:description")).toBeTruthy()
   })
 
+  it("wires the social share image for OG + Twitter (#180)", () => {
+    const OG_IMAGE = "https://aoe2.criticalbit.gg/kings-gauntlet/og-image.png"
+    expect(metaContent("property", "og:image")).toBe(OG_IMAGE)
+    expect(metaContent("property", "og:image:width")).toBe("1200")
+    expect(metaContent("property", "og:image:height")).toBe("630")
+    expect(metaContent("property", "og:image:alt")).toBeTruthy()
+    // twitter:card is summary_large_image, so the large-format preview only
+    // renders if twitter:image resolves — keep it pointed at the same asset.
+    expect(metaContent("name", "twitter:image")).toBe(OG_IMAGE)
+  })
+
   it("sets a theme-color for mobile browser chrome", () => {
     expect(metaContent("name", "theme-color")).toMatch(/^#[0-9a-fA-F]{6}$/)
   })

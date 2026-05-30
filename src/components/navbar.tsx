@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/user-avatar"
+import { activeTournament } from "@/config/tournaments"
 import { useTournament } from "@/hooks/use-tournament"
 import { useAuth } from "@/lib/auth"
 import { AUTH_URL, loginUrl } from "@/lib/auth-config"
@@ -32,33 +33,31 @@ import { AUTH_URL, loginUrl } from "@/lib/auth-config"
  * fixed bar.
  */
 export function Navbar() {
-  const { t } = useTranslation()
-  // Shares the cache entry with HomePage's own useTournament() call — both
-  // hit the same query key, so the navbar piggybacks on whichever fetch
-  // resolves first and re-renders when the name arrives.
+  // Live tournament name, with the build-time config name as a synchronous
+  // fallback so the wordmark paints immediately instead of flashing a
+  // skeleton — the brand name is fixed for this build either way. Shares the
+  // query cache with HomePage's own useTournament() call.
   const tournament = useTournament()
-  const tournamentName = tournament.data?.name ?? null
+  const tournamentName = tournament.data?.name ?? activeTournament.name
 
   return (
     <nav className="border-border/50 bg-background/80 fixed top-0 z-50 w-full border-b backdrop-blur-sm">
       <div className="mx-auto flex h-14 w-full max-w-[1536px] items-center justify-between gap-3 px-4">
         {/*
-         * aria-label uses the live tournament name once it's loaded so it
-         * matches the visible text rather than diverging into a stale
-         * fallback (Lighthouse flags a mismatch between accessible name
-         * and visible label as a WCAG violation). Falls back to the
-         * generic "Live Standings" while the metadata fetch is in
-         * flight, since the logo's alt="" makes the image decorative and
-         * the link otherwise has no accessible name during loading.
+         * Plain-text wordmark linking home. The full crest headlines the
+         * page hero now (#180); the navbar keeps a quiet text mark so the
+         * brand persists once the hero scrolls out of view. The visible
+         * text is the link's accessible name, so no aria-label is needed.
+         * `min-w-0 truncate` lets it yield to the controls on a narrow bar
+         * rather than push them off-screen.
          */}
         <Link
           to="/"
-          className="flex shrink-0 items-center transition-opacity hover:opacity-80"
-          aria-label={tournamentName ?? t("nav.brandAriaLabel")}
+          className="font-display text-foreground min-w-0 truncate text-lg tracking-wide transition-opacity hover:opacity-80 sm:text-xl"
         >
-          <img src="/logo.png" alt="" className="size-8 shrink-0" />
+          {tournamentName}
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <ThemeToggle />
           <LanguageToggle />
           <AuthWidget />

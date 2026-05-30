@@ -4,8 +4,7 @@ import { useMemo } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
-import { SidePanel } from "@/components/side-panel"
-import { TournamentHero } from "@/components/tournament-hero"
+import { TournamentLayout } from "@/components/tournament-layout"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -14,7 +13,6 @@ import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { teamColorSlot } from "@/lib/team-colors"
 import type { TeamColorSlot } from "@/lib/team-colors"
-import { ViewTabs } from "@/pages/home/view-tabs"
 import {
   HorizontalBarChart,
   type BarDatum,
@@ -44,62 +42,52 @@ export function StatsPage() {
   const peakData = standings.data ? peakBars(standings.data.rows) : []
 
   return (
-    <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
-      <TournamentHero />
-      <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
-        <SidePanel />
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <ViewTabs value="stats" />
-          </div>
-
-          {progression.isPending ? (
-            <div className="grid gap-4 sm:grid-cols-3">
-              {Array.from({ length: 3 }, (_, i) => (
-                <Skeleton key={i} className="h-24 rounded-lg" />
-              ))}
-            </div>
-          ) : (
-            <SummaryCards series={progression.data?.series ?? []} />
-          )}
-
-          <ChartSection
-            title={t("stats.teamEloTitle")}
-            query={teams}
-            isEmpty={teamData.length === 0}
-            skeletonHeight={260}
-          >
-            <HorizontalBarChart
-              data={teamData}
-              height={Math.max(180, teamData.length * 56)}
-            />
-          </ChartSection>
-
-          <ChartSection
-            title={t("stats.chartTitle")}
-            query={progression}
-            isEmpty={!progression.data || progression.data.series.length === 0}
-            skeletonHeight={460}
-          >
-            {progression.data ? (
-              <RatingProgressionChart series={progression.data.series} />
-            ) : null}
-          </ChartSection>
-
-          <ChartSection
-            title={t("stats.peakRatingTitle")}
-            query={standings}
-            isEmpty={peakData.length === 0}
-            skeletonHeight={400}
-          >
-            <HorizontalBarChart
-              data={peakData}
-              height={Math.max(180, peakData.length * 28)}
-            />
-          </ChartSection>
+    <TournamentLayout view="stats">
+      {progression.isPending ? (
+        <div className="grid gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }, (_, i) => (
+            <Skeleton key={i} className="h-24 rounded-lg" />
+          ))}
         </div>
-      </div>
-    </div>
+      ) : (
+        <SummaryCards series={progression.data?.series ?? []} />
+      )}
+
+      <ChartSection
+        title={t("stats.teamEloTitle")}
+        query={teams}
+        isEmpty={teamData.length === 0}
+        skeletonHeight={260}
+      >
+        <HorizontalBarChart
+          data={teamData}
+          height={Math.max(180, teamData.length * 56)}
+        />
+      </ChartSection>
+
+      <ChartSection
+        title={t("stats.chartTitle")}
+        query={progression}
+        isEmpty={!progression.data || progression.data.series.length === 0}
+        skeletonHeight={460}
+      >
+        {progression.data ? (
+          <RatingProgressionChart series={progression.data.series} />
+        ) : null}
+      </ChartSection>
+
+      <ChartSection
+        title={t("stats.peakRatingTitle")}
+        query={standings}
+        isEmpty={peakData.length === 0}
+        skeletonHeight={400}
+      >
+        <HorizontalBarChart
+          data={peakData}
+          height={Math.max(180, peakData.length * 28)}
+        />
+      </ChartSection>
+    </TournamentLayout>
   )
 }
 
