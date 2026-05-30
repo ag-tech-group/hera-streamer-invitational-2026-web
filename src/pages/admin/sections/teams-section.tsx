@@ -14,6 +14,15 @@ import {
   useUpdateTeamV1TournamentsTournamentSlugTeamsTeamIdPatch,
 } from "@/api/generated/hooks/teams/teams"
 import type { PlayerRead } from "@/api/generated/types"
+
+/**
+ * Polled-only narrowing of `PlayerRead` (#185). The teams admin filters
+ * out placeholder rows at the source because the API's team-member ops
+ * still key off `profile_id`; downstream components type their roster
+ * prop as `PolledPlayer[]` rather than `PlayerRead[]` so the non-null
+ * guarantee propagates without per-site assertions.
+ */
+type PolledPlayer = PlayerRead & { profile_id: number }
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import {
   AlertDialog,
@@ -64,8 +73,18 @@ export function TeamsSection() {
     [teams.data?.rows]
   )
 
-  const allPlayers: PlayerRead[] =
-    playersQuery.data?.status === 200 ? playersQuery.data.data.items : []
+  // Teams require a polled `profile_id` to add a member (the API's team-
+  // member rows still key off it, unchanged by the unified roster in
+  // #185). Placeholders surface on the players-admin tab but can't be put
+  // on teams until they're promoted, so filter them out at the source
+  // here. The type predicate narrows `profile_id` to non-null for every
+  // downstream consumer of `allPlayers`.
+  const allPlayers: PolledPlayer[] =
+    playersQuery.data?.status === 200
+      ? playersQuery.data.data.items.filter(
+          (p): p is PolledPlayer => p.profile_id !== null
+        )
+      : []
 
   // Map of profile_id → the team they're currently on (if any). Lets the
   // add-member select badge each option with its existing team and trigger
@@ -125,7 +144,7 @@ function TeamItem({
   playerTeamMap,
 }: {
   team: TeamStandingsRow
-  allPlayers: PlayerRead[]
+  allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
 }) {
   const { t } = useTranslation()
@@ -287,7 +306,7 @@ function MembersBlock({
 }: {
   teamId: number
   members: TeamMember[]
-  allPlayers: PlayerRead[]
+  allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
 }) {
   const { t } = useTranslation()
@@ -406,7 +425,7 @@ function AddMemberForm({
 }: {
   teamId: number
   members: TeamMember[]
-  allPlayers: PlayerRead[]
+  allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
 }) {
   const { t } = useTranslation()

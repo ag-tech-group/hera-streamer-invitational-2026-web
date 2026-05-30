@@ -17,23 +17,22 @@ import type { PlayerRatingRead } from './playerRatingRead';
  * Single-player response (``GET /v1/players/{profile_id}``).
 
 Extends ``PlayerRead`` with ``last_polled_at`` and the player's recent
-matches. ``recent_matches`` is set by the router (not via SQLAlchemy
-relationship) because matches are joined through ``MatchPlayer.profile_id``,
-which intentionally has no foreign key back to ``Player`` (opponents
-don't need to be tracked).
+matches. Always represents a polled identity — the detail endpoint
+only accepts a ``profile_id``, so placeholder rows aren't addressable
+here (they have no detail to show).
  */
 export interface PlayerDetail {
-  profile_id: number;
+  profile_id: number | null;
   alias: string;
   country: string | null;
   steam_id: string | null;
-  level: number;
-  xp: number;
-  region_id: number;
+  level: number | null;
+  xp: number | null;
+  region_id: number | null;
   clan_name: string | null;
-  updated_at: string;
+  updated_at: string | null;
   presentation?: PlayerDetailPresentation;
-  ratings: PlayerRatingRead[];
+  ratings?: PlayerRatingRead[];
   last_polled_at?: string | null;
   recent_matches?: MatchRead[];
 }

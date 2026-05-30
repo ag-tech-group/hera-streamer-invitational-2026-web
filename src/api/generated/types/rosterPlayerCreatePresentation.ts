@@ -9,15 +9,5 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
-import type { RosterPlaceholderUpdatePresentation } from './rosterPlaceholderUpdatePresentation';
 
-/**
- * Owner edit for a placeholder's presentation bag.
-
-Same replace-whole-object semantics as ``RosterPlayerUpdate``; the
-placeholder's ``name`` is immutable (it's the routing key — delete +
-re-create to rename).
- */
-export interface RosterPlaceholderUpdate {
-  presentation: RosterPlaceholderUpdatePresentation;
-}
+export type RosterPlayerCreatePresentation = { [key: string]: unknown };

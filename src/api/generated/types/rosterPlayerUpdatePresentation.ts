@@ -10,4 +10,4 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  * OpenAPI spec version: 0.0.1
  */
 
-export type RosterPlayerUpdatePresentation = { [key: string]: unknown };
+export type RosterPlayerUpdatePresentation = { [key: string]: unknown } | null;
