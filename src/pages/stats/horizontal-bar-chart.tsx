@@ -23,6 +23,13 @@ export interface BarDatum {
   color: string
 }
 
+/** The echarts tooltip-formatter params we read (axis trigger → an array). */
+interface BarTooltipParam {
+  name: string
+  value: number
+  marker: string
+}
+
 function buildOption(data: BarDatum[], colors: ChartColors): EChartsCoreOption {
   // Ascending so the largest lands at the top of the (bottom-origin) category
   // axis — the chart reads as a top-down ranking.
@@ -31,12 +38,19 @@ function buildOption(data: BarDatum[], colors: ChartColors): EChartsCoreOption {
     backgroundColor: "transparent",
     grid: { left: 8, right: 56, top: 8, bottom: 8, containLabel: true },
     tooltip: {
-      trigger: "axis",
-      axisPointer: { type: "shadow" },
+      // Per-item: hovering a bar fires its emphasis (and blurs the rest), which
+      // an `axis` trigger doesn't drive — it would show the tooltip but leave
+      // every bar at full strength. This replaces the default shadow band too.
+      trigger: "item",
       backgroundColor: "rgba(15,23,42,0.95)",
       borderColor: "rgba(148,163,184,0.2)",
       borderWidth: 1,
       textStyle: { color: "#e2e8f0", fontSize: 12 },
+      // The hovered bar's label (y/category) over its value (x).
+      formatter: (params: BarTooltipParam | BarTooltipParam[]) => {
+        const p = Array.isArray(params) ? params[0] : params
+        return `${p.marker}${p.name}<br/><span style="font-weight:600">${p.value}</span>`
+      },
     },
     xAxis: {
       type: "value",
@@ -58,11 +72,21 @@ function buildOption(data: BarDatum[], colors: ChartColors): EChartsCoreOption {
       {
         type: "bar",
         barWidth: "62%",
-        // Per-bar colour (team palette / brand), rounded on the outer end.
+        // Per-bar colour (team palette / brand), rounded on the outer end. Base
+        // opacity sits a touch below full so the hovered bar can brighten to
+        // full while the rest dim — see `emphasis` / `blur` below.
         data: sorted.map((d) => ({
           value: d.value,
-          itemStyle: { color: d.color, borderRadius: [0, 4, 4, 0] },
+          itemStyle: {
+            color: d.color,
+            borderRadius: [0, 4, 4, 0],
+            opacity: 0.85,
+          },
         })),
+        // Hover focuses the bar (brightens it to full) and blurs the others
+        // (dims them, but only gently) — in place of echarts' default highlight.
+        emphasis: { focus: "self", itemStyle: { opacity: 1 } },
+        blur: { itemStyle: { opacity: 0.5 } },
         label: {
           show: true,
           position: "right",
