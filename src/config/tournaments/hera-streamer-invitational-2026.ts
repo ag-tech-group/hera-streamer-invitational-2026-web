@@ -16,7 +16,9 @@ export const heraStreamerInvitational2026: Tournament = {
   // if this tournament's pool is in a different currency. (#156)
   prizeCurrency: "USD",
   // Sponsor credited under the prize-pool amount on `PrizePoolCard` (#156).
-  prizeSponsor: "Microsoft",
+  // Links out to the studio's page on ageofempires.com (#183).
+  prizeSponsor: "World's Edge",
+  prizeSponsorUrl: "https://www.ageofempires.com/worlds-edge-studio/",
   hostLinks: [
     { label: "Twitch", url: "https://twitch.tv/hera", kind: "twitch" },
     {

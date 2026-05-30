@@ -54,7 +54,7 @@
     },
     "prizePool": {
       "label": "Prize pool",
-      "sponsoredBy": "Sponsored by {{sponsor}}"
+      "sponsoredBy": "Sponsored by "
     }
   },
   "standings": {

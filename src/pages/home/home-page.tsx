@@ -192,6 +192,7 @@ export function HomePage() {
             prizePoolCents={tournament.data?.prizePoolCents}
             currency={activeTournament.prizeCurrency}
             sponsor={activeTournament.prizeSponsor}
+            sponsorUrl={activeTournament.prizeSponsorUrl}
             isLoading={tournament.isPending}
           />
           <HostLinksCard
