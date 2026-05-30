@@ -82,9 +82,17 @@ export function PrizePoolCard({
        * this card's headline number, not a stat in a row. Bebas Neue
        * ships at weight 400 only, so `font-display` carries the broadcast
        * weight without a synthetic bold.
+       *
+       * Currency code (e.g. `USD`) hangs off the end as a smaller, muted
+       * suffix — `"$"` is ambiguous globally (CAD / AUD / MXN / ARS all
+       * use it) and this build's audience is international, so the
+       * disambiguating code reads as clarification rather than clutter.
+       * Stays in `font-display` so it tracks the broadcast aesthetic
+       * instead of breaking back to sans mid-line.
        */}
       <p className="font-display text-4xl tracking-wide tabular-nums">
         {formatted}
+        <span className="text-muted-foreground ml-2 text-2xl">{currency}</span>
       </p>
       {sponsor && (
         <p className="text-muted-foreground text-xs">
