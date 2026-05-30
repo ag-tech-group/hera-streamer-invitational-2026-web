@@ -140,9 +140,12 @@ export const DeleteTournamentV1TournamentsTournamentSlugDeleteParams = zod.objec
 /**
  * The tournament's players, ranked by current rating on its leaderboard.
 
-Scoped two ways: to the tournament's roster (``TournamentPlayer``) and
-to its ``leaderboard_id``. ``recent_results`` and live-match status are
-folded in by two further queries over the same standing set.
+Scoped to the tournament's roster (``TournamentPlayer``) and joined left
+to ``PlayerRating`` on its ``leaderboard_id`` — a roster member without
+a rating row on that leaderboard (typically a brand-new account that
+hasn't played its first ranked match) still surfaces, with null rating
+fields and a zero record, sorted to the tail. ``recent_results`` and
+live-match status are folded in by further queries over the same set.
  * @summary Get Standings
  */
 export const GetStandingsV1TournamentsTournamentSlugStandingsGetParams = zod.object({
@@ -161,8 +164,8 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "initials": zod.string()
 }).describe('The team a standings row\'s player belongs to, if any.\n\nA compact reference — id + display strings, no aggregates — folded\nonto each ``StandingRow`` so the standings table can show a player\'s\nteam where it would otherwise show their global ladder rank. A player\nbelongs to at most one team per tournament; an un-teamed player\'s row\ncarries ``team = null``.'),zod.null()]),
   "presentation": zod.record(zod.string(), zod.unknown()),
-  "current_rating": zod.number(),
-  "max_rating": zod.number(),
+  "current_rating": zod.union([zod.number(),zod.null()]),
+  "max_rating": zod.union([zod.number(),zod.null()]),
   "wins": zod.number(),
   "losses": zod.number(),
   "streak": zod.number(),
@@ -182,7 +185,7 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "updated_at": zod.iso.datetime({}),
   "games": zod.number(),
   "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp), or null when the player has no games.')
-}).describe('One row in a tournament\'s standings list.\n\nA denormalized read model: a join of ``Player`` and ``PlayerRating``\nplus folded-in derived fields, so a consumer renders a full standings\ntable from one response with no per-player fan-out. ``recent_results``\nis completed-match form; ``tournament_record`` is the player\'s record\nwithin the tournament\'s date window; ``in_match`` \/ ``live_match_id``\nare current live-match status. Sorted by ``current_rating`` desc.'))
+}).describe('One row in a tournament\'s standings list.\n\nA denormalized read model: a left join of ``Player`` and ``PlayerRating``\nplus folded-in derived fields, so a consumer renders a full standings\ntable from one response with no per-player fan-out. ``recent_results``\nis completed-match form; ``tournament_record`` is the player\'s record\nwithin the tournament\'s date window; ``in_match`` \/ ``live_match_id``\nare current live-match status. Sorted by ``current_rating`` desc, with\nunrated roster members (no rating row on the tournament\'s leaderboard\n— typically brand-new accounts) at the tail, ordered by ``profile_id``.'))
 })
 
 /**

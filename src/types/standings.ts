@@ -28,8 +28,18 @@ export interface StandingsRow {
   country: string | null
   /** The player's team, or null if they aren't on one. */
   team: StandingsTeam | null
-  currentRating: number
-  maxRating: number
+  /**
+   * Player's current rating on the tournament leaderboard. `null` for
+   * roster members who haven't played a ranked match yet — the API
+   * surfaces them via a left join against `PlayerRating`, sorted to the
+   * tail of the standings.
+   */
+  currentRating: number | null
+  /**
+   * Highest rating reached on the tournament leaderboard. `null` for the
+   * same unrated-member reason as `currentRating`.
+   */
+  maxRating: number | null
   wins: number
   losses: number
   /** Current win/loss streak as reported by the upstream ladder. */
