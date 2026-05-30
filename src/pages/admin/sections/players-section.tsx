@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
+import { isHttpUrl } from "@/lib/url"
 
 /**
  * Manage the active tournament's player roster — add / remove by
@@ -252,7 +253,7 @@ function PresentationForm({
   // Disable save when any non-empty URL field doesn't parse — preserves
   // empty rows (used to add a slot) without false-flagging them.
   const hasInvalidUrl = form.streamUrls.some(
-    (url) => url.trim().length > 0 && !isValidStreamUrl(url)
+    (url) => url.trim().length > 0 && !isHttpUrl(url)
   )
 
   // A profile_id is optional (a placeholder can be edited without promoting),
@@ -266,7 +267,7 @@ function PresentationForm({
   // same guard as the stream links, since the player name's href comes
   // straight from it.
   const invalidProfileUrl =
-    form.profileUrl.trim().length > 0 && !isValidStreamUrl(form.profileUrl)
+    form.profileUrl.trim().length > 0 && !isHttpUrl(form.profileUrl)
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -365,7 +366,7 @@ function PresentationForm({
       <div className="flex flex-col gap-2">
         <Label>{t("admin.players.presentation.streamUrls")}</Label>
         {form.streamUrls.map((url, index) => {
-          const invalid = url.trim().length > 0 && !isValidStreamUrl(url)
+          const invalid = url.trim().length > 0 && !isHttpUrl(url)
           return (
             <div key={index} className="flex flex-col gap-1">
               <div className="flex gap-2">
@@ -543,22 +544,6 @@ function playerLookup(player: PlayerRead): string {
   return player.profile_id !== null
     ? player.profile_id.toString()
     : player.alias
-}
-
-/**
- * Lightweight URL guard for stream channel links. Requires `http(s)`
- * specifically — other protocols (`javascript:`, `data:`, etc.) are
- * rejected so a bag value can't smuggle in an XSS vector when rendered as
- * an anchor href later. The standings UI doesn't run the URL through any
- * parser before opening it.
- */
-function isValidStreamUrl(value: string): boolean {
-  try {
-    const url = new URL(value)
-    return url.protocol === "http:" || url.protocol === "https:"
-  } catch {
-    return false
-  }
 }
 
 function AddPlayerForm() {
