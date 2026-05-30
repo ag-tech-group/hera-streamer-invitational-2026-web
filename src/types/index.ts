@@ -12,3 +12,8 @@ export type {
   TeamStandingsRow,
   TeamStandingsSnapshot,
 } from "./teams"
+export type {
+  PlayerSeries,
+  ProgressionSnapshot,
+  RatingObservation,
+} from "./progression"

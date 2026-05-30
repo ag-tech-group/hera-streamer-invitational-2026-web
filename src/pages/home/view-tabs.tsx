@@ -7,10 +7,17 @@ import { cn } from "@/lib/utils"
 /** Which standings table the home page is showing. */
 export type StandingsView = "players" | "teams"
 
-/** The two views and the path-based routes that back them (#163). */
-const TABS: { view: StandingsView; to: "/" | "/teams" }[] = [
+/**
+ * The tab bar also points at the stats route (#164), which isn't a standings
+ * view — so its value type is the standings views plus "stats".
+ */
+type NavView = StandingsView | "stats"
+
+/** The three top-level views and the path-based routes that back them. */
+const TABS: { view: NavView; to: "/" | "/teams" | "/stats" }[] = [
   { view: "players", to: "/" },
   { view: "teams", to: "/teams" },
+  { view: "stats", to: "/stats" },
 ]
 
 /**
@@ -24,7 +31,7 @@ const TABS: { view: StandingsView; to: "/" | "/teams" }[] = [
  * the display face (#38) for the same broadcast caps treatment as the table
  * column headers.
  */
-export function ViewTabs({ value }: { value: StandingsView }) {
+export function ViewTabs({ value }: { value: NavView }) {
   const { t } = useTranslation()
   const analytics = useAnalytics()
   return (

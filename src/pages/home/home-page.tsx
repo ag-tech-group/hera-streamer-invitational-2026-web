@@ -1,12 +1,7 @@
 import { useCallback, useState } from "react"
-import { Trans, useTranslation } from "react-i18next"
 
-import { Countdown } from "@/components/countdown"
-import { HostLinksCard } from "@/components/host-links-card"
-import { LadderRaceActiveCard } from "@/components/ladder-race-active-card"
-import { PrizePoolCard } from "@/components/prize-pool-card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { activeTournament } from "@/config/tournaments"
+import { SidePanel } from "@/components/side-panel"
+import { TournamentHero } from "@/components/tournament-hero"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
@@ -32,7 +27,6 @@ import { ViewTabs, type StandingsView } from "@/pages/home/view-tabs"
 import type { StandingsSnapshot, TeamStandingsSnapshot } from "@/types"
 
 export function HomePage({ view }: { view: StandingsView }) {
-  const { t } = useTranslation()
   useDocumentTitle()
 
   const standings = useStandings()
@@ -43,23 +37,14 @@ export function HomePage({ view }: { view: StandingsView }) {
   // query so the visible table refetches without a manual reload.
   useLiveUpdates()
 
-  // Tournament metadata (start/end dates) for the hero countdown. The
-  // dates live in the DB and are served on `TournamentRead`; the countdown
-  // renders nothing until a date is set.
+  // Has the tournament started? Gates the Games + Recent columns — the API
+  // only populates them within the tournament's date window, so pre-start
+  // they're always zero / empty and showing them reads as dead chrome. (The
+  // left column's countdown→active-panel swap lives in `SidePanel` now.)
+  // Null start date counts as "not started"; `mountedAtMs` is captured once
+  // via `useState`'s lazy initializer so `Date.now()` stays out of the render
+  // pass (react-hooks/purity), and a manual reload re-evaluates it.
   const tournament = useTournament()
-
-  // Has the tournament started? Drives two things: it gates the Games +
-  // Recent columns (the API only populates them within the tournament's
-  // date window — pre-tournament they're always zero / empty, so showing
-  // them reads as dead chrome), and it flips the left column's start slot
-  // from the "Ladder Race Begins" countdown to the "Ladder Race Active"
-  // panel (#147). Null start date counts as "not started".
-  //
-  // `mountedAtMs` is captured once via `useState`'s lazy initializer so
-  // `Date.now()` lives outside the render pass (react-hooks/purity would
-  // flag a direct call). A manual reload is what flips the columns on
-  // when the tournament window opens — no ticking timer needed, the
-  // countdown right next to the table already signals when to refresh.
   const [mountedAtMs] = useState(() => Date.now())
   const tournamentStarted = tournament.data?.startDate
     ? new Date(tournament.data.startDate).getTime() <= mountedAtMs
@@ -88,36 +73,7 @@ export function HomePage({ view }: { view: StandingsView }) {
 
   return (
     <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
-      <header className="hero-divider flex flex-col gap-1 pb-4">
-        {/*
-         * The tournament name is the page headline. Drops `font-bold` because
-         * Bebas Neue ships only weight 400 — a synthetic 700 emboldens the
-         * glyphs badly. Skeleton while the name loads so the row doesn't jump;
-         * the generic "Live Standings" shows only if the metadata never lands.
-         */}
-        {tournament.isPending ? (
-          <Skeleton className="h-10 w-72 max-w-full" />
-        ) : (
-          <h1 className="font-display text-4xl tracking-wide">
-            {tournament.data?.name ?? t("home.title")}
-          </h1>
-        )}
-        <p className="text-muted-foreground text-sm">
-          <Trans
-            i18nKey="home.subtitle"
-            components={{
-              product: (
-                <a
-                  href="https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground underline underline-offset-2 transition-colors"
-                />
-              ),
-            }}
-          />
-        </p>
-      </header>
+      <TournamentHero />
 
       {/*
        * Two-column flex layout on xl+; stacks vertically on smaller
@@ -143,65 +99,7 @@ export function HomePage({ view }: { view: StandingsView }) {
        * compress to a cramped ~240px.
        */}
       <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
-        <div className="flex flex-col gap-6 xl:w-1/4 xl:shrink-0">
-          {/*
-           * Start slot: counts down to the race start, then — once it's
-           * underway — swaps to the "Ladder Race Active" info panel and
-           * stays there (the default post-end behavior in #147). The
-           * grand-finals countdown below keeps running and self-retires
-           * when its own target passes.
-           */}
-          {tournamentStarted ? (
-            <LadderRaceActiveCard />
-          ) : (
-            <Countdown
-              target={tournament.data?.startDate ?? null}
-              isLoading={tournament.isPending}
-              label={
-                <Trans
-                  i18nKey="home.ladderRace.begins"
-                  components={{
-                    accent: <span className="text-brand font-semibold" />,
-                  }}
-                />
-              }
-              variant="compact"
-            />
-          )}
-          <Countdown
-            target={tournament.data?.grandFinalsDate ?? null}
-            isLoading={tournament.isPending}
-            label={
-              <Trans
-                i18nKey="home.ladderRace.ends"
-                components={{
-                  // Red "team P2" accent — a go/stop colour contrast against
-                  // the brand-blue "Begins". Deliberately the team red, not
-                  // --destructive (which would read as an error).
-                  accent: <span className="text-team-p2 font-semibold" />,
-                }}
-              />
-            }
-            variant="compact"
-          />
-          {/*
-           * Prize pool slot (#156): between the countdowns and the host
-           * links. The card returns null when the API has no pool set, so
-           * pre-launch and tournaments without a published pool collapse
-           * cleanly.
-           */}
-          <PrizePoolCard
-            prizePoolCents={tournament.data?.prizePoolCents}
-            currency={activeTournament.prizeCurrency}
-            sponsor={activeTournament.prizeSponsor}
-            sponsorUrl={activeTournament.prizeSponsorUrl}
-            isLoading={tournament.isPending}
-          />
-          <HostLinksCard
-            label={activeTournament.hostLabel}
-            links={activeTournament.hostLinks}
-          />
-        </div>
+        <SidePanel />
 
         <div className="flex min-w-0 flex-1 flex-col gap-6">
           {/*
