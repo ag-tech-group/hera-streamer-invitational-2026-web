@@ -1,3 +1,5 @@
+import { Swords, TrendingUp, Trophy } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -157,16 +159,19 @@ function SummaryCards({ series }: { series: PlayerSeries[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       <StatCard
+        icon={TrendingUp}
         label={t("stats.cards.biggestClimber")}
         value={biggestClimber ? signed(biggestClimber.value) : "—"}
         player={biggestClimber?.alias ?? null}
       />
       <StatCard
+        icon={Trophy}
         label={t("stats.cards.highestPeak")}
         value={highestPeak ? String(highestPeak.value) : "—"}
         player={highestPeak?.alias ?? null}
       />
       <StatCard
+        icon={Swords}
         label={t("stats.cards.mostMatches")}
         value={mostMatches ? String(mostMatches.value) : "—"}
         player={mostMatches?.alias ?? null}
@@ -176,25 +181,40 @@ function SummaryCards({ series }: { series: PlayerSeries[] }) {
 }
 
 function StatCard({
+  icon: Icon,
   label,
   value,
   player,
 }: {
+  icon: LucideIcon
   label: string
   value: string
   player: string | null
 }) {
   return (
-    <div className="bg-card shadow-card flex flex-col gap-1 rounded-lg border p-4">
-      <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-        {label}
-      </p>
-      <p className="font-display text-3xl tracking-wide tabular-nums">
-        {value}
-      </p>
-      {player ? (
-        <p className="text-muted-foreground truncate text-sm">{player}</p>
-      ) : null}
+    <div className="bg-card shadow-card relative flex items-center gap-3.5 overflow-hidden rounded-lg border p-4">
+      {/* Brand accent rail down the left edge — mirrors the chart frame's top
+          stripe so the cards read as part of the same furniture. */}
+      <span
+        aria-hidden
+        className="bg-brand absolute inset-y-0 left-0 w-[3px]"
+      />
+      <span className="bg-brand/10 text-brand flex size-11 shrink-0 items-center justify-center rounded-lg">
+        <Icon className="size-5" aria-hidden />
+      </span>
+      <div className="flex min-w-0 flex-col">
+        <p className="text-muted-foreground text-[10px] font-medium tracking-widest uppercase">
+          {label}
+        </p>
+        <p className="font-display text-2xl leading-none tracking-wide tabular-nums">
+          {value}
+        </p>
+        {player ? (
+          <p className="text-muted-foreground mt-1 truncate text-xs">
+            {player}
+          </p>
+        ) : null}
+      </div>
     </div>
   )
 }
