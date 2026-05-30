@@ -273,21 +273,40 @@ describe("StandingsTable — rank-1 row spotlight", () => {
   })
 })
 
-describe("StandingsTable — alias link", () => {
-  it("links the alias to an aoe2insights search for that alias in a new tab", () => {
+describe("StandingsTable — player name link", () => {
+  it("links the name to the host-supplied profile URL in a new tab", () => {
     render(
       <StandingsTable
-        rows={[row({ profileId: 1819870, alias: "Alpha" })]}
+        rows={[
+          row({
+            profileId: 1819870,
+            alias: "Alpha",
+            presentation: {
+              profileUrl: "https://www.aoe2insights.com/user/12449433/",
+            },
+          }),
+        ]}
         tournamentStarted
       />
     )
     const link = screen.getByRole("link", { name: /alpha/i })
     expect(link).toHaveAttribute(
       "href",
-      "https://www.aoe2insights.com/search/?q=Alpha"
+      "https://www.aoe2insights.com/user/12449433/"
     )
     expect(link).toHaveAttribute("target", "_blank")
     expect(link).toHaveAttribute("rel", "noopener noreferrer")
+  })
+
+  it("renders the name as plain text when no profile URL is set", () => {
+    render(
+      <StandingsTable
+        rows={[row({ profileId: 1819870, alias: "Alpha", presentation: {} })]}
+        tournamentStarted
+      />
+    )
+    expect(screen.queryByRole("link", { name: /alpha/i })).toBeNull()
+    expect(screen.getByText("Alpha")).toBeInTheDocument()
   })
 })
 

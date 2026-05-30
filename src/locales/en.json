@@ -96,7 +96,7 @@
     "recentAriaLabel": "Recent results, most recent first: {{results}}",
     "win": "Win",
     "loss": "Loss",
-    "viewOnAoe2insights": "View {{alias}} on aoe2insights",
+    "viewProfile": "View {{name}}'s profile",
     "watchOn": {
       "twitch": "Watch on Twitch",
       "youtube": "Watch on YouTube",
@@ -183,6 +183,8 @@
         "invalidUrl": "Enter a valid http(s) URL",
         "bio": "Bio",
         "bioPlaceholder": "Short background shown to viewers — e.g. 2× champion, plays aggressive Scouts.",
+        "profileUrl": "Profile URL",
+        "profileUrlPlaceholder": "https://www.aoe2insights.com/user/12449433/",
         "cancel": "Cancel",
         "save": "Save",
         "saving": "Saving…",

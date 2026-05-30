@@ -15,7 +15,6 @@ import {
   type SortState,
 } from "@/hooks/use-table-sort"
 import {
-  aoe2insightsPlayerUrl,
   flagEmojiToCountryCode,
   formatRelativeTime,
   normalizeCountryCode,
@@ -174,8 +173,8 @@ export function StandingsTable({
                 country={row.country}
                 flagOverride={row.presentation.flag}
                 bio={row.presentation.bio}
+                profileUrl={row.presentation.profileUrl}
                 inMatch={row.inMatch}
-                linkable={row.profileId !== null}
               />
             </td>
             {/*
@@ -585,8 +584,8 @@ function PlayerCell({
   country,
   flagOverride,
   bio,
+  profileUrl,
   inMatch,
-  linkable,
 }: {
   alias: string
   displayName?: string
@@ -594,13 +593,14 @@ function PlayerCell({
   flagOverride?: string
   /** Host-authored bio from the presentation bag; shows an info affordance when set. */
   bio?: string
-  inMatch: boolean
   /**
-   * `false` for placeholder rows whose `profile_id` hasn't minted on the
-   * ladder yet — the aoe2insights search by alias would land on no result.
-   * Render the visible name as plain text in that case rather than a link.
+   * Host-curated profile link from the presentation bag (#131). When set the
+   * name links straight to it; when absent the name is plain text — we don't
+   * derive a link from the relic profile_id because it doesn't match
+   * aoe2insights' internal URL id.
    */
-  linkable: boolean
+  profileUrl?: string
+  inMatch: boolean
 }) {
   const { t } = useTranslation()
   const countryCode = normalizeCountryCode(country)
@@ -617,24 +617,23 @@ function PlayerCell({
   const renderOverrideAsText = Boolean(flagOverride && !overrideCode)
   const visibleName = displayName ?? alias
 
-  // The visible name: a link to the player's aoe2insights profile (polled
-  // rows) or plain text (placeholder rows, which have no ladder profile yet).
-  // On hover-capable devices this element doubles as the bio hover trigger,
-  // so it's built once and handed to `BioHint`.
-  const nameNode = linkable ? (
+  // The visible name links to the host-curated profile URL when set, otherwise
+  // it's plain text — a link always means a real profile (#131). On
+  // hover-capable devices this element doubles as the bio hover trigger, so
+  // it's built once and handed to `BioHint`.
+  const nameNode = profileUrl ? (
     <a
-      href={aoe2insightsPlayerUrl(alias)}
+      href={profileUrl}
       target="_blank"
       rel="noopener noreferrer"
-      title={t("standings.viewOnAoe2insights", { alias })}
+      title={t("standings.viewProfile", { name: visibleName })}
       className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
     >
       {visibleName}
     </a>
   ) : (
-    // Placeholder row: no ladder profile to link to. Keep the same weight +
-    // nowrap so the column rhythm doesn't shift, but drop the brand colour so
-    // the row reads as non-interactive.
+    // No profile URL set: keep the same weight + nowrap so the column rhythm
+    // doesn't shift, but drop the brand colour so the name reads as plain text.
     <span className="font-medium whitespace-nowrap">{visibleName}</span>
   )
 

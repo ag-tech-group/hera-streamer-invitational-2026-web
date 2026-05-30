@@ -3,6 +3,7 @@ import type {
   StandingRow,
   StandingRowPresentation,
 } from "@/api/generated/types"
+import { isHttpUrl } from "@/lib/url"
 import type {
   PlayerPresentation,
   StandingsRow,
@@ -64,11 +65,18 @@ function toPlayerPresentation(
   if (typeof bag.displayName === "string") out.displayName = bag.displayName
   if (typeof bag.flag === "string") out.flag = bag.flag
   if (Array.isArray(bag.streamUrls)) {
+    // Scheme-filter, not just type-filter: these render straight into anchor
+    // hrefs, so a non-http(s) value (e.g. `javascript:`) would be an XSS sink.
     out.streamUrls = bag.streamUrls.filter(
-      (u): u is string => typeof u === "string"
+      (u): u is string => typeof u === "string" && isHttpUrl(u)
     )
   }
   if (typeof bag.bio === "string") out.bio = bag.bio
+  // Drop a non-http(s) profileUrl here so the name link can never become a
+  // `javascript:` href — the API stores the bag opaquely and never validates.
+  if (typeof bag.profileUrl === "string" && isHttpUrl(bag.profileUrl)) {
+    out.profileUrl = bag.profileUrl
+  }
   return out
 }
 

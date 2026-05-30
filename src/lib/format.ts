@@ -70,20 +70,6 @@ export function formatRelativeTime(
 }
 
 /**
- * Builds an aoe2insights search URL for a player by alias.
- *
- * We can't deep-link to `/user/<id>` because aoe2insights uses an internal
- * numeric ID for its URLs that does not match the relic profile_id our API
- * surfaces (the two happen to coincide for most accounts, but diverge for
- * some — typically Microsoft Store vs Steam accounts). Searching by alias
- * sidesteps the ID mismatch and lands on a one-result page for unambiguous
- * aliases.
- */
-export function aoe2insightsPlayerUrl(alias: string): string {
-  return `https://www.aoe2insights.com/search/?q=${encodeURIComponent(alias)}`
-}
-
-/**
  * Formats an ISO-8601 timestamp as a human "time ago" phrase with
  * second-level granularity — `"just now"`, `"8s ago"`, `"3m ago"`,
  * `"2h ago"`, `"5d ago"`. Future timestamps (clock skew) collapse to
