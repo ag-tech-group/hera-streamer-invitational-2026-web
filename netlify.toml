@@ -1,6 +1,22 @@
 [[headers]]
   for = "/*"
   [headers.values]
+    # Content-Security-Policy. Locked down by default — `default-src 'self'`,
+    # `object-src`/`frame-src 'none'`, `base-uri`/`form-action 'self'`, and a
+    # `connect-src` scoped to the criticalbit API (REST + the SSE stream),
+    # Sentry, and PostHog. Three relaxations are deliberate and reviewed in the
+    # #64 pre-launch security audit:
+    #   - script-src 'unsafe-inline': required by the pre-paint theme IIFE in
+    #     index.html (sets the theme class before first paint to avoid a flash
+    #     of the wrong theme) and PostHog's runtime. The SPA has no
+    #     user-controlled HTML-injection surface, so the residual XSS exposure
+    #     is low. Dropping it means hashing the inline script via a build step
+    #     and re-verifying PostHog — a scoped follow-up, not a launch blocker.
+    #   - style-src 'unsafe-inline': React inline styles, Tailwind, and Radix
+    #     all emit inline styles; unavoidable without a style-nonce pipeline.
+    #   - img-src https:: user avatars resolve to arbitrary federated-identity
+    #     CDNs via the auth API and render only on the authenticated admin
+    #     surface. Images can't execute, so the wildcard is low-risk.
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.criticalbit.gg https://*.ingest.us.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com; worker-src 'self' blob:; img-src 'self' data: https:; object-src 'none'; frame-src 'none'; form-action 'self'; upgrade-insecure-requests; base-uri 'self'"
     # Strict-Transport-Security: explicit 1-year `max-age` plus
     # `includeSubDomains` (so the same HSTS guarantee covers any

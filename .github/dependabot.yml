@@ -1,0 +1,25 @@
+# Keep dependencies patched on a steady cadence (#64, pre-launch security
+# audit). Dependabot reads pnpm-lock.yaml under the `npm` ecosystem. Minor and
+# patch bumps are grouped to cut PR noise; majors open individually so breaking
+# changes get their own review. CI (lint + tests + build with the bundle-size
+# check) gates every Dependabot PR like any other.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      production:
+        applies-to: version-updates
+        dependency-type: "production"
+        update-types: ["minor", "patch"]
+      development:
+        applies-to: version-updates
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
