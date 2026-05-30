@@ -6,6 +6,7 @@ import { toast } from "sonner"
 
 import { NotFound } from "@/components/not-found"
 import { activeTournament } from "@/config/tournaments"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuth } from "@/lib/auth"
 import { loginUrl } from "@/lib/auth-config"
 import i18n from "@/lib/i18n"
@@ -35,6 +36,8 @@ import { TournamentDetailsSection } from "@/pages/admin/sections/tournament-deta
  * admin route having mysteriously disappeared.
  */
 export function AdminPage() {
+  const { t } = useTranslation()
+  useDocumentTitle(t("admin.title"))
   const { isAdmin, isLoading } = useAuth()
   const navigate = useNavigate()
   const wasAdminRef = useRef(false)

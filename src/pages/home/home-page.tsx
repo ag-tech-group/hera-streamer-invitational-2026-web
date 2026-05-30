@@ -6,6 +6,7 @@ import { HostLinksCard } from "@/components/host-links-card"
 import { LadderRaceActiveCard } from "@/components/ladder-race-active-card"
 import { PrizePoolCard } from "@/components/prize-pool-card"
 import { activeTournament } from "@/config/tournaments"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
@@ -31,6 +32,7 @@ import type { StandingsSnapshot, TeamStandingsSnapshot } from "@/types"
 
 export function HomePage() {
   const { t } = useTranslation()
+  useDocumentTitle()
   const [view, setView] = useState<StandingsView>("players")
 
   const standings = useStandings()
