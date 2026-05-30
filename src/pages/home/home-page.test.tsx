@@ -188,7 +188,19 @@ describe("HomePage", () => {
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
-    await user.click(screen.getByRole("button", { name: "Teams" }))
+    await user.click(screen.getByRole("link", { name: "Teams" }))
+
+    expect(await screen.findByText("Team One")).toBeInTheDocument()
+  })
+
+  it("deep-links straight to the Teams view at /teams", async () => {
+    server.use(
+      standingsHandler(standings),
+      teamsHandler(teamStandings),
+      tournamentHandler(tournament)
+    )
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/teams" })
 
     expect(await screen.findByText("Team One")).toBeInTheDocument()
   })

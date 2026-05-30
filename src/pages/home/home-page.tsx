@@ -31,10 +31,9 @@ import { TeamsView, TeamsViewSkeleton } from "@/pages/home/teams-view"
 import { ViewTabs, type StandingsView } from "@/pages/home/view-tabs"
 import type { StandingsSnapshot, TeamStandingsSnapshot } from "@/types"
 
-export function HomePage() {
+export function HomePage({ view }: { view: StandingsView }) {
   const { t } = useTranslation()
   useDocumentTitle()
-  const [view, setView] = useState<StandingsView>("players")
 
   const standings = useStandings()
   // The team standings load lazily — only once the Teams view is opened.
@@ -67,16 +66,6 @@ export function HomePage() {
     : false
 
   const analytics = useAnalytics()
-
-  // Track view-tab switches so we can see which standings (Players vs Teams)
-  // is the dominant view in production.
-  const handleViewChange = useCallback(
-    (next: StandingsView) => {
-      analytics.track("view.changed", { from: view, to: next })
-      setView(next)
-    },
-    [analytics, view]
-  )
 
   // Track retry-button clicks separately per view — a spike in retries on
   // either side is an early signal the relevant API path is unhealthy.
@@ -222,7 +211,7 @@ export function HomePage() {
            * `ml-auto` keeps the badge on the right regardless of wrap.
            */}
           <div className="flex flex-wrap items-center gap-3">
-            <ViewTabs value={view} onChange={handleViewChange} />
+            <ViewTabs value={view} />
             <div className="ml-auto">
               {activeData ? (
                 <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
