@@ -79,7 +79,7 @@ function PlayersList({
   return (
     <ul className="flex flex-col gap-2">
       {players.map((player) => (
-        <PlayerRow key={player.profile_id} player={player} />
+        <PlayerRow key={playerLookup(player)} player={player} />
       ))}
     </ul>
   )
