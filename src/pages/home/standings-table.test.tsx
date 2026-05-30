@@ -24,6 +24,8 @@ function row(
     inMatch: false,
     lastMatchAt: null,
     updatedAt: "2026-05-21T00:00:00Z",
+    presentation: {},
+    streamLive: false,
     ...overrides,
   }
 }

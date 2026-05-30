@@ -69,7 +69,8 @@
       "streak": "Streak",
       "games": "Games",
       "recent": "Recent",
-      "activity": "Activity"
+      "activity": "Activity",
+      "watch": "Watch"
     },
     "live": "Live",
     "liveAriaLabel": "In a live match",
@@ -78,7 +79,13 @@
     "recentAriaLabel": "Recent results, most recent first: {{results}}",
     "win": "Win",
     "loss": "Loss",
-    "viewOnAoe2insights": "View {{alias}} on aoe2insights"
+    "viewOnAoe2insights": "View {{alias}} on aoe2insights",
+    "watchOn": {
+      "twitch": "Watch on Twitch",
+      "youtube": "Watch on YouTube",
+      "other": "Watch stream"
+    },
+    "streamingLive": "Streaming live"
   },
   "teams": {
     "average": "avg",
