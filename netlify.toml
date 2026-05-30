@@ -49,6 +49,63 @@
   to = "/assets/:splat"
   status = 200
 
+# `public/fonts/*` is copied to `dist/fonts/*` by Vite and referenced from
+# `index.css` (e.g. the Bebas Neue `@font-face`). The URL gets the base
+# prefix; the file doesn't. Without this rule a font request falls through
+# to the SPA fallback and the browser tries to parse `<!DOCTYPE html…` as a
+# font header — observed as "OTS parsing error: invalid sfntVersion".
+[[redirects]]
+  from = "/kings-gauntlet/fonts/*"
+  to = "/fonts/:splat"
+  status = 200
+
+# `public/textures/*` is the home for the dark/light noise SVGs the page
+# overlay uses. Same prefix-vs-physical asymmetry as fonts above.
+[[redirects]]
+  from = "/kings-gauntlet/textures/*"
+  to = "/textures/:splat"
+  status = 200
+
+# Root-level files in `public/` (favicons, app icon, logo, plain-text
+# files) are referenced from the built HTML under the base prefix but live
+# at the deploy root. Enumerated rather than glob-matched because a broader
+# `/kings-gauntlet/*.png`-style pattern would shadow the SPA fallback below
+# for any route name that happens to end in an extension.
+[[redirects]]
+  from = "/kings-gauntlet/favicon.ico"
+  to = "/favicon.ico"
+  status = 200
+
+[[redirects]]
+  from = "/kings-gauntlet/favicon-16x16.png"
+  to = "/favicon-16x16.png"
+  status = 200
+
+[[redirects]]
+  from = "/kings-gauntlet/favicon-32x32.png"
+  to = "/favicon-32x32.png"
+  status = 200
+
+[[redirects]]
+  from = "/kings-gauntlet/apple-touch-icon.png"
+  to = "/apple-touch-icon.png"
+  status = 200
+
+[[redirects]]
+  from = "/kings-gauntlet/logo.png"
+  to = "/logo.png"
+  status = 200
+
+[[redirects]]
+  from = "/kings-gauntlet/robots.txt"
+  to = "/robots.txt"
+  status = 200
+
+[[redirects]]
+  from = "/kings-gauntlet/llms.txt"
+  to = "/llms.txt"
+  status = 200
+
 [[redirects]]
   from = "/kings-gauntlet/*"
   to = "/index.html"

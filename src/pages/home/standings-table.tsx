@@ -16,6 +16,7 @@ import {
 } from "@/hooks/use-table-sort"
 import {
   aoe2insightsPlayerUrl,
+  flagEmojiToCountryCode,
   formatRelativeTime,
   normalizeCountryCode,
 } from "@/lib/format"
@@ -571,22 +572,33 @@ function PlayerCell({
 }) {
   const { t } = useTranslation()
   const countryCode = normalizeCountryCode(country)
+  // Country flag emojis don't render as glyphs on Windows (no font for the
+  // regional-indicator range), so route a standard `presentation.flag` back
+  // through the `flag-icons` SVG pipeline when it decomposes to an ISO
+  // code. Non-standard flag emojis (rainbow, pirate, tag sequences, …)
+  // fail decomposition and fall through to text rendering, which still
+  // looks correct everywhere modern Windows ships glyphs for them.
+  const overrideCode = flagOverride
+    ? flagEmojiToCountryCode(flagOverride)
+    : null
+  const effectiveFlagCode = overrideCode ?? countryCode
+  const renderOverrideAsText = Boolean(flagOverride && !overrideCode)
   const visibleName = displayName ?? alias
   return (
     <span className="flex items-center gap-2">
-      {flagOverride ? (
+      {effectiveFlagCode ? (
+        <span
+          className={`fi fi-${effectiveFlagCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
+          title={effectiveFlagCode.toUpperCase()}
+          aria-hidden
+        />
+      ) : renderOverrideAsText ? (
         <span
           className="shrink-0 text-base leading-none"
           aria-label={visibleName}
         >
           {flagOverride}
         </span>
-      ) : countryCode ? (
-        <span
-          className={`fi fi-${countryCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
-          title={countryCode.toUpperCase()}
-          aria-hidden
-        />
       ) : (
         <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
       )}
