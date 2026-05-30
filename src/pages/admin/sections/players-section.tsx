@@ -16,6 +16,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
 
@@ -298,9 +299,9 @@ function PromoteForm({
  * Inline editor for one roster member's `presentation` bag (#152). The API
  * treats the bag as opaque and replaces it wholesale on PATCH, so this form
  * does a **read-modify-write**: spread the existing object, overlay the
- * managed keys (`displayName`, `flag`, `streamUrls`), and write back. Any
- * other keys the bag carries (e.g. a future `bio`) survive untouched, so a
- * later editor extension can land without coordinating with this one.
+ * managed keys (`displayName`, `flag`, `streamUrls`, `bio`), and write back.
+ * Any *other* keys the bag carries survive untouched, so a later editor
+ * extension can land without coordinating with this one.
  *
  * URLs are validated client-side — the API dropped server-side URL checks
  * — but only enough to block obvious garbage (must parse as http/https URL).
@@ -476,6 +477,22 @@ function PresentationForm({
           {t("admin.players.presentation.addStreamUrl")}
         </Button>
       </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={`presentation-bio-${lookup}`}>
+          {t("admin.players.presentation.bio")}
+        </Label>
+        <Textarea
+          id={`presentation-bio-${lookup}`}
+          value={form.bio}
+          onChange={(event) => setForm({ ...form, bio: event.target.value })}
+          placeholder={t("admin.players.presentation.bioPlaceholder")}
+          rows={3}
+          // The whole presentation bag is capped at 8 KB on the API; 500
+          // chars keeps the blurb broadcast-length with ample room left for
+          // the name / flag / stream fields alongside it.
+          maxLength={500}
+        />
+      </div>
       <div className="flex items-center justify-end gap-2">
         <Button type="button" variant="outline" onClick={onDone}>
           {t("admin.players.presentation.cancel")}
@@ -494,6 +511,7 @@ interface PresentationFormState {
   displayName: string
   flag: string
   streamUrls: string[]
+  bio: string
 }
 
 function toPresentationFormState(
@@ -510,6 +528,7 @@ function toPresentationFormState(
           (u): u is string => typeof u === "string"
         )
       : [],
+    bio: typeof presentation.bio === "string" ? presentation.bio : "",
   }
 }
 
@@ -536,6 +555,9 @@ function toPresentationUpdate(
     .filter((u): u is string => u.length > 0)
   if (streamUrls.length > 0) updated.streamUrls = streamUrls
   else delete updated.streamUrls
+  const bio = form.bio.trim()
+  if (bio) updated.bio = bio
+  else delete updated.bio
   return updated
 }
 

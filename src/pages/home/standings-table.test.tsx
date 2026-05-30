@@ -364,3 +364,30 @@ describe("StandingsTable — country flag", () => {
     expect(container.querySelector(".fi")).not.toBeInTheDocument()
   })
 })
+
+describe("StandingsTable — player bio", () => {
+  it("renders the bio affordance only for players with a bio in the bag", () => {
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            presentation: { bio: "Two-time champion." },
+          }),
+          row({ profileId: 2, alias: "Bravo" }),
+        ]}
+        tournamentStarted
+      />
+    )
+    // In jsdom `(hover: hover)` is false, so BioHint renders its touch
+    // affordance — an info button labelled "About {name}" beside the name.
+    // Present for Alpha, absent for Bravo (empty presentation bag).
+    expect(
+      screen.getByRole("button", { name: "About Alpha" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "About Bravo" })
+    ).not.toBeInTheDocument()
+  })
+})

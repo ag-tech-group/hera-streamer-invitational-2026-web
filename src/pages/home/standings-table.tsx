@@ -22,6 +22,7 @@ import {
 } from "@/lib/format"
 import { teamColorSlot } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
+import { BioHint } from "@/pages/home/bio-hint"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
 import type { MatchResult, StandingsRow, StandingsTeam } from "@/types"
 
@@ -172,6 +173,7 @@ export function StandingsTable({
                 displayName={row.presentation.displayName}
                 country={row.country}
                 flagOverride={row.presentation.flag}
+                bio={row.presentation.bio}
                 inMatch={row.inMatch}
                 linkable={row.profileId !== null}
               />
@@ -582,6 +584,7 @@ function PlayerCell({
   displayName,
   country,
   flagOverride,
+  bio,
   inMatch,
   linkable,
 }: {
@@ -589,6 +592,8 @@ function PlayerCell({
   displayName?: string
   country: string | null
   flagOverride?: string
+  /** Host-authored bio from the presentation bag; shows an info affordance when set. */
+  bio?: string
   inMatch: boolean
   /**
    * `false` for placeholder rows whose `profile_id` hasn't minted on the
@@ -611,6 +616,28 @@ function PlayerCell({
   const effectiveFlagCode = overrideCode ?? countryCode
   const renderOverrideAsText = Boolean(flagOverride && !overrideCode)
   const visibleName = displayName ?? alias
+
+  // The visible name: a link to the player's aoe2insights profile (polled
+  // rows) or plain text (placeholder rows, which have no ladder profile yet).
+  // On hover-capable devices this element doubles as the bio hover trigger,
+  // so it's built once and handed to `BioHint`.
+  const nameNode = linkable ? (
+    <a
+      href={aoe2insightsPlayerUrl(alias)}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={t("standings.viewOnAoe2insights", { alias })}
+      className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
+    >
+      {visibleName}
+    </a>
+  ) : (
+    // Placeholder row: no ladder profile to link to. Keep the same weight +
+    // nowrap so the column rhythm doesn't shift, but drop the brand colour so
+    // the row reads as non-interactive.
+    <span className="font-medium whitespace-nowrap">{visibleName}</span>
+  )
+
   return (
     <span className="flex items-center gap-2">
       {effectiveFlagCode ? (
@@ -629,21 +656,17 @@ function PlayerCell({
       ) : (
         <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
       )}
-      {linkable ? (
-        <a
-          href={aoe2insightsPlayerUrl(alias)}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={t("standings.viewOnAoe2insights", { alias })}
-          className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
-        >
-          {visibleName}
-        </a>
+      {/*
+       * With a bio set, the name becomes the disclosure: hover it on desktop,
+       * or tap the info icon `BioHint` adds beside it on touch. No bio → the
+       * name renders bare.
+       */}
+      {bio ? (
+        <BioHint bio={bio} name={visibleName}>
+          {nameNode}
+        </BioHint>
       ) : (
-        // Placeholder row: no ladder profile to link to. Keep the same
-        // weight + nowrap so the column rhythm doesn't shift, but drop
-        // the brand colour so the row reads as non-interactive.
-        <span className="font-medium whitespace-nowrap">{visibleName}</span>
+        nameNode
       )}
       {inMatch && <LiveBadge />}
     </span>
