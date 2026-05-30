@@ -20,6 +20,39 @@ export function normalizeCountryCode(country: string | null): string | null {
 }
 
 /**
+ * Converts a country flag emoji to its lowercase ISO 3166-1 alpha-2 code,
+ * or `null` for any emoji that isn't a standard two-regional-indicator
+ * country flag (rainbow, pirate, England's tag sequence, etc.).
+ *
+ * Country flag emojis are deterministic: each is two regional-indicator
+ * symbol letters in the codepoint range U+1F1E6..U+1F1FF, mapping directly
+ * to A-Z. So `"🇺🇸"` → `[U, S]` → `"us"`.
+ *
+ * Why this exists: Windows ships no glyphs for the regional-indicator
+ * range, so rendering a country flag emoji directly on Windows shows the
+ * underlying letters (e.g. "US") instead of a flag image. Routing the
+ * extracted code through the existing `flag-icons` SVG pipeline gives a
+ * cross-platform flag for the (very common) case where the bag's flag
+ * value happens to be a standard country emoji.
+ */
+export function flagEmojiToCountryCode(flag: string): string | null {
+  const REGIONAL_A = 0x1f1e6
+  const REGIONAL_Z = 0x1f1ff
+  const points: number[] = []
+  for (const ch of flag) {
+    const cp = ch.codePointAt(0)
+    if (cp === undefined) return null
+    points.push(cp)
+  }
+  if (points.length !== 2) return null
+  if (points.some((cp) => cp < REGIONAL_A || cp > REGIONAL_Z)) return null
+  return points
+    .map((cp) => String.fromCharCode(0x41 + (cp - REGIONAL_A)))
+    .join("")
+    .toLowerCase()
+}
+
+/**
  * Formats an ISO-8601 timestamp as a short "time ago" string relative to
  * `now` — e.g. `"5m"`, `"3h"`, `"12d"`. Sub-minute and future timestamps both
  * collapse to `"now"`. Used for the recency of a player's last match.
