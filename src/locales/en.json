@@ -144,19 +144,7 @@
       "removeSuccess": "Player removed.",
       "noPlayers": "No players yet.",
       "loadError": "Couldn't load roster.",
-      "editAria": "Edit display overrides for {{name}}",
-      "placeholder": "Placeholder",
-      "placeholderBadgeTitle": "No polled AoE2 profile yet — promote them once they play a ranked match.",
-      "promoteAria": "Promote {{name}} to a polled player",
-      "promote": {
-        "title": "Promote to player",
-        "profileIdLabel": "Player's aoe2 profile ID",
-        "profileIdPlaceholder": "aoe2 profile_id",
-        "cancel": "Cancel",
-        "confirm": "Promote",
-        "confirming": "Promoting…",
-        "successToast": "Promoted to polled player."
-      },
+      "editAria": "Edit {{name}}",
       "addPlaceholderLabel": "Add placeholder",
       "addPlaceholderPlaceholder": "Host-given display name",
       "addPlaceholderAction": "Add placeholder",
@@ -165,6 +153,8 @@
       "addPlaceholderHint": "Use for streamers without a ranked AoE2 profile yet — promote them once they play their first ranked match.",
       "presentation": {
         "title": "Display overrides",
+        "profileId": "Profile ID",
+        "profileIdPlaceholder": "e.g. 1819870",
         "displayName": "Display name",
         "displayNamePlaceholder": "Streamer handle (e.g. uThermal)",
         "flag": "Flag",
@@ -179,7 +169,7 @@
         "cancel": "Cancel",
         "save": "Save",
         "saving": "Saving…",
-        "saveSuccess": "Display overrides updated."
+        "saveSuccess": "Player updated."
       },
       "profileHint": "Find a player's <code>profile_id</code> in their <link>aoe2insights</link> URL — e.g. <code>aoe2insights.com/user/1819870</code> → <code>1819870</code>."
     },

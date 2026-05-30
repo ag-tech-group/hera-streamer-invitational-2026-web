@@ -144,19 +144,7 @@
       "removeSuccess": "Jugador quitado.",
       "noPlayers": "Aún no hay jugadores.",
       "loadError": "No se pudo cargar el plantel.",
-      "editAria": "Editar sobrescrituras de visualización para {{name}}",
-      "placeholder": "Reservado",
-      "placeholderBadgeTitle": "Aún sin perfil de AoE2 clasificado — promueve cuando juegue su primera partida clasificatoria.",
-      "promoteAria": "Promover a {{name}} a jugador con perfil",
-      "promote": {
-        "title": "Promover a jugador",
-        "profileIdLabel": "profile_id de aoe2 del jugador",
-        "profileIdPlaceholder": "profile_id de aoe2",
-        "cancel": "Cancelar",
-        "confirm": "Promover",
-        "confirming": "Promoviendo…",
-        "successToast": "Promovido a jugador."
-      },
+      "editAria": "Editar a {{name}}",
       "addPlaceholderLabel": "Añadir reservado",
       "addPlaceholderPlaceholder": "Nombre visible asignado por el host",
       "addPlaceholderAction": "Añadir reservado",
@@ -165,6 +153,8 @@
       "addPlaceholderHint": "Úsalo para streamers sin un perfil clasificado de AoE2 aún — promuévelos cuando jueguen su primera partida clasificatoria.",
       "presentation": {
         "title": "Sobrescrituras de visualización",
+        "profileId": "ID de perfil",
+        "profileIdPlaceholder": "p. ej. 1819870",
         "displayName": "Nombre visible",
         "displayNamePlaceholder": "Apodo del streamer (p. ej. uThermal)",
         "flag": "Bandera",
@@ -179,7 +169,7 @@
         "cancel": "Cancelar",
         "save": "Guardar",
         "saving": "Guardando…",
-        "saveSuccess": "Sobrescrituras actualizadas."
+        "saveSuccess": "Jugador actualizado."
       },
       "profileHint": "Encuentra el <code>profile_id</code> del jugador en su URL de <link>aoe2insights</link> — p. ej. <code>aoe2insights.com/user/1819870</code> → <code>1819870</code>."
     },

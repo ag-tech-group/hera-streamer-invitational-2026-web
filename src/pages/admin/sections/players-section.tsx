@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { Pencil, Plus, Trash2, UserCheck, X } from "lucide-react"
+import { Pencil, Plus, Trash2, X } from "lucide-react"
 import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -91,7 +91,6 @@ function PlayerRow({ player }: { player: PlayerRead }) {
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [editing, setEditing] = useState(false)
-  const [promoting, setPromoting] = useState(false)
   const isPlaceholder = player.profile_id === null
 
   const mutation =
@@ -118,17 +117,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
     <li className="bg-muted/30 flex flex-col gap-3 rounded-md px-3 py-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">{player.alias}</span>
-            {isPlaceholder && (
-              <span
-                className="bg-muted-foreground/15 text-muted-foreground rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wider uppercase"
-                title={t("admin.players.placeholderBadgeTitle")}
-              >
-                {t("admin.players.placeholder")}
-              </span>
-            )}
-          </div>
+          <span className="text-sm font-medium">{player.alias}</span>
           {!isPlaceholder && (
             <span className="text-muted-foreground font-mono text-xs">
               profile_id {player.profile_id}
@@ -137,20 +126,6 @@ function PlayerRow({ player }: { player: PlayerRead }) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {isPlaceholder && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setPromoting((open) => !open)}
-              aria-label={t("admin.players.promoteAria", {
-                name: player.alias,
-              })}
-              aria-expanded={promoting}
-            >
-              <UserCheck className="size-4" aria-hidden />
-            </Button>
-          )}
           <Button
             type="button"
             variant="outline"
@@ -192,106 +167,14 @@ function PlayerRow({ player }: { player: PlayerRead }) {
         <PresentationForm
           lookup={playerLookup(player)}
           alias={player.alias}
+          profileId={player.profile_id}
           presentation={
             (player.presentation as Record<string, unknown> | undefined) ?? {}
           }
           onDone={() => setEditing(false)}
         />
       )}
-      {promoting && (
-        <PromoteForm alias={player.alias} onDone={() => setPromoting(false)} />
-      )}
     </li>
-  )
-}
-
-/**
- * Inline promote form for a placeholder row (#185). Atomic transition
- * via `PATCH /v1/tournaments/{slug}/players/{name}` with `{ profile_id }`
- * — the placeholder's name clears, the polled `profile_id` sets, and the
- * row's `presentation` carries through unchanged. Re-uses the same
- * `useUpdate…LookupPatch` hook the presentation editor uses, so promote
- * and presentation edits share idempotency / mutation surface.
- */
-function PromoteForm({
-  alias,
-  onDone,
-}: {
-  /** The placeholder's host-given name, used as the lookup in the URL. */
-  alias: string
-  onDone: () => void
-}) {
-  const { t } = useTranslation()
-  const queryClient = useQueryClient()
-  const idempotencyKey = useIdempotencyKey()
-  const [profileId, setProfileId] = useState("")
-
-  const mutation =
-    useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatch({
-      request: {
-        headers: { "Idempotency-Key": idempotencyKey.current },
-      },
-      mutation: {
-        onSuccess: () => {
-          idempotencyKey.reset()
-          void queryClient.invalidateQueries({
-            queryKey:
-              getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
-                activeTournament.apiTournamentSlug
-              ),
-          })
-          toast.success(t("admin.players.promote.successToast"))
-          onDone()
-        },
-        onError: idempotencyKey.resetOnReusedKey,
-      },
-    })
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    mutation.mutate({
-      tournamentSlug: activeTournament.apiTournamentSlug,
-      lookup: alias,
-      data: { profile_id: Number(profileId) },
-    })
-  }
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="border-border/60 flex flex-col gap-3 border-t pt-3"
-    >
-      <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-        {t("admin.players.promote.title")}
-      </p>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={`promote-profile-id-${alias}`}>
-          {t("admin.players.promote.profileIdLabel")}
-        </Label>
-        <Input
-          id={`promote-profile-id-${alias}`}
-          type="number"
-          inputMode="numeric"
-          value={profileId}
-          onChange={(event) => setProfileId(event.target.value)}
-          placeholder={t("admin.players.promote.profileIdPlaceholder")}
-          min={1}
-          required
-          autoFocus
-        />
-      </div>
-      <ProfileIdHint />
-      <div className="flex items-center justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onDone}>
-          {t("admin.players.promote.cancel")}
-        </Button>
-        <Button type="submit" disabled={mutation.isPending || !profileId}>
-          {mutation.isPending
-            ? t("admin.players.promote.confirming")
-            : t("admin.players.promote.confirm")}
-        </Button>
-      </div>
-    </form>
   )
 }
 
@@ -311,6 +194,7 @@ function PromoteForm({
 function PresentationForm({
   lookup,
   alias,
+  profileId,
   presentation,
   onDone,
 }: {
@@ -321,14 +205,27 @@ function PresentationForm({
    */
   lookup: string
   alias: string
+  /**
+   * The row's polled identity, or `null` for a placeholder. When null the
+   * form surfaces an editable Profile ID field — filling it promotes the
+   * placeholder in the same PATCH. A polled row's identity is immutable, so
+   * the field is omitted there.
+   */
+  profileId: number | null
   presentation: Record<string, unknown>
   onDone: () => void
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
+  const isPlaceholder = profileId === null
   const [form, setForm] = useState<PresentationFormState>(() =>
     toPresentationFormState(presentation)
+  )
+  // Promotion is just another edit field: a placeholder's Profile ID starts
+  // empty and, once filled, rides the same PATCH that saves the overrides.
+  const [profileIdInput, setProfileIdInput] = useState(
+    profileId !== null ? String(profileId) : ""
   )
 
   const mutation =
@@ -358,12 +255,26 @@ function PresentationForm({
     (url) => url.trim().length > 0 && !isValidStreamUrl(url)
   )
 
+  // A profile_id is optional (a placeholder can be edited without promoting),
+  // but once one is typed it must be a positive integer before save is allowed.
+  const promotedId = Number(profileIdInput)
+  const wantsPromote = isPlaceholder && profileIdInput.trim().length > 0
+  const invalidProfileId =
+    wantsPromote && !(Number.isInteger(promotedId) && promotedId > 0)
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     mutation.mutate({
       tournamentSlug: activeTournament.apiTournamentSlug,
       lookup,
-      data: { presentation: toPresentationUpdate(presentation, form) },
+      data: {
+        presentation: toPresentationUpdate(presentation, form),
+        // Only a placeholder promotes; the API rejects changing a polled
+        // row's profile_id, so it's never sent for one.
+        ...(wantsPromote && !invalidProfileId
+          ? { profile_id: promotedId }
+          : {}),
+      },
     })
   }
 
@@ -390,6 +301,24 @@ function PresentationForm({
       onSubmit={handleSubmit}
       className="border-border/60 flex flex-col gap-3 border-t pt-3"
     >
+      {isPlaceholder && (
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor={`presentation-profile-id-${lookup}`}>
+            {t("admin.players.presentation.profileId")}
+          </Label>
+          <Input
+            id={`presentation-profile-id-${lookup}`}
+            type="number"
+            inputMode="numeric"
+            value={profileIdInput}
+            onChange={(event) => setProfileIdInput(event.target.value)}
+            placeholder={t("admin.players.presentation.profileIdPlaceholder")}
+            min={1}
+            aria-invalid={invalidProfileId}
+          />
+          <ProfileIdHint />
+        </div>
+      )}
       <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
         {t("admin.players.presentation.title")}
       </p>
@@ -497,7 +426,10 @@ function PresentationForm({
         <Button type="button" variant="outline" onClick={onDone}>
           {t("admin.players.presentation.cancel")}
         </Button>
-        <Button type="submit" disabled={mutation.isPending || hasInvalidUrl}>
+        <Button
+          type="submit"
+          disabled={mutation.isPending || hasInvalidUrl || invalidProfileId}
+        >
           {mutation.isPending
             ? t("admin.players.presentation.saving")
             : t("admin.players.presentation.save")}
@@ -657,7 +589,8 @@ function AddPlayerForm() {
  * form uses; the API distinguishes by which key is populated in the body
  * (`profile_id` vs `name`, XOR — 422 if both or neither, 422 if the name
  * parses as an integer). The trimmed name is the row's lookup key for
- * the lifetime of the placeholder, until promoted via `PromoteForm`.
+ * the lifetime of the placeholder, until it's promoted by setting a profile
+ * ID in its edit form.
  */
 function AddPlaceholderForm() {
   const { t } = useTranslation()
