@@ -71,7 +71,7 @@
     "globals": "^17.4.0",
     "husky": "^9.1.7",
     "jsdom": "^29.0.0",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.0.6",
     "msw": "^2.12.10",
     "orval": "^8.5.3",
     "prettier": "^3.8.1",
