@@ -69,6 +69,7 @@ function toPlayerPresentation(
     )
   }
   if (typeof bag.bio === "string") out.bio = bag.bio
+  if (typeof bag.profileUrl === "string") out.profileUrl = bag.profileUrl
   return out
 }
 

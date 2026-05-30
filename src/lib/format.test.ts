@@ -1,24 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  aoe2insightsPlayerUrl,
-  formatTimeAgo,
-  normalizeCountryCode,
-} from "@/lib/format"
-
-describe("aoe2insightsPlayerUrl", () => {
-  it("builds a search URL for the given alias", () => {
-    expect(aoe2insightsPlayerUrl("ANKR.blve")).toBe(
-      "https://www.aoe2insights.com/search/?q=ANKR.blve"
-    )
-  })
-
-  it("URL-encodes aliases with reserved characters", () => {
-    expect(aoe2insightsPlayerUrl("Hera & Co")).toBe(
-      "https://www.aoe2insights.com/search/?q=Hera%20%26%20Co"
-    )
-  })
-})
+import { formatTimeAgo, normalizeCountryCode } from "@/lib/format"
 
 describe("normalizeCountryCode", () => {
   it("returns a well-formed alpha-2 code unchanged", () => {

@@ -26,6 +26,14 @@ export interface PlayerPresentation {
    * aggressive Scouts"). Plain text; newlines are preserved on render.
    */
   bio?: string
+  /**
+   * Host-curated link target for the player's name — typically their
+   * aoe2insights `/user/<id>` profile. The relic `profile_id` the poller uses
+   * doesn't match aoe2insights' internal URL id (#131), so the host supplies
+   * the exact URL here rather than the frontend deriving it; when absent the
+   * name renders as plain text (no link).
+   */
+  profileUrl?: string
 }
 
 /**
@@ -53,9 +61,9 @@ export interface StandingsRow {
    * AoE2 profile id, or `null` for **placeholder rows** — announced-but-
    * unjoined streamers whose `profile_id` hasn't minted yet. Placeholder
    * rows still appear on the standings (sorted to the tail) and carry an
-   * `alias` + `presentation` for display, but they have no detail page to
-   * link to and no other rating data; consumers use `(profileId !== null)`
-   * to gate the aoe2insights link in the player cell.
+   * `alias` + `presentation` for display, but they have no rating data yet.
+   * The player-name link is driven by `presentation.profileUrl` (#131), not
+   * this id, so it's independent of whether a row is a placeholder.
    */
   profileId: number | null
   alias: string

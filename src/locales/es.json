@@ -96,7 +96,7 @@
     "recentAriaLabel": "Resultados recientes, más recientes primero: {{results}}",
     "win": "Victoria",
     "loss": "Derrota",
-    "viewOnAoe2insights": "Ver a {{alias}} en aoe2insights",
+    "viewProfile": "Ver el perfil de {{name}}",
     "watchOn": {
       "twitch": "Ver en Twitch",
       "youtube": "Ver en YouTube",
@@ -183,6 +183,8 @@
         "invalidUrl": "Ingresa una URL http(s) válida",
         "bio": "Biografía",
         "bioPlaceholder": "Contexto breve visible para los espectadores — p. ej. 2× campeón, juega Exploradores agresivos.",
+        "profileUrl": "URL del perfil",
+        "profileUrlPlaceholder": "https://www.aoe2insights.com/user/12449433/",
         "cancel": "Cancelar",
         "save": "Guardar",
         "saving": "Guardando…",
