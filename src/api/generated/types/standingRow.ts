@@ -24,10 +24,18 @@ is completed-match form; ``tournament_record`` is the player's record
 within the tournament's date window; ``in_match`` / ``live_match_id``
 are current live-match status. Sorted by ``current_rating`` desc, with
 unrated roster members (no rating row on the tournament's leaderboard
-— typically brand-new accounts) at the tail, ordered by ``profile_id``.
+— typically brand-new accounts) next by ``profile_id``, and announced
+placeholder roster slots last by ``alias`` (their display name).
+
+Placeholder rows surface announced-but-unjoined entrants — streamers
+whose ``profile_id`` hasn't minted yet. ``profile_id`` is null on
+these rows (no detail page to link to), ``alias`` carries their
+display name, ``presentation`` carries their bag (so flag/streamUrls
+work identically), and every other field is null/zero. ``updated_at``
+is null too — no polled refresh signal applies.
  */
 export interface StandingRow {
-  profile_id: number;
+  profile_id: number | null;
   alias: string;
   country: string | null;
   team: StandingTeam | null;
@@ -45,7 +53,7 @@ export interface StandingRow {
   live_match_id: number | null;
   stream_live: boolean;
   last_match_at: string | null;
-  updated_at: string;
+  updated_at: string | null;
   readonly games: number;
   /** Win percentage (0–100, 1 dp), or null when the player has no games. */
   readonly win_pct: number | null;

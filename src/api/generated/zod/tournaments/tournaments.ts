@@ -155,7 +155,7 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetParams = zod.obj
 export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.object({
   "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "items": zod.array(zod.object({
-  "profile_id": zod.number(),
+  "profile_id": zod.union([zod.number(),zod.null()]),
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),
   "team": zod.union([zod.object({
@@ -182,10 +182,10 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "live_match_id": zod.union([zod.number(),zod.null()]),
   "stream_live": zod.boolean(),
   "last_match_at": zod.union([zod.iso.datetime({}),zod.null()]),
-  "updated_at": zod.iso.datetime({}),
+  "updated_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "games": zod.number(),
   "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp), or null when the player has no games.')
-}).describe('One row in a tournament\'s standings list.\n\nA denormalized read model: a left join of ``Player`` and ``PlayerRating``\nplus folded-in derived fields, so a consumer renders a full standings\ntable from one response with no per-player fan-out. ``recent_results``\nis completed-match form; ``tournament_record`` is the player\'s record\nwithin the tournament\'s date window; ``in_match`` \/ ``live_match_id``\nare current live-match status. Sorted by ``current_rating`` desc, with\nunrated roster members (no rating row on the tournament\'s leaderboard\n— typically brand-new accounts) at the tail, ordered by ``profile_id``.'))
+}).describe('One row in a tournament\'s standings list.\n\nA denormalized read model: a left join of ``Player`` and ``PlayerRating``\nplus folded-in derived fields, so a consumer renders a full standings\ntable from one response with no per-player fan-out. ``recent_results``\nis completed-match form; ``tournament_record`` is the player\'s record\nwithin the tournament\'s date window; ``in_match`` \/ ``live_match_id``\nare current live-match status. Sorted by ``current_rating`` desc, with\nunrated roster members (no rating row on the tournament\'s leaderboard\n— typically brand-new accounts) next by ``profile_id``, and announced\nplaceholder roster slots last by ``alias`` (their display name).\n\nPlaceholder rows surface announced-but-unjoined entrants — streamers\nwhose ``profile_id`` hasn\'t minted yet. ``profile_id`` is null on\nthese rows (no detail page to link to), ``alias`` carries their\ndisplay name, ``presentation`` carries their bag (so flag\/streamUrls\nwork identically), and every other field is null\/zero. ``updated_at``\nis null too — no polled refresh signal applies.'))
 })
 
 /**

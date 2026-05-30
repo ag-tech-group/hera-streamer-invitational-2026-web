@@ -43,7 +43,15 @@ export interface StandingsTeam {
  * (`src/api/adapters/standings.ts`) and never reaches components.
  */
 export interface StandingsRow {
-  profileId: number
+  /**
+   * AoE2 profile id, or `null` for **placeholder rows** — announced-but-
+   * unjoined streamers whose `profile_id` hasn't minted yet. Placeholder
+   * rows still appear on the standings (sorted to the tail) and carry an
+   * `alias` + `presentation` for display, but they have no detail page to
+   * link to and no other rating data; consumers use `(profileId !== null)`
+   * to gate the aoe2insights link in the player cell.
+   */
+  profileId: number | null
   alias: string
   /** ISO 3166-1 alpha-2 country code (lowercase), or null if unknown. */
   country: string | null
@@ -80,8 +88,11 @@ export interface StandingsRow {
   inMatch: boolean
   /** ISO-8601 timestamp of the player's most recent match, or null. */
   lastMatchAt: string | null
-  /** ISO-8601 timestamp of when this row was last refreshed upstream. */
-  updatedAt: string
+  /**
+   * ISO-8601 timestamp of when this row was last refreshed upstream, or
+   * `null` for placeholder rows — they carry no polled refresh signal.
+   */
+  updatedAt: string | null
   /**
    * Frontend-defined overrides for how the row renders (display name, flag,
    * stream URLs). Shape comes from the adapter — see `PlayerPresentation`.
