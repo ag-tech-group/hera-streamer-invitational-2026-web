@@ -5,6 +5,7 @@ import { Countdown } from "@/components/countdown"
 import { HostLinksCard } from "@/components/host-links-card"
 import { LadderRaceActiveCard } from "@/components/ladder-race-active-card"
 import { PrizePoolCard } from "@/components/prize-pool-card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { activeTournament } from "@/config/tournaments"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
@@ -100,22 +101,32 @@ export function HomePage() {
     <div className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 p-8">
       <header className="hero-divider flex flex-col gap-1 pb-4">
         {/*
-         * Drops `font-bold` because Bebas Neue ships only weight 400 —
-         * forcing a synthetic 700 produces an ugly emboldened glyph.
+         * The tournament name is the page headline. Drops `font-bold` because
+         * Bebas Neue ships only weight 400 — a synthetic 700 emboldens the
+         * glyphs badly. Skeleton while the name loads so the row doesn't jump;
+         * the generic "Live Standings" shows only if the metadata never lands.
          */}
-        <h1 className="font-display text-4xl tracking-wide">
-          {t("home.title")}
-        </h1>
+        {tournament.isPending ? (
+          <Skeleton className="h-10 w-72 max-w-full" />
+        ) : (
+          <h1 className="font-display text-4xl tracking-wide">
+            {tournament.data?.name ?? t("home.title")}
+          </h1>
+        )}
         <p className="text-muted-foreground text-sm">
-          <a
-            href="https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-foreground underline underline-offset-2 transition-colors"
-          >
-            {t("home.subtitleProduct")}
-          </a>{" "}
-          {t("home.subtitleSuffix")}
+          <Trans
+            i18nKey="home.subtitle"
+            components={{
+              product: (
+                <a
+                  href="https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground underline underline-offset-2 transition-colors"
+                />
+              ),
+            }}
+          />
         </p>
       </header>
 

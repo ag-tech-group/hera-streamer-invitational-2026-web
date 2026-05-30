@@ -129,8 +129,9 @@ describe("HomePage", () => {
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
 
+    // The heading is the live tournament name once the metadata loads.
     expect(
-      screen.getByRole("heading", { name: /live standings/i })
+      await screen.findByRole("heading", { name: "Test Tournament" })
     ).toBeInTheDocument()
   })
 

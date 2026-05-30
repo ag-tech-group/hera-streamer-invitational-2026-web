@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next"
 import { LanguageToggle } from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,11 +19,10 @@ import { AUTH_URL, loginUrl } from "@/lib/auth-config"
 
 /**
  * Top-level app shell navbar — fixed to the top of the viewport on
- * every route. Carries the logo + active tournament name on the left
- * (the tournament name serves as the brand wordmark — it's what
- * changes per deployment, so it earns the prime real estate), and the
- * theme toggle + auth widget on the right; page-level headers below
- * shouldn't compete for that space.
+ * every route. Carries just the logo (linking home) on the left — the
+ * tournament name now headlines the standings page itself, so the bar
+ * stays a quiet brand mark — with the theme toggle + language toggle +
+ * auth widget on the right.
  *
  * Layout mirrors criticalbit-web's `Navbar`: full-width translucent
  * bar (`bg-background/80` + `backdrop-blur-sm`), `h-14`, content
@@ -54,19 +52,10 @@ export function Navbar() {
          */}
         <Link
           to="/"
-          className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-80"
+          className="flex shrink-0 items-center transition-opacity hover:opacity-80"
           aria-label={tournamentName ?? t("nav.brandAriaLabel")}
         >
           <img src="/logo.png" alt="" className="size-8 shrink-0" />
-          {tournamentName ? (
-            <span className="font-display hidden truncate text-lg tracking-wide sm:inline">
-              {tournamentName}
-            </span>
-          ) : tournament.isPending ? (
-            // Same-width skeleton while the metadata fetch is in flight so the
-            // wordmark slot doesn't pop in from nothing once the name arrives.
-            <Skeleton className="hidden h-5 w-48 sm:block" />
-          ) : null}
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
