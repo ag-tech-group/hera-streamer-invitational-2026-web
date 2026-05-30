@@ -47,10 +47,17 @@ export interface Tournament {
   /**
    * Optional sponsor name credited as a muted line under the prize-pool
    * amount (#156). Rendered via the `home.prizePool.sponsoredBy` i18n
-   * template, so the name itself isn't translated — "Sponsored by
-   * Microsoft" in EN, "Patrocinado por Microsoft" in ES.
+   * template, so the name itself isn't translated — "Sponsored by World's
+   * Edge" in EN, "Patrocinado por World's Edge" in ES.
    */
   prizeSponsor?: string
+  /**
+   * Optional URL the sponsor name links to (#183). When set,
+   * `PrizePoolCard` wraps `prizeSponsor` in an external `<a>`; when unset,
+   * the sponsor renders as plain text. Has no effect without
+   * `prizeSponsor`.
+   */
+  prizeSponsorUrl?: string
 }
 
 /** A single host-channel / donation / social link rendered on the standings page. */

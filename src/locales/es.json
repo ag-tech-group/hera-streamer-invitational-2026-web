@@ -54,7 +54,7 @@
     },
     "prizePool": {
       "label": "Premio total",
-      "sponsoredBy": "Patrocinado por {{sponsor}}"
+      "sponsoredBy": "Patrocinado por "
     }
   },
   "standings": {

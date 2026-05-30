@@ -20,6 +20,7 @@ export function PrizePoolCard({
   prizePoolCents,
   currency,
   sponsor,
+  sponsorUrl,
   isLoading,
   className,
 }: {
@@ -27,6 +28,12 @@ export function PrizePoolCard({
   currency: string | undefined
   /** Optional sponsor credited as muted text under the amount (#156). */
   sponsor?: string
+  /**
+   * Optional URL the `sponsor` name links to (#183). When set, the
+   * sponsor is wrapped in an external `<a>`; when unset, it renders as
+   * plain text. No effect without `sponsor`.
+   */
+  sponsorUrl?: string
   isLoading: boolean
   className?: string
 }) {
@@ -96,7 +103,27 @@ export function PrizePoolCard({
       </p>
       {sponsor && (
         <p className="text-muted-foreground text-xs">
-          {t("home.prizePool.sponsoredBy", { sponsor })}
+          {/*
+           * Same prefix-then-link split the footer uses for its
+           * criticalbit / Microsoft-disclaimer credits. Avoids
+           * `Trans` + interpolation-inside-a-named-component-tag,
+           * which renders an empty `<a>` followed by the sponsor
+           * name as a sibling text node — clearly visible in
+           * DevTools but not clickable.
+           */}
+          {t("home.prizePool.sponsoredBy")}
+          {sponsorUrl ? (
+            <a
+              href={sponsorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground underline underline-offset-2 transition-colors"
+            >
+              {sponsor}
+            </a>
+          ) : (
+            sponsor
+          )}
         </p>
       )}
     </section>
