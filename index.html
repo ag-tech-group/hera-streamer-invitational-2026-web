@@ -7,11 +7,92 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      SEO / social metadata (#179). This block is the source of truth for
+      crawlers and link-preview scrapers: the app is a client-rendered SPA,
+      so anything set later from JS (e.g. the per-route document.title in
+      `useDocumentTitle`) is invisible to non-JS scrapers like Discord,
+      Slack, iMessage, and X. Whatever a share preview shows comes from here.
+
+      `og:*`/`twitter:*` values mirror the static <title>/<description> on
+      purpose — keep them in sync if either changes.
+    -->
+    <title>The King's Gauntlet (Hosted by Hera)</title>
     <meta
       name="description"
       content="Live ratings, team standings, and tournament progression for The King's Gauntlet — Age of Empires II: Definitive Edition, hosted by Hera."
     />
-    <title>The King's Gauntlet (Hosted by Hera)</title>
+    <!--
+      Canonical points at the path-router public entry (aoe2.criticalbit.gg
+      under the /kings-gauntlet/ base path), not the bare Netlify subdomain
+      that serves the same dist/. Both hosts resolve to identical content;
+      the canonical tells search engines which one to index and consolidates
+      ranking signals onto it (#179).
+    -->
+    <link rel="canonical" href="https://aoe2.criticalbit.gg/kings-gauntlet/" />
+    <!-- Matches the dark-theme --background (oklch(0.17 0.012 240)); the app
+         defaults to dark, so this is what most visitors see. -->
+    <meta name="theme-color" content="#0b1014" />
+
+    <!-- Open Graph (Facebook, Discord, LinkedIn, most chat apps) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The King's Gauntlet" />
+    <meta property="og:title" content="The King's Gauntlet (Hosted by Hera)" />
+    <meta
+      property="og:description"
+      content="Live ratings, team standings, and tournament progression for The King's Gauntlet — Age of Empires II: Definitive Edition, hosted by Hera."
+    />
+    <meta
+      property="og:url"
+      content="https://aoe2.criticalbit.gg/kings-gauntlet/"
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <!--
+      og:image / twitter:image are intentionally omitted until the tournament
+      share card (1200×630) exists — tracked in #180 alongside the favicon /
+      logo asset swap. A broken or off-brand image reads worse than none, so
+      previews stay text-only (title + description) for now. When the asset
+      lands, drop it in public/ and add, here:
+
+        <meta property="og:image"
+              content="https://aoe2.criticalbit.gg/kings-gauntlet/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt"
+              content="The King's Gauntlet — Age of Empires II tournament hosted by Hera" />
+        <meta name="twitter:image"
+              content="https://aoe2.criticalbit.gg/kings-gauntlet/og-image.png" />
+    -->
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The King's Gauntlet (Hosted by Hera)" />
+    <meta
+      name="twitter:description"
+      content="Live ratings, team standings, and tournament progression for The King's Gauntlet — Age of Empires II: Definitive Edition, hosted by Hera."
+    />
+
+    <!--
+      Structured data (#179). A WebSite entity gives search engines the
+      canonical site name + URL to render in results rather than an inferred
+      one. Kept date-free on purpose: the SportsEvent schema's rich-result
+      treatment requires a startDate, and the tournament dates are dynamic
+      (served by the API, not known at build time). A runtime SportsEvent
+      block fed by the live dates is a sensible follow-up.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "The King's Gauntlet",
+        "alternateName": "The King's Gauntlet — Age of Empires II Invitational",
+        "url": "https://aoe2.criticalbit.gg/kings-gauntlet/",
+        "description": "Live ratings, team standings, and tournament progression for The King's Gauntlet — Age of Empires II: Definitive Edition, hosted by Hera.",
+        "inLanguage": ["en", "es"]
+      }
+    </script>
     <!--
       Apply the saved (or default) theme before first paint to avoid a flash
       of the wrong theme. Must mirror src/components/theme-provider.tsx: same

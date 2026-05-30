@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap for the public surface. Only the standings home is listed; /admin is
+  authenticated and excluded (also Disallow'd in robots.txt). No <lastmod>: the
+  page is a live leaderboard with no meaningful build-time "last changed" date,
+  so <changefreq>daily</changefreq> signals freshness instead.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://aoe2.criticalbit.gg/kings-gauntlet/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

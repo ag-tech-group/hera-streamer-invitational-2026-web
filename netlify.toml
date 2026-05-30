@@ -107,6 +107,11 @@
   status = 200
 
 [[redirects]]
+  from = "/kings-gauntlet/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+
+[[redirects]]
   from = "/kings-gauntlet/*"
   to = "/index.html"
   status = 200

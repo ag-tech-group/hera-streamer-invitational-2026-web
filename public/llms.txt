@@ -7,7 +7,7 @@ as matches are played.
 
 ## Pages
 
-- [Home / Players standings](https://hera-streamer-invitational-2026.criticalbit.gg/): live 1v1-ladder ratings + per-tournament games for every roster player, with a Teams tab for the same field grouped by team.
+- [Home / Players standings](https://aoe2.criticalbit.gg/kings-gauntlet/): live 1v1-ladder ratings + per-tournament games for every roster player, with a Teams tab for the same field grouped by team.
 
 ## Source
 
