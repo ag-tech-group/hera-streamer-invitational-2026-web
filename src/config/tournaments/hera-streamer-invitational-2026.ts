@@ -8,7 +8,7 @@ import type { Tournament } from "@/types"
  */
 export const heraStreamerInvitational2026: Tournament = {
   slug: "hera-streamer-invitational-2026",
-  name: "AoE2: DE 1v1 Invitational",
+  name: "The King's Gauntlet",
   apiTournamentSlug: "default",
   hostLabel: "Hosted by Hera",
   // Currency that the API's `prize_pool_cents` is denominated in. USD is
