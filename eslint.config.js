@@ -7,8 +7,11 @@ import tseslint from "typescript-eslint"
 export default tseslint.config(
   // `dist` is the build output; `src/api/generated` is orval output (zod
   // schemas in particular have regex escapes that trip no-useless-escape
-  // even though they're correct in the generated regexes).
-  { ignores: ["dist", "src/api/generated/**"] },
+  // even though they're correct in the generated regexes). `.claude` is
+  // gitignored local tooling state — notably `.claude/worktrees/*` git
+  // worktree copies whose duplicate tsconfigs otherwise break
+  // typescript-eslint's root detection when `eslint .` descends into them.
+  { ignores: ["dist", "src/api/generated/**", ".claude/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
