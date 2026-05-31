@@ -79,8 +79,12 @@ describe("TeamsView", () => {
     // the rank reflects the API order rather than the stable
     // teamId-sorted display order the panels use.
     render(<TeamsView rows={[rows[1], rows[0]]} />)
-    expect(screen.getByLabelText("Rank 1")).toHaveTextContent("#1")
-    expect(screen.getByLabelText("Rank 2")).toHaveTextContent("#2")
+    expect(
+      screen.getByLabelText("Rank #1 by average rating")
+    ).toHaveTextContent("#1")
+    expect(
+      screen.getByLabelText("Rank #2 by average rating")
+    ).toHaveTextContent("#2")
   })
 
   it("renders every roster member with their current rating", () => {

@@ -77,7 +77,7 @@ export function BioHint({
     return (
       <HoverCard openDelay={140} closeDelay={90}>
         <HoverCardTrigger asChild>{children}</HoverCardTrigger>
-        <HoverCardContent>
+        <HoverCardContent className="tooltip-surface">
           <BioCard bio={bio} name={name} />
         </HoverCardContent>
       </HoverCard>
@@ -97,7 +97,7 @@ export function BioHint({
             <Info className="size-4" aria-hidden />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-64">
+        <PopoverContent className="tooltip-surface w-64">
           <BioCard bio={bio} name={name} />
         </PopoverContent>
       </Popover>

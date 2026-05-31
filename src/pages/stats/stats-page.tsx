@@ -1,4 +1,4 @@
-import { Swords, TrendingUp, Trophy } from "lucide-react"
+import { Percent, Swords, TrendingUp, Trophy } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useMemo } from "react"
 import type { ReactNode } from "react"
@@ -43,14 +43,17 @@ export function StatsPage() {
 
   return (
     <TournamentLayout view="stats">
-      {progression.isPending ? (
-        <div className="grid gap-4 sm:grid-cols-3">
-          {Array.from({ length: 3 }, (_, i) => (
+      {progression.isPending || standings.isPending ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }, (_, i) => (
             <Skeleton key={i} className="h-24 rounded-lg" />
           ))}
         </div>
       ) : (
-        <SummaryCards series={progression.data?.series ?? []} />
+        <SummaryCards
+          series={progression.data?.series ?? []}
+          standingsRows={standings.data?.rows ?? []}
+        />
       )}
 
       <ChartSection
@@ -215,28 +218,69 @@ function computeStats(series: PlayerSeries[]): {
   return { biggestClimber, highestPeak, mostMatches }
 }
 
-function SummaryCards({ series }: { series: PlayerSeries[] }) {
+/**
+ * Best win rate across the standings (#225 follow-up). Win% comes from the
+ * standings rows (wins / decided games), not the progression series — the
+ * series only carries rating points. Players with no decided games are
+ * skipped so a 0-game row can't read as 0%. The DTO also exposes a computed
+ * `win_pct`, but the adapter doesn't surface it, so we derive from the
+ * already-mapped wins / losses. Tiny samples (e.g. 1–0 = 100%) can lead; a
+ * minimum-games threshold can be layered on later if the leaderboard warrants.
+ */
+function computeWinPctLeader(rows: StandingsRow[]): Leader | null {
+  let leader: Leader | null = null
+  for (const r of rows) {
+    const decided = r.wins + r.losses
+    if (decided === 0) continue
+    const pct = (r.wins / decided) * 100
+    if (!leader || pct > leader.value) {
+      leader = { alias: r.presentation.displayName ?? r.alias, value: pct }
+    }
+  }
+  return leader
+}
+
+function SummaryCards({
+  series,
+  standingsRows,
+}: {
+  series: PlayerSeries[]
+  standingsRows: StandingsRow[]
+}) {
   const { t } = useTranslation()
   const { biggestClimber, highestPeak, mostMatches } = useMemo(
     () => computeStats(series),
     [series]
   )
+  const winPctLeader = useMemo(
+    () => computeWinPctLeader(standingsRows),
+    [standingsRows]
+  )
   // A climber delta carries a sign (someone may be the "least dropped"); peak
   // and matches are plain counts.
   const signed = (n: number) => (n >= 0 ? `+${n}` : String(n))
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      <StatCard
-        icon={TrendingUp}
-        label={t("stats.cards.biggestClimber")}
-        value={biggestClimber ? signed(biggestClimber.value) : "—"}
-        player={biggestClimber?.alias ?? null}
-      />
+    // Highest peak leads — it's the tournament's headline metric (only peak
+    // elos count toward seeding). Win rate sits beside it, then the
+    // movement / volume stats.
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
         icon={Trophy}
         label={t("stats.cards.highestPeak")}
         value={highestPeak ? String(highestPeak.value) : "—"}
         player={highestPeak?.alias ?? null}
+      />
+      <StatCard
+        icon={Percent}
+        label={t("stats.cards.winPct")}
+        value={winPctLeader ? `${winPctLeader.value.toFixed(1)}%` : "—"}
+        player={winPctLeader?.alias ?? null}
+      />
+      <StatCard
+        icon={TrendingUp}
+        label={t("stats.cards.biggestClimber")}
+        value={biggestClimber ? signed(biggestClimber.value) : "—"}
+        player={biggestClimber?.alias ?? null}
       />
       <StatCard
         icon={Swords}

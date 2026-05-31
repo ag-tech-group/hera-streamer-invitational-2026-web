@@ -20,6 +20,13 @@ import type { HostLink, HostLinkKind } from "@/types"
  * links exist or where they point. Returns `null` when no links are passed
  * so the layout collapses cleanly.
  *
+ * Deliberately sourced from build config — NOT the admin-saved
+ * `host_stream_urls` (#225). That field is a flat URL list the API uses only
+ * to detect host liveness (`host_stream_live`); it carries no labels, kinds,
+ * or order and can't express the donate/Patreon entries or display sequence
+ * here. The two overlapping Twitch/YouTube URLs are intentional duplication,
+ * not drift — see the project memory note on this split.
+ *
  * When `streamLive` is set (the API's `host_stream_live`, #149) the eyebrow
  * gains a pulsing "Live" badge and the broadcast links (Twitch / YouTube)
  * light up brand-blue with a soft glow — mirroring the standings Watch

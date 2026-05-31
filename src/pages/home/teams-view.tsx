@@ -301,20 +301,36 @@ function TeamHeader({ team, rank }: { team: TeamStandingsRow; rank: number }) {
  * at reduced opacity, so rank reads as a team-identity cue rather than
  * a neutral "you lost" gray. Bebas Neue to match the standings table's
  * broadcast-graphic caps treatment.
+ *
+ * Leads with a small "RANK" caption: in AoE2 a bare "#1" reads as a player
+ * *colour* (colours are numbered 1–8), so the label disambiguates that this
+ * is standings position, not the blue/red team slot.
  */
 function RankBadge({ rank }: { rank: number }) {
+  const { t } = useTranslation()
   if (rank === 0) return null
   const leader = rank === 1
   return (
     <span
-      className="font-display shrink-0 text-2xl leading-none tabular-nums @md:text-3xl"
+      className="flex shrink-0 items-baseline gap-1"
       style={{
         color: "var(--team-color-strong)",
         opacity: leader ? 1 : 0.55,
       }}
-      aria-label={`Rank ${rank}`}
+      aria-label={t("teams.rankAria", { rank })}
     >
-      #{rank}
+      <span
+        aria-hidden
+        className="text-[10px] font-semibold tracking-widest uppercase"
+      >
+        {t("teams.rankLabel")}
+      </span>
+      <span
+        aria-hidden
+        className="font-display text-2xl leading-none tabular-nums @md:text-3xl"
+      >
+        #{rank}
+      </span>
     </span>
   )
 }

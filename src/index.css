@@ -633,4 +633,46 @@
   .dark input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(0.85);
   }
+
+  /*
+   * Informational tooltip / popover surface (#: win% + bio hints). Layers the
+   * same broadcast chrome the cards use onto a floating popover: an icy-blue
+   * accent bar along the top edge and a soft brand glow blooming from the
+   * upper-right corner. Applied via the `tooltip-surface` className on
+   * `HoverCardContent` / `PopoverContent` (both already carry `position:
+   * relative`-friendly padding + `overflow` is added here so the glow clips to
+   * the rounded corners). Decorative only — the pseudo-elements are aria-silent.
+   */
+  .tooltip-surface {
+    position: relative;
+    overflow: hidden;
+  }
+  .tooltip-surface::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    /* Icy-blue: a lighter, higher-chroma lift off the base brand so the bar
+       reads as cool "light" rather than the deeper UI brand. */
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--brand) 85%, white 30%),
+      color-mix(in oklch, var(--brand) 45%, transparent)
+    );
+    pointer-events: none;
+  }
+  .tooltip-surface::after {
+    content: "";
+    position: absolute;
+    top: -2.5rem;
+    right: -2.5rem;
+    width: 7rem;
+    height: 7rem;
+    border-radius: 9999px;
+    background: color-mix(in oklch, var(--brand) 22%, transparent);
+    filter: blur(2.25rem);
+    opacity: 0.85;
+    pointer-events: none;
+  }
 }
