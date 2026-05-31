@@ -130,7 +130,17 @@
       "saving": "Saving…",
       "successToast": "Tournament updated.",
       "loadError": "Couldn't load tournament details.",
-      "prizePoolLabel": "Prize pool"
+      "prizePoolLabel": "Prize pool",
+      "hostStreamUrls": {
+        "label": "Host stream URLs",
+        "help": "Channel URLs (Twitch/YouTube) used to detect when the host is live and light up the promo card. Up to {{max}}.",
+        "add": "Add URL",
+        "rowPlaceholder": "https://twitch.tv/channel",
+        "rowAria": "Host stream URL {{index}}",
+        "removeAria": "Remove host stream URL {{index}}",
+        "errorTooLong": "URL must be {{max}} characters or fewer.",
+        "errorTooMany": "At most {{max}} URLs."
+      }
     },
     "owners": {
       "grantLabel": "Grant ownership",

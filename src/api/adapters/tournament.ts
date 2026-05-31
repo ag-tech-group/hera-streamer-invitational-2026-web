@@ -39,6 +39,10 @@ export function toTournamentInfo(response: TournamentResponse): TournamentInfo {
     // the UI always has a definite boolean and the host card stays dark when
     // the field or a configured host channel is absent.
     hostStreamLive: dto.host_stream_live ?? false,
+    // `host_stream_urls` is the server-side liveness-detection list (#149),
+    // surfaced for the admin editor (#225). Required on the DTO, but default
+    // defensively so a missing field never breaks the form seed.
+    hostStreamUrls: dto.host_stream_urls ?? [],
     createdAt: dto.created_at,
   }
 }

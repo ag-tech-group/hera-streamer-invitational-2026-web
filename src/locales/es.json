@@ -130,7 +130,17 @@
       "saving": "Guardando…",
       "successToast": "Torneo actualizado.",
       "loadError": "No se pudieron cargar los detalles del torneo.",
-      "prizePoolLabel": "Premio total"
+      "prizePoolLabel": "Premio total",
+      "hostStreamUrls": {
+        "label": "URLs del canal del anfitrión",
+        "help": "URLs de canales (Twitch/YouTube) para detectar cuándo el anfitrión está en vivo y activar la tarjeta promocional. Hasta {{max}}.",
+        "add": "Agregar URL",
+        "rowPlaceholder": "https://twitch.tv/canal",
+        "rowAria": "URL del canal del anfitrión {{index}}",
+        "removeAria": "Eliminar URL del canal del anfitrión {{index}}",
+        "errorTooLong": "La URL debe tener {{max}} caracteres o menos.",
+        "errorTooMany": "Máximo {{max}} URLs."
+      }
     },
     "owners": {
       "grantLabel": "Otorgar acceso",

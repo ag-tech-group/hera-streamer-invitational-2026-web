@@ -38,6 +38,15 @@ export interface TournamentInfo {
    * optional) or no host channel is configured server-side.
    */
   hostStreamLive: boolean
+  /**
+   * Host broadcast channel URLs the server-side broadcast-live poller
+   * resolves to compute {@link hostStreamLive} (#149). The tournament owner
+   * edits these in the admin tournament-details form (#225); the API caps
+   * the list at 5. NOT what the promo card displays — `HostLinksCard`
+   * renders its links from build config (`src/config/tournaments/<slug>.ts`);
+   * this is purely the liveness-detection input. Empty when none configured.
+   */
+  hostStreamUrls: string[]
   /** ISO-8601 timestamp when the tournament record was created. */
   createdAt: string
 }
