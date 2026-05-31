@@ -26,6 +26,8 @@ on every page load. See ``_ME_CACHE_CONTROL`` above for why we
 can't fall through to the middleware default here.
  * @summary Get Me
  */
+export const getMeV1MeGetResponseOwnedTournamentsItemHostStreamLiveDefault = false;
+
 export const GetMeV1MeGetResponse = zod.object({
   "user_id": zod.string(),
   "owned_tournaments": zod.array(zod.object({
@@ -36,7 +38,9 @@ export const GetMeV1MeGetResponse = zod.object({
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
+  "host_stream_urls": zod.array(zod.string()),
+  "host_stream_live": zod.boolean().default(getMeV1MeGetResponseOwnedTournamentsItemHostStreamLiveDefault),
   "created_at": zod.iso.datetime({})
-}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.'))
+}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.\nThe one exception is ``host_stream_live`` (#149) — a derived flag the\nrouter computes from the broadcast-live snapshot before serializing,\nso a host channel going live transitions the card within one poll\ncycle. The standings ``live`` SSE nudge already invalidates this query.'))
 }).describe('The authenticated user\'s identity + everything they can manage.\n\nOne round-trip the frontend can hit on app load to answer \"who am\nI and what can I admin?\" — replaces probing per-tournament owner\nendpoints to derive the admin-UI map.')
 

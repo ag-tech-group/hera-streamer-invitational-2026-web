@@ -74,6 +74,7 @@ export function ContextCards() {
         label={activeTournament.hostLabel}
         logo={activeTournament.hostLogo}
         links={activeTournament.hostLinks}
+        streamLive={tournament.data?.hostStreamLive ?? false}
       />
     </div>
   )

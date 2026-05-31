@@ -31,6 +31,13 @@ export interface TournamentInfo {
    * `PrizePoolCard` collapses out of the sidebar (#156).
    */
   prizePoolCents: number | null
+  /**
+   * Whether the tournament host's broadcast channel is live right now
+   * (#149 → the API's `host_stream_live`). Drives the pulsing "Live" badge on
+   * `HostLinksCard`. Defaults to `false` when the API omits the field (it's
+   * optional) or no host channel is configured server-side.
+   */
+  hostStreamLive: boolean
   /** ISO-8601 timestamp when the tournament record was created. */
   createdAt: string
 }

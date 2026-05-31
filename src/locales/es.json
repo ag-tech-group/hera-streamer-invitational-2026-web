@@ -255,7 +255,9 @@
     "seconds": "seg"
   },
   "hostLinks": {
-    "defaultLabel": "Presentado por"
+    "defaultLabel": "Presentado por",
+    "live": "En vivo",
+    "streamingLive": "Transmitiendo en vivo"
   },
   "notFound": {
     "eyebrow": "Página no encontrada",

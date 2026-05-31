@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
   getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey,
   getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey,
+  getGetTournamentDetailV1TournamentsTournamentSlugGetQueryKey,
 } from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
@@ -68,6 +69,21 @@ describe("useLiveUpdates", () => {
     // endpoint folds into each row — so it refreshes the standings query.
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
+        activeTournament.apiTournamentSlug
+      ),
+    })
+  })
+
+  it("invalidates the tournament query on a 'live' nudge", () => {
+    const { invalidateSpy } = renderUseLiveUpdates()
+
+    MockEventSource.last().emit("live", { polled_at: "2026-05-21T00:00:00Z" })
+
+    // A `live` nudge also carries the host's `host_stream_live` (a derived
+    // flag on the tournament record, #149), so the tournament-detail query
+    // refreshes too — that's what lights up the host card without a reload.
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: getGetTournamentDetailV1TournamentsTournamentSlugGetQueryKey(
         activeTournament.apiTournamentSlug
       ),
     })
