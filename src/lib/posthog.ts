@@ -41,6 +41,10 @@ interface PostHogClient {
  * the existing `useFeatureFlag()` hook surface stays the same.
  */
 
+// Ingestion host. Production sets VITE_POSTHOG_HOST to the first-party reverse
+// proxy (https://aoe2.criticalbit.gg/relay, wired as rewrites in netlify.toml)
+// so privacy / ad blockers don't drop events by blocking *.i.posthog.com.
+// Falls back to PostHog US cloud for local dev and direct ingestion.
 const DEFAULT_HOST = "https://us.i.posthog.com"
 
 const enabled = Boolean(import.meta.env.VITE_POSTHOG_KEY)
@@ -59,6 +63,11 @@ export async function initPostHog(): Promise<void> {
   const { default: posthog } = await import("posthog-js")
   posthog.init(key, {
     api_host: import.meta.env.VITE_POSTHOG_HOST || DEFAULT_HOST,
+    // When api_host is the first-party reverse proxy, ui_host points the SDK
+    // at the real PostHog app so any generated UI links (e.g. the toolbar)
+    // resolve to PostHog instead of the proxy path. No requests hit ui_host
+    // during normal capture, so this is inert for end users. PostHog US.
+    ui_host: "https://us.posthog.com",
     autocapture: false,
     capture_pageview: true,
     capture_pageleave: true,
