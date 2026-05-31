@@ -21,6 +21,8 @@ config split-cache rather than the auth-aware polled-data helper
 (see ``_TOURNAMENT_CONFIG_CACHE_CONTROL``).
  * @summary List Tournaments
  */
+export const listTournamentsV1TournamentsGetResponseHostStreamLiveDefault = false;
+
 export const ListTournamentsV1TournamentsGetResponseItem = zod.object({
   "id": zod.number(),
   "slug": zod.string(),
@@ -29,8 +31,10 @@ export const ListTournamentsV1TournamentsGetResponseItem = zod.object({
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
+  "host_stream_urls": zod.array(zod.string()),
+  "host_stream_live": zod.boolean().default(listTournamentsV1TournamentsGetResponseHostStreamLiveDefault),
   "created_at": zod.iso.datetime({})
-}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
+}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.\nThe one exception is ``host_stream_live`` (#149) — a derived flag the\nrouter computes from the broadcast-live snapshot before serializing,\nso a host channel going live transitions the card within one poll\ncycle. The standings ``live`` SSE nudge already invalidates this query.')
 export const ListTournamentsV1TournamentsGetResponse = zod.array(ListTournamentsV1TournamentsGetResponseItem)
 
 /**
@@ -53,6 +57,8 @@ export const createTournamentV1TournamentsPostBodyLeaderboardIdExclusiveMin = 0;
 
 export const createTournamentV1TournamentsPostBodyPrizePoolCentsOneMin = 0;
 
+export const createTournamentV1TournamentsPostBodyHostStreamUrlsMax = 5;
+
 
 
 export const CreateTournamentV1TournamentsPostBody = zod.object({
@@ -61,7 +67,8 @@ export const CreateTournamentV1TournamentsPostBody = zod.object({
   "leaderboard_id": zod.number().gt(createTournamentV1TournamentsPostBodyLeaderboardIdExclusiveMin),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
-  "prize_pool_cents": zod.union([zod.number().min(createTournamentV1TournamentsPostBodyPrizePoolCentsOneMin),zod.null()]).optional()
+  "prize_pool_cents": zod.union([zod.number().min(createTournamentV1TournamentsPostBodyPrizePoolCentsOneMin),zod.null()]).optional(),
+  "host_stream_urls": zod.array(zod.string()).max(createTournamentV1TournamentsPostBodyHostStreamUrlsMax).optional()
 }).describe('Body for ``POST \/v1\/tournaments`` — create a new tournament.\n\nRequired fields back non-nullable columns; the optional date fields\nbehave the same way as on ``TournamentUpdate`` (omit to leave unset,\nexplicit ``null`` is just an unset). ``slug`` is the routing key\nconsumers\' URLs are built from — restricted to lowercase alphanumeric\n+ internal hyphens so the value drops into a path segment unchanged.')
 
 /**
@@ -72,6 +79,8 @@ export const GetTournamentDetailV1TournamentsTournamentSlugGetParams = zod.objec
   "tournament_slug": zod.string()
 })
 
+export const getTournamentDetailV1TournamentsTournamentSlugGetResponseHostStreamLiveDefault = false;
+
 export const GetTournamentDetailV1TournamentsTournamentSlugGetResponse = zod.object({
   "id": zod.number(),
   "slug": zod.string(),
@@ -80,8 +89,10 @@ export const GetTournamentDetailV1TournamentsTournamentSlugGetResponse = zod.obj
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
+  "host_stream_urls": zod.array(zod.string()),
+  "host_stream_live": zod.boolean().default(getTournamentDetailV1TournamentsTournamentSlugGetResponseHostStreamLiveDefault),
   "created_at": zod.iso.datetime({})
-}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
+}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.\nThe one exception is ``host_stream_live`` (#149) — a derived flag the\nrouter computes from the broadcast-live snapshot before serializing,\nso a host channel going live transitions the card within one poll\ncycle. The standings ``live`` SSE nudge already invalidates this query.')
 
 /**
  * Edit a tournament's metadata — owner-gated.
@@ -103,6 +114,8 @@ export const updateTournamentV1TournamentsTournamentSlugPatchBodyLeaderboardIdOn
 
 export const updateTournamentV1TournamentsTournamentSlugPatchBodyPrizePoolCentsOneMin = 0;
 
+export const updateTournamentV1TournamentsTournamentSlugPatchBodyHostStreamUrlsOneMax = 5;
+
 
 
 export const UpdateTournamentV1TournamentsTournamentSlugPatchBody = zod.object({
@@ -110,8 +123,11 @@ export const UpdateTournamentV1TournamentsTournamentSlugPatchBody = zod.object({
   "leaderboard_id": zod.union([zod.number().gt(updateTournamentV1TournamentsTournamentSlugPatchBodyLeaderboardIdOneExclusiveMin),zod.null()]).optional(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
-  "prize_pool_cents": zod.union([zod.number().min(updateTournamentV1TournamentsTournamentSlugPatchBodyPrizePoolCentsOneMin),zod.null()]).optional()
+  "prize_pool_cents": zod.union([zod.number().min(updateTournamentV1TournamentsTournamentSlugPatchBodyPrizePoolCentsOneMin),zod.null()]).optional(),
+  "host_stream_urls": zod.union([zod.array(zod.string()).max(updateTournamentV1TournamentsTournamentSlugPatchBodyHostStreamUrlsOneMax),zod.null()]).optional()
 }).describe('Partial update for a tournament\'s metadata (``PATCH``).\n\nEvery field is optional; only the fields present in the request body\nare applied. ``start_date`` \/ ``grand_finals_date`` may be set to\n``null`` to clear them. ``name`` and ``leaderboard_id`` back non-\nnullable columns, so an explicit ``null`` for either is rejected\nwith 422.\n\n``slug`` is intentionally not updatable — it is the routing key\nconsumers\' URLs are built from.')
+
+export const updateTournamentV1TournamentsTournamentSlugPatchResponseHostStreamLiveDefault = false;
 
 export const UpdateTournamentV1TournamentsTournamentSlugPatchResponse = zod.object({
   "id": zod.number(),
@@ -121,8 +137,10 @@ export const UpdateTournamentV1TournamentsTournamentSlugPatchResponse = zod.obje
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
+  "host_stream_urls": zod.array(zod.string()),
+  "host_stream_live": zod.boolean().default(updateTournamentV1TournamentsTournamentSlugPatchResponseHostStreamLiveDefault),
   "created_at": zod.iso.datetime({})
-}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.')
+}).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.\nThe one exception is ``host_stream_live`` (#149) — a derived flag the\nrouter computes from the broadcast-live snapshot before serializing,\nso a host channel going live transitions the card within one poll\ncycle. The standings ``live`` SSE nudge already invalidates this query.')
 
 /**
  * Delete a tournament and everything tournament-scoped — owner-gated.

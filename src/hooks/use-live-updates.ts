@@ -8,6 +8,7 @@ import { getStreamV1StreamGetUrl } from "@/api/generated/hooks/stream/stream"
 import {
   getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey,
   getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey,
+  getGetTournamentDetailV1TournamentsTournamentSlugGetQueryKey,
 } from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
 import { logger } from "@/lib/logger"
@@ -46,17 +47,23 @@ export function useLiveUpdates(): void {
       getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey(
         tournamentSlug
       )
+    const tournamentKey =
+      getGetTournamentDetailV1TournamentsTournamentSlugGetQueryKey(
+        tournamentSlug
+      )
 
     // The query keys invalidated for each nudge type. A `standings` nudge is
     // the standings poll — it refreshes both the player standings and the
     // team standings, whose combined ratings derive from player ratings. A
-    // `live` nudge changes a player's `in_match`, which the standings
-    // endpoint folds into each row. `matches` has no consumer yet, so that
+    // `live` nudge changes a player's `in_match` (folded into each standings
+    // row) and the host's `host_stream_live` (a derived flag on the
+    // tournament record, #149), so it invalidates both the standings and the
+    // tournament-detail query. `matches` has no consumer yet, so that
     // invalidation is a no-op; it is wired anyway to keep the stream layer
     // complete for when a matches view lands.
     const queryKeysFor: Record<NudgeEvent, QueryKey[]> = {
       standings: [standingsKey, teamStandingsKey],
-      live: [standingsKey],
+      live: [standingsKey, tournamentKey],
       matches: [
         getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey(
           tournamentSlug

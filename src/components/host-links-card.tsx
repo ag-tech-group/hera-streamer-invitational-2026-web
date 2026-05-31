@@ -19,6 +19,11 @@ import type { HostLink, HostLinkKind } from "@/types"
  * via the tournament's `hostLinks`; the frontend has no opinion about which
  * links exist or where they point. Returns `null` when no links are passed
  * so the layout collapses cleanly.
+ *
+ * When `streamLive` is set (the API's `host_stream_live`, #149) the eyebrow
+ * gains a pulsing "Live" badge and the broadcast links (Twitch / YouTube)
+ * light up brand-blue with a soft glow — mirroring the standings Watch
+ * column's "this channel is live right now" treatment.
  */
 type IconComponent = LucideIcon | ComponentType<SVGProps<SVGSVGElement>>
 
@@ -36,11 +41,18 @@ export function HostLinksCard({
   links,
   label,
   logo,
+  streamLive = false,
   className,
 }: {
   links: HostLink[] | undefined
   label?: string
   logo?: string
+  /**
+   * Whether the host's channel is broadcasting live right now (the API's
+   * `host_stream_live`, #149). When true, the eyebrow shows a pulsing "Live"
+   * badge and the Twitch / YouTube links glow brand-blue. Defaults to `false`.
+   */
+  streamLive?: boolean
   className?: string
 }) {
   const { t } = useTranslation()
@@ -76,17 +88,52 @@ export function HostLinksCard({
         <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
           {label ?? t("hostLinks.defaultLabel")}
         </p>
+        {/*
+         * Live badge: when the host is broadcasting, the eyebrow carries a
+         * pulsing brand pill — the same ping-ring "right now" vocabulary as the
+         * standings "Live" badge. `ml-auto` parks it at the trailing edge.
+         */}
+        {streamLive && (
+          <span
+            className="bg-brand/15 text-brand ml-auto inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
+            aria-label={t("hostLinks.streamingLive")}
+          >
+            <span className="relative flex size-1.5" aria-hidden>
+              <span className="bg-brand absolute inline-flex size-full animate-ping rounded-full opacity-75" />
+              <span className="bg-brand relative inline-flex size-1.5 rounded-full" />
+            </span>
+            {t("hostLinks.live")}
+          </span>
+        )}
       </div>
       <ul className="grid grid-cols-2 gap-1">
         {links.map((link) => {
           const Icon = KIND_ICON[link.kind] ?? ExternalLink
+          // While the host is live, the broadcast links (Twitch / YouTube) glow
+          // brand-blue — the channels you'd actually click to go watch. Donate
+          // / Patreon stay muted so the emphasis lands on what's streaming.
+          const broadcastGlow =
+            streamLive && (link.kind === "twitch" || link.kind === "youtube")
           return (
             <li key={link.url}>
               <a
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
+                className={cn(
+                  "hover:bg-muted/50 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                  broadcastGlow
+                    ? "text-brand hover:text-brand"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+                style={
+                  broadcastGlow
+                    ? {
+                        textShadow:
+                          "0 0 8px color-mix(in oklch, var(--brand) 60%, transparent)",
+                      }
+                    : undefined
+                }
               >
                 <Icon className="text-brand size-4 shrink-0" aria-hidden />
                 <span>{link.label}</span>

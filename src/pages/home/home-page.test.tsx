@@ -112,6 +112,7 @@ const tournament: TournamentRead = {
   start_date: null,
   grand_finals_date: null,
   prize_pool_cents: null,
+  host_stream_urls: [],
   created_at: "2026-05-01T00:00:00Z",
 }
 

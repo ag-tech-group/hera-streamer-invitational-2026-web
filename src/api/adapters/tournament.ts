@@ -35,6 +35,10 @@ export function toTournamentInfo(response: TournamentResponse): TournamentInfo {
     startDate: dto.start_date,
     grandFinalsDate: dto.grand_finals_date,
     prizePoolCents: dto.prize_pool_cents,
+    // `host_stream_live` is optional on the DTO (#149) — default to false so
+    // the UI always has a definite boolean and the host card stays dark when
+    // the field or a configured host channel is absent.
+    hostStreamLive: dto.host_stream_live ?? false,
     createdAt: dto.created_at,
   }
 }

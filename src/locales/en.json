@@ -253,7 +253,9 @@
     "seconds": "sec"
   },
   "hostLinks": {
-    "defaultLabel": "Hosted by"
+    "defaultLabel": "Hosted by",
+    "live": "Live",
+    "streamingLive": "Streaming live"
   },
   "notFound": {
     "eyebrow": "Page not found",
