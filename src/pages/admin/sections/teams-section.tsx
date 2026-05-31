@@ -47,6 +47,7 @@ import {
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
 import { useTeamStandings } from "@/hooks/use-team-standings"
+import { presentationDisplayName } from "@/lib/presentation"
 import type { TeamMember, TeamStandingsRow } from "@/types"
 
 /**
@@ -79,12 +80,15 @@ export function TeamsSection() {
   // on teams until they're promoted, so filter them out at the source
   // here. The type predicate narrows `profile_id` to non-null for every
   // downstream consumer of `allPlayers`.
-  const allPlayers: PolledPlayer[] =
-    playersQuery.data?.status === 200
-      ? playersQuery.data.data.items.filter(
-          (p): p is PolledPlayer => p.profile_id !== null
-        )
-      : []
+  const allPlayers: PolledPlayer[] = useMemo(
+    () =>
+      playersQuery.data?.status === 200
+        ? playersQuery.data.data.items.filter(
+            (p): p is PolledPlayer => p.profile_id !== null
+          )
+        : [],
+    [playersQuery.data]
+  )
 
   // Map of profile_id → the team they're currently on (if any). Lets the
   // add-member select badge each option with its existing team and trigger
@@ -101,6 +105,19 @@ export function TeamsSection() {
     }
     return map
   }, [rows])
+
+  // profile_id → host-set Display name override (when set), built from the same
+  // roster the Players tab edits. Lets the member chips and add-member picker
+  // show the friendly name viewers see, rather than the raw ladder alias the
+  // team-standings endpoint returns (it carries no presentation bag).
+  const displayNameByProfileId = useMemo(() => {
+    const map: DisplayNameMap = new Map()
+    for (const player of allPlayers) {
+      const name = presentationDisplayName(player.presentation)
+      if (name) map.set(player.profile_id, name)
+    }
+    return map
+  }, [allPlayers])
 
   return (
     <div className="flex flex-col gap-4">
@@ -120,6 +137,7 @@ export function TeamsSection() {
               team={team}
               allPlayers={allPlayers}
               playerTeamMap={playerTeamMap}
+              displayNameByProfileId={displayNameByProfileId}
             />
           ))}
         </ul>
@@ -130,6 +148,9 @@ export function TeamsSection() {
 }
 
 type PlayerTeamMap = Map<number, { teamId: number; teamName: string }>
+
+/** profile_id → host-set Display name override (present only when one is set). */
+type DisplayNameMap = Map<number, string>
 
 function teamsQueryKey() {
   return getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey(
@@ -142,10 +163,12 @@ function TeamItem({
   team,
   allPlayers,
   playerTeamMap,
+  displayNameByProfileId,
 }: {
   team: TeamStandingsRow
   allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
+  displayNameByProfileId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
@@ -182,6 +205,7 @@ function TeamItem({
         members={team.members}
         allPlayers={allPlayers}
         playerTeamMap={playerTeamMap}
+        displayNameByProfileId={displayNameByProfileId}
       />
     </li>
   )
@@ -303,11 +327,13 @@ function MembersBlock({
   members,
   allPlayers,
   playerTeamMap,
+  displayNameByProfileId,
 }: {
   teamId: number
   members: TeamMember[]
   allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
+  displayNameByProfileId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   return (
@@ -323,6 +349,7 @@ function MembersBlock({
               key={member.profileId}
               teamId={teamId}
               member={member}
+              displayNameByProfileId={displayNameByProfileId}
             />
           ))}
         </ul>
@@ -332,6 +359,7 @@ function MembersBlock({
         members={members}
         allPlayers={allPlayers}
         playerTeamMap={playerTeamMap}
+        displayNameByProfileId={displayNameByProfileId}
       />
     </div>
   )
@@ -340,13 +368,16 @@ function MembersBlock({
 function MemberChip({
   teamId,
   member,
+  displayNameByProfileId,
 }: {
   teamId: number
   member: TeamMember
+  displayNameByProfileId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
+  const name = displayNameByProfileId.get(member.profileId) ?? member.alias
 
   const mutation =
     useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete(
@@ -371,17 +402,17 @@ function MemberChip({
             disabled={mutation.isPending}
             className="bg-muted/40 hover:bg-destructive/20 hover:text-destructive group inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs transition-colors disabled:opacity-50"
             aria-label={t("admin.teams.removeMemberAria", {
-              name: member.alias,
+              name,
             })}
           >
-            <span>{member.alias}</span>
+            <span>{name}</span>
             <Trash2
               className="size-3 opacity-50 group-hover:opacity-100"
               aria-hidden
             />
           </button>
         }
-        title={t("admin.teams.removeMemberTitle", { name: member.alias })}
+        title={t("admin.teams.removeMemberTitle", { name })}
         description={t("admin.teams.removeMemberDescription")}
         confirmLabel={t("admin.teams.removeMemberConfirm")}
         destructive
@@ -422,11 +453,13 @@ function AddMemberForm({
   members,
   allPlayers,
   playerTeamMap,
+  displayNameByProfileId,
 }: {
   teamId: number
   members: TeamMember[]
   allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
+  displayNameByProfileId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
@@ -435,7 +468,7 @@ function AddMemberForm({
   const [selectedId, setSelectedId] = useState<string>("")
   const [pendingMove, setPendingMove] = useState<{
     profileId: number
-    alias: string
+    name: string
     fromTeamId: number
     fromTeamName: string
   } | null>(null)
@@ -511,7 +544,10 @@ function AddMemberForm({
       const player = allPlayers.find((p) => p.profile_id === profileId)
       setPendingMove({
         profileId,
-        alias: player?.alias ?? String(profileId),
+        name:
+          displayNameByProfileId.get(profileId) ??
+          player?.alias ??
+          String(profileId),
         fromTeamId: existing.teamId,
         fromTeamName: existing.teamName,
       })
@@ -548,12 +584,14 @@ function AddMemberForm({
             <SelectContent>
               {options.map((player) => {
                 const existing = playerTeamMap.get(player.profile_id)
+                const optionName =
+                  displayNameByProfileId.get(player.profile_id) ?? player.alias
                 return (
                   <SelectItem
                     key={player.profile_id}
                     value={String(player.profile_id)}
                   >
-                    <span>{player.alias}</span>
+                    <span>{optionName}</span>
                     {existing ? (
                       <span className="text-muted-foreground ml-2 text-xs">
                         {t("admin.teams.memberOnTeam", {
@@ -598,7 +636,7 @@ function AddMemberForm({
             <AlertDialogDescription>
               {pendingMove
                 ? t("admin.teams.moveDescription", {
-                    name: pendingMove.alias,
+                    name: pendingMove.name,
                     from: pendingMove.fromTeamName,
                   })
                 : null}

@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
+import { presentationDisplayName } from "@/lib/presentation"
 import { isHttpUrl } from "@/lib/url"
 
 /**
@@ -94,6 +95,22 @@ function PlayerRow({ player }: { player: PlayerRead }) {
   const [editing, setEditing] = useState(false)
   const isPlaceholder = player.profile_id === null
 
+  // Lead with the host-set Display name (the presentation override) — the same
+  // name viewers see on the public standings, where `displayName ?? alias`
+  // wins (#152). When an override is masking the raw ladder `alias`, keep the
+  // alias in the metadata line below so admins can still confirm which profile
+  // is linked.
+  const overrideName = presentationDisplayName(player.presentation)
+  const visibleName = overrideName ?? player.alias
+  const meta: string[] = []
+  if (overrideName !== undefined && overrideName !== player.alias) {
+    meta.push(`alias ${player.alias}`)
+  }
+  if (!isPlaceholder) {
+    meta.push(`profile_id ${player.profile_id}`)
+    if (player.country) meta.push(player.country)
+  }
+
   const mutation =
     useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersLookupDelete({
       request: {
@@ -118,11 +135,10 @@ function PlayerRow({ player }: { player: PlayerRead }) {
     <li className="bg-muted/30 flex flex-col gap-3 rounded-md px-3 py-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col">
-          <span className="text-sm font-medium">{player.alias}</span>
-          {!isPlaceholder && (
+          <span className="text-sm font-medium">{visibleName}</span>
+          {meta.length > 0 && (
             <span className="text-muted-foreground font-mono text-xs">
-              profile_id {player.profile_id}
-              {player.country ? ` · ${player.country}` : null}
+              {meta.join(" · ")}
             </span>
           )}
         </div>
@@ -132,7 +148,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
             variant="outline"
             size="sm"
             onClick={() => setEditing((open) => !open)}
-            aria-label={t("admin.players.editAria", { name: player.alias })}
+            aria-label={t("admin.players.editAria", { name: visibleName })}
             aria-expanded={editing}
           >
             <Pencil className="size-4" aria-hidden />
@@ -145,13 +161,13 @@ function PlayerRow({ player }: { player: PlayerRead }) {
                 size="sm"
                 disabled={mutation.isPending}
                 aria-label={t("admin.players.removeAria", {
-                  name: player.alias,
+                  name: visibleName,
                 })}
               >
                 <Trash2 className="size-4" aria-hidden />
               </Button>
             }
-            title={t("admin.players.removeTitle", { name: player.alias })}
+            title={t("admin.players.removeTitle", { name: visibleName })}
             description={t("admin.players.removeDescription")}
             confirmLabel={t("admin.players.removeConfirm")}
             destructive
