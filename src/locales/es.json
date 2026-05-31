@@ -71,7 +71,8 @@
     "cards": {
       "biggestClimber": "Mayor ascenso",
       "highestPeak": "Punto más alto",
-      "mostMatches": "Más partidas"
+      "mostMatches": "Más partidas",
+      "winPct": "Mejor % de victorias"
     }
   },
   "standings": {
@@ -85,9 +86,16 @@
       "peak": "Máximo",
       "streak": "Racha",
       "games": "Partidas",
+      "winPct": "% Vict.",
       "recent": "Reciente",
       "activity": "Actividad",
       "watch": "Ver"
+    },
+    "winPctBreakdown": {
+      "title": "Porcentaje de victorias",
+      "wins": "{{count}} V",
+      "losses": "{{count}} D",
+      "aria": "{{wins}} victorias, {{losses}} derrotas"
     },
     "live": "En vivo",
     "liveAriaLabel": "En partida en vivo",
@@ -111,7 +119,9 @@
     "playersCount_other": "{{count}} jugadores",
     "noMembers": "Aún no hay integrantes con clasificación.",
     "rosterAriaLabel": "Plantilla del equipo",
-    "versus": "VS"
+    "versus": "VS",
+    "rankLabel": "Puesto",
+    "rankAria": "Puesto #{{rank}} por promedio de puntos"
   },
   "admin": {
     "title": "Admin",

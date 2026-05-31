@@ -1,4 +1,11 @@
-import { ExternalLink, Globe, Twitch, Youtube } from "lucide-react"
+import {
+  Crown,
+  ExternalLink,
+  Globe,
+  Skull,
+  Twitch,
+  Youtube,
+} from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useMemo, useRef } from "react"
 import type { ReactNode, Ref } from "react"
@@ -23,6 +30,7 @@ import { teamColorSlot } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
 import { BioHint } from "@/pages/home/bio-hint"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
+import { WinPctHint } from "@/pages/home/win-pct-hint"
 import type { MatchResult, StandingsRow, StandingsTeam } from "@/types"
 
 /** A player's last match counts as "active" if it landed within this window. */
@@ -223,9 +231,6 @@ export function StandingsTable({
                 row.currentRating
               )}
             </FlashCell>
-            <FlashCell value={row.streak} className="px-4 py-3 text-center">
-              <StreakCell streak={row.streak} />
-            </FlashCell>
             {tournamentStarted && (
               <>
                 <FlashCell
@@ -234,11 +239,24 @@ export function StandingsTable({
                 >
                   {row.gamesPlayed}
                 </FlashCell>
+                {/* Win% sits right after Games. Tooltip breaks down the W–L
+                    split behind the percentage (hover desktop / tap mobile). */}
+                <FlashCell
+                  value={row.wins - row.losses}
+                  className="px-4 py-3 text-right tabular-nums"
+                >
+                  <WinPctCell wins={row.wins} losses={row.losses} />
+                </FlashCell>
                 <td className="px-4 py-3">
                   <RecentResultsCell results={row.recentResults} />
                 </td>
               </>
             )}
+            {/* Streak sits adjacent to Recent — both are "recent form" — when
+                the tournament is live; pre-start it falls right after Rating. */}
+            <FlashCell value={row.streak} className="px-4 py-3 text-center">
+              <StreakCell streak={row.streak} />
+            </FlashCell>
             <td className="px-4 py-3">
               <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
             </td>
@@ -306,6 +324,10 @@ function getSortValue(row: StandingsRow, key: string): SortableValue {
       return row.streak
     case "gamesPlayed":
       return row.gamesPlayed
+    case "winPct":
+      // Rows with no decided games sort last (null) rather than as 0% — a
+      // 0-game placeholder shouldn't outrank a real 50% record.
+      return winPct(row)
     case "lastMatchAt":
       return row.lastMatchAt
     case "watch":
@@ -404,14 +426,6 @@ function StandingsHeaderRow({
         sortState={sortState}
         onSort={onSort}
       />
-      <SortableTh
-        label={t("standings.headers.streak")}
-        align="center"
-        sortKey="streak"
-        defaultDirection="desc"
-        sortState={sortState}
-        onSort={onSort}
-      />
       {tournamentStarted && (
         <>
           <SortableTh
@@ -422,9 +436,25 @@ function StandingsHeaderRow({
             sortState={sortState}
             onSort={onSort}
           />
+          <SortableTh
+            label={t("standings.headers.winPct")}
+            align="right"
+            sortKey="winPct"
+            defaultDirection="desc"
+            sortState={sortState}
+            onSort={onSort}
+          />
           <SortableTh label={t("standings.headers.recent")} />
         </>
       )}
+      <SortableTh
+        label={t("standings.headers.streak")}
+        align="center"
+        sortKey="streak"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
       <SortableTh
         label={t("standings.headers.activity")}
         sortKey="lastMatchAt"
@@ -494,19 +524,25 @@ export function StandingsTableSkeleton({
           <td className="px-4 py-3">
             <Skeleton className="ml-auto h-4 w-12" />
           </td>
-          <td className="px-4 py-3">
-            <Skeleton className="mx-auto h-5 w-10" />
-          </td>
           {tournamentStarted && (
             <>
               <td className="px-4 py-3">
                 <Skeleton className="ml-auto h-4 w-8" />
+              </td>
+              {/* Win% placeholder */}
+              <td className="px-4 py-3">
+                <Skeleton className="ml-auto h-4 w-12" />
               </td>
               <td className="px-4 py-3">
                 <Skeleton className="h-4 w-20" />
               </td>
             </>
           )}
+          {/* Streak placeholder — moved to follow Recent, matching the
+              populated row order. */}
+          <td className="px-4 py-3">
+            <Skeleton className="mx-auto h-5 w-10" />
+          </td>
           <td className="px-4 py-3">
             <Skeleton className="h-5 w-24 rounded-full" />
           </td>
@@ -808,12 +844,18 @@ function StreakCell({ streak }: { streak: number }) {
  * wins and reds losses — the same colour language as the streak badge. A
  * player with no completed match shows a neutral placeholder.
  */
+/** How many of the most-recent games the Recent column shows. */
+const RECENT_RESULTS_LIMIT = 6
+
 function RecentResultsCell({ results }: { results: MatchResult[] }) {
   const { t } = useTranslation()
   if (results.length === 0) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
-  const labeled = results
+  // Cap to the last N games. `results` is most-recent-first, so the first N
+  // are the latest; the visible slice stays newest → oldest, left → right.
+  const visible = results.slice(0, RECENT_RESULTS_LIMIT)
+  const labeled = visible
     .map((r) => (r === "win" ? t("standings.win") : t("standings.loss")))
     .join(", ")
   return (
@@ -821,18 +863,63 @@ function RecentResultsCell({ results }: { results: MatchResult[] }) {
       className="flex items-center gap-1"
       aria-label={t("standings.recentAriaLabel", { results: labeled })}
     >
-      {results.map((result, index) => (
-        <span
-          key={index}
-          aria-hidden
-          title={result === "win" ? t("standings.win") : t("standings.loss")}
-          className={cn(
-            "size-2 rounded-[2px]",
-            result === "win" ? "bg-chart-2" : "bg-destructive"
-          )}
-        />
-      ))}
+      {visible.map((result, index) => {
+        // Crown for a win, skull for a loss (#: broadcast vocabulary over the
+        // old neutral squares). Coloured with the same win/loss tokens the
+        // streak badge uses so the form language stays consistent across cells.
+        const Icon = result === "win" ? Crown : Skull
+        // Direction cue without extra chrome: the newest game (index 0, left)
+        // is full-strength and each older one fades a step, so "bright = now"
+        // reads at a glance. Floored at 0.4 so the oldest still stays legible.
+        const opacity = Math.max(0.4, 1 - index * 0.12)
+        return (
+          <Icon
+            key={index}
+            aria-hidden
+            style={{ opacity }}
+            className={cn(
+              "size-3.5",
+              result === "win" ? "text-chart-2-deep" : "text-destructive-deep"
+            )}
+          >
+            <title>
+              {result === "win" ? t("standings.win") : t("standings.loss")}
+            </title>
+          </Icon>
+        )
+      })}
     </span>
+  )
+}
+
+/**
+ * Win percentage from decided games (wins / (wins + losses)), or null when the
+ * player has no decided games — so a 0-game placeholder reads as "—" rather
+ * than 0% and sorts to the tail. The API also exposes a precomputed `win_pct`,
+ * but the standings adapter doesn't surface it, so we derive from the mapped
+ * wins / losses to avoid an adapter change.
+ */
+function winPct(row: StandingsRow): number | null {
+  const decided = row.wins + row.losses
+  return decided === 0 ? null : (row.wins / decided) * 100
+}
+
+/**
+ * The Win% cell: the percentage with a hover/tap breakdown of the underlying
+ * W–L split. Renders a muted em-dash for rows with no decided games (matching
+ * the other empty-state cells) and skips the tooltip there — there's nothing
+ * to break down.
+ */
+function WinPctCell({ wins, losses }: { wins: number; losses: number }) {
+  const decided = wins + losses
+  if (decided === 0) {
+    return <span className="text-muted-foreground text-xs">—</span>
+  }
+  const pct = (wins / decided) * 100
+  return (
+    <WinPctHint wins={wins} losses={losses}>
+      {pct.toFixed(1)}%
+    </WinPctHint>
   )
 }
 

@@ -71,7 +71,8 @@
     "cards": {
       "biggestClimber": "Biggest climber",
       "highestPeak": "Highest peak",
-      "mostMatches": "Most matches"
+      "mostMatches": "Most matches",
+      "winPct": "Best win rate"
     }
   },
   "standings": {
@@ -85,9 +86,16 @@
       "peak": "Peak",
       "streak": "Streak",
       "games": "Games",
+      "winPct": "Win %",
       "recent": "Recent",
       "activity": "Activity",
       "watch": "Watch"
+    },
+    "winPctBreakdown": {
+      "title": "Win rate",
+      "wins": "{{count}} W",
+      "losses": "{{count}} L",
+      "aria": "{{wins}} wins, {{losses}} losses"
     },
     "live": "Live",
     "liveAriaLabel": "In a live match",
@@ -111,7 +119,9 @@
     "playersCount_other": "{{count}} players",
     "noMembers": "No rated members yet.",
     "rosterAriaLabel": "Team roster",
-    "versus": "VS"
+    "versus": "VS",
+    "rankLabel": "Rank",
+    "rankAria": "Rank #{{rank}} by average rating"
   },
   "admin": {
     "title": "Admin",

@@ -273,10 +273,11 @@ describe("StandingsTable — games played", () => {
         tournamentStarted
       />
     )
-    // Games is the 7th column: Position, Team, Player, Peak, Rating,
-    // Streak, Games, Recent, Activity.
+    // Games is the 6th column (index 5): Position, Team, Player, Peak,
+    // Rating, Games, Win%, Recent, Streak, Activity, Watch. (Streak moved
+    // to follow Recent; Win% was inserted right after Games.)
     const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell")
-    expect(cells[6]).toHaveTextContent("14")
+    expect(cells[5]).toHaveTextContent("14")
   })
 })
 

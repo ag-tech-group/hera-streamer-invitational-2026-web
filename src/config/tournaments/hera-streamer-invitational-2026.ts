@@ -24,6 +24,11 @@ export const heraStreamerInvitational2026: Tournament = {
   // Links out to the studio's page on ageofempires.com (#183).
   prizeSponsor: "World's Edge",
   prizeSponsorUrl: "https://www.ageofempires.com/worlds-edge-studio/",
+  // Promo links rendered by `HostLinksCard`. These are build-config and the
+  // sole source for the card — distinct from the admin-saved `host_stream_urls`
+  // (#225), which the API uses only for host-liveness detection. The Twitch /
+  // YouTube URLs here may duplicate that list; that's intentional (the flat
+  // list can't carry these labels/kinds/order).
   hostLinks: [
     { label: "Twitch", url: "https://twitch.tv/hera", kind: "twitch" },
     {
