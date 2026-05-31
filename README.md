@@ -77,19 +77,19 @@ src/
 
 ### Runtime (bundled, `VITE_*` reach the browser)
 
-| Variable                                   | Description                                                       | Default                           |
-| ------------------------------------------ | ----------------------------------------------------------------- | --------------------------------- |
-| `VITE_API_URL`                             | Backend API URL                                                   | `/api`                            |
-| `VITE_AUTH_URL`                            | Auth frontend URL (sign-in, profile management)                   | `https://auth.criticalbit.gg`     |
-| `VITE_AUTH_API_URL`                        | Auth API URL (logout, token refresh, user search)                 | `https://auth-api.criticalbit.gg` |
-| `VITE_TOURNAMENT_SLUG`                     | Tournament config this build serves                               | `hera-streamer-invitational-2026` |
-| `VITE_LOG_LEVEL`                           | Minimum log level (debug/info/warn/error)                         | `debug` (dev), `warn` (prod)      |
-| `VITE_SENTRY_DSN`                          | Sentry project DSN — unset = SDK never initialises (zero events)  | unset                             |
-| `VITE_SENTRY_TRACES_SAMPLE_RATE`           | Performance trace sample rate (`0` – `1`)                         | `0`                               |
-| `VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE`  | Session replay sample rate (`0` – `1`)                            | `0`                               |
-| `VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE` | Replay sample rate on error (`0` – `1`)                           | `0`                               |
-| `VITE_POSTHOG_KEY`                         | PostHog project key — unset = SDK never initialises (zero events) | unset                             |
-| `VITE_POSTHOG_HOST`                        | PostHog ingest host (US/EU cloud or self-hosted)                  | `https://us.i.posthog.com`        |
+| Variable                                   | Description                                                                                                                                                                                          | Default                           |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `VITE_API_URL`                             | Backend API URL                                                                                                                                                                                      | `/api`                            |
+| `VITE_AUTH_URL`                            | Auth frontend URL (sign-in, profile management)                                                                                                                                                      | `https://auth.criticalbit.gg`     |
+| `VITE_AUTH_API_URL`                        | Auth API URL (logout, token refresh, user search)                                                                                                                                                    | `https://auth-api.criticalbit.gg` |
+| `VITE_TOURNAMENT_SLUG`                     | Tournament config this build serves                                                                                                                                                                  | `hera-streamer-invitational-2026` |
+| `VITE_LOG_LEVEL`                           | Minimum log level (debug/info/warn/error)                                                                                                                                                            | `debug` (dev), `warn` (prod)      |
+| `VITE_SENTRY_DSN`                          | Sentry project DSN — unset = SDK never initialises (zero events)                                                                                                                                     | unset                             |
+| `VITE_SENTRY_TRACES_SAMPLE_RATE`           | Performance trace sample rate (`0` – `1`)                                                                                                                                                            | `0`                               |
+| `VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE`  | Session replay sample rate (`0` – `1`)                                                                                                                                                               | `0`                               |
+| `VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE` | Replay sample rate on error (`0` – `1`)                                                                                                                                                              | `0`                               |
+| `VITE_POSTHOG_KEY`                         | PostHog project key — unset = SDK never initialises (zero events)                                                                                                                                    | unset                             |
+| `VITE_POSTHOG_HOST`                        | PostHog ingest host. Prod points this at the first-party `/relay` reverse proxy (see [PostHog analytics reverse proxy](#posthog-analytics-reverse-proxy)) so ad / privacy blockers don't drop events | `https://us.i.posthog.com`        |
 
 ### Build-time (used by tooling, not bundled)
 
@@ -126,6 +126,28 @@ Deployed to Netlify, served from `hera-streamer-invitational-2026.criticalbit.gg
 Netlify auto-builds on every push to `main` once the project is wired. The build runs `pnpm install` → `pnpm build` (which itself runs `generate-routes` → `tsc -b` → `vite build`) and serves the resulting `dist/` from the custom domain.
 
 `netlify.toml` at the repo root configures production headers and routing in one place: the CSP and standard security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy), long-lived `Cache-Control` for `/assets/*` (Vite-hashed bundles are immutable per build) with `must-revalidate` on `/index.html`, and the SPA fallback so deep links from the TanStack Router resolve through `index.html`.
+
+### PostHog analytics reverse proxy
+
+PostHog ingestion is routed through a first-party path on the event domain so privacy / ad-block extensions — common in the AoE2 audience — don't silently drop events by blocking the `*.i.posthog.com` destinations. In production `VITE_POSTHOG_HOST` is set to `https://aoe2.criticalbit.gg/relay` (baked into `netlify.toml`'s `[context.production.environment]`, so it applies to `main` builds only — deploy previews fall back to direct ingestion). `posthog-js` therefore only ever talks to the same origin as the app, and `netlify.toml` proxies those paths to PostHog server-side via two rewrites:
+
+- `/relay/static/*` → `https://us-assets.i.posthog.com/static/*` — the lazily-loaded SDK assets
+- `/relay/*` → `https://us.i.posthog.com/*` — capture, `/decide`, `/flags`, `/array`
+
+Both use `force = true` and sit above the SPA fallback so `index.html` doesn't shadow them. No CSP change is needed — `connect-src 'self'` already covers the first-party path; the explicit `us.i.posthog.com` / `us-assets.i.posthog.com` entries remain as the direct-ingestion fallback for any context where `VITE_POSTHOG_HOST` is unset. The proxy still needs `VITE_POSTHOG_KEY` set in the Netlify environment to emit anything.
+
+On the production domain, `aoe2.criticalbit.gg` is fronted by the [criticalbit-router](https://github.com/ag-tech-group/criticalbit-router) (Cloudflare Worker). Its event-hub config uses an empty `routes` map, so it serves only the apex `/` → `/<slug>/` redirect and passes every deeper path — including `/relay/*` — through to the Netlify origin unchanged; the rewrites above run at Netlify.
+
+**Verify after deploy:** load the site with an ad-blocker (e.g. uBlock Origin) enabled, then in DevTools → Network confirm analytics requests go to `aoe2.criticalbit.gg/relay/*` (`200`) rather than `*.i.posthog.com`, and that events arrive in PostHog. Quick non-blocker smoke test:
+
+```sh
+# SDK assets — expect 200, content-type: application/javascript
+curl -sI https://aoe2.criticalbit.gg/relay/static/array.js | grep -i content-type
+# decide/flags — expect PostHog JSON, not the SPA's text/html
+curl -s 'https://aoe2.criticalbit.gg/relay/decide/?v=3'
+```
+
+> A misconfigured proxy drops **all** events (versus losing only blocked ones today), so this check gates calling it done.
 
 ### Path-router routing (deferred)
 
