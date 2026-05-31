@@ -15,6 +15,10 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
 
 Configuration rather than polled data: a tournament's standings,
 matches, and live state are served under ``/v1/tournaments/{slug}/...``.
+The one exception is ``host_stream_live`` (#149) — a derived flag the
+router computes from the broadcast-live snapshot before serializing,
+so a host channel going live transitions the card within one poll
+cycle. The standings ``live`` SSE nudge already invalidates this query.
  */
 export interface TournamentRead {
   id: number;
@@ -24,5 +28,7 @@ export interface TournamentRead {
   start_date: string | null;
   grand_finals_date: string | null;
   prize_pool_cents: number | null;
+  host_stream_urls: string[];
+  host_stream_live?: boolean;
   created_at: string;
 }
