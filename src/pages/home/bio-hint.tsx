@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useAnalytics } from "@/lib/analytics"
 
 /**
  * Whether this is a true mouse-pointer setup rather than a touch screen. Drives
@@ -71,19 +72,32 @@ function BioCard({ bio, name }: { bio: string; name: string }) {
 export function BioHint({
   bio,
   name,
+  profileId,
+  alias,
   children,
 }: {
   bio: string
   name: string
+  /** Relic profile id (null for placeholder rows) — carried for analytics. */
+  profileId: number | null
+  /** Raw ladder alias — carried for analytics alongside the display name. */
+  alias: string
   /** The player-name node that acts as the hover trigger on the desktop. */
   children: ReactNode
 }) {
   const { t } = useTranslation()
+  const analytics = useAnalytics()
   const hoverCapable = useHoverCapable()
+
+  // #215: fire `player.bio.open` once, on the open transition only (the
+  // primitive calls `onOpenChange` for both open and close).
+  const onOpenChange = (open: boolean) => {
+    if (open) analytics.track("player.bio.open", { profileId, alias })
+  }
 
   if (hoverCapable) {
     return (
-      <HoverCard openDelay={140} closeDelay={90}>
+      <HoverCard openDelay={140} closeDelay={90} onOpenChange={onOpenChange}>
         <HoverCardTrigger asChild>{children}</HoverCardTrigger>
         <HoverCardContent className="tooltip-surface">
           <BioCard bio={bio} name={name} />
@@ -95,7 +109,7 @@ export function BioHint({
   return (
     <span className="inline-flex items-center gap-1.5">
       {children}
-      <Popover>
+      <Popover onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           <button
             type="button"

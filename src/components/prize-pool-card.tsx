@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next"
 
 import { Skeleton } from "@/components/ui/skeleton"
+import { useAnalytics } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 
 /**
@@ -38,6 +39,7 @@ export function PrizePoolCard({
   className?: string
 }) {
   const { t } = useTranslation()
+  const analytics = useAnalytics()
 
   if (isLoading) {
     return <PrizePoolCardSkeleton sponsor={sponsor} className={className} />
@@ -117,6 +119,10 @@ export function PrizePoolCard({
               href={sponsorUrl}
               target="_blank"
               rel="noopener noreferrer"
+              // #215: sponsor click-through from the prize-pool card.
+              onClick={() =>
+                analytics.track("prize.sponsor.click", { sponsor })
+              }
               className="hover:text-foreground underline underline-offset-2 transition-colors"
             >
               {sponsor}

@@ -10,6 +10,7 @@ import type { LucideIcon } from "lucide-react"
 import type { ComponentType, SVGProps } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAnalytics } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import type { HostLink, HostLinkKind } from "@/types"
 
@@ -63,6 +64,7 @@ export function HostLinksCard({
   className?: string
 }) {
   const { t } = useTranslation()
+  const analytics = useAnalytics()
   if (!links || links.length === 0) return null
   return (
     <section
@@ -127,6 +129,14 @@ export function HostLinksCard({
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                // #215: host promo-card click-through, by link kind.
+                onClick={() =>
+                  analytics.track("host.link.click", {
+                    kind: link.kind,
+                    streamLive,
+                    source: "host_card",
+                  })
+                }
                 className={cn(
                   "hover:bg-muted/50 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
                   broadcastGlow

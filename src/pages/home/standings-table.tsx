@@ -26,6 +26,7 @@ import {
   formatRelativeTime,
   normalizeCountryCode,
 } from "@/lib/format"
+import { useAnalytics } from "@/lib/analytics"
 import { teamColorMap, type TeamColorSlot } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
 import { BioHint } from "@/pages/home/bio-hint"
@@ -186,6 +187,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             </td>
             <td className="px-4 py-3">
               <PlayerCell
+                profileId={row.profileId}
                 alias={row.alias}
                 displayName={row.presentation.displayName}
                 country={row.country}
@@ -260,6 +262,8 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
               <WatchCell
                 streamUrls={row.presentation.streamUrls}
                 streamLive={row.streamLive}
+                profileId={row.profileId}
+                alias={row.alias}
               />
             </td>
           </tr>
@@ -666,6 +670,7 @@ function TeamCell({
  * code change.
  */
 function PlayerCell({
+  profileId,
   alias,
   displayName,
   country,
@@ -674,6 +679,8 @@ function PlayerCell({
   profileUrl,
   inMatch,
 }: {
+  /** Relic profile id, or null for placeholder rows — carried for analytics. */
+  profileId: number | null
   alias: string
   displayName?: string
   country: string | null
@@ -690,6 +697,7 @@ function PlayerCell({
   inMatch: boolean
 }) {
   const { t } = useTranslation()
+  const analytics = useAnalytics()
   const countryCode = normalizeCountryCode(country)
   // Country flag emojis don't render as glyphs on Windows (no font for the
   // regional-indicator range), so route a standard `presentation.flag` back
@@ -714,6 +722,15 @@ function PlayerCell({
       target="_blank"
       rel="noopener noreferrer"
       title={t("standings.viewProfile", { name: visibleName })}
+      // #215: profile click-through. In the click handler so it fires once per
+      // real click, not on every render of the (also hover-trigger) name node.
+      onClick={() =>
+        analytics.track("player.profile.click", {
+          profileId,
+          alias,
+          source: "standings",
+        })
+      }
       className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
     >
       {visibleName}
@@ -748,7 +765,12 @@ function PlayerCell({
        * name renders bare.
        */}
       {bio ? (
-        <BioHint bio={bio} name={visibleName}>
+        <BioHint
+          bio={bio}
+          name={visibleName}
+          profileId={profileId}
+          alias={alias}
+        >
           {nameNode}
         </BioHint>
       ) : (
@@ -969,11 +991,16 @@ function ActivityCell({
 function WatchCell({
   streamUrls,
   streamLive,
+  profileId,
+  alias,
 }: {
   streamUrls: string[] | undefined
   streamLive: boolean
+  profileId: number | null
+  alias: string
 }) {
   const { t } = useTranslation()
+  const analytics = useAnalytics()
   if (!streamUrls || streamUrls.length === 0) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
@@ -991,6 +1018,17 @@ function WatchCell({
             target="_blank"
             rel="noopener noreferrer"
             title={t(`standings.watchOn.${platform}`)}
+            // #215: the headline "go watch" conversion. Fired in the click
+            // handler (not an effect) so it logs once per real click.
+            onClick={() =>
+              analytics.track("watch.click", {
+                profileId,
+                alias,
+                platform,
+                streamLive,
+                source: "standings",
+              })
+            }
             // Padding grows the tap target past the visible glyph (#214); the
             // wrapper's negative margin keeps the cell from getting taller.
             className={cn(
