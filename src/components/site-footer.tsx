@@ -16,7 +16,16 @@ const LINK_CLASS =
  * rendered on every route so the claim accompanies any page that surfaces
  * those assets.
  *
- * Each line uses the same prefix/link/suffix i18n pattern the home-page
+ * Also carries the criticalbit Privacy and Terms links (#216). This site is
+ * a `*.criticalbit.gg` property operated by AG Technology Group LLC and its
+ * data processing (PostHog analytics, Sentry error tracking, the shared auth
+ * cookie) is governed by the platform-wide policy at criticalbit.gg — so we
+ * link that canonical policy rather than author a separate one that could
+ * drift. The links are absolute cross-origin `<a>`s, not router `<Link>`s:
+ * `/privacy` and `/terms` are routes on the criticalbit.gg origin, not this
+ * SPA, so a same-origin `<Link>` would 404.
+ *
+ * Each prose line uses the same prefix/link/suffix i18n pattern the home-page
  * subtitle does: a direct `<a>` wraps the link text and the surrounding
  * prose comes from two sibling translation keys. The earlier `<Trans>`
  * version with a `<link>` placeholder rendered the anchor as a self-closing
@@ -31,18 +40,42 @@ export function SiteFooter() {
   return (
     <footer className="border-border/50 border-t">
       <div className="text-muted-foreground mx-auto flex w-full max-w-[1536px] flex-col gap-1.5 px-8 py-6 text-xs">
-        <p>
-          {t("footer.criticalbitProjectPrefix")}
-          <a
-            href="https://criticalbit.gg"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={LINK_CLASS}
+        <div className="flex items-center justify-between gap-4">
+          <p>
+            {t("footer.criticalbitProjectPrefix")}
+            <a
+              href="https://criticalbit.gg"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={LINK_CLASS}
+            >
+              {t("footer.criticalbitProjectLink")}
+            </a>
+            {t("footer.criticalbitProjectSuffix")}
+          </p>
+          <nav
+            aria-label={t("footer.legalNavLabel")}
+            className="flex shrink-0 items-center gap-2"
           >
-            {t("footer.criticalbitProjectLink")}
-          </a>
-          {t("footer.criticalbitProjectSuffix")}
-        </p>
+            <a
+              href="https://criticalbit.gg/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={LINK_CLASS}
+            >
+              {t("footer.privacyLink")}
+            </a>
+            <span aria-hidden="true">·</span>
+            <a
+              href="https://criticalbit.gg/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={LINK_CLASS}
+            >
+              {t("footer.termsLink")}
+            </a>
+          </nav>
+        </div>
         <p>
           {t("footer.microsoftDisclaimerPrefix")}
           <a

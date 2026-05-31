@@ -289,6 +289,9 @@
     "criticalbitProjectSuffix": " project.",
     "microsoftDisclaimerPrefix": "Age of Empires II © Microsoft Corporation. This site was created under Microsoft's ",
     "microsoftDisclaimerLink": "Game Content Usage Rules",
-    "microsoftDisclaimerSuffix": " using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft."
+    "microsoftDisclaimerSuffix": " using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.",
+    "legalNavLabel": "Legal",
+    "privacyLink": "Privacy",
+    "termsLink": "Terms"
   }
 }
