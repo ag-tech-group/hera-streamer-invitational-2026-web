@@ -42,7 +42,7 @@ const rows: StandingsRow[] = [
 
 describe("StandingsTable", () => {
   it("shows Position and Team column headers", () => {
-    render(<StandingsTable rows={rows} tournamentStarted />)
+    render(<StandingsTable rows={rows} />)
     expect(
       screen.getByRole("columnheader", { name: "Position" })
     ).toBeInTheDocument()
@@ -52,7 +52,7 @@ describe("StandingsTable", () => {
   })
 
   it("numbers rows by tournament position from peak rating, not ladder rank", () => {
-    render(<StandingsTable rows={rows} tournamentStarted />)
+    render(<StandingsTable rows={rows} />)
     const bodyRows = screen.getAllByRole("row").slice(1) // drop the header row
 
     const positions = bodyRows.map(
@@ -84,7 +84,6 @@ describe("StandingsTable", () => {
             maxRating: 2750,
           }),
         ]}
-        tournamentStarted
       />
     )
     const bodyRows = screen.getAllByRole("row").slice(1)
@@ -105,7 +104,6 @@ describe("StandingsTable", () => {
             maxRating: 2900,
           }),
         ]}
-        tournamentStarted
       />
     )
     const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell")
@@ -114,7 +112,7 @@ describe("StandingsTable", () => {
   })
 
   it("shows the Games and Recent column headers", () => {
-    render(<StandingsTable rows={rows} tournamentStarted />)
+    render(<StandingsTable rows={rows} />)
     expect(
       screen.getByRole("columnheader", { name: "Games" })
     ).toBeInTheDocument()
@@ -135,7 +133,6 @@ describe("StandingsTable — team column", () => {
             team: { teamId: 3, name: "Team Grubby", initials: "G" },
           }),
         ]}
-        tournamentStarted
       />
     )
     const chip = screen.getByTitle("Team Grubby")
@@ -146,7 +143,6 @@ describe("StandingsTable — team column", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", team: null })]}
-        tournamentStarted
       />
     )
     // Team is the 2nd column (Position, Team, Player, ...).
@@ -169,7 +165,6 @@ describe("StandingsTable — team column", () => {
             team: { teamId: 2, name: "Red", initials: "R" },
           }),
         ]}
-        tournamentStarted
       />
     )
     expect(screen.getByTitle("Blue")).toHaveAttribute("data-team-color", "p1")
@@ -200,7 +195,6 @@ describe("StandingsTable — team column", () => {
             team: { teamId: 2, name: "Red", initials: "R" },
           }),
         ]}
-        tournamentStarted
       />
     )
     await user.click(screen.getByRole("button", { name: "Team" }))
@@ -224,7 +218,6 @@ describe("StandingsTable — recent results", () => {
             recentResults: ["win", "loss", "win"],
           }),
         ]}
-        tournamentStarted
       />
     )
     expect(screen.getAllByTitle("Win")).toHaveLength(2)
@@ -235,7 +228,6 @@ describe("StandingsTable — recent results", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", recentResults: [] })]}
-        tournamentStarted
       />
     )
     expect(screen.queryByTitle("Win")).not.toBeInTheDocument()
@@ -248,7 +240,6 @@ describe("StandingsTable — in-match indicator", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", inMatch: true })]}
-        tournamentStarted
       />
     )
     expect(screen.getByText("Live")).toBeInTheDocument()
@@ -258,7 +249,6 @@ describe("StandingsTable — in-match indicator", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", inMatch: false })]}
-        tournamentStarted
       />
     )
     expect(screen.queryByText("Live")).not.toBeInTheDocument()
@@ -270,7 +260,6 @@ describe("StandingsTable — games played", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", gamesPlayed: 14 })]}
-        tournamentStarted
       />
     )
     // Games is the 6th column (index 5): Position, Team, Player, Peak,
@@ -283,14 +272,14 @@ describe("StandingsTable — games played", () => {
 
 describe("StandingsTable — podium position chips", () => {
   it("renders position 1 as a filled brand chip", () => {
-    render(<StandingsTable rows={rows} tournamentStarted />)
+    render(<StandingsTable rows={rows} />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     const firstPos = within(bodyRows[0]).getAllByRole("cell")[0]
     expect(firstPos.querySelector("span")).toHaveClass("bg-brand")
   })
 
   it("renders positions 2 and 3 with descending brand-fill intensity", () => {
-    render(<StandingsTable rows={rows} tournamentStarted />)
+    render(<StandingsTable rows={rows} />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     const secondPos = within(bodyRows[1]).getAllByRole("cell")[0]
     const thirdPos = within(bodyRows[2]).getAllByRole("cell")[0]
@@ -303,7 +292,7 @@ describe("StandingsTable — podium position chips", () => {
       ...rows,
       row({ profileId: 4, alias: "Delta", currentRating: 2500, rank: 30 }),
     ]
-    render(<StandingsTable rows={fourRows} tournamentStarted />)
+    render(<StandingsTable rows={fourRows} />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     const fourthPos = within(bodyRows[3]).getAllByRole("cell")[0]
     const span = fourthPos.querySelector("span")
@@ -316,7 +305,7 @@ describe("StandingsTable — podium position chips", () => {
 
 describe("StandingsTable — rank-1 row spotlight", () => {
   it("applies the spotlight class to the leader's row only", () => {
-    render(<StandingsTable rows={rows} tournamentStarted />)
+    render(<StandingsTable rows={rows} />)
     const bodyRows = screen.getAllByRole("row").slice(1)
     expect(bodyRows[0]).toHaveClass("rank-1-spotlight")
     expect(bodyRows[1]).not.toHaveClass("rank-1-spotlight")
@@ -337,7 +326,6 @@ describe("StandingsTable — player name link", () => {
             },
           }),
         ]}
-        tournamentStarted
       />
     )
     const link = screen.getByRole("link", { name: /alpha/i })
@@ -353,7 +341,6 @@ describe("StandingsTable — player name link", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1819870, alias: "Alpha", presentation: {} })]}
-        tournamentStarted
       />
     )
     expect(screen.queryByRole("link", { name: /alpha/i })).toBeNull()
@@ -361,43 +348,27 @@ describe("StandingsTable — player name link", () => {
   })
 })
 
-describe("StandingsTable — pre-tournament column gating", () => {
-  it("hides the Games and Recent column headers when tournamentStarted is false", () => {
-    render(<StandingsTable rows={rows} tournamentStarted={false} />)
-    expect(
-      screen.queryByRole("columnheader", { name: "Games" })
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole("columnheader", { name: "Recent" })
-    ).not.toBeInTheDocument()
-    // The other columns continue to render.
-    expect(
-      screen.getByRole("columnheader", { name: "Rating" })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole("columnheader", { name: "Activity" })
-    ).toBeInTheDocument()
-  })
-
-  it("shows the Games and Recent column headers when tournamentStarted is true", () => {
-    render(<StandingsTable rows={rows} tournamentStarted />)
+describe("StandingsTable — full column set", () => {
+  it("always renders the Games, Win %, and Recent column headers", () => {
+    render(<StandingsTable rows={rows} />)
     expect(
       screen.getByRole("columnheader", { name: "Games" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("columnheader", { name: "Win %" })
     ).toBeInTheDocument()
     expect(
       screen.getByRole("columnheader", { name: "Recent" })
     ).toBeInTheDocument()
   })
 
-  it("drops the Games + Recent cells from each row when tournamentStarted is false", () => {
+  it("renders each player's games-played count", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", gamesPlayed: 14 })]}
-        tournamentStarted={false}
       />
     )
-    // No row should render the games count (would be in a hidden td).
-    expect(screen.queryByText("14")).not.toBeInTheDocument()
+    expect(screen.getByText("14")).toBeInTheDocument()
   })
 })
 
@@ -406,7 +377,6 @@ describe("StandingsTable — rating cell", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", currentRating: 1850 })]}
-        tournamentStarted
       />
     )
     expect(screen.getByText("1850")).toBeInTheDocument()
@@ -418,7 +388,6 @@ describe("StandingsTable — country flag", () => {
     render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", country: "ca" })]}
-        tournamentStarted
       />
     )
     expect(screen.getByTitle("CA")).toHaveClass("fi", "fi-ca")
@@ -428,7 +397,6 @@ describe("StandingsTable — country flag", () => {
     const { container } = render(
       <StandingsTable
         rows={[row({ profileId: 1, alias: "Alpha", country: null })]}
-        tournamentStarted
       />
     )
     expect(container.querySelector(".fi")).not.toBeInTheDocument()
@@ -447,7 +415,6 @@ describe("StandingsTable — player bio", () => {
           }),
           row({ profileId: 2, alias: "Bravo" }),
         ]}
-        tournamentStarted
       />
     )
     // In jsdom `(hover: hover)` is false, so BioHint renders its touch
