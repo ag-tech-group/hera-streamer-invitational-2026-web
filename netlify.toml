@@ -1,3 +1,13 @@
+# Point posthog-js at the first-party `/relay/*` reverse proxy (rewrites
+# below) only on production builds, so privacy / ad blockers don't drop
+# events by blocking `*.i.posthog.com`. Scoped to the production context
+# (main) deliberately: deploy previews and branch deploys leave this unset
+# and fall back to direct ingestion (DEFAULT_HOST in src/lib/posthog.ts),
+# which keeps preview analytics out of the production proxy path. The proxy
+# still needs VITE_POSTHOG_KEY set (Netlify UI) to emit anything.
+[context.production.environment]
+  VITE_POSTHOG_HOST = "https://aoe2.criticalbit.gg/relay"
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -17,6 +27,11 @@
     #   - img-src https:: user avatars resolve to arbitrary federated-identity
     #     CDNs via the auth API and render only on the authenticated admin
     #     surface. Images can't execute, so the wildcard is low-risk.
+    # PostHog is normally reached first-party via the `/relay/*` reverse proxy
+    # (redirects below), which `connect-src 'self'` already covers. The explicit
+    # `us.i.posthog.com` / `us-assets.i.posthog.com` entries stay as the direct-
+    # ingestion fallback for when `VITE_POSTHOG_HOST` is unset (e.g. deploy
+    # previews) — don't remove them.
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.criticalbit.gg https://*.ingest.us.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com; worker-src 'self' blob:; img-src 'self' data: https:; object-src 'none'; frame-src 'none'; form-action 'self'; upgrade-insecure-requests; base-uri 'self'"
     # Strict-Transport-Security: explicit 1-year `max-age` plus
     # `includeSubDomains` (so the same HSTS guarantee covers any
@@ -51,10 +66,12 @@
 
 # Cutover prefix-stripping (#167). Vite's `base = "/kings-gauntlet/"` rewrites
 # URLs in the built HTML to include the prefix, but doesn't physically move
-# files under a `/kings-gauntlet/` subdirectory in `dist/`. With Netlify
-# serving `aoe2.criticalbit.gg/*` directly via custom-domain (no upstream
-# router stripping the prefix), these rules map the prefixed URLs the browser
-# requests back to the actual file layout on disk.
+# files under a `/kings-gauntlet/` subdirectory in `dist/`. The domain is
+# fronted by Cloudflare (the criticalbit-router) which only serves the apex
+# `/` → `/kings-gauntlet/` redirect and passes every deeper path through to
+# the Netlify origin un-rewritten — it does NOT strip the prefix. So these
+# rules run at Netlify and map the prefixed URLs the browser requests back to
+# the actual file layout on disk.
 #
 # Order matters: the specific asset rule has to land before the broader
 # `/kings-gauntlet/*` SPA fallback so JS/CSS get the file rather than the
@@ -131,6 +148,35 @@
   from = "/kings-gauntlet/*"
   to = "/index.html"
   status = 200
+
+# PostHog analytics reverse proxy. Routes product-analytics traffic through a
+# first-party path on this domain so privacy / ad-block extensions — common in
+# the AoE2 / esports audience — don't silently drop events by blocking the
+# `*.i.posthog.com` destinations. The browser only ever talks to
+# `aoe2.criticalbit.gg/relay/*`; Netlify proxies server-side to PostHog US.
+# posthog-js is pointed here via `VITE_POSTHOG_HOST=https://aoe2.criticalbit.gg/relay`
+# (read in src/lib/posthog.ts).
+#
+# Two-rule split mirrors PostHog's documented reverse-proxy pattern: `/static/*`
+# serves the SDK's lazily-loaded JS assets from the assets host; everything else
+# (capture `/e` / `/i`, `/decide`, `/flags`, `/array`) goes to the ingestion
+# host. More specific rule first. `force = true` makes the rewrite win even if a
+# path ever collides with a built file. These must precede the `/*` SPA fallback
+# below or the paths would render the app shell instead of proxying. Requests
+# arrive via the Cloudflare edge that fronts this domain, which passes non-apex
+# paths through to this Netlify origin (see the #167 note above), so the proxy
+# lives correctly here at Netlify.
+[[redirects]]
+  from = "/relay/static/*"
+  to = "https://us-assets.i.posthog.com/static/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/relay/*"
+  to = "https://us.i.posthog.com/:splat"
+  status = 200
+  force = true
 
 # Bare apex → tournament path. Visitors who land on `aoe2.criticalbit.gg/`
 # directly (e.g. from a bookmark of the host domain) get bounced into the
