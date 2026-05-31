@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 
 import { TournamentLayout } from "@/components/tournament-layout"
 import type { StandingsView } from "@/components/view-tabs"
@@ -6,7 +6,6 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
-import { useTournament } from "@/hooks/use-tournament"
 import { useAnalytics } from "@/lib/analytics"
 import {
   LastUpdatedBadge,
@@ -35,19 +34,6 @@ export function HomePage({ view }: { view: StandingsView }) {
   // Subscribe to the SSE nudge stream: each nudge invalidates the matching
   // query so the visible table refetches without a manual reload.
   useLiveUpdates()
-
-  // Has the tournament started? Gates the Games + Recent columns — the API
-  // only populates them within the tournament's date window, so pre-start
-  // they're always zero / empty and showing them reads as dead chrome. (The
-  // context strip's countdown→active-panel swap lives in `ContextCards` now.)
-  // Null start date counts as "not started"; `mountedAtMs` is captured once
-  // via `useState`'s lazy initializer so `Date.now()` stays out of the render
-  // pass (react-hooks/purity), and a manual reload re-evaluates it.
-  const tournament = useTournament()
-  const [mountedAtMs] = useState(() => Date.now())
-  const tournamentStarted = tournament.data?.startDate
-    ? new Date(tournament.data.startDate).getTime() <= mountedAtMs
-    : false
 
   const analytics = useAnalytics()
 
@@ -88,7 +74,6 @@ export function HomePage({ view }: { view: StandingsView }) {
           isError={standings.isError}
           error={standings.error}
           onRetry={handleRetryStandings}
-          tournamentStarted={tournamentStarted}
         />
       ) : (
         <TeamsSection
@@ -114,17 +99,15 @@ function StandingsSection({
   isError,
   error,
   onRetry,
-  tournamentStarted,
 }: {
   snapshot: StandingsSnapshot | undefined
   isPending: boolean
   isError: boolean
   error: unknown
   onRetry: () => void
-  tournamentStarted: boolean
 }) {
   if (isPending) {
-    return <StandingsTableSkeleton tournamentStarted={tournamentStarted} />
+    return <StandingsTableSkeleton />
   }
 
   if (isError || !snapshot) {
@@ -135,12 +118,7 @@ function StandingsSection({
     return <StandingsEmpty />
   }
 
-  return (
-    <StandingsTable
-      rows={snapshot.rows}
-      tournamentStarted={tournamentStarted}
-    />
-  )
+  return <StandingsTable rows={snapshot.rows} />
 }
 
 /** The teams counterpart of `StandingsSection`, with the same state precedence. */

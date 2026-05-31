@@ -91,19 +91,11 @@ function rowKey(row: StandingsRow): string {
  * rows it is handed and owns no fetching or query state — `HomePage` decides
  * when a populated table is the right thing to show (vs. loading/empty/error).
  *
- * `tournamentStarted` gates the Games + Recent columns: before the tournament
- * begins, those columns are always zero / empty (the API scopes both to the
- * tournament's date window), so they read as dead chrome. `HomePage` derives
- * the flag from `tournament.startDate`; the column treatment is reversible
- * the moment the start date passes.
+ * Every column renders at all times. (Games + Recent were previously hidden
+ * until the tournament's start date passed; that gate was removed so the full
+ * table shows from the start — pre-start those cells just read as 0 / empty.)
  */
-export function StandingsTable({
-  rows,
-  tournamentStarted,
-}: {
-  rows: StandingsRow[]
-  tournamentStarted: boolean
-}) {
+export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
   const { t } = useTranslation()
   // One reference instant for the whole render, so every "time ago" in the
   // Activity column is measured against the same clock.
@@ -143,13 +135,7 @@ export function StandingsTable({
     <TableShell
       caption={t("standings.caption")}
       bodyRef={containerRef}
-      headerRow={
-        <StandingsHeaderRow
-          sortState={sortState}
-          onSort={sortBy}
-          tournamentStarted={tournamentStarted}
-        />
-      }
+      headerRow={<StandingsHeaderRow sortState={sortState} onSort={sortBy} />}
     >
       {sortedRows.map((row) => {
         const key = rowKey(row)
@@ -231,29 +217,24 @@ export function StandingsTable({
                 row.currentRating
               )}
             </FlashCell>
-            {tournamentStarted && (
-              <>
-                <FlashCell
-                  value={row.gamesPlayed}
-                  className="text-muted-foreground px-4 py-3 text-right tabular-nums"
-                >
-                  {row.gamesPlayed}
-                </FlashCell>
-                {/* Win% sits right after Games. Tooltip breaks down the W–L
-                    split behind the percentage (hover desktop / tap mobile). */}
-                <FlashCell
-                  value={row.wins - row.losses}
-                  className="px-4 py-3 text-right tabular-nums"
-                >
-                  <WinPctCell wins={row.wins} losses={row.losses} />
-                </FlashCell>
-                <td className="px-4 py-3">
-                  <RecentResultsCell results={row.recentResults} />
-                </td>
-              </>
-            )}
-            {/* Streak sits adjacent to Recent — both are "recent form" — when
-                the tournament is live; pre-start it falls right after Rating. */}
+            <FlashCell
+              value={row.gamesPlayed}
+              className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+            >
+              {row.gamesPlayed}
+            </FlashCell>
+            {/* Win% sits right after Games. Tooltip breaks down the W–L
+                split behind the percentage (hover desktop / tap mobile). */}
+            <FlashCell
+              value={row.wins - row.losses}
+              className="px-4 py-3 text-right tabular-nums"
+            >
+              <WinPctCell wins={row.wins} losses={row.losses} />
+            </FlashCell>
+            <td className="px-4 py-3">
+              <RecentResultsCell results={row.recentResults} />
+            </td>
+            {/* Streak sits adjacent to Recent — both are "recent form". */}
             <FlashCell value={row.streak} className="px-4 py-3 text-center">
               <StreakCell streak={row.streak} />
             </FlashCell>
@@ -386,11 +367,9 @@ function descNullsLast(a: number | null, b: number | null): number {
 function StandingsHeaderRow({
   sortState,
   onSort,
-  tournamentStarted,
 }: {
   sortState?: SortState | null
   onSort?: (key: string, defaultDirection: SortDirection) => void
-  tournamentStarted: boolean
 }) {
   const { t } = useTranslation()
   return (
@@ -426,27 +405,23 @@ function StandingsHeaderRow({
         sortState={sortState}
         onSort={onSort}
       />
-      {tournamentStarted && (
-        <>
-          <SortableTh
-            label={t("standings.headers.games")}
-            align="right"
-            sortKey="gamesPlayed"
-            defaultDirection="desc"
-            sortState={sortState}
-            onSort={onSort}
-          />
-          <SortableTh
-            label={t("standings.headers.winPct")}
-            align="right"
-            sortKey="winPct"
-            defaultDirection="desc"
-            sortState={sortState}
-            onSort={onSort}
-          />
-          <SortableTh label={t("standings.headers.recent")} />
-        </>
-      )}
+      <SortableTh
+        label={t("standings.headers.games")}
+        align="right"
+        sortKey="gamesPlayed"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh
+        label={t("standings.headers.winPct")}
+        align="right"
+        sortKey="winPct"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
+      <SortableTh label={t("standings.headers.recent")} />
       <SortableTh
         label={t("standings.headers.streak")}
         align="center"
@@ -477,19 +452,14 @@ function StandingsHeaderRow({
 /**
  * Loading placeholder for the standings table. Renders through the same
  * `TableShell` and column count as the real table, so data arriving causes no
- * layout shift. Takes the same `tournamentStarted` gate as the real table so
- * the skeleton's column count matches what's about to appear.
+ * layout shift. Renders the same full column set as the real table.
  */
-export function StandingsTableSkeleton({
-  tournamentStarted,
-}: {
-  tournamentStarted: boolean
-}) {
+export function StandingsTableSkeleton() {
   const { t } = useTranslation()
   return (
     <TableShell
       caption={t("standings.captionLoading")}
-      headerRow={<StandingsHeaderRow tournamentStarted={tournamentStarted} />}
+      headerRow={<StandingsHeaderRow />}
     >
       {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
         <tr key={index} className="border-b last:border-b-0">
@@ -524,22 +494,20 @@ export function StandingsTableSkeleton({
           <td className="px-4 py-3">
             <Skeleton className="ml-auto h-4 w-12" />
           </td>
-          {tournamentStarted && (
-            <>
-              <td className="px-4 py-3">
-                <Skeleton className="ml-auto h-4 w-8" />
-              </td>
-              {/* Win% placeholder */}
-              <td className="px-4 py-3">
-                <Skeleton className="ml-auto h-4 w-12" />
-              </td>
-              <td className="px-4 py-3">
-                <Skeleton className="h-4 w-20" />
-              </td>
-            </>
-          )}
-          {/* Streak placeholder — moved to follow Recent, matching the
-              populated row order. */}
+          {/* Games placeholder */}
+          <td className="px-4 py-3">
+            <Skeleton className="ml-auto h-4 w-8" />
+          </td>
+          {/* Win% placeholder */}
+          <td className="px-4 py-3">
+            <Skeleton className="ml-auto h-4 w-12" />
+          </td>
+          {/* Recent placeholder */}
+          <td className="px-4 py-3">
+            <Skeleton className="h-4 w-20" />
+          </td>
+          {/* Streak placeholder — follows Recent, matching the populated row
+              order. */}
           <td className="px-4 py-3">
             <Skeleton className="mx-auto h-5 w-10" />
           </td>
