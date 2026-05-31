@@ -978,7 +978,9 @@ function WatchCell({
     return <span className="text-muted-foreground text-xs">—</span>
   }
   return (
-    <span className="inline-flex items-center justify-center gap-1.5">
+    // `-my-1.5` cancels the link padding's vertical growth so the row height is
+    // unchanged while each Watch link gets a ~40px tap target (#214).
+    <span className="-my-1.5 inline-flex items-center justify-center">
       {streamUrls.map((url) => {
         const platform = streamPlatform(url)
         const Icon = STREAM_ICON[platform]
@@ -989,8 +991,10 @@ function WatchCell({
             target="_blank"
             rel="noopener noreferrer"
             title={t(`standings.watchOn.${platform}`)}
+            // Padding grows the tap target past the visible glyph (#214); the
+            // wrapper's negative margin keeps the cell from getting taller.
             className={cn(
-              "hover:text-brand transition-colors",
+              "hover:text-brand inline-flex p-2 transition-colors",
               streamLive ? "text-brand" : "text-muted-foreground"
             )}
           >
