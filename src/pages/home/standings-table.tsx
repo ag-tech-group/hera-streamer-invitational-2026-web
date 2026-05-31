@@ -231,13 +231,13 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             >
               <WinPctCell wins={row.wins} losses={row.losses} />
             </FlashCell>
-            <td className="px-4 py-3">
-              <RecentResultsCell results={row.recentResults} />
-            </td>
-            {/* Streak sits adjacent to Recent — both are "recent form". */}
+            {/* Streak sits just left of Recent — both are "recent form". */}
             <FlashCell value={row.streak} className="px-4 py-3 text-center">
               <StreakCell streak={row.streak} />
             </FlashCell>
+            <td className="px-4 py-3">
+              <RecentResultsCell results={row.recentResults} />
+            </td>
             <td className="px-4 py-3">
               <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
             </td>
@@ -421,7 +421,6 @@ function StandingsHeaderRow({
         sortState={sortState}
         onSort={onSort}
       />
-      <SortableTh label={t("standings.headers.recent")} />
       <SortableTh
         label={t("standings.headers.streak")}
         align="center"
@@ -430,6 +429,7 @@ function StandingsHeaderRow({
         sortState={sortState}
         onSort={onSort}
       />
+      <SortableTh label={t("standings.headers.recent")} />
       <SortableTh
         label={t("standings.headers.activity")}
         sortKey="lastMatchAt"
@@ -502,14 +502,14 @@ export function StandingsTableSkeleton() {
           <td className="px-4 py-3">
             <Skeleton className="ml-auto h-4 w-12" />
           </td>
+          {/* Streak placeholder — sits just left of Recent, matching the
+              populated row order. */}
+          <td className="px-4 py-3">
+            <Skeleton className="mx-auto h-5 w-10" />
+          </td>
           {/* Recent placeholder */}
           <td className="px-4 py-3">
             <Skeleton className="h-4 w-20" />
-          </td>
-          {/* Streak placeholder — follows Recent, matching the populated row
-              order. */}
-          <td className="px-4 py-3">
-            <Skeleton className="mx-auto h-5 w-10" />
           </td>
           <td className="px-4 py-3">
             <Skeleton className="h-5 w-24 rounded-full" />
