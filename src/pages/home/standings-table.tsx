@@ -308,9 +308,25 @@ function getSortValue(row: StandingsRow, key: string): SortableValue {
       return row.gamesPlayed
     case "lastMatchAt":
       return row.lastMatchAt
+    case "watch":
+      return watchSortRank(row)
     default:
       return null
   }
+}
+
+/**
+ * Watchability rank for the Watch column sort: 2 = a stream is live right now,
+ * 1 = has a channel but it's offline, 0 = no channel at all. A `desc` sort
+ * (the header's default) surfaces "who can I go watch" at the top, then the
+ * rest of the streamers, then the channel-less rows — mirroring the tiering
+ * `WatchCell` already paints. `streamLive` can only be true when `streamUrls`
+ * is non-empty (the API derives it from those URLs), so the tiers never
+ * contradict each other.
+ */
+function watchSortRank(row: StandingsRow): number {
+  if (row.streamLive) return 2
+  return (row.presentation.streamUrls?.length ?? 0) > 0 ? 1 : 0
 }
 
 /**
@@ -416,7 +432,14 @@ function StandingsHeaderRow({
         sortState={sortState}
         onSort={onSort}
       />
-      <SortableTh label={t("standings.headers.watch")} align="center" />
+      <SortableTh
+        label={t("standings.headers.watch")}
+        align="center"
+        sortKey="watch"
+        defaultDirection="desc"
+        sortState={sortState}
+        onSort={onSort}
+      />
     </tr>
   )
 }
