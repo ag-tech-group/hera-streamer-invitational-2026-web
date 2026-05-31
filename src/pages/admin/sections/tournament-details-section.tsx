@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
+import { Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -12,6 +13,13 @@ import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
 import { useTournament } from "@/hooks/use-tournament"
 import type { TournamentInfo } from "@/types"
+
+/**
+ * API limits for `host_stream_urls` (#225) — mirror the server's validation
+ * client-side so an owner gets inline feedback before the PATCH round-trips.
+ */
+const MAX_HOST_STREAM_URLS = 5
+const MAX_HOST_STREAM_URL_LENGTH = 256
 
 /**
  * Editor for the active tournament's metadata.
@@ -59,6 +67,9 @@ function TournamentDetailsForm({
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [form, setForm] = useState<FormState>(() => toFormState(initialData))
+  // Per-row validation errors for the host-stream URL editor, keyed by row
+  // index. Computed on submit; cleared on success.
+  const [urlErrors, setUrlErrors] = useState<Record<number, string>>({})
 
   const mutation = useUpdateTournamentV1TournamentsTournamentSlugPatch({
     request: {
@@ -74,6 +85,7 @@ function TournamentDetailsForm({
         // recovery on `idempotency_key_reused`) and never toasts, so the
         // two don't compete.
         idempotencyKey.reset()
+        setUrlErrors({})
         void queryClient.invalidateQueries({
           queryKey: [
             "getTournamentDetailV1TournamentsTournamentSlugGet",
@@ -88,6 +100,9 @@ function TournamentDetailsForm({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const errors = validateHostStreamUrls(form.hostStreamUrls, t)
+    setUrlErrors(errors)
+    if (Object.keys(errors).length > 0) return
     mutation.mutate({
       tournamentSlug: activeTournament.apiTournamentSlug,
       data: toUpdateBody(form),
@@ -146,6 +161,11 @@ function TournamentDetailsForm({
           onChange={(v) => setForm({ ...form, prizePool: v })}
         />
       </div>
+      <HostStreamUrlsEditor
+        urls={form.hostStreamUrls}
+        errors={urlErrors}
+        onChange={(next) => setForm({ ...form, hostStreamUrls: next })}
+      />
       <div className="flex items-center justify-end">
         <Button type="submit" disabled={mutation.isPending}>
           {mutation.isPending
@@ -175,6 +195,12 @@ interface FormState {
    * submit — cleared, not zero.
    */
   prizePool: string
+  /**
+   * Editable rows for the host broadcast channel URLs (#225). Held as the
+   * raw row values (may include in-progress blanks); blank rows are trimmed
+   * out on submit so clearing every row sends `[]`.
+   */
+  hostStreamUrls: string[]
 }
 
 function toFormState(tournament: TournamentInfo): FormState {
@@ -183,6 +209,7 @@ function toFormState(tournament: TournamentInfo): FormState {
     startDate: toDatetimeLocal(tournament.startDate),
     grandFinalsDate: toDatetimeLocal(tournament.grandFinalsDate),
     prizePool: toPrizePoolInput(tournament.prizePoolCents),
+    hostStreamUrls: tournament.hostStreamUrls,
   }
 }
 
@@ -193,7 +220,43 @@ function toUpdateBody(form: FormState): TournamentUpdate {
     start_date: fromDatetimeLocal(form.startDate),
     grand_finals_date: fromDatetimeLocal(form.grandFinalsDate),
     prize_pool_cents: fromPrizePoolInput(form.prizePool),
+    // Trim each row and drop blanks so a stray empty row doesn't block save
+    // and clearing every row sends `[]` (the API treats that as "none").
+    host_stream_urls: form.hostStreamUrls
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0),
   }
+}
+
+/**
+ * Validates the host-stream URL rows against the API's contract (#225):
+ * at most {@link MAX_HOST_STREAM_URLS} non-blank entries, each no longer than
+ * {@link MAX_HOST_STREAM_URL_LENGTH} characters. Blank rows are ignored (they
+ * get trimmed out on submit). Returns a map of row index → error message;
+ * an empty map means the rows are valid. Over-limit is reported on the first
+ * row beyond the cap so the message has somewhere to render.
+ */
+function validateHostStreamUrls(
+  urls: string[],
+  t: (key: string, opts?: Record<string, unknown>) => string
+): Record<number, string> {
+  const errors: Record<number, string> = {}
+  let kept = 0
+  urls.forEach((url, index) => {
+    const trimmed = url.trim()
+    if (trimmed.length === 0) return
+    kept += 1
+    if (trimmed.length > MAX_HOST_STREAM_URL_LENGTH) {
+      errors[index] = t("admin.tournament.hostStreamUrls.errorTooLong", {
+        max: MAX_HOST_STREAM_URL_LENGTH,
+      })
+    } else if (kept > MAX_HOST_STREAM_URLS) {
+      errors[index] = t("admin.tournament.hostStreamUrls.errorTooMany", {
+        max: MAX_HOST_STREAM_URLS,
+      })
+    }
+  })
+  return errors
 }
 
 /** ISO timestamp → `"YYYY-MM-DDTHH:mm"` in the viewer's local clock. */
@@ -266,6 +329,93 @@ function Field({
         step={step}
         placeholder={placeholder}
       />
+    </div>
+  )
+}
+
+/**
+ * Add / edit / remove editor for the tournament's host-stream channel URLs
+ * (#225). Rows are plain text inputs; the parent owns the array and submit-time
+ * trimming. "Add" is capped at {@link MAX_HOST_STREAM_URLS} rows so the count
+ * can't exceed the API limit in the first place; per-row errors surface the
+ * length check. This list drives server-side liveness detection only — it is
+ * not what the promo card renders.
+ */
+function HostStreamUrlsEditor({
+  urls,
+  errors,
+  onChange,
+}: {
+  urls: string[]
+  errors: Record<number, string>
+  onChange: (next: string[]) => void
+}) {
+  const { t } = useTranslation()
+  const atLimit = urls.length >= MAX_HOST_STREAM_URLS
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label>{t("admin.tournament.hostStreamUrls.label")}</Label>
+      <p className="text-muted-foreground text-xs">
+        {t("admin.tournament.hostStreamUrls.help", {
+          max: MAX_HOST_STREAM_URLS,
+        })}
+      </p>
+      {urls.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {urls.map((url, index) => (
+            // Index key: rows are positional and only the parent reorders them
+            // (via filter on remove), so the index is stable enough here.
+            <li key={index} className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <Input
+                  type="url"
+                  value={url}
+                  aria-label={t("admin.tournament.hostStreamUrls.rowAria", {
+                    index: index + 1,
+                  })}
+                  aria-invalid={errors[index] ? true : undefined}
+                  placeholder={t(
+                    "admin.tournament.hostStreamUrls.rowPlaceholder"
+                  )}
+                  onChange={(event) =>
+                    onChange(
+                      urls.map((u, i) => (i === index ? event.target.value : u))
+                    )
+                  }
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => onChange(urls.filter((_, i) => i !== index))}
+                  aria-label={t("admin.tournament.hostStreamUrls.removeAria", {
+                    index: index + 1,
+                  })}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              {errors[index] && (
+                <p className="text-destructive text-xs">{errors[index]}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={atLimit}
+          onClick={() => onChange([...urls, ""])}
+        >
+          <Plus className="h-4 w-4" />
+          {t("admin.tournament.hostStreamUrls.add")}
+        </Button>
+      </div>
     </div>
   )
 }
