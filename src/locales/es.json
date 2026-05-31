@@ -167,6 +167,8 @@
       "noPlayers": "Aún no hay jugadores.",
       "loadError": "No se pudo cargar el plantel.",
       "editAria": "Editar a {{name}}",
+      "linkedAccount": "Cuenta de ladder vinculada",
+      "notYetRated": "Aún sin clasificación (0 partidas clasificatorias)",
       "presentation": {
         "title": "Sobrescrituras de visualización",
         "profileId": "ID de perfil",
@@ -192,7 +194,7 @@
         "saving": "Guardando…",
         "saveSuccess": "Jugador actualizado."
       },
-      "profileHint": "Encuentra el <code>profile_id</code> del jugador en su URL de <link>aoe2insights</link> — p. ej. <code>aoe2insights.com/user/1819870</code> → <code>1819870</code>."
+      "profileHint": "En la página de <link>aoe2insights</link> del jugador, el <code>profile_id</code> es el <code>Game Id</code> (el número del enlace <code>/user/relic/…</code>), <strong>no</strong> el número de la URL de la página, que es diferente en las cuentas más nuevas."
     },
     "teams": {
       "createLabel": "Crear equipo",
