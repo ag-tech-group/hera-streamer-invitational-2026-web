@@ -25,6 +25,10 @@ const LINK_CLASS =
  * `/privacy` and `/terms` are routes on the criticalbit.gg origin, not this
  * SPA, so a same-origin `<Link>` would 404.
  *
+ * A closing copyright line names AG Technology Group LLC as the operator.
+ * The year is computed at render (`new Date().getFullYear()`) rather than
+ * hardcoded, so it never silently goes stale at the next year boundary.
+ *
  * Each prose line uses the same prefix/link/suffix i18n pattern the home-page
  * subtitle does: a direct `<a>` wraps the link text and the surrounding
  * prose comes from two sibling translation keys. The earlier `<Trans>`
@@ -37,6 +41,7 @@ const LINK_CLASS =
  */
 export function SiteFooter() {
   const { t } = useTranslation()
+  const year = new Date().getFullYear()
   return (
     <footer className="border-border/50 border-t">
       <div className="text-muted-foreground mx-auto flex w-full max-w-[1536px] flex-col gap-1.5 px-8 py-6 text-xs">
@@ -88,6 +93,7 @@ export function SiteFooter() {
           </a>
           {t("footer.microsoftDisclaimerSuffix")}
         </p>
+        <p>{t("footer.copyright", { year })}</p>
       </div>
     </footer>
   )

@@ -23,4 +23,14 @@ describe("SiteFooter", () => {
     expect(terms).toHaveAttribute("target", "_blank")
     expect(terms).toHaveAttribute("rel", "noopener noreferrer")
   })
+
+  it("renders the operator copyright line with the current year", () => {
+    render(<SiteFooter />)
+    const year = new Date().getFullYear()
+    expect(
+      screen.getByText(
+        `© ${year} AG Technology Group LLC. All rights reserved.`
+      )
+    ).toBeInTheDocument()
+  })
 })

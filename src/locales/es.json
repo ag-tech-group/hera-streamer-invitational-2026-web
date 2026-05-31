@@ -292,6 +292,7 @@
     "microsoftDisclaimerSuffix": " de Microsoft usando recursos de Age of Empires II y no está respaldado ni afiliado con Microsoft.",
     "legalNavLabel": "Legal",
     "privacyLink": "Privacidad",
-    "termsLink": "Términos"
+    "termsLink": "Términos",
+    "copyright": "© {{year}} AG Technology Group LLC. Todos los derechos reservados."
   }
 }

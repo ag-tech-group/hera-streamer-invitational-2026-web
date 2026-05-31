@@ -292,6 +292,7 @@
     "microsoftDisclaimerSuffix": " using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.",
     "legalNavLabel": "Legal",
     "privacyLink": "Privacy",
-    "termsLink": "Terms"
+    "termsLink": "Terms",
+    "copyright": "© {{year}} AG Technology Group LLC. All rights reserved."
   }
 }
