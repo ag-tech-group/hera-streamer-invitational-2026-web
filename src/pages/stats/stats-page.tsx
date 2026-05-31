@@ -11,7 +11,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useProgression } from "@/hooks/use-progression"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
-import { teamColorSlot } from "@/lib/team-colors"
+import { teamColorMap } from "@/lib/team-colors"
 import type { TeamColorSlot } from "@/lib/team-colors"
 import {
   HorizontalBarChart,
@@ -111,10 +111,14 @@ const PEAK_COLOR = "#60a5fa"
 
 /** Teams ranked by combined elo — the tournament's actual scoring metric. */
 function teamBars(rows: TeamStandingsRow[]): BarDatum[] {
+  // Colour by team identity (creation order, #231) so a team's bar matches its
+  // panel on the Teams tab and its chip on the standings — built from the full
+  // id set, keyed by id, independent of this list's rating-rank order.
+  const colorByTeamId = teamColorMap(rows.map((r) => r.teamId))
   return rows.map((r) => ({
     label: r.name,
     value: r.combinedRatingSum,
-    color: TEAM_HEX[teamColorSlot(r.teamId)],
+    color: TEAM_HEX[colorByTeamId.get(r.teamId) ?? "p1"],
   }))
 }
 

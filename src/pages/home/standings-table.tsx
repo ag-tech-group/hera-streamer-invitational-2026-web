@@ -26,7 +26,7 @@ import {
   formatRelativeTime,
   normalizeCountryCode,
 } from "@/lib/format"
-import { teamColorSlot } from "@/lib/team-colors"
+import { teamColorMap, type TeamColorSlot } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
 import { BioHint } from "@/pages/home/bio-hint"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
@@ -131,6 +131,16 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
     return map
   }, [rankedRows])
 
+  // Team → colour by creation order (#231), built from every team id present
+  // in the standings so the chip here paints the same colour as the team's
+  // panel on the Teams tab and its bar on the stats page. Keyed by id, so it's
+  // independent of this table's row order.
+  const colorByTeamId = useMemo(
+    () =>
+      teamColorMap(rows.flatMap((row) => (row.team ? [row.team.teamId] : []))),
+    [rows]
+  )
+
   return (
     <TableShell
       caption={t("standings.caption")}
@@ -152,7 +162,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             // spotlight, the row hover, and the cell change-flash instead of
             // replacing them; here we just tag the row.
             data-team-color={
-              row.team ? teamColorSlot(row.team.teamId) : undefined
+              row.team ? colorByTeamId.get(row.team.teamId) : undefined
             }
             className={cn(
               "border-b transition-colors last:border-b-0",
@@ -167,7 +177,12 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
               <PositionCell position={position} />
             </td>
             <td className="px-4 py-3">
-              <TeamCell team={row.team} />
+              <TeamCell
+                team={row.team}
+                colorSlot={
+                  row.team ? colorByTeamId.get(row.team.teamId) : undefined
+                }
+              />
             </td>
             <td className="px-4 py-3">
               <PlayerCell
@@ -607,7 +622,14 @@ function PositionCell({ position }: { position: number }) {
  * affiliation is more relevant than overall ladder position for a team event,
  * and the Position column already carries tournament place.
  */
-function TeamCell({ team }: { team: StandingsTeam | null }) {
+function TeamCell({
+  team,
+  colorSlot,
+}: {
+  team: StandingsTeam | null
+  /** Creation-order colour slot for this team (#231), from the table-level map. */
+  colorSlot: TeamColorSlot | undefined
+}) {
   if (team === null) {
     return <span className="text-muted-foreground">—</span>
   }
@@ -616,7 +638,7 @@ function TeamCell({ team }: { team: StandingsTeam | null }) {
       // `data-team-color` aliases the generic --team-color-* vars (index.css),
       // the same recipe the Teams-tab panels use, so the chip paints blue or
       // red without per-team styling here.
-      data-team-color={teamColorSlot(team.teamId)}
+      data-team-color={colorSlot}
       className="ring-border inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold tracking-wide ring-1 ring-inset"
       style={{
         background: "var(--team-color-bg)",

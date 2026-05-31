@@ -150,19 +150,22 @@ describe("StandingsTable — team column", () => {
     expect(cells[1]).toHaveTextContent("—")
   })
 
-  it("colours the chip blue for odd team ids and red for even", () => {
+  it("colours the team chip by creation order, matching the Teams tab (#231)", () => {
+    // Team ids 3 and 8 (earlier teams deleted): colour follows ordinal
+    // position, not the raw id, so the first-created (id 3) is blue and the
+    // later one (id 8) is red — no green from the gap.
     render(
       <StandingsTable
         rows={[
           row({
             profileId: 1,
             alias: "Alpha",
-            team: { teamId: 1, name: "Blue", initials: "B" },
+            team: { teamId: 3, name: "Blue", initials: "B" },
           }),
           row({
             profileId: 2,
             alias: "Bravo",
-            team: { teamId: 2, name: "Red", initials: "R" },
+            team: { teamId: 8, name: "Red", initials: "R" },
           }),
         ]}
       />
