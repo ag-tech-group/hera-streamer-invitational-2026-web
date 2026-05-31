@@ -97,19 +97,32 @@ function PlayerRow({ player }: { player: PlayerRead }) {
 
   // Lead with the host-set Display name (the presentation override) — the same
   // name viewers see on the public standings, where `displayName ?? alias`
-  // wins (#152). When an override is masking the raw ladder `alias`, keep the
-  // alias in the metadata line below so admins can still confirm which profile
-  // is linked.
+  // wins (#152). The line below spells out the *linked ladder account* (the
+  // relic identity we actually poll) so an admin can catch a mis-link: a
+  // profile_id pasted from the aoe2insights page URL (its site id) instead of
+  // the relic "Game Id" resolves to an unrelated account, and that shows up
+  // here straight away.
   const overrideName = presentationDisplayName(player.presentation)
   const visibleName = overrideName ?? player.alias
-  const meta: string[] = []
-  if (overrideName !== undefined && overrideName !== player.alias) {
-    meta.push(`alias ${player.alias}`)
-  }
+  // Surface the ladder alias only when an override is hiding it — without an
+  // override the title already *is* the alias, so a wrong link is visible there
+  // and repeating it would just be noise.
+  const aliasMasked =
+    overrideName !== undefined && overrideName !== player.alias
+  const linkedAccount: string[] = []
   if (!isPlaceholder) {
-    meta.push(`profile_id ${player.profile_id}`)
-    if (player.country) meta.push(player.country)
+    if (aliasMasked) linkedAccount.push(player.alias)
+    linkedAccount.push(String(player.profile_id))
+    if (player.country) linkedAccount.push(player.country)
   }
+  // A polled identity with no rating row hasn't placed on the tracked ladder
+  // yet — a brand-new account, or (per the mis-link above) a 0-game stranger.
+  // `ratings` is populated for polled rows; guard on the array so an absent
+  // field never false-flags a rated player as unrated.
+  const notYetRated =
+    !isPlaceholder &&
+    Array.isArray(player.ratings) &&
+    player.ratings.length === 0
 
   const mutation =
     useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersLookupDelete({
@@ -134,11 +147,16 @@ function PlayerRow({ player }: { player: PlayerRead }) {
   return (
     <li className="bg-muted/30 flex flex-col gap-3 rounded-md px-3 py-2">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-0.5">
           <span className="text-sm font-medium">{visibleName}</span>
-          {meta.length > 0 && (
+          {!isPlaceholder && (
             <span className="text-muted-foreground font-mono text-xs">
-              {meta.join(" · ")}
+              {t("admin.players.linkedAccount")}: {linkedAccount.join(" · ")}
+            </span>
+          )}
+          {notYetRated && (
+            <span className="text-muted-foreground text-xs">
+              {t("admin.players.notYetRated")}
             </span>
           )}
         </div>
@@ -692,6 +710,7 @@ export function ProfileIdHint() {
         i18nKey="admin.players.profileHint"
         components={{
           code: <code className="font-mono" />,
+          strong: <strong className="font-semibold" />,
           link: (
             <a
               href="https://www.aoe2insights.com"

@@ -102,6 +102,7 @@ type Player = {
   alias: string
   country: string | null
   presentation?: Record<string, unknown>
+  ratings?: unknown[]
 }
 
 function player(overrides: Partial<Player> & Pick<Player, "alias">): Player {
@@ -142,9 +143,11 @@ describe("PlayersSection — roster shows the host's Display name", () => {
     // The host's Display name is the primary label — matching the public
     // standings, where `displayName ?? alias` wins.
     expect(await screen.findByText("TheViper")).toBeInTheDocument()
-    // …and the raw ladder alias stays in the metadata line so admins can
-    // still confirm which profile is linked.
-    expect(screen.getByText(/alias TheViper_aM/)).toBeInTheDocument()
+    // …and the raw ladder alias stays in the linked-account line so admins
+    // can still confirm which relic profile is wired up.
+    expect(
+      screen.getByText(/Linked ladder account: TheViper_aM/)
+    ).toBeInTheDocument()
   })
 
   it("falls back to the ladder alias when no override is set", async () => {
@@ -152,8 +155,9 @@ describe("PlayersSection — roster shows the host's Display name", () => {
     renderRoster()
 
     expect(await screen.findByText("uThermal")).toBeInTheDocument()
-    // No override → no shadowed "alias …", just the profile_id line.
-    expect(screen.getByText("profile_id 1234")).toBeInTheDocument()
+    // No override → the title already is the ladder alias, so the
+    // linked-account line carries just the profile_id, not a repeated alias.
+    expect(screen.getByText(/Linked ladder account: 1234/)).toBeInTheDocument()
     expect(screen.queryByText(/alias /)).not.toBeInTheDocument()
   })
 
@@ -169,5 +173,32 @@ describe("PlayersSection — roster shows the host's Display name", () => {
 
     expect(await screen.findByText("Hera")).toBeInTheDocument()
     expect(screen.queryByText(/alias /)).not.toBeInTheDocument()
+  })
+
+  it("flags a polled identity with no rating row as not yet rated", async () => {
+    // A wrong id (e.g. an aoe2insights site id pasted in place of the relic
+    // Game Id) resolves to a 0-game stranger with no rating row, so this line
+    // is the admin's cue that the link is empty or pointed at the wrong person.
+    mockRoster([
+      player({ profile_id: 12345678, alias: "unrated_account", ratings: [] }),
+    ])
+    renderRoster()
+
+    expect(await screen.findByText("unrated_account")).toBeInTheDocument()
+    expect(screen.getByText(/Not yet rated/)).toBeInTheDocument()
+  })
+
+  it("does not flag a player who has a rating row", async () => {
+    mockRoster([
+      player({
+        profile_id: 4321,
+        alias: "rated_account",
+        ratings: [{ leaderboard_id: 3 }],
+      }),
+    ])
+    renderRoster()
+
+    expect(await screen.findByText("rated_account")).toBeInTheDocument()
+    expect(screen.queryByText(/Not yet rated/)).not.toBeInTheDocument()
   })
 })

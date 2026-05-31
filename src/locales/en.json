@@ -167,6 +167,8 @@
       "noPlayers": "No players yet.",
       "loadError": "Couldn't load roster.",
       "editAria": "Edit {{name}}",
+      "linkedAccount": "Linked ladder account",
+      "notYetRated": "Not yet rated (0 ranked games)",
       "presentation": {
         "title": "Display overrides",
         "profileId": "Profile ID",
@@ -192,7 +194,7 @@
         "saving": "Saving…",
         "saveSuccess": "Player updated."
       },
-      "profileHint": "Find a player's <code>profile_id</code> in their <link>aoe2insights</link> URL — e.g. <code>aoe2insights.com/user/1819870</code> → <code>1819870</code>."
+      "profileHint": "On a player's <link>aoe2insights</link> page, the <code>profile_id</code> is the <code>Game Id</code> (the number in the <code>/user/relic/…</code> link) — <strong>not</strong> the number in the page URL, which is different for newer accounts."
     },
     "teams": {
       "createLabel": "Create team",
