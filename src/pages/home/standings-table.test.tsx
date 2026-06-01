@@ -1,7 +1,8 @@
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
+import { AnalyticsProvider, type AnalyticsBackend } from "@/lib/analytics"
 import { StandingsTable } from "@/pages/home/standings-table"
 import type { StandingsRow } from "@/types"
 
@@ -429,5 +430,75 @@ describe("StandingsTable — player bio", () => {
     expect(
       screen.queryByRole("button", { name: "About Bravo" })
     ).not.toBeInTheDocument()
+  })
+})
+
+describe("StandingsTable — analytics (#215)", () => {
+  function renderWithAnalytics(rows: StandingsRow[]) {
+    const track = vi.fn()
+    const backend: AnalyticsBackend = {
+      track,
+      identify: vi.fn(),
+      page: vi.fn(),
+    }
+    render(
+      <AnalyticsProvider backend={backend}>
+        <StandingsTable rows={rows} />
+      </AnalyticsProvider>
+    )
+    return track
+  }
+
+  it("fires watch.click with platform + stream state on a Watch link", async () => {
+    const user = userEvent.setup()
+    const track = renderWithAnalytics([
+      row({
+        profileId: 42,
+        alias: "Streamer",
+        streamLive: true,
+        presentation: { streamUrls: ["https://twitch.tv/streamer"] },
+      }),
+    ])
+    await user.click(screen.getByTitle("Watch on Twitch"))
+    expect(track).toHaveBeenCalledWith("watch.click", {
+      profileId: 42,
+      alias: "Streamer",
+      platform: "twitch",
+      streamLive: true,
+      source: "standings",
+    })
+  })
+
+  it("fires player.profile.click when the name link is clicked", async () => {
+    const user = userEvent.setup()
+    const track = renderWithAnalytics([
+      row({
+        profileId: 7,
+        alias: "Linked",
+        presentation: { profileUrl: "https://www.aoe2insights.com" },
+      }),
+    ])
+    await user.click(screen.getByRole("link", { name: "Linked" }))
+    expect(track).toHaveBeenCalledWith("player.profile.click", {
+      profileId: 7,
+      alias: "Linked",
+      source: "standings",
+    })
+  })
+
+  it("fires player.bio.open once when the bio affordance is opened", async () => {
+    const user = userEvent.setup()
+    const track = renderWithAnalytics([
+      row({
+        profileId: 9,
+        alias: "Storied",
+        presentation: { bio: "Two-time champion." },
+      }),
+    ])
+    // jsdom reports no hover capability, so the touch info button is rendered.
+    await user.click(screen.getByRole("button", { name: "About Storied" }))
+    const bioOpens = track.mock.calls.filter((c) => c[0] === "player.bio.open")
+    expect(bioOpens).toHaveLength(1)
+    expect(bioOpens[0][1]).toEqual({ profileId: 9, alias: "Storied" })
   })
 })
