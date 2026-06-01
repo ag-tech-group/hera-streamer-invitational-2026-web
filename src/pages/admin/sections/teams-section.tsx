@@ -12,7 +12,7 @@ import {
   useCreateTeamV1TournamentsTournamentSlugTeamsPost,
   useDeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDelete,
   useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete,
-  useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut,
+  useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch,
   useUpdateTeamV1TournamentsTournamentSlugTeamsTeamIdPatch,
 } from "@/api/generated/hooks/teams/teams"
 import type { PlayerRead } from "@/api/generated/types"
@@ -405,7 +405,7 @@ function MemberChip({
   // so a double-click can't error. On success the team-standings cache is
   // invalidated so the badge updates here and on the public teams view.
   const setCaptain =
-    useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut({
+    useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch({
       request: {
         headers: { "Idempotency-Key": captainIdempotencyKey.current },
       },

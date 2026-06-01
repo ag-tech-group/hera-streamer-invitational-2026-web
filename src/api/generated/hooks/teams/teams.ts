@@ -515,30 +515,30 @@ export const useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPro
 
 Atomic: clears any existing captain on the team, then sets the new
 one. The target profile must already be a member of the team (404
-otherwise). Idempotent — re-PUTting the current captain is a 204
+otherwise). Idempotent — re-PATCHing the current captain is a 204
 no-op with no audit event.
  * @summary Set Team Captain
  */
-export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponse204 = {
+export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponse204 = {
   data: void
   status: 204
 }
 
-export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponse422 = {
+export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponse422 = {
   data: HTTPValidationError
   status: 422
 }
 
-export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponseSuccess = (setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponse204) & {
+export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponseSuccess = (setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponse204) & {
   headers: Headers;
 };
-export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponseError = (setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponse422) & {
+export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponseError = (setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponse422) & {
   headers: Headers;
 };
 
-export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponse = (setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponseSuccess | setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponseError)
+export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponse = (setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponseSuccess | setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponseError)
 
-export const getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutUrl = (tournamentSlug: string,
+export const getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchUrl = (tournamentSlug: string,
     teamId: number,) => {
 
 
@@ -547,14 +547,14 @@ export const getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutUr
   return `/v1/tournaments/${tournamentSlug}/teams/${teamId}/captain`
 }
 
-export const setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut = async (tournamentSlug: string,
+export const setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch = async (tournamentSlug: string,
     teamId: number,
-    teamCaptainSet: TeamCaptainSet, options?: RequestInit): Promise<setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponse> => {
+    teamCaptainSet: TeamCaptainSet, options?: RequestInit): Promise<setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponse> => {
   
-  return orvalClient<setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutResponse>(getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutUrl(tournamentSlug,teamId),
+  return orvalClient<setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponse>(getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchUrl(tournamentSlug,teamId),
   {      
     ...options,
-    method: 'PUT',
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
       teamCaptainSet,)
@@ -564,11 +564,11 @@ export const setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut = as
 
 
 
-export const getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut>>, TError,{tournamentSlug: string;teamId: number;data: TeamCaptainSet}, TContext>, request?: SecondParameter<typeof orvalClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut>>, TError,{tournamentSlug: string;teamId: number;data: TeamCaptainSet}, TContext> => {
+export const getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch>>, TError,{tournamentSlug: string;teamId: number;data: TeamCaptainSet}, TContext>, request?: SecondParameter<typeof orvalClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch>>, TError,{tournamentSlug: string;teamId: number;data: TeamCaptainSet}, TContext> => {
 
-const mutationKey = ['setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut'];
+const mutationKey = ['setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -578,10 +578,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut>>, {tournamentSlug: string;teamId: number;data: TeamCaptainSet}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch>>, {tournamentSlug: string;teamId: number;data: TeamCaptainSet}> = (props) => {
           const {tournamentSlug,teamId,data} = props ?? {};
 
-          return  setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut(tournamentSlug,teamId,data,requestOptions)
+          return  setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch(tournamentSlug,teamId,data,requestOptions)
         }
 
 
@@ -591,22 +591,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutMutationResult = NonNullable<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut>>>
-    export type SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutMutationBody = TeamCaptainSet
-    export type SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutMutationError = HTTPValidationError
+    export type SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchMutationResult = NonNullable<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch>>>
+    export type SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchMutationBody = TeamCaptainSet
+    export type SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchMutationError = HTTPValidationError
 
     /**
  * @summary Set Team Captain
  */
-export const useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut>>, TError,{tournamentSlug: string;teamId: number;data: TeamCaptainSet}, TContext>, request?: SecondParameter<typeof orvalClient>}
+export const useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch>>, TError,{tournamentSlug: string;teamId: number;data: TeamCaptainSet}, TContext>, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut>>,
+        Awaited<ReturnType<typeof setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch>>,
         TError,
         {tournamentSlug: string;teamId: number;data: TeamCaptainSet},
         TContext
       > => {
-      return useMutation(getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutMutationOptions(options), queryClient);
+      return useMutation(getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchMutationOptions(options), queryClient);
     }
     /**
  * Clear the team's captain — owner-gated.
