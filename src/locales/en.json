@@ -121,7 +121,8 @@
     "rosterAriaLabel": "Team roster",
     "versus": "VS",
     "rankLabel": "Rank",
-    "rankAria": "Rank #{{rank}} by average rating"
+    "rankAria": "Rank #{{rank}} by average rating",
+    "captain": "Captain"
   },
   "admin": {
     "title": "Admin",
@@ -248,7 +249,13 @@
       "loadError": "Couldn't load teams.",
       "createSuccess": "Team created.",
       "updateSuccess": "Team updated.",
-      "deleteSuccess": "Team deleted."
+      "deleteSuccess": "Team deleted.",
+      "setCaptain": "Make captain",
+      "clearCaptain": "Clear captain",
+      "setCaptainAria": "Make {{name}} team captain",
+      "clearCaptainAria": "Clear {{name}} as team captain",
+      "captainSetSuccess": "{{name}} is now captain.",
+      "captainClearSuccess": "Captain cleared."
     }
   },
   "common": {

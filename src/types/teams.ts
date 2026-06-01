@@ -15,6 +15,12 @@ export interface TeamMember {
   inMatch: boolean
   /** ID of the live match they're in, or null. */
   liveMatchId: number | null
+  /**
+   * Whether this member is the team's captain (#235). At most one member per
+   * team is captain; a team may have none. Drives the Captain badge on the
+   * teams view — not shown on the per-player standings list.
+   */
+  isCaptain: boolean
 }
 
 /**

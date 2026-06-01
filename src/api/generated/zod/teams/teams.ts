@@ -108,3 +108,36 @@ export const RemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfil
   "tournament_slug": zod.string()
 })
 
+/**
+ * Designate a team member as the team's captain — owner-gated.
+
+Atomic: clears any existing captain on the team, then sets the new
+one. The target profile must already be a member of the team (404
+otherwise). Idempotent — re-PUTting the current captain is a 204
+no-op with no audit event.
+ * @summary Set Team Captain
+ */
+export const SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutParams = zod.object({
+  "team_id": zod.number(),
+  "tournament_slug": zod.string()
+})
+
+export const setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutBodyProfileIdExclusiveMin = 0;
+
+
+
+export const SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutBody = zod.object({
+  "profile_id": zod.number().gt(setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPutBodyProfileIdExclusiveMin)
+}).describe('Request body for ``PUT \/teams\/{team_id}\/captain`` — designates the captain.\n\nThe profile must already be a member of the team; the endpoint\natomically clears any existing captain on the team and sets this one.')
+
+/**
+ * Clear the team's captain — owner-gated.
+
+204 even when no captain was set (no-op with no audit event).
+ * @summary Clear Team Captain
+ */
+export const ClearTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainDeleteParams = zod.object({
+  "team_id": zod.number(),
+  "tournament_slug": zod.string()
+})
+

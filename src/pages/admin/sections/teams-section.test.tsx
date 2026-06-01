@@ -26,6 +26,7 @@ function teamStanding(member: { profile_id: number; alias: string }) {
         current_rating: 2000,
         in_match: false,
         live_match_id: null,
+        is_captain: false,
       },
     ],
   }

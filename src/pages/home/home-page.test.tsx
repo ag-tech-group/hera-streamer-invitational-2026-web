@@ -88,6 +88,7 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
           current_rating: 2797,
           in_match: false,
           live_match_id: null,
+          is_captain: false,
         },
         {
           profile_id: 102,
@@ -96,6 +97,7 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
           current_rating: 2718,
           in_match: false,
           live_match_id: null,
+          is_captain: false,
         },
       ],
     },

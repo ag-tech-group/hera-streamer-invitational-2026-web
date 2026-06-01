@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { Pencil, Trash2 } from "lucide-react"
+import { Pencil, Shield, Trash2 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -8,9 +8,11 @@ import { useListPlayersV1TournamentsTournamentSlugPlayersGet } from "@/api/gener
 import { getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey } from "@/api/generated/hooks/tournaments/tournaments"
 import {
   useAddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPost,
+  useClearTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainDelete,
   useCreateTeamV1TournamentsTournamentSlugTeamsPost,
   useDeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDelete,
   useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete,
+  useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut,
   useUpdateTeamV1TournamentsTournamentSlugTeamsTeamIdPatch,
 } from "@/api/generated/hooks/teams/teams"
 import type { PlayerRead } from "@/api/generated/types"
@@ -48,6 +50,7 @@ import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { presentationDisplayName } from "@/lib/presentation"
+import { cn } from "@/lib/utils"
 import type { TeamMember, TeamStandingsRow } from "@/types"
 
 /**
@@ -377,7 +380,11 @@ function MemberChip({
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
+  const captainIdempotencyKey = useIdempotencyKey()
   const name = displayNameByProfileId.get(member.profileId) ?? member.alias
+
+  const invalidateTeams = () =>
+    void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
 
   const mutation =
     useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete(
@@ -386,26 +393,109 @@ function MemberChip({
         mutation: {
           onSuccess: () => {
             idempotencyKey.reset()
-            void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
+            invalidateTeams()
           },
           onError: idempotencyKey.resetOnReusedKey,
         },
       }
     )
 
+  // Set / clear captain (#235). The toggle picks the route by the member's
+  // current captain state; both are 204 no-ops if already in the target state,
+  // so a double-click can't error. On success the team-standings cache is
+  // invalidated so the badge updates here and on the public teams view.
+  const setCaptain =
+    useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPut({
+      request: {
+        headers: { "Idempotency-Key": captainIdempotencyKey.current },
+      },
+      mutation: {
+        onSuccess: () => {
+          captainIdempotencyKey.reset()
+          invalidateTeams()
+          toast.success(t("admin.teams.captainSetSuccess", { name }))
+        },
+        onError: captainIdempotencyKey.resetOnReusedKey,
+      },
+    })
+  const clearCaptain =
+    useClearTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainDelete({
+      request: {
+        headers: { "Idempotency-Key": captainIdempotencyKey.current },
+      },
+      mutation: {
+        onSuccess: () => {
+          captainIdempotencyKey.reset()
+          invalidateTeams()
+          toast.success(t("admin.teams.captainClearSuccess", { name }))
+        },
+        onError: captainIdempotencyKey.resetOnReusedKey,
+      },
+    })
+
+  const captainPending = setCaptain.isPending || clearCaptain.isPending
+  const toggleCaptain = () => {
+    if (member.isCaptain) {
+      clearCaptain.mutate({
+        tournamentSlug: activeTournament.apiTournamentSlug,
+        teamId,
+      })
+    } else {
+      setCaptain.mutate({
+        tournamentSlug: activeTournament.apiTournamentSlug,
+        teamId,
+        data: { profile_id: member.profileId },
+      })
+    }
+  }
+
   return (
-    <li>
+    <li
+      className={cn(
+        "bg-muted/40 inline-flex items-center gap-1.5 rounded-full py-1 pr-1 pl-2.5 text-xs",
+        member.isCaptain && "ring-brand/40 ring-1 ring-inset"
+      )}
+    >
+      <span className="font-medium">{name}</span>
+      {/* Captain toggle: filled brand shield when captain, muted outline when
+          not. Tapping sets or clears (idempotent on the API). */}
+      <button
+        type="button"
+        disabled={captainPending}
+        onClick={toggleCaptain}
+        aria-pressed={member.isCaptain}
+        aria-label={t(
+          member.isCaptain
+            ? "admin.teams.clearCaptainAria"
+            : "admin.teams.setCaptainAria",
+          { name }
+        )}
+        className={cn(
+          "inline-flex size-5 items-center justify-center rounded-full transition-colors disabled:opacity-50",
+          member.isCaptain
+            ? "text-brand hover:text-brand/70"
+            : "text-muted-foreground hover:text-brand"
+        )}
+        title={t(
+          member.isCaptain
+            ? "admin.teams.clearCaptain"
+            : "admin.teams.setCaptain"
+        )}
+      >
+        <Shield
+          className="size-3.5"
+          fill={member.isCaptain ? "currentColor" : "none"}
+          aria-hidden
+        />
+      </button>
       <ConfirmDialog
         trigger={
           <button
             type="button"
             disabled={mutation.isPending}
-            className="bg-muted/40 hover:bg-destructive/20 hover:text-destructive group inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs transition-colors disabled:opacity-50"
-            aria-label={t("admin.teams.removeMemberAria", {
-              name,
-            })}
+            className="hover:bg-destructive/20 hover:text-destructive group inline-flex size-5 items-center justify-center rounded-full transition-colors disabled:opacity-50"
+            aria-label={t("admin.teams.removeMemberAria", { name })}
           >
-            <span>{name}</span>
             <Trash2
               className="size-3 opacity-50 group-hover:opacity-100"
               aria-hidden

@@ -26,6 +26,7 @@ function toTeamStandingsRow(dto: TeamStandingRow): TeamStandingsRow {
       currentRating: member.current_rating,
       inMatch: member.in_match,
       liveMatchId: member.live_match_id,
+      isCaptain: member.is_captain,
     })),
   }
 }

@@ -26,4 +26,5 @@ export interface TeamMemberRead {
   current_rating: number;
   in_match: boolean;
   live_match_id: number | null;
+  is_captain: boolean;
 }
