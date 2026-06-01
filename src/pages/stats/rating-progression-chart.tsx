@@ -15,11 +15,11 @@ import ReactEChartsCore from "echarts-for-react/esm/core"
 import { useMemo } from "react"
 
 import { useStableValue } from "@/hooks/use-stable-value"
+import type { LabeledSeries } from "@/pages/stats/series-labels"
 import {
   useChartColors,
   type ChartColors,
 } from "@/pages/stats/use-chart-colors"
-import type { PlayerSeries } from "@/types"
 
 // Register only the pieces the rating chart uses, so the lazy /stats chunk
 // carries a trimmed echarts (line chart + grid/tooltip/legend on the canvas
@@ -53,7 +53,7 @@ const LINE_PALETTE = [
 ]
 
 function buildOption(
-  series: PlayerSeries[],
+  series: LabeledSeries[],
   colors: ChartColors
 ): EChartsCoreOption {
   return {
@@ -114,7 +114,9 @@ function buildOption(
       // live refetches (matching by id, not array position) instead of
       // disposing and rebuilding it — see the chart component for why.
       id: s.profileId,
-      name: s.alias,
+      // The host's display-name override (joined upstream in StatsPage), else
+      // the raw ladder alias — so the legend/tooltip match the rest of the site.
+      name: s.label,
       // Filled-circle symbol so the legend marker reads as a solid coloured
       // dot — the default `emptyCircle` shows a hollow white centre.
       // `showSymbol` stays false, so the line itself carries no point markers.
@@ -148,7 +150,11 @@ function buildOption(
  * (see registrations above) and rendered via the `echarts-for-react` core
  * wrapper so no full-echarts import sneaks in.
  */
-export function RatingProgressionChart({ series }: { series: PlayerSeries[] }) {
+export function RatingProgressionChart({
+  series,
+}: {
+  series: LabeledSeries[]
+}) {
   const colors = useChartColors()
   // Hold the series reference steady across value-identical SSE refetches so a
   // live nudge that changed nothing doesn't rebuild the chart (see
