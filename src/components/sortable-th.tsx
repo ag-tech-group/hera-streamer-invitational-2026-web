@@ -74,8 +74,10 @@ export function SortableTh({
       <button
         type="button"
         onClick={() => onSort(sortKey, defaultDirection)}
+        // `py-1.5` lifts the button's hit area toward the 44px touch-target
+        // guideline (#214); `-my-1.5` keeps the header row height unchanged.
         className={cn(
-          "hover:text-foreground inline-flex w-full items-center gap-1 transition-colors",
+          "hover:text-foreground -my-1.5 inline-flex w-full items-center gap-1 py-1.5 transition-colors",
           BUTTON_JUSTIFY[align],
           active && "text-foreground"
         )}

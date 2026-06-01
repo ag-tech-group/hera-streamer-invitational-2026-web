@@ -15,19 +15,27 @@ import {
 } from "@/components/ui/popover"
 
 /**
- * Whether the primary pointer can hover (a desktop mouse) rather than being
- * coarse/touch. Drives the bio disclosure: on the desktop the player's name
- * itself is the hover target (no extra chrome); on touch — where hover is
- * impossible and a tap on the name should follow its link — a small tappable
- * info icon sits beside it instead. Resolved from `(hover: hover)` and kept
- * live so a device-mode switch re-picks.
+ * Whether this is a true mouse-pointer setup rather than a touch screen. Drives
+ * the bio disclosure: on the desktop the player's name itself is the hover
+ * target (no extra chrome); on touch — where hover is impossible and a tap on
+ * the name should follow its link — a small tappable info icon sits beside it.
+ *
+ * Requires BOTH `(hover: hover)` and `(pointer: fine)` (#214). The old check was
+ * `(hover: hover)` alone, but modern phones increasingly report themselves as
+ * hover-capable — so a real phone fell into the desktop branch and never showed
+ * the info icon, leaving the bio unreachable on touch (observed: icon present
+ * in devtools device mode, absent on an actual phone). A mouse satisfies both
+ * queries; a finger is `pointer: coarse`, so the combined query is the reliable
+ * "is this a mouse" signal. Kept live so a device-mode switch re-picks.
  */
+const DESKTOP_POINTER_QUERY = "(hover: hover) and (pointer: fine)"
+
 function useHoverCapable(): boolean {
   const [hoverCapable, setHoverCapable] = useState(
-    () => window.matchMedia?.("(hover: hover)").matches ?? true
+    () => window.matchMedia?.(DESKTOP_POINTER_QUERY).matches ?? true
   )
   useEffect(() => {
-    const mql = window.matchMedia?.("(hover: hover)")
+    const mql = window.matchMedia?.(DESKTOP_POINTER_QUERY)
     if (!mql) return
     const onChange = () => setHoverCapable(mql.matches)
     mql.addEventListener("change", onChange)
@@ -92,7 +100,10 @@ export function BioHint({
           <button
             type="button"
             aria-label={t("standings.bioLabel", { name })}
-            className="text-muted-foreground hover:text-brand inline-flex shrink-0 transition-colors"
+            // Negative margin keeps the glyph visually inline while the padding
+            // grows the tap target to ~44px (#214 touch-target sizing) — the
+            // hit area extends past the visible icon without shifting layout.
+            className="text-muted-foreground hover:text-brand -m-2.5 inline-flex shrink-0 p-2.5 transition-colors"
           >
             <Info className="size-4" aria-hidden />
           </button>
