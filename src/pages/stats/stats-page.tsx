@@ -1,6 +1,6 @@
 import { Percent, Swords, TrendingUp, Trophy } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -11,6 +11,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useProgression } from "@/hooks/use-progression"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
+import { useTournament } from "@/hooks/use-tournament"
 import { teamColorMap } from "@/lib/team-colors"
 import type { TeamColorSlot } from "@/lib/team-colors"
 import {
@@ -38,6 +39,17 @@ export function StatsPage() {
   const teams = useTeamStandings(true)
   const standings = useStandings()
 
+  // Hide the team charts until the ladder race starts — pre-start the team
+  // ratings are all empty, so the bars would read as noise. Same "started"
+  // derivation as `ContextCards`: compare `start_date` against a mount-time
+  // instant captured once (keeps `Date.now()` out of the render pass), so a
+  // reload re-evaluates it. Null start date counts as not started.
+  const tournament = useTournament()
+  const [mountedAtMs] = useState(() => Date.now())
+  const tournamentStarted = tournament.data?.startDate
+    ? new Date(tournament.data.startDate).getTime() <= mountedAtMs
+    : false
+
   const teamData = teams.data ? teamBars(teams.data.rows) : []
   const teamAvgData = teams.data ? teamAvgBars(teams.data.rows) : []
   const peakData = standings.data ? peakBars(standings.data.rows) : []
@@ -57,10 +69,13 @@ export function StatsPage() {
         />
       )}
 
+      {/* Team charts stay visible but show their empty state until the ladder
+          race starts (#242) — pre-start the team ratings carry no signal, so
+          the section renders its "nothing yet" placeholder rather than bars. */}
       <ChartSection
         title={t("stats.teamEloTitle")}
         query={teams}
-        isEmpty={teamData.length === 0}
+        isEmpty={!tournamentStarted || teamData.length === 0}
         skeletonHeight={260}
       >
         <HorizontalBarChart
@@ -72,7 +87,7 @@ export function StatsPage() {
       <ChartSection
         title={t("stats.teamAvgEloTitle")}
         query={teams}
-        isEmpty={teamAvgData.length === 0}
+        isEmpty={!tournamentStarted || teamAvgData.length === 0}
         skeletonHeight={260}
       >
         <HorizontalBarChart

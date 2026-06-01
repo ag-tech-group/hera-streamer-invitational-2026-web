@@ -61,7 +61,7 @@
     "title": "Estadísticas",
     "subtitle": "Progreso de puntuación a lo largo del torneo.",
     "chartTitle": "Puntuación a lo largo del tiempo",
-    "teamEloTitle": "Clasificación por equipos — elo combinado",
+    "teamEloTitle": "Elo combinado por equipo",
     "teamAvgEloTitle": "Elo promedio por equipo",
     "peakRatingTitle": "Puntuación máxima",
     "noData": "Nada que mostrar aún.",
