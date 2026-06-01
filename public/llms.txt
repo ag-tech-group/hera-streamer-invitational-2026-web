@@ -1,6 +1,6 @@
-# Hera Streamer Invitational 2026 — Live Standings
+# The King's Gauntlet — Live Standings
 
-A real-time companion site for the Hera Streamer Invitational 2026 — an
+A real-time companion site for **The King's Gauntlet** — an
 Age of Empires II: Definitive Edition tournament hosted by Hera.
 Surfaces live player ratings, team standings, and tournament progression
 as matches are played.
