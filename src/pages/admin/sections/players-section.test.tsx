@@ -201,4 +201,32 @@ describe("PlayersSection — roster shows the host's Display name", () => {
     expect(await screen.findByText("rated_account")).toBeInTheDocument()
     expect(screen.queryByText(/Not yet rated/)).not.toBeInTheDocument()
   })
+
+  it("sorts the roster alphabetically by visible name, not API order", async () => {
+    // Fed out of order, mixed case, mixing display-name overrides with bare
+    // aliases. Expected display order: Apricot, banana, Cherry, Zebra — sorted
+    // by the visible name (override else alias), case-insensitively.
+    mockRoster([
+      player({
+        profile_id: 1,
+        alias: "zebra_ladder",
+        presentation: { displayName: "Zebra" },
+      }),
+      player({ profile_id: 2, alias: "banana" }),
+      player({
+        profile_id: 3,
+        alias: "apricot_ladder",
+        presentation: { displayName: "Apricot" },
+      }),
+      player({ profile_id: 4, alias: "Cherry" }),
+    ])
+    renderRoster()
+
+    await screen.findByText("Zebra")
+    // The visible-name nodes carry `font-medium`; read them in DOM order.
+    const names = Array.from(document.querySelectorAll("span.font-medium")).map(
+      (el) => el.textContent
+    )
+    expect(names).toEqual(["Apricot", "banana", "Cherry", "Zebra"])
+  })
 })

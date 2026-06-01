@@ -83,15 +83,23 @@ export function TeamsSection() {
   // on teams until they're promoted, so filter them out at the source
   // here. The type predicate narrows `profile_id` to non-null for every
   // downstream consumer of `allPlayers`.
-  const allPlayers: PolledPlayer[] = useMemo(
-    () =>
-      playersQuery.data?.status === 200
-        ? playersQuery.data.data.items.filter(
-            (p): p is PolledPlayer => p.profile_id !== null
+  const allPlayers: PolledPlayer[] = useMemo(() => {
+    if (playersQuery.data?.status !== 200) return []
+    return (
+      playersQuery.data.data.items
+        .filter((p): p is PolledPlayer => p.profile_id !== null)
+        // Alphabetical by visible name (display-name override, else alias) so the
+        // add-member dropdown reads in name order, not API add-order. Case-
+        // insensitive via localeCompare.
+        .sort((a, b) =>
+          (presentationDisplayName(a.presentation) ?? a.alias).localeCompare(
+            presentationDisplayName(b.presentation) ?? b.alias,
+            undefined,
+            { sensitivity: "base" }
           )
-        : [],
-    [playersQuery.data]
-  )
+        )
+    )
+  }, [playersQuery.data])
 
   // Map of profile_id → the team they're currently on (if any). Lets the
   // add-member select badge each option with its existing team and trigger
