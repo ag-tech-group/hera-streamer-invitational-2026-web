@@ -5,7 +5,9 @@
     "es": "Español",
     "ar": "العربية",
     "nl": "Nederlands",
-    "de": "Deutsch"
+    "de": "Deutsch",
+    "sv": "Svenska",
+    "ru": "Русский"
   },
   "theme": {
     "label": "المظهر",

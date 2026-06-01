@@ -1,0 +1,337 @@
+{
+  "language": {
+    "label": "Язык",
+    "en": "English",
+    "es": "Español",
+    "ar": "العربية",
+    "nl": "Nederlands",
+    "de": "Deutsch",
+    "sv": "Svenska",
+    "ru": "Русский"
+  },
+  "theme": {
+    "label": "Тема",
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "auto": "Авто"
+  },
+  "nav": {
+    "brandAriaLabel": "Турнирная таблица в реальном времени",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "profile": "Профиль",
+    "admin": "Админ",
+    "accountMenu": "Меню аккаунта"
+  },
+  "home": {
+    "title": "Турнирная таблица в реальном времени",
+    "subtitle": "Рейтинги, командный зачёт и ход турнира в реальном времени — <product>Age of Empires 2: Definitive Edition</product>.",
+    "tabs": {
+      "players": "Игроки",
+      "teams": "Команды",
+      "stats": "Статистика"
+    },
+    "viewTabsAria": "Вид таблицы",
+    "lastUpdated": "Обновлено {{time}}",
+    "ladderRace": {
+      "begins": "Гонка по ладдеру <accent>начинается</accent>",
+      "ends": "Гонка по ладдеру <accent>завершается</accent>",
+      "active": {
+        "title": "Гонка по ладдеру <accent>идёт</accent>",
+        "body": "Игроки разделены на 4 команды и борются за максимально возможный суммарный эло. В итоговом зачёте учитывается только пиковый эло."
+      }
+    },
+    "noStandings": {
+      "title": "Пока нет таблицы",
+      "body": "Игроки появятся здесь, как только турнирная таблица будет заполнена."
+    },
+    "noTeams": {
+      "title": "Пока нет команд",
+      "body": "Команды появятся здесь, как только они будут созданы для этого турнира."
+    },
+    "loadErrorStandings": {
+      "title": "Не удалось загрузить таблицу",
+      "body": "При обращении к таблице лидеров что-то пошло не так."
+    },
+    "loadErrorTeams": {
+      "title": "Не удалось загрузить команды",
+      "body": "При обращении к командному зачёту что-то пошло не так."
+    },
+    "prizePool": {
+      "label": "Призовой фонд",
+      "sponsoredBy": "Спонсор: "
+    }
+  },
+  "stats": {
+    "title": "Статистика",
+    "subtitle": "Динамика рейтинга по ходу турнира.",
+    "chartTitle": "Рейтинг во времени",
+    "teamEloTitle": "Суммарный пиковый эло команды",
+    "teamAvgEloTitle": "Средний пиковый эло команды",
+    "peakRatingTitle": "Пиковый рейтинг",
+    "noData": "Пока нечего показать.",
+    "ratingAxis": "Рейтинг",
+    "empty": "Пока нет завершённых матчей — динамика появится, когда игроки начнут завершать рейтинговые игры.",
+    "error": "Не удалось загрузить статистику.",
+    "retry": "Повторить",
+    "cards": {
+      "biggestClimber": "Лучший рост",
+      "highestPeak": "Высший пик",
+      "mostMatches": "Больше всего матчей",
+      "winPct": "Лучший процент побед"
+    }
+  },
+  "standings": {
+    "caption": "Турнирная таблица в реальном времени",
+    "captionLoading": "Загрузка таблицы",
+    "headers": {
+      "position": "Место",
+      "team": "Команда",
+      "player": "Игрок",
+      "rating": "Рейтинг",
+      "peak": "Пик",
+      "streak": "Серия",
+      "games": "Игры",
+      "winPct": "% побед",
+      "recent": "Недавние",
+      "activity": "Активность",
+      "watch": "Смотреть"
+    },
+    "winPctBreakdown": {
+      "title": "Процент побед",
+      "wins": "{{count}} В",
+      "losses": "{{count}} П",
+      "aria": "{{wins}} побед, {{losses}} поражений"
+    },
+    "live": "В эфире",
+    "liveAriaLabel": "В прямом матче",
+    "active": "Активен",
+    "idle": "Не в игре",
+    "recentAriaLabel": "Недавние результаты, сначала самые свежие: {{results}}",
+    "win": "Победа",
+    "loss": "Поражение",
+    "viewProfile": "Открыть профиль игрока {{name}}",
+    "watchOn": {
+      "twitch": "Смотреть на Twitch",
+      "youtube": "Смотреть на YouTube",
+      "other": "Смотреть трансляцию"
+    },
+    "streamingLive": "Прямой эфир",
+    "bioLabel": "Об игроке {{name}}"
+  },
+  "teams": {
+    "sum": "сумма пиков",
+    "playersCount_one": "{{count}} игрок",
+    "playersCount_few": "{{count}} игрока",
+    "playersCount_many": "{{count}} игроков",
+    "playersCount_other": "{{count}} игрока",
+    "noMembers": "Пока нет участников с рейтингом.",
+    "rosterAriaLabel": "Состав команды",
+    "versus": "VS",
+    "rankLabel": "Место",
+    "rankAria": "Место №{{rank}} по суммарному рейтингу",
+    "captain": "Капитан"
+  },
+  "admin": {
+    "title": "Админ",
+    "backToStandings": "Назад к таблице",
+    "sections": {
+      "tournamentDetails": "Сведения о турнире",
+      "owners": "Владельцы",
+      "players": "Игроки",
+      "teams": "Команды"
+    },
+    "tournament": {
+      "nameLabel": "Название",
+      "startDate": "Дата начала",
+      "grandFinalsDate": "Дата гранд-финала",
+      "save": "Сохранить изменения",
+      "saving": "Сохранение…",
+      "successToast": "Турнир обновлён.",
+      "loadError": "Не удалось загрузить сведения о турнире.",
+      "prizePoolLabel": "Призовой фонд",
+      "hostStreamUrls": {
+        "label": "URL трансляций ведущего",
+        "help": "URL каналов (Twitch/YouTube), по которым определяется, когда ведущий в эфире, и подсвечивается промо-карточка. До {{max}}.",
+        "add": "Добавить URL",
+        "rowPlaceholder": "https://twitch.tv/channel",
+        "rowAria": "URL трансляции ведущего {{index}}",
+        "removeAria": "Удалить URL трансляции ведущего {{index}}",
+        "errorTooLong": "URL должен содержать не более {{max}} символов.",
+        "errorTooMany": "Не более {{max}} URL."
+      }
+    },
+    "owners": {
+      "grantLabel": "Предоставить права владельца",
+      "addPlaceholder": "Поиск по имени или email",
+      "addAction": "Предоставить",
+      "addingAction": "Предоставление…",
+      "grantedOn": "Предоставлено {{date}}",
+      "removeAria": "Отозвать у {{name}}",
+      "removeTitle": "Отозвать права владельца?",
+      "removeDescription": "{{name}} потеряет доступ администратора к этому турниру.",
+      "removeConfirm": "Отозвать",
+      "soleOwnerHint": "Вы единственный владелец — предоставьте права другому пользователю, прежде чем удалять себя.",
+      "grantSuccess": "Права владельца предоставлены.",
+      "revokeSuccess": "Права владельца отозваны.",
+      "noOwners": "Пока нет владельцев.",
+      "loadError": "Не удалось загрузить владельцев — требуется вход."
+    },
+    "players": {
+      "addLabel": "Добавить игрока",
+      "addNameLabel": "Отображаемое имя",
+      "addNamePlaceholder": "Ник стримера (напр. uThermal)",
+      "addProfileIdLabel": "ID профиля",
+      "addProfileIdPlaceholder": "aoe2 profile_id — необязательно",
+      "addAction": "Добавить",
+      "addingAction": "Добавление…",
+      "addSuccess": "Игрок добавлен.",
+      "addErrorProfileId": "ID профиля должен быть положительным числом.",
+      "addErrorNumericName": "Похоже на ID профиля — введите его в поле «ID профиля».",
+      "removeAria": "Удалить {{name}}",
+      "removeTitle": "Удалить {{name}}?",
+      "removeDescription": "Это удалит игрока из состава турнира. История матчей и рейтинги останутся нетронутыми на стороне источника.",
+      "removeConfirm": "Удалить",
+      "removeSuccess": "Игрок удалён.",
+      "noPlayers": "Пока нет игроков.",
+      "loadError": "Не удалось загрузить состав.",
+      "editAria": "Изменить {{name}}",
+      "linkedAccount": "Привязанный аккаунт ладдера",
+      "notYetRated": "Ещё без рейтинга (0 рейтинговых игр)",
+      "presentation": {
+        "title": "Переопределения отображения",
+        "profileId": "ID профиля",
+        "profileIdPlaceholder": "напр. 1819870",
+        "displayName": "Отображаемое имя",
+        "displayNamePlaceholder": "Ник стримера (напр. uThermal)",
+        "flag": "Флаг",
+        "flagPlaceholder": "Выберите страну",
+        "flagSearch": "Поиск стран",
+        "flagClear": "Без флага",
+        "flagNoResults": "Страны не найдены",
+        "streamUrls": "URL трансляций",
+        "streamUrlPlaceholder": "https://twitch.tv/handle",
+        "addStreamUrl": "Добавить URL трансляции",
+        "removeStreamUrlAria": "Удалить URL трансляции для {{name}}",
+        "invalidUrl": "Введите корректный http(s) URL",
+        "bio": "Био",
+        "bioPlaceholder": "Краткая справка для зрителей — напр. 2-кратный чемпион, играет агрессивно через скаутов.",
+        "profileUrl": "URL профиля",
+        "profileUrlPlaceholder": "https://www.aoe2insights.com/user/12449433/",
+        "cancel": "Отмена",
+        "save": "Сохранить",
+        "saving": "Сохранение…",
+        "saveSuccess": "Игрок обновлён."
+      },
+      "profileHint": "На странице игрока в <link>aoe2insights</link> <code>profile_id</code> — это <code>Game Id</code> (число в ссылке <code>/user/relic/…</code>) — <strong>а не</strong> число в URL страницы, которое для новых аккаунтов отличается."
+    },
+    "teams": {
+      "createLabel": "Создать команду",
+      "initialsPlaceholder": "Инициалы",
+      "namePlaceholder": "Название команды",
+      "createAction": "Создать",
+      "creatingAction": "Создание…",
+      "save": "Сохранить",
+      "saving": "Сохранение…",
+      "cancel": "Отмена",
+      "editAria": "Изменить {{name}}",
+      "deleteAria": "Удалить {{name}}",
+      "deleteTitle": "Удалить команду «{{name}}»?",
+      "deleteDescription": "Команда и все её участники будут удалены. Сами игроки останутся в составе турнира.",
+      "deleteConfirm": "Удалить команду",
+      "addMember": "Добавить участника",
+      "addMemberPlaceholder": "Выберите игрока",
+      "addMemberNone": "Нет доступных игроков",
+      "addMemberAction": "Добавить",
+      "addMemberAdding": "Добавление…",
+      "memberOnTeam": "(в команде {{name}})",
+      "noMembers": "Пока нет участников.",
+      "removeMemberAria": "Удалить {{name}} из команды",
+      "removeMemberTitle": "Удалить {{name}} из этой команды?",
+      "removeMemberDescription": "Игрок останется в составе турнира.",
+      "removeMemberConfirm": "Удалить",
+      "moveTitle": "Переместить игрока в эту команду?",
+      "moveDescription": "{{name}} сейчас в команде {{from}}.",
+      "moveConfirm": "Переместить игрока",
+      "noTeams": "Пока нет команд.",
+      "loadError": "Не удалось загрузить команды.",
+      "createSuccess": "Команда создана.",
+      "updateSuccess": "Команда обновлена.",
+      "deleteSuccess": "Команда удалена.",
+      "setCaptain": "Назначить капитаном",
+      "clearCaptain": "Снять капитана",
+      "setCaptainAria": "Назначить {{name}} капитаном команды",
+      "clearCaptainAria": "Снять {{name}} с роли капитана команды",
+      "captainSetSuccess": "{{name}} теперь капитан.",
+      "captainClearSuccess": "Капитан снят."
+    }
+  },
+  "common": {
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "loading": "Загрузка…",
+    "error": "Ошибка",
+    "tryAgain": "Повторить попытку",
+    "reference": "Код: {{id}}",
+    "goHome": "На главную"
+  },
+  "userSearch": {
+    "placeholder": "Поиск по имени или email",
+    "clear": "Сбросить выбранного пользователя",
+    "noMatches": "Нет пользователей по этому запросу.",
+    "searching": "Поиск…"
+  },
+  "countdown": {
+    "days": "дн.",
+    "hours": "ч",
+    "minutes": "мин",
+    "seconds": "сек"
+  },
+  "hostLinks": {
+    "defaultLabel": "Ведущий",
+    "live": "В эфире",
+    "streamingLive": "Прямой эфир"
+  },
+  "notFound": {
+    "eyebrow": "Страница не найдена",
+    "code": "404",
+    "body": "Извините, мы не смогли найти запрашиваемую страницу.",
+    "homeAction": "Вернуться на главную"
+  },
+  "errorBoundary": {
+    "eyebrow": "Что-то пошло не так",
+    "heading": "Ошибка",
+    "body": "Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.",
+    "retry": "Повторить попытку",
+    "home": "На главную"
+  },
+  "errors": {
+    "default": "Произошла непредвиденная ошибка.",
+    "400": "Некорректный запрос. Пожалуйста, проверьте введённые данные.",
+    "401": "Срок действия сессии истёк. Пожалуйста, войдите снова.",
+    "403": "У вас нет прав на это действие.",
+    "404": "Запрашиваемый ресурс не найден.",
+    "409": "Это конфликтует с существующим ресурсом.",
+    "422": "Пожалуйста, проверьте введённые данные и попробуйте снова.",
+    "429": "Слишком много запросов. Пожалуйста, подождите немного.",
+    "500": "На нашей стороне что-то пошло не так. Пожалуйста, попробуйте позже.",
+    "idempotencyKeyReused": "Что-то изменилось — пожалуйста, попробуйте снова.",
+    "tournamentNotFound": "Турнир не найден.",
+    "sessionExpired": "Срок действия сессии истёк — войдите снова, чтобы продолжить.",
+    "signInAction": "Войти"
+  },
+  "footer": {
+    "criticalbitProjectPrefix": "Проект ",
+    "criticalbitProjectLink": "criticalbit.gg",
+    "criticalbitProjectSuffix": ".",
+    "microsoftDisclaimerPrefix": "Age of Empires II © Microsoft Corporation. Этот сайт создан в соответствии с ",
+    "microsoftDisclaimerLink": "Game Content Usage Rules",
+    "microsoftDisclaimerSuffix": " от Microsoft с использованием ресурсов Age of Empires II и не одобрен Microsoft и не связан с ней.",
+    "legalNavLabel": "Правовая информация",
+    "privacyLink": "Конфиденциальность",
+    "termsLink": "Условия",
+    "copyright": "© {{year}} AG Technology Group LLC. Все права защищены."
+  }
+}

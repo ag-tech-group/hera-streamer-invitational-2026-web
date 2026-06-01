@@ -7,10 +7,13 @@ import de from "@/locales/de.json"
 import en from "@/locales/en.json"
 import es from "@/locales/es.json"
 import nl from "@/locales/nl.json"
+import ru from "@/locales/ru.json"
+import sv from "@/locales/sv.json"
 
 /**
- * i18n setup for the SPA. English (default), Spanish, Arabic, Dutch, and
- * German (machine-translated for the 2026 invitational — community polish
+ * i18n setup for the SPA. English (default), Spanish, Arabic, Dutch,
+ * German, Swedish, and Russian (machine-translated for the 2026
+ * invitational — community polish
  * welcome later, see #57). Arabic is RTL: the `<html dir>` is synced
  * from i18next's `i18n.dir()` below. Language is detected from
  * localStorage first, then the browser's navigator.language; the
@@ -24,7 +27,15 @@ import nl from "@/locales/nl.json"
  */
 export const LANGUAGE_STORAGE_KEY = "app_language"
 
-export const SUPPORTED_LANGUAGES = ["en", "es", "ar", "nl", "de"] as const
+export const SUPPORTED_LANGUAGES = [
+  "en",
+  "es",
+  "ar",
+  "nl",
+  "de",
+  "sv",
+  "ru",
+] as const
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 
 void i18n
@@ -37,6 +48,8 @@ void i18n
       ar: { translation: ar },
       nl: { translation: nl },
       de: { translation: de },
+      sv: { translation: sv },
+      ru: { translation: ru },
     },
     fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGUAGES,
