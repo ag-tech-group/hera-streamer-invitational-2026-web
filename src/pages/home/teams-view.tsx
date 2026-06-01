@@ -245,9 +245,9 @@ function TeamPanelSkeleton({
 /**
  * Team identity + headline stats at the top of a panel.
  *
- * Average rating is the headline — sum-of-ratings ranks identically when
- * teams are the same size, but reads as a less-meaningful big number, so
- * the panel leads with avg and just notes the roster size beside it.
+ * Combined-rating **sum** is the headline (#242) — it's the metric teams are
+ * actually ranked by, so the big number matches the order and the rank badge.
+ * Roster size is noted beside it.
  */
 function TeamHeader({ team, rank }: { team: TeamStandingsRow; rank: number }) {
   const { t } = useTranslation()
@@ -277,10 +277,10 @@ function TeamHeader({ team, rank }: { team: TeamStandingsRow; rank: number }) {
          * h1 in home-page.tsx avoids `font-bold`).
          */}
         <span className="font-display text-foreground text-3xl tracking-wide tabular-nums @md:text-4xl">
-          {Math.round(team.combinedRatingAverage).toLocaleString()}
+          {Math.round(team.combinedRatingSum).toLocaleString()}
         </span>
         <span className="text-xs tracking-widest uppercase">
-          {t("teams.average")}
+          {t("teams.sum")}
         </span>
         <span aria-hidden>·</span>
         <span className="tabular-nums">
