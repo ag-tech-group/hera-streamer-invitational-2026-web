@@ -106,3 +106,21 @@ describe("TeamsSection — member chips show the host's Display name", () => {
     ).toBeInTheDocument()
   })
 })
+
+describe("TeamsSection — team colours", () => {
+  it("tints each card with its identity colour via data-team-color", async () => {
+    mockTeamsAndRoster(teamStanding({ profile_id: 1234, alias: "uThermal" }), [
+      rosterPlayer({ profile_id: 1234, alias: "uThermal" }),
+    ])
+    renderTeams()
+
+    // The card resolves its slot from the same creation-order map the public
+    // Teams view uses; a lone team takes the first slot (p1 / blue). Asserting
+    // the wiring — not a computed colour — keeps this stable against palette
+    // tweaks while still proving the card is team-coloured.
+    const card = (await screen.findByText("Team Alpha")).closest(
+      "[data-team-color]"
+    )
+    expect(card).toHaveAttribute("data-team-color", "p1")
+  })
+})

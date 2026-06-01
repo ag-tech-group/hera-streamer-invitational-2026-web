@@ -50,6 +50,11 @@ import { activeTournament } from "@/config/tournaments"
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { presentationDisplayName } from "@/lib/presentation"
+import {
+  TEAM_COLOR_SLOTS,
+  teamColorMap,
+  type TeamColorSlot,
+} from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
 import type { TeamMember, TeamStandingsRow } from "@/types"
 
@@ -75,6 +80,16 @@ export function TeamsSection() {
   const rows = useMemo(
     () => [...(teams.data?.rows ?? [])].sort((a, b) => a.teamId - b.teamId),
     [teams.data?.rows]
+  )
+
+  // Colour each admin card by team identity, reusing the public Teams view's
+  // creation-order `teamColorMap` (#231) — built from the full id set and keyed
+  // by id, so a team's colour here matches its panel, standings chip, and stats
+  // bar everywhere else. `rows` is already teamId-sorted, the order the map
+  // assigns slots from.
+  const colorByTeamId = useMemo(
+    () => teamColorMap(rows.map((r) => r.teamId)),
+    [rows]
   )
 
   // Teams require a polled `profile_id` to add a member (the API's team-
@@ -146,6 +161,7 @@ export function TeamsSection() {
             <TeamItem
               key={team.teamId}
               team={team}
+              color={colorByTeamId.get(team.teamId) ?? TEAM_COLOR_SLOTS[0]}
               allPlayers={allPlayers}
               playerTeamMap={playerTeamMap}
               displayNameByProfileId={displayNameByProfileId}
@@ -172,11 +188,13 @@ function teamsQueryKey() {
 /** One team's full admin card: header (name/initials/edit/delete) + members + add-member form. */
 function TeamItem({
   team,
+  color,
   allPlayers,
   playerTeamMap,
   displayNameByProfileId,
 }: {
   team: TeamStandingsRow
+  color: TeamColorSlot
   allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
   displayNameByProfileId: DisplayNameMap
@@ -185,13 +203,34 @@ function TeamItem({
   const [editing, setEditing] = useState(false)
 
   return (
-    <li className="border-border/60 flex flex-col gap-3 rounded-md border p-3">
+    // `data-team-color` exposes the team's palette to descendants as the
+    // generic `--team-color*` vars (see index.css), the same mechanism the
+    // public Teams view uses — so the accent rail and initials chip tint to the
+    // team's colour without per-team class names. A left rail (vs the public
+    // card's top stripe) suits the dense admin list and echoes the stats
+    // summary cards; the rail also marks identity while the header is in edit
+    // mode and the initials chip is hidden.
+    <li
+      data-team-color={color}
+      className="border-border/60 relative flex flex-col gap-3 overflow-hidden rounded-md border p-3 pl-4"
+    >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px]"
+        style={{ background: "var(--team-color)" }}
+      />
       {editing ? (
         <EditTeamForm team={team} onDone={() => setEditing(false)} />
       ) : (
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="bg-muted text-muted-foreground rounded px-2 py-0.5 font-mono text-xs">
+            <span
+              className="ring-border rounded px-2 py-0.5 font-mono text-xs ring-1 ring-inset"
+              style={{
+                background: "var(--team-color-bg)",
+                color: "var(--team-color-strong)",
+              }}
+            >
               {team.initials}
             </span>
             <span className="text-sm font-medium">{team.name}</span>
