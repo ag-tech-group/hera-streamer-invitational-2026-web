@@ -1,4 +1,4 @@
-import { Trans } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 
 import { activeTournament } from "@/config/tournaments"
 
@@ -14,6 +14,12 @@ import { activeTournament } from "@/config/tournaments"
  * config), so there's no metadata fetch and no skeleton — it paints at once.
  */
 export function TournamentHero() {
+  // `<Trans>` renders against the current language but doesn't subscribe to
+  // changes on its own; `useTranslation()` re-renders the hero on a language
+  // switch so the subtitle below stays in sync (every other `<Trans>` user in
+  // the app pairs it with this hook for the same reason).
+  const { t } = useTranslation()
+
   return (
     <header className="relative flex flex-col items-center gap-4 pb-6 text-center">
       {/*
@@ -41,6 +47,7 @@ export function TournamentHero() {
       </h1>
       <p className="text-muted-foreground relative max-w-2xl text-sm">
         <Trans
+          t={t}
           i18nKey="home.subtitle"
           components={{
             product: (
