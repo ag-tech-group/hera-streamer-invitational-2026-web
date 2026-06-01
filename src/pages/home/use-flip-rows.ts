@@ -36,16 +36,22 @@ function prefersReducedMotion(): boolean {
  */
 export function useFlipRows(orderKey: string) {
   const containerRef = useRef<HTMLTableSectionElement>(null)
-  const rowNodes = useRef(new Map<number, HTMLTableRowElement>())
-  const prevTops = useRef(new Map<number, number>())
-  const running = useRef(new Map<number, Animation>())
+  const rowNodes = useRef(new Map<string, HTMLTableRowElement>())
+  const prevTops = useRef(new Map<string, number>())
+  const running = useRef(new Map<string, Animation>())
 
   // A single stable ref callback for every row. Each <tr> carries its id in
   // `data-flip-id`; the callback reads it and returns a cleanup (React 19),
   // so row identity is tracked without a new closure per render.
   const registerRow = useCallback((node: HTMLTableRowElement | null) => {
     if (!node) return
-    const id = Number(node.dataset.flipId)
+    // The flip id is an opaque identity token (e.g. `id:123` /
+    // `placeholder:alias`) used purely as a Map key — keep it a string. Don't
+    // coerce to a number: non-numeric keys (placeholder rows) would all become
+    // `NaN`, which Map treats as a single key, collapsing every row onto one
+    // entry so all but one would snap instead of slide.
+    const id = node.dataset.flipId
+    if (id === undefined) return
     rowNodes.current.set(id, node)
     return () => {
       rowNodes.current.delete(id)
@@ -59,7 +65,7 @@ export function useFlipRows(orderKey: string) {
 
     // Measure every row's top relative to the tbody (scroll-independent).
     const base = container.getBoundingClientRect().top
-    const currentTops = new Map<number, number>()
+    const currentTops = new Map<string, number>()
     for (const [id, node] of rowNodes.current) {
       currentTops.set(id, node.getBoundingClientRect().top - base)
     }
