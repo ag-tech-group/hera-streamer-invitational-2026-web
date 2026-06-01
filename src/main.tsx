@@ -15,6 +15,7 @@ import "flag-icons/css/flag-icons.min.css"
 import { AnalyticsProvider } from "./lib/analytics"
 import { getUserMessage, parseApiError } from "./lib/api-errors"
 import { AuthProvider } from "./lib/auth"
+import { installChunkReloadHandler } from "./lib/chunk-reload"
 import { FeatureFlagProvider } from "./lib/feature-flags"
 // Side-effect import: bootstraps i18next before any component renders.
 // Components use the `useTranslation` hook (or `i18n.t` outside the
@@ -27,6 +28,11 @@ import { routeTree } from "./routeTree.gen"
 // Initialize Sentry as early as possible so init-time errors flow through.
 // No-op when VITE_SENTRY_DSN is unset.
 initSentry()
+
+// Recover from stale code-split chunks after a redeploy: a tab on the previous
+// build that navigates to a lazy route (e.g. /stats) fails to fetch the now-
+// rotated chunk. Reload once to pick up the current build (see chunk-reload.ts).
+installChunkReloadHandler()
 
 // Defer PostHog init until the browser is idle (#65 perf) so its ~60 KB gzip
 // SDK doesn't compete with first paint. Events captured before the SDK
