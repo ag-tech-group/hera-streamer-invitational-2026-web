@@ -1,0 +1,337 @@
+{
+  "language": {
+    "label": "Langue",
+    "en": "English",
+    "es": "Español",
+    "ar": "العربية",
+    "nl": "Nederlands",
+    "de": "Deutsch",
+    "sv": "Svenska",
+    "ru": "Русский",
+    "fr": "Français"
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "auto": "Auto"
+  },
+  "nav": {
+    "brandAriaLabel": "Classement en direct",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "profile": "Profil",
+    "admin": "Admin",
+    "accountMenu": "Menu du compte"
+  },
+  "home": {
+    "title": "Classement en direct",
+    "subtitle": "Classements en direct, classement par équipe et progression du tournoi — <product>Age of Empires 2: Definitive Edition</product>.",
+    "tabs": {
+      "players": "Joueurs",
+      "teams": "Équipes",
+      "stats": "Stats"
+    },
+    "viewTabsAria": "Vue du classement",
+    "lastUpdated": "Mis à jour {{time}}",
+    "ladderRace": {
+      "begins": "La course au ladder <accent>commence</accent>",
+      "ends": "La course au ladder <accent>se termine</accent>",
+      "active": {
+        "title": "La course au ladder <accent>est en cours</accent>",
+        "body": "Les joueurs sont répartis en 4 équipes et s'affrontent pour atteindre l'elo combiné le plus élevé possible. Seuls les elos de pointe sont pris en compte pour le classement final."
+      }
+    },
+    "noStandings": {
+      "title": "Pas encore de classement",
+      "body": "Les joueurs apparaîtront ici une fois le classement du tournoi renseigné."
+    },
+    "noTeams": {
+      "title": "Pas encore d'équipes",
+      "body": "Les équipes apparaîtront ici une fois configurées pour ce tournoi."
+    },
+    "loadErrorStandings": {
+      "title": "Impossible de charger le classement",
+      "body": "Un problème est survenu lors de l'accès au classement."
+    },
+    "loadErrorTeams": {
+      "title": "Impossible de charger les équipes",
+      "body": "Un problème est survenu lors de l'accès au classement des équipes."
+    },
+    "prizePool": {
+      "label": "Cagnotte",
+      "sponsoredBy": "Sponsorisé par "
+    }
+  },
+  "stats": {
+    "title": "Stats",
+    "subtitle": "Progression du classement au cours du tournoi.",
+    "chartTitle": "Classement au fil du temps",
+    "teamEloTitle": "Elo de pointe combiné de l'équipe",
+    "teamAvgEloTitle": "Elo de pointe moyen de l'équipe",
+    "peakRatingTitle": "Pic de classement",
+    "noData": "Rien à afficher pour l'instant.",
+    "ratingAxis": "Classement",
+    "empty": "Aucun match terminé pour l'instant — la progression apparaît dès que les joueurs commencent à terminer des parties classées.",
+    "error": "Impossible de charger les stats.",
+    "retry": "Réessayer",
+    "cards": {
+      "biggestClimber": "Plus forte progression",
+      "highestPeak": "Pic le plus élevé",
+      "mostMatches": "Plus de matchs",
+      "winPct": "Meilleur taux de victoire"
+    }
+  },
+  "standings": {
+    "caption": "Classement du tournoi en direct",
+    "captionLoading": "Chargement du classement",
+    "headers": {
+      "position": "Position",
+      "team": "Équipe",
+      "player": "Joueur",
+      "rating": "Classement",
+      "peak": "Pic",
+      "streak": "Série",
+      "games": "Parties",
+      "winPct": "% victoires",
+      "recent": "Récent",
+      "activity": "Activité",
+      "watch": "Regarder"
+    },
+    "winPctBreakdown": {
+      "title": "Taux de victoire",
+      "wins": "{{count}} V",
+      "losses": "{{count}} D",
+      "aria": "{{wins}} victoires, {{losses}} défaites"
+    },
+    "live": "En direct",
+    "liveAriaLabel": "Dans un match en direct",
+    "active": "Actif",
+    "idle": "Inactif",
+    "recentAriaLabel": "Résultats récents, du plus récent au plus ancien : {{results}}",
+    "win": "Victoire",
+    "loss": "Défaite",
+    "viewProfile": "Voir le profil de {{name}}",
+    "watchOn": {
+      "twitch": "Regarder sur Twitch",
+      "youtube": "Regarder sur YouTube",
+      "other": "Regarder le stream"
+    },
+    "streamingLive": "En direct",
+    "bioLabel": "À propos de {{name}}"
+  },
+  "teams": {
+    "sum": "somme des pics",
+    "playersCount_one": "{{count}} joueur",
+    "playersCount_other": "{{count}} joueurs",
+    "noMembers": "Aucun membre classé pour l'instant.",
+    "rosterAriaLabel": "Effectif de l'équipe",
+    "versus": "VS",
+    "rankLabel": "Rang",
+    "rankAria": "Rang n°{{rank}} au classement combiné",
+    "captain": "Capitaine"
+  },
+  "admin": {
+    "title": "Admin",
+    "backToStandings": "Retour au classement",
+    "sections": {
+      "tournamentDetails": "Détails du tournoi",
+      "owners": "Propriétaires",
+      "players": "Joueurs",
+      "teams": "Équipes"
+    },
+    "tournament": {
+      "nameLabel": "Nom",
+      "startDate": "Date de début",
+      "grandFinalsDate": "Date de la grande finale",
+      "save": "Enregistrer les modifications",
+      "saving": "Enregistrement…",
+      "successToast": "Tournoi mis à jour.",
+      "loadError": "Impossible de charger les détails du tournoi.",
+      "prizePoolLabel": "Cagnotte",
+      "hostStreamUrls": {
+        "label": "URL des streams de l'hôte",
+        "help": "URL des chaînes (Twitch/YouTube) utilisées pour détecter quand l'hôte est en direct et allumer la carte promo. Jusqu'à {{max}}.",
+        "add": "Ajouter une URL",
+        "rowPlaceholder": "https://twitch.tv/channel",
+        "rowAria": "URL du stream de l'hôte {{index}}",
+        "removeAria": "Supprimer l'URL du stream de l'hôte {{index}}",
+        "errorTooLong": "L'URL ne doit pas dépasser {{max}} caractères.",
+        "errorTooMany": "Au maximum {{max}} URL."
+      }
+    },
+    "owners": {
+      "grantLabel": "Accorder la propriété",
+      "addPlaceholder": "Rechercher par nom ou e-mail",
+      "addAction": "Accorder",
+      "addingAction": "Attribution…",
+      "grantedOn": "Accordé le {{date}}",
+      "removeAria": "Révoquer {{name}}",
+      "removeTitle": "Révoquer la propriété ?",
+      "removeDescription": "{{name}} perdra l'accès administrateur à ce tournoi.",
+      "removeConfirm": "Révoquer",
+      "soleOwnerHint": "Vous êtes le seul propriétaire — accordez la propriété à un autre utilisateur avant de vous retirer.",
+      "grantSuccess": "Propriété accordée.",
+      "revokeSuccess": "Propriété révoquée.",
+      "noOwners": "Pas encore de propriétaires.",
+      "loadError": "Impossible de charger les propriétaires — connexion requise."
+    },
+    "players": {
+      "addLabel": "Ajouter un joueur",
+      "addNameLabel": "Nom affiché",
+      "addNamePlaceholder": "Pseudo du streamer (par ex. uThermal)",
+      "addProfileIdLabel": "ID de profil",
+      "addProfileIdPlaceholder": "aoe2 profile_id — facultatif",
+      "addAction": "Ajouter",
+      "addingAction": "Ajout…",
+      "addSuccess": "Joueur ajouté.",
+      "addErrorProfileId": "L'ID de profil doit être un nombre positif.",
+      "addErrorNumericName": "Cela ressemble à un ID de profil — saisissez-le dans le champ ID de profil.",
+      "removeAria": "Supprimer {{name}}",
+      "removeTitle": "Supprimer {{name}} ?",
+      "removeDescription": "Cela retire le joueur de l'effectif du tournoi. Son historique de matchs et ses classements restent intacts en amont.",
+      "removeConfirm": "Supprimer",
+      "removeSuccess": "Joueur supprimé.",
+      "noPlayers": "Pas encore de joueurs.",
+      "loadError": "Impossible de charger l'effectif.",
+      "editAria": "Modifier {{name}}",
+      "linkedAccount": "Compte de ladder lié",
+      "notYetRated": "Pas encore classé (0 partie classée)",
+      "presentation": {
+        "title": "Remplacements d'affichage",
+        "profileId": "ID de profil",
+        "profileIdPlaceholder": "par ex. 1819870",
+        "displayName": "Nom affiché",
+        "displayNamePlaceholder": "Pseudo du streamer (par ex. uThermal)",
+        "flag": "Drapeau",
+        "flagPlaceholder": "Sélectionner un pays",
+        "flagSearch": "Rechercher des pays",
+        "flagClear": "Aucun drapeau",
+        "flagNoResults": "Aucun pays trouvé",
+        "streamUrls": "URL des streams",
+        "streamUrlPlaceholder": "https://twitch.tv/handle",
+        "addStreamUrl": "Ajouter une URL de stream",
+        "removeStreamUrlAria": "Supprimer une URL de stream pour {{name}}",
+        "invalidUrl": "Saisissez une URL http(s) valide",
+        "bio": "Bio",
+        "bioPlaceholder": "Brève présentation montrée aux spectateurs — par ex. 2× champion, joue des Éclaireurs agressifs.",
+        "profileUrl": "URL du profil",
+        "profileUrlPlaceholder": "https://www.aoe2insights.com/user/12449433/",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "saving": "Enregistrement…",
+        "saveSuccess": "Joueur mis à jour."
+      },
+      "profileHint": "Sur la page <link>aoe2insights</link> d'un joueur, le <code>profile_id</code> est le <code>Game Id</code> (le nombre dans le lien <code>/user/relic/…</code>) — <strong>et non</strong> le nombre dans l'URL de la page, qui diffère pour les comptes récents."
+    },
+    "teams": {
+      "createLabel": "Créer une équipe",
+      "initialsPlaceholder": "Initiales",
+      "namePlaceholder": "Nom de l'équipe",
+      "createAction": "Créer",
+      "creatingAction": "Création…",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "editAria": "Modifier {{name}}",
+      "deleteAria": "Supprimer {{name}}",
+      "deleteTitle": "Supprimer l'équipe « {{name}} » ?",
+      "deleteDescription": "L'équipe et tous ses membres sont supprimés. Les joueurs eux-mêmes restent dans l'effectif du tournoi.",
+      "deleteConfirm": "Supprimer l'équipe",
+      "addMember": "Ajouter un membre",
+      "addMemberPlaceholder": "Choisir un joueur",
+      "addMemberNone": "Aucun joueur disponible",
+      "addMemberAction": "Ajouter",
+      "addMemberAdding": "Ajout…",
+      "memberOnTeam": "(dans {{name}})",
+      "noMembers": "Pas encore de membres.",
+      "removeMemberAria": "Retirer {{name}} de l'équipe",
+      "removeMemberTitle": "Retirer {{name}} de cette équipe ?",
+      "removeMemberDescription": "Le joueur reste dans l'effectif du tournoi.",
+      "removeMemberConfirm": "Retirer",
+      "moveTitle": "Déplacer le joueur vers cette équipe ?",
+      "moveDescription": "{{name}} est actuellement dans {{from}}.",
+      "moveConfirm": "Déplacer le joueur",
+      "noTeams": "Pas encore d'équipes.",
+      "loadError": "Impossible de charger les équipes.",
+      "createSuccess": "Équipe créée.",
+      "updateSuccess": "Équipe mise à jour.",
+      "deleteSuccess": "Équipe supprimée.",
+      "setCaptain": "Nommer capitaine",
+      "clearCaptain": "Retirer le capitaine",
+      "setCaptainAria": "Nommer {{name}} capitaine de l'équipe",
+      "clearCaptainAria": "Retirer {{name}} du rôle de capitaine",
+      "captainSetSuccess": "{{name}} est désormais capitaine.",
+      "captainClearSuccess": "Capitaine retiré."
+    }
+  },
+  "common": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "loading": "Chargement…",
+    "error": "Erreur",
+    "tryAgain": "Réessayer",
+    "reference": "Référence : {{id}}",
+    "goHome": "Accueil"
+  },
+  "userSearch": {
+    "placeholder": "Rechercher par nom ou e-mail",
+    "clear": "Effacer l'utilisateur sélectionné",
+    "noMatches": "Aucun utilisateur ne correspond à cette recherche.",
+    "searching": "Recherche…"
+  },
+  "countdown": {
+    "days": "jours",
+    "hours": "h",
+    "minutes": "min",
+    "seconds": "s"
+  },
+  "hostLinks": {
+    "defaultLabel": "Présenté par",
+    "hostedBy": "Présenté par {{host}}",
+    "live": "En direct",
+    "streamingLive": "En direct"
+  },
+  "notFound": {
+    "eyebrow": "Page introuvable",
+    "code": "404",
+    "body": "Désolé, nous n'avons pas trouvé la page que vous recherchez.",
+    "homeAction": "Retour à l'accueil"
+  },
+  "errorBoundary": {
+    "eyebrow": "Une erreur est survenue",
+    "heading": "Erreur",
+    "body": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "home": "Accueil"
+  },
+  "errors": {
+    "default": "Une erreur inattendue s'est produite.",
+    "400": "Requête invalide. Veuillez vérifier votre saisie.",
+    "401": "Votre session a expiré. Veuillez vous reconnecter.",
+    "403": "Vous n'avez pas la permission de faire cela.",
+    "404": "La ressource demandée est introuvable.",
+    "409": "Cela entre en conflit avec une ressource existante.",
+    "422": "Veuillez vérifier votre saisie et réessayer.",
+    "429": "Trop de requêtes. Veuillez patienter un instant.",
+    "500": "Un problème est survenu de notre côté. Veuillez réessayer plus tard.",
+    "idempotencyKeyReused": "Quelque chose a changé — veuillez réessayer.",
+    "tournamentNotFound": "Tournoi introuvable.",
+    "sessionExpired": "Votre session a expiré — reconnectez-vous pour continuer.",
+    "signInAction": "Se connecter"
+  },
+  "footer": {
+    "criticalbitProjectPrefix": "Un projet ",
+    "criticalbitProjectLink": "criticalbit.gg",
+    "criticalbitProjectSuffix": ".",
+    "microsoftDisclaimerPrefix": "Age of Empires II © Microsoft Corporation. Ce site a été créé dans le cadre des ",
+    "microsoftDisclaimerLink": "Game Content Usage Rules",
+    "microsoftDisclaimerSuffix": " de Microsoft à l'aide de ressources d'Age of Empires II et n'est ni approuvé ni soutenu par Microsoft.",
+    "legalNavLabel": "Mentions légales",
+    "privacyLink": "Confidentialité",
+    "termsLink": "Conditions",
+    "copyright": "© {{year}} AG Technology Group LLC. Tous droits réservés."
+  }
+}
