@@ -17,6 +17,9 @@ function row(
     maxRating: 2600,
     wins: 100,
     losses: 50,
+    // Default consistent with 100W / 50L; the API computes win_pct, so the
+    // fixture carries it directly rather than deriving it.
+    winPct: 66.7,
     streak: 0,
     recentResults: [],
     gamesPlayed: 0,

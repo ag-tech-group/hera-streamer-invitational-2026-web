@@ -32,17 +32,24 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
           initials: dto.team.initials,
         }
       : null,
+    // Rating stays the live lifetime ladder rating (organizer decision, #238)
+    // — it should move as the player competes and we don't recompute it.
     currentRating: dto.current_rating,
-    maxRating: dto.max_rating,
-    wins: dto.wins,
-    losses: dto.losses,
-    streak: dto.streak,
-    recentResults: dto.recent_results,
+    // Every other stat reads the tournament-window record (#238): peak, streak,
+    // recent form, win%, and activity are all scoped to the event, so a
+    // streamer with no tournament matches yet reads `—` instead of a
+    // misleading lifetime figure. `win_pct` is API-computed (0–100, 1dp).
+    maxRating: dto.tournament_record.peak_rating,
+    wins: dto.tournament_record.wins,
+    losses: dto.tournament_record.losses,
+    streak: dto.tournament_record.streak,
+    recentResults: dto.tournament_record.recent_results,
+    winPct: dto.tournament_record.win_pct,
     gamesPlayed: dto.tournament_record.games_played,
     rank: dto.rank,
     rankTotal: dto.rank_total,
     inMatch: dto.in_match,
-    lastMatchAt: dto.last_match_at,
+    lastMatchAt: dto.tournament_record.last_match_at,
     updatedAt: dto.updated_at,
     presentation: toPlayerPresentation(dto.presentation),
     streamLive: dto.stream_live,

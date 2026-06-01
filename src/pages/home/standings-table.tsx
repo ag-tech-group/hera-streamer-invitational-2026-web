@@ -243,10 +243,14 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             {/* Win% sits right after Games. Tooltip breaks down the W–L
                 split behind the percentage (hover desktop / tap mobile). */}
             <FlashCell
-              value={row.wins - row.losses}
+              value={row.winPct}
               className="px-4 py-3 text-right tabular-nums"
             >
-              <WinPctCell wins={row.wins} losses={row.losses} />
+              <WinPctCell
+                winPct={row.winPct}
+                wins={row.wins}
+                losses={row.losses}
+              />
             </FlashCell>
             {/* Streak sits just left of Recent — both are "recent form". */}
             <FlashCell value={row.streak} className="px-4 py-3 text-center">
@@ -325,9 +329,10 @@ function getSortValue(row: StandingsRow, key: string): SortableValue {
     case "gamesPlayed":
       return row.gamesPlayed
     case "winPct":
-      // Rows with no decided games sort last (null) rather than as 0% — a
-      // 0-game placeholder shouldn't outrank a real 50% record.
-      return winPct(row)
+      // API-computed tournament-window win% (#238); null (no in-window decided
+      // games) sorts last rather than as 0% so a 0-game row can't outrank a
+      // real record.
+      return row.winPct
     case "lastMatchAt":
       return row.lastMatchAt
     case "watch":
@@ -905,32 +910,28 @@ function RecentResultsCell({ results }: { results: MatchResult[] }) {
 }
 
 /**
- * Win percentage from decided games (wins / (wins + losses)), or null when the
- * player has no decided games — so a 0-game placeholder reads as "—" rather
- * than 0% and sorts to the tail. The API also exposes a precomputed `win_pct`,
- * but the standings adapter doesn't surface it, so we derive from the mapped
- * wins / losses to avoid an adapter change.
+ * The Win% cell: the API-computed tournament-window percentage
+ * (`row.winPct`, #238) with a hover/tap breakdown of the underlying W–L split.
+ * Renders a muted em-dash when `winPct` is null — no in-window decided games —
+ * matching the other empty-state cells, and skips the tooltip there since
+ * there's nothing to break down. The breakdown's wins/losses are also
+ * tournament-scoped (mapped from `tournament_record` in the adapter).
  */
-function winPct(row: StandingsRow): number | null {
-  const decided = row.wins + row.losses
-  return decided === 0 ? null : (row.wins / decided) * 100
-}
-
-/**
- * The Win% cell: the percentage with a hover/tap breakdown of the underlying
- * W–L split. Renders a muted em-dash for rows with no decided games (matching
- * the other empty-state cells) and skips the tooltip there — there's nothing
- * to break down.
- */
-function WinPctCell({ wins, losses }: { wins: number; losses: number }) {
-  const decided = wins + losses
-  if (decided === 0) {
+function WinPctCell({
+  winPct,
+  wins,
+  losses,
+}: {
+  winPct: number | null
+  wins: number
+  losses: number
+}) {
+  if (winPct === null) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
-  const pct = (wins / decided) * 100
   return (
     <WinPctHint wins={wins} losses={losses}>
-      {pct.toFixed(1)}%
+      {winPct.toFixed(1)}%
     </WinPctHint>
   )
 }

@@ -9,18 +9,25 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
+import type { MatchOutcome } from './matchOutcome';
 
 /**
- * A player's win/loss record within a tournament's date window.
+ * A player's stats within a tournament's date window.
 
 Counts only completed matches on the tournament's leaderboard between
 its ``start_date`` and ``grand_finals_date`` (a null bound is treated as open).
-Distinct from the lifetime-ladder ``wins`` / ``losses`` / ``streak``
-on ``StandingRow``.
+Distinct from the lifetime-ladder ``wins`` / ``losses`` / ``streak`` /
+``max_rating`` / ``last_match_at`` / ``recent_results`` on ``StandingRow``;
+every field here is in-window only.
  */
 export interface TournamentRecord {
   games_played: number;
   wins: number;
   losses: number;
   streak: number;
+  peak_rating: number | null;
+  last_match_at: string | null;
+  recent_results: MatchOutcome[];
+  /** Win percentage (0–100, 1 dp) over in-window games; null when none. */
+  readonly win_pct: number | null;
 }
