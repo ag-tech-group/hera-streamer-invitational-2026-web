@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Pencil, Plus, Trash2, X } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
@@ -35,10 +35,21 @@ export function PlayersSection() {
     activeTournament.apiTournamentSlug
   )
 
-  // Narrow the generated 200|422 union — see the same comment in
-  // `owners-section.tsx`.
-  const players: PlayerRead[] =
-    query.data?.status === 200 ? query.data.data.items : []
+  // Narrow the generated 200|422 union (see `owners-section.tsx`) and sort
+  // alphabetically by the visible name (display-name override, else the ladder
+  // alias) rather than the API's add-order, so the roster is scannable.
+  // Case-insensitive; `localeCompare` keeps it stable and locale-aware. Keyed
+  // on `query.data` so the array identity is stable across renders.
+  const players: PlayerRead[] = useMemo(() => {
+    if (query.data?.status !== 200) return []
+    return [...query.data.data.items].sort((a, b) =>
+      (presentationDisplayName(a.presentation) ?? a.alias).localeCompare(
+        presentationDisplayName(b.presentation) ?? b.alias,
+        undefined,
+        { sensitivity: "base" }
+      )
+    )
+  }, [query.data])
 
   return (
     <div className="flex flex-col gap-4">
