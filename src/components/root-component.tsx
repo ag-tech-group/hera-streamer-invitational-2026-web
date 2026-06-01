@@ -6,6 +6,7 @@ import { Navbar } from "@/components/navbar"
 import { SiteAtmosphere } from "@/components/site-atmosphere"
 import { SiteFooter } from "@/components/site-footer"
 import { SiteParticles } from "@/components/site-particles"
+import { useTheme } from "@/components/theme-provider"
 import { useAnalytics } from "@/lib/analytics"
 
 const TanStackRouterDevtools = import.meta.env.PROD
@@ -44,6 +45,12 @@ function RouteTracker() {
  * leaving both files clean Fast Refresh boundaries.
  */
 export function RootComponent() {
+  // Match the toasts to the active theme (#228). Sonner defaults to light, so
+  // without this its surfaces stay light even in dark mode. `theme` may be
+  // "system", which sonner resolves against `prefers-color-scheme` natively —
+  // the same resolution `ThemeProvider` applies to the `<html>` class — so the
+  // two never disagree.
+  const { theme } = useTheme()
   return (
     <>
       <RouteTracker />
@@ -71,7 +78,7 @@ export function RootComponent() {
         </main>
         <SiteFooter />
       </div>
-      <Toaster position="bottom-right" richColors closeButton />
+      <Toaster theme={theme} position="bottom-right" richColors closeButton />
       <Suspense fallback={null}>
         <TanStackRouterDevtools />
         <ReactQueryDevtools />
