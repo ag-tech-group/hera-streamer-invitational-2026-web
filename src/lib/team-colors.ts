@@ -27,11 +27,25 @@ export const TEAM_COLOR_SLOTS: readonly TeamColorSlot[] = [
 ]
 
 /**
- * Stable colour slot for a team, keyed on its id so the colour never shifts
- * with the rankings: team 1 → blue, 2 → red, 3 → green, … in AoE2 order. Past
- * eight teams the palette wraps. Team ids are positive, so `teamId - 1` is a
- * valid index.
+ * Builds a stable `teamId → colour slot` map from the full set of team ids.
+ *
+ * Colour follows **creation order**, not the raw id: the ids are sorted
+ * ascending (≈ creation order) and assigned blue, red, green, … in AoE2 order
+ * by their *ordinal position*. So the first-created team is always blue even
+ * if its database id is 3 because earlier teams were deleted (#231) — the gap
+ * doesn't leak into the palette. Past eight teams the palette wraps.
+ *
+ * Keying off a map (rather than the bare id) also means colour stays pinned to
+ * a team's identity regardless of how the panels are *ordered* on screen, so
+ * the Teams tab can sort by rank (#230) without the colours moving.
+ *
+ * Every surface that colours a team — the Teams tab, the standings Team chip,
+ * the stats bars — must build this map from the same id set so a given team
+ * paints identically everywhere.
  */
-export function teamColorSlot(teamId: number): TeamColorSlot {
-  return TEAM_COLOR_SLOTS[(teamId - 1) % TEAM_COLOR_SLOTS.length]
+export function teamColorMap(teamIds: number[]): Map<number, TeamColorSlot> {
+  const ordered = [...new Set(teamIds)].sort((a, b) => a - b)
+  return new Map(
+    ordered.map((id, i) => [id, TEAM_COLOR_SLOTS[i % TEAM_COLOR_SLOTS.length]])
+  )
 }

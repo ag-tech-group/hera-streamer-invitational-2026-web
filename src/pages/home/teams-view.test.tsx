@@ -74,11 +74,13 @@ describe("TeamsView", () => {
     expect(screen.getAllByText("2 players")).toHaveLength(2)
   })
 
-  it("labels teams by their position in the standings", () => {
-    // Reverse the input — Team Bravo is ranked first now — to prove
-    // the rank reflects the API order rather than the stable
-    // teamId-sorted display order the panels use.
+  it("displays panels in rank order (API order) and labels their position", () => {
+    // Reverse the input so Team Bravo is ranked first — panels follow the
+    // API rank order (#230), so Bravo's panel renders before Alpha's.
     render(<TeamsView rows={[rows[1], rows[0]]} />)
+    const headings = screen.getAllByRole("heading", { level: 2 })
+    expect(headings[0]).toHaveTextContent("Team Bravo")
+    expect(headings[1]).toHaveTextContent("Team Alpha")
     expect(
       screen.getByLabelText("Rank #1 by average rating")
     ).toHaveTextContent("#1")
@@ -97,9 +99,11 @@ describe("TeamsView", () => {
     expect(within(rosters[1]).getByText("2610")).toBeInTheDocument()
   })
 
-  it("assigns blue (P1) to the lower teamId and red (P2) to the higher", () => {
-    // Stable colour assignment matters — otherwise a live rating change
-    // that flips the ranking would also flip which side is blue.
+  it("colours by creation order, pinned to team identity regardless of display order (#231)", () => {
+    // Input reversed (Bravo ranked first), but colour follows creation order
+    // (teamId ascending): Alpha (id 1) stays blue, Bravo (id 2) stays red —
+    // even though Bravo's panel now renders first. A live rank flip reorders
+    // panels without recolouring them.
     render(<TeamsView rows={[rows[1], rows[0]]} />)
     const alpha = screen
       .getByRole("heading", { name: "Team Alpha" })
@@ -109,6 +113,23 @@ describe("TeamsView", () => {
       .closest("[data-team-color]")
     expect(alpha).toHaveAttribute("data-team-color", "p1")
     expect(bravo).toHaveAttribute("data-team-color", "p2")
+  })
+
+  it("colours the first-created team blue even when its id has a gap (#231)", () => {
+    // Teams with ids 3 and 8 (earlier teams deleted): the lower id is still
+    // the first-created, so it's blue — the raw id value doesn't pick green.
+    render(
+      <TeamsView
+        rows={[
+          teamRow({ teamId: 8, name: "Later Team" }),
+          teamRow({ teamId: 3, name: "First Team" }),
+        ]}
+      />
+    )
+    const first = screen
+      .getByRole("heading", { name: "First Team" })
+      .closest("[data-team-color]")
+    expect(first).toHaveAttribute("data-team-color", "p1")
   })
 
   it("shows a placeholder when a team has no rated members", () => {

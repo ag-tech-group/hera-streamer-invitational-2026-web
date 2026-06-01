@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { normalizeCountryCode } from "@/lib/format"
 import {
   TEAM_COLOR_SLOTS,
-  teamColorSlot,
+  teamColorMap,
   type TeamColorSlot,
 } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
@@ -38,32 +38,28 @@ const SKELETON_TEAM_SIZES = [4, 4]
  * and a wide banner panel shows several.
  */
 export function TeamsView({ rows }: { rows: TeamStandingsRow[] }) {
-  // Standings position is the row's index in the API-ranked list (by
-  // combined rating, desc). We freeze it into a map up-front so the
-  // teamId-sorted display order below doesn't relabel the leader.
-  const positionMap = useMemo(() => {
-    const map = new Map<number, number>()
-    rows.forEach((row, i) => map.set(row.teamId, i + 1))
-    return map
-  }, [rows])
-
-  // Sort by teamId so colour assignment is stable across renders —
-  // otherwise a live rating change that flips the ranking would also
-  // flip which side is blue and which is red.
-  const teams = useMemo(
-    () => [...rows].sort((a, b) => a.teamId - b.teamId),
+  // Panels display in rank order — the API returns `rows` ranked by combined
+  // rating, desc, so the incoming order IS the ranking (#230). Position is
+  // therefore just the row index + 1.
+  //
+  // Colour is keyed to team identity via `teamColorMap` (creation order, #231),
+  // NOT the display position, so a team keeps its colour as it moves up or down
+  // the ranking on a live update — only the panel order changes, never the
+  // blue/red/green assignment.
+  const colorByTeamId = useMemo(
+    () => teamColorMap(rows.map((r) => r.teamId)),
     [rows]
   )
 
-  const isPair = teams.length === COLISEUM_TEAM_COUNT
+  const isPair = rows.length === COLISEUM_TEAM_COUNT
   return (
     <TeamsLayout isPair={isPair}>
-      {teams.map((team, i) => (
+      {rows.map((team, i) => (
         <TeamPanel
           key={team.teamId}
           team={team}
-          color={teamColorSlot(team.teamId)}
-          rank={positionMap.get(team.teamId) ?? 0}
+          color={colorByTeamId.get(team.teamId) ?? TEAM_COLOR_SLOTS[0]}
+          rank={i + 1}
           revealOffset={i * team.members.length}
           className={
             isPair ? (i === 0 ? "xl:col-start-1" : "xl:col-start-3") : undefined
