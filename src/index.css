@@ -666,7 +666,7 @@
     content: "";
     position: absolute;
     top: -2.5rem;
-    right: -2.5rem;
+    inset-inline-end: -2.5rem;
     width: 7rem;
     height: 7rem;
     border-radius: 9999px;

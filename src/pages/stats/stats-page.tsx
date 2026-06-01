@@ -356,7 +356,7 @@ function StatCard({
           stripe so the cards read as part of the same furniture. */}
       <span
         aria-hidden
-        className="bg-brand absolute inset-y-0 left-0 w-[3px]"
+        className="bg-brand absolute inset-y-0 start-0 w-[3px]"
       />
       <span className="bg-brand/10 text-brand flex size-11 shrink-0 items-center justify-center rounded-lg">
         <Icon className="size-5" aria-hidden />

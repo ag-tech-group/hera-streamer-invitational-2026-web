@@ -102,7 +102,7 @@ export function Countdown({
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        className="pointer-events-none absolute -end-24 -top-24 size-64 rounded-full opacity-80 blur-3xl"
         style={{
           background: "color-mix(in oklch, var(--brand) 12%, transparent)",
         }}
@@ -112,7 +112,14 @@ export function Countdown({
           {label}
         </p>
       ) : null}
+      {/*
+       * A countdown is a fixed days → hrs → min → sec sequence, like a clock
+       * face — it must read left-to-right even when the page is RTL. Pin the
+       * digits row to `dir="ltr"` so the flex order (and the leftmost-non-zero
+       * accent migration) doesn't reverse to sec → days under Arabic.
+       */}
       <div
+        dir="ltr"
         className={cn(
           "flex items-baseline tabular-nums",
           isHero ? "gap-3 sm:gap-5" : "gap-2 sm:gap-3"
@@ -251,7 +258,7 @@ function CountdownSkeleton({
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        className="pointer-events-none absolute -end-24 -top-24 size-64 rounded-full opacity-80 blur-3xl"
         style={{
           background: "color-mix(in oklch, var(--brand) 12%, transparent)",
         }}

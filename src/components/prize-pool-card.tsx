@@ -76,7 +76,7 @@ export function PrizePoolCard({
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        className="pointer-events-none absolute -end-24 -top-24 size-64 rounded-full opacity-80 blur-3xl"
         style={{
           background: "color-mix(in oklch, var(--brand) 12%, transparent)",
         }}
@@ -99,9 +99,19 @@ export function PrizePoolCard({
        * Stays in `font-display` so it tracks the broadcast aesthetic
        * instead of breaking back to sans mid-line.
        */}
-      <p className="font-display text-4xl tracking-wide tabular-nums">
-        {formatted}
-        <span className="text-muted-foreground ml-2 text-2xl">{currency}</span>
+      {/*
+       * A currency amount is a fixed LTR expression (digits + ISO code), so
+       * pin the row `dir="ltr"` like the countdown, else RTL flips it to
+       * "USD $10,000". flex + `gap-2` spaces the code off the number
+       * direction-agnostically — more robust than a bidi-fragile inline
+       * margin. The card's `items-center` still centres the whole row.
+       */}
+      <p
+        dir="ltr"
+        className="font-display flex items-baseline gap-2 text-4xl tracking-wide tabular-nums"
+      >
+        <span>{formatted}</span>
+        <span className="text-muted-foreground text-2xl">{currency}</span>
       </p>
       {sponsor && (
         <p className="text-muted-foreground text-xs">

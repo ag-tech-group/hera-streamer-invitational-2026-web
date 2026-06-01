@@ -1,0 +1,335 @@
+{
+  "language": {
+    "label": "اللغة",
+    "en": "English",
+    "es": "Español",
+    "ar": "العربية"
+  },
+  "theme": {
+    "label": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "auto": "تلقائي"
+  },
+  "nav": {
+    "brandAriaLabel": "الترتيب المباشر",
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج",
+    "profile": "الملف الشخصي",
+    "admin": "الإدارة",
+    "accountMenu": "قائمة الحساب"
+  },
+  "home": {
+    "title": "الترتيب المباشر",
+    "subtitle": "تصنيفات مباشرة وترتيب الفرق وتقدّم البطولة — <product>Age of Empires 2: Definitive Edition</product>.",
+    "tabs": {
+      "players": "اللاعبون",
+      "teams": "الفرق",
+      "stats": "الإحصائيات"
+    },
+    "viewTabsAria": "عرض الترتيب",
+    "lastUpdated": "تم التحديث {{time}}",
+    "ladderRace": {
+      "begins": "سباق السلّم <accent>يبدأ</accent>",
+      "ends": "سباق السلّم <accent>ينتهي</accent>",
+      "active": {
+        "title": "سباق السلّم <accent>جارٍ</accent>",
+        "body": "يُقسَّم اللاعبون إلى 4 فرق ويتنافسون لتحقيق أعلى مجموع إيلو ممكن. تُحتسب تصنيفات الذروة فقط في الترتيب النهائي."
+      }
+    },
+    "noStandings": {
+      "title": "لا يوجد ترتيب بعد",
+      "body": "سيظهر اللاعبون هنا بمجرد تعبئة لوحة صدارة البطولة."
+    },
+    "noTeams": {
+      "title": "لا توجد فرق بعد",
+      "body": "ستظهر الفرق هنا بمجرد إعدادها لهذه البطولة."
+    },
+    "loadErrorStandings": {
+      "title": "تعذّر تحميل الترتيب",
+      "body": "حدث خطأ ما أثناء الوصول إلى لوحة الصدارة."
+    },
+    "loadErrorTeams": {
+      "title": "تعذّر تحميل الفرق",
+      "body": "حدث خطأ ما أثناء الوصول إلى ترتيب الفرق."
+    },
+    "prizePool": {
+      "label": "مجموع الجوائز",
+      "sponsoredBy": "برعاية "
+    }
+  },
+  "stats": {
+    "title": "الإحصائيات",
+    "subtitle": "تقدّم التصنيف على مدار البطولة.",
+    "chartTitle": "التصنيف عبر الزمن",
+    "teamEloTitle": "مجموع ذروة إيلو الفريق",
+    "teamAvgEloTitle": "متوسط ذروة إيلو الفريق",
+    "peakRatingTitle": "تصنيف الذروة",
+    "noData": "لا شيء لعرضه بعد.",
+    "ratingAxis": "التصنيف",
+    "empty": "لا توجد مباريات مكتملة بعد — يظهر التقدّم بمجرد أن يبدأ اللاعبون في إنهاء المباريات المصنّفة.",
+    "error": "تعذّر تحميل الإحصائيات.",
+    "retry": "إعادة المحاولة",
+    "cards": {
+      "biggestClimber": "أكبر صعود",
+      "highestPeak": "أعلى ذروة",
+      "mostMatches": "الأكثر مباريات",
+      "winPct": "أفضل نسبة فوز"
+    }
+  },
+  "standings": {
+    "caption": "ترتيب البطولة المباشر",
+    "captionLoading": "جارٍ تحميل الترتيب",
+    "headers": {
+      "position": "المركز",
+      "team": "الفريق",
+      "player": "اللاعب",
+      "rating": "التصنيف",
+      "peak": "الذروة",
+      "streak": "السلسلة",
+      "games": "المباريات",
+      "winPct": "نسبة الفوز",
+      "recent": "الأخيرة",
+      "activity": "النشاط",
+      "watch": "المشاهدة"
+    },
+    "winPctBreakdown": {
+      "title": "نسبة الفوز",
+      "wins": "{{count}} فوز",
+      "losses": "{{count}} خسارة",
+      "aria": "{{wins}} فوز، {{losses}} خسارة"
+    },
+    "live": "مباشر",
+    "liveAriaLabel": "في مباراة مباشرة",
+    "active": "نشط",
+    "idle": "خامل",
+    "recentAriaLabel": "النتائج الأخيرة، الأحدث أولاً: {{results}}",
+    "win": "فوز",
+    "loss": "خسارة",
+    "viewProfile": "عرض الملف الشخصي لـ {{name}}",
+    "watchOn": {
+      "twitch": "المشاهدة على Twitch",
+      "youtube": "المشاهدة على YouTube",
+      "other": "مشاهدة البث"
+    },
+    "streamingLive": "يبثّ مباشرةً",
+    "bioLabel": "نبذة عن {{name}}"
+  },
+  "teams": {
+    "sum": "مجموع الذروة",
+    "playersCount_zero": "لا لاعبين",
+    "playersCount_one": "لاعب واحد",
+    "playersCount_two": "لاعبان",
+    "playersCount_few": "{{count}} لاعبين",
+    "playersCount_many": "{{count}} لاعبًا",
+    "playersCount_other": "{{count}} لاعب",
+    "noMembers": "لا يوجد أعضاء مصنّفون بعد.",
+    "rosterAriaLabel": "قائمة الفريق",
+    "versus": "ضد",
+    "rankLabel": "الترتيب",
+    "rankAria": "الترتيب رقم {{rank}} حسب التصنيف المجمّع",
+    "captain": "القائد"
+  },
+  "admin": {
+    "title": "الإدارة",
+    "backToStandings": "العودة إلى الترتيب",
+    "sections": {
+      "tournamentDetails": "تفاصيل البطولة",
+      "owners": "المالكون",
+      "players": "اللاعبون",
+      "teams": "الفرق"
+    },
+    "tournament": {
+      "nameLabel": "الاسم",
+      "startDate": "تاريخ البدء",
+      "grandFinalsDate": "تاريخ النهائي الكبير",
+      "save": "حفظ التغييرات",
+      "saving": "جارٍ الحفظ…",
+      "successToast": "تم تحديث البطولة.",
+      "loadError": "تعذّر تحميل تفاصيل البطولة.",
+      "prizePoolLabel": "مجموع الجوائز",
+      "hostStreamUrls": {
+        "label": "روابط بث المضيف",
+        "help": "روابط القنوات (Twitch/YouTube) المستخدَمة لاكتشاف بثّ المضيف المباشر وإضاءة بطاقة الترويج. حتى {{max}}.",
+        "add": "إضافة رابط",
+        "rowPlaceholder": "https://twitch.tv/channel",
+        "rowAria": "رابط بث المضيف {{index}}",
+        "removeAria": "إزالة رابط بث المضيف {{index}}",
+        "errorTooLong": "يجب ألّا يتجاوز الرابط {{max}} حرفًا.",
+        "errorTooMany": "بحدّ أقصى {{max}} روابط."
+      }
+    },
+    "owners": {
+      "grantLabel": "منح الملكية",
+      "addPlaceholder": "ابحث بالاسم أو البريد الإلكتروني",
+      "addAction": "منح",
+      "addingAction": "جارٍ المنح…",
+      "grantedOn": "تم المنح في {{date}}",
+      "removeAria": "إلغاء منح {{name}}",
+      "removeTitle": "إلغاء الملكية؟",
+      "removeDescription": "سيفقد {{name}} صلاحية الإدارة لهذه البطولة.",
+      "removeConfirm": "إلغاء",
+      "soleOwnerHint": "أنت المالك الوحيد — امنح الملكية لمستخدم آخر قبل إزالة نفسك.",
+      "grantSuccess": "تم منح الملكية.",
+      "revokeSuccess": "تم إلغاء الملكية.",
+      "noOwners": "لا يوجد مالكون بعد.",
+      "loadError": "تعذّر تحميل المالكين — يتطلّب تسجيل الدخول."
+    },
+    "players": {
+      "addLabel": "إضافة لاعب",
+      "addNameLabel": "الاسم المعروض",
+      "addNamePlaceholder": "اسم المذيع (مثل uThermal)",
+      "addProfileIdLabel": "معرّف الملف",
+      "addProfileIdPlaceholder": "معرّف ملف aoe2 — اختياري",
+      "addAction": "إضافة",
+      "addingAction": "جارٍ الإضافة…",
+      "addSuccess": "تمت إضافة اللاعب.",
+      "addErrorProfileId": "يجب أن يكون معرّف الملف رقمًا موجبًا.",
+      "addErrorNumericName": "يبدو هذا كمعرّف ملف — أدخله في حقل معرّف الملف.",
+      "removeAria": "إزالة {{name}}",
+      "removeTitle": "إزالة {{name}}؟",
+      "removeDescription": "يؤدي ذلك إلى إزالة اللاعب من قائمة البطولة. يبقى سجلّ مبارياته وتصنيفاته سليمًا في المصدر.",
+      "removeConfirm": "إزالة",
+      "removeSuccess": "تمت إزالة اللاعب.",
+      "noPlayers": "لا يوجد لاعبون بعد.",
+      "loadError": "تعذّر تحميل القائمة.",
+      "editAria": "تعديل {{name}}",
+      "linkedAccount": "حساب السلّم المرتبط",
+      "notYetRated": "غير مصنّف بعد (0 مباراة مصنّفة)",
+      "presentation": {
+        "title": "تجاوزات العرض",
+        "profileId": "معرّف الملف",
+        "profileIdPlaceholder": "مثل 1819870",
+        "displayName": "الاسم المعروض",
+        "displayNamePlaceholder": "اسم المذيع (مثل uThermal)",
+        "flag": "العلم",
+        "flagPlaceholder": "اختر دولة",
+        "flagSearch": "ابحث عن الدول",
+        "flagClear": "بدون علم",
+        "flagNoResults": "لم يُعثَر على دول",
+        "streamUrls": "روابط البث",
+        "streamUrlPlaceholder": "https://twitch.tv/handle",
+        "addStreamUrl": "إضافة رابط بث",
+        "removeStreamUrlAria": "إزالة رابط بث لـ {{name}}",
+        "invalidUrl": "أدخل رابط http(s) صالحًا",
+        "bio": "نبذة",
+        "bioPlaceholder": "خلفية موجزة تُعرض للمشاهدين — مثل بطل مرتين، يلعب بأسلوب هجومي بالكشّافة.",
+        "profileUrl": "رابط الملف",
+        "profileUrlPlaceholder": "https://www.aoe2insights.com/user/12449433/",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "saving": "جارٍ الحفظ…",
+        "saveSuccess": "تم تحديث اللاعب."
+      },
+      "profileHint": "في صفحة اللاعب على <link>aoe2insights</link>، يكون الـ <code>profile_id</code> هو الـ <code>Game Id</code> (الرقم الموجود في رابط <code>/user/relic/…</code>) — <strong>وليس</strong> الرقم الموجود في رابط الصفحة، فهو مختلف للحسابات الأحدث."
+    },
+    "teams": {
+      "createLabel": "إنشاء فريق",
+      "initialsPlaceholder": "الأحرف الأولى",
+      "namePlaceholder": "اسم الفريق",
+      "createAction": "إنشاء",
+      "creatingAction": "جارٍ الإنشاء…",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ…",
+      "cancel": "إلغاء",
+      "editAria": "تعديل {{name}}",
+      "deleteAria": "حذف {{name}}",
+      "deleteTitle": "حذف الفريق \"{{name}}\"؟",
+      "deleteDescription": "يُحذَف الفريق وجميع أعضائه. يبقى اللاعبون أنفسهم في قائمة البطولة.",
+      "deleteConfirm": "حذف الفريق",
+      "addMember": "إضافة عضو",
+      "addMemberPlaceholder": "اختر لاعبًا",
+      "addMemberNone": "لا يوجد لاعبون متاحون",
+      "addMemberAction": "إضافة",
+      "addMemberAdding": "جارٍ الإضافة…",
+      "memberOnTeam": "(في {{name}})",
+      "noMembers": "لا يوجد أعضاء بعد.",
+      "removeMemberAria": "إزالة {{name}} من الفريق",
+      "removeMemberTitle": "إزالة {{name}} من هذا الفريق؟",
+      "removeMemberDescription": "يبقى اللاعب في قائمة البطولة.",
+      "removeMemberConfirm": "إزالة",
+      "moveTitle": "نقل اللاعب إلى هذا الفريق؟",
+      "moveDescription": "{{name}} حاليًا في {{from}}.",
+      "moveConfirm": "نقل اللاعب",
+      "noTeams": "لا توجد فرق بعد.",
+      "loadError": "تعذّر تحميل الفرق.",
+      "createSuccess": "تم إنشاء الفريق.",
+      "updateSuccess": "تم تحديث الفريق.",
+      "deleteSuccess": "تم حذف الفريق.",
+      "setCaptain": "تعيين قائدًا",
+      "clearCaptain": "إلغاء القائد",
+      "setCaptainAria": "تعيين {{name}} قائدًا للفريق",
+      "clearCaptainAria": "إلغاء {{name}} كقائد للفريق",
+      "captainSetSuccess": "{{name}} أصبح القائد الآن.",
+      "captainClearSuccess": "تم إلغاء القائد."
+    }
+  },
+  "common": {
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "save": "حفظ",
+    "saving": "جارٍ الحفظ…",
+    "loading": "جارٍ التحميل…",
+    "error": "خطأ",
+    "tryAgain": "حاول مرة أخرى",
+    "reference": "المرجع: {{id}}",
+    "goHome": "الذهاب إلى الرئيسية"
+  },
+  "userSearch": {
+    "placeholder": "ابحث بالاسم أو البريد الإلكتروني",
+    "clear": "مسح المستخدم المحدّد",
+    "noMatches": "لا يوجد مستخدمون يطابقون هذا البحث.",
+    "searching": "جارٍ البحث…"
+  },
+  "countdown": {
+    "days": "يوم",
+    "hours": "ساعة",
+    "minutes": "دقيقة",
+    "seconds": "ثانية"
+  },
+  "hostLinks": {
+    "defaultLabel": "استضافة",
+    "live": "مباشر",
+    "streamingLive": "يبثّ مباشرةً"
+  },
+  "notFound": {
+    "eyebrow": "الصفحة غير موجودة",
+    "code": "404",
+    "body": "عذرًا، لم نتمكّن من العثور على الصفحة التي تبحث عنها.",
+    "homeAction": "العودة إلى الرئيسية"
+  },
+  "errorBoundary": {
+    "eyebrow": "حدث خطأ ما",
+    "heading": "خطأ",
+    "body": "حدث خطأ غير متوقّع. يُرجى المحاولة مرة أخرى.",
+    "retry": "حاول مرة أخرى",
+    "home": "الذهاب إلى الرئيسية"
+  },
+  "errors": {
+    "default": "حدث خطأ غير متوقّع.",
+    "400": "طلب غير صالح. يُرجى التحقّق من مُدخلاتك.",
+    "401": "انتهت صلاحية جلستك. يُرجى تسجيل الدخول مرة أخرى.",
+    "403": "ليست لديك صلاحية للقيام بذلك.",
+    "404": "لم يُعثَر على المورد المطلوب.",
+    "409": "يتعارض هذا مع مورد موجود.",
+    "422": "يُرجى التحقّق من مُدخلاتك والمحاولة مرة أخرى.",
+    "429": "طلبات كثيرة جدًا. يُرجى الانتظار لحظة.",
+    "500": "حدث خطأ ما لدينا. يُرجى المحاولة لاحقًا.",
+    "idempotencyKeyReused": "تغيّر شيء ما — يُرجى المحاولة مرة أخرى.",
+    "tournamentNotFound": "لم يُعثَر على البطولة.",
+    "sessionExpired": "انتهت صلاحية جلستك — سجّل الدخول مرة أخرى للمتابعة.",
+    "signInAction": "تسجيل الدخول"
+  },
+  "footer": {
+    "criticalbitProjectPrefix": "مشروع من ",
+    "criticalbitProjectLink": "criticalbit.gg",
+    "criticalbitProjectSuffix": ".",
+    "microsoftDisclaimerPrefix": "Age of Empires II © شركة Microsoft. أُنشئ هذا الموقع بموجب ",
+    "microsoftDisclaimerLink": "Game Content Usage Rules",
+    "microsoftDisclaimerSuffix": " الخاصة بـ Microsoft باستخدام أصول من Age of Empires II، وهو غير معتمَد من Microsoft ولا تابع لها.",
+    "legalNavLabel": "قانوني",
+    "privacyLink": "الخصوصية",
+    "termsLink": "الشروط",
+    "copyright": "© {{year}} AG Technology Group LLC. جميع الحقوق محفوظة."
+  }
+}

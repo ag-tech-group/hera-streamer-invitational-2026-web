@@ -134,7 +134,7 @@ export function CountryCombobox({ id, value, onChange }: CountryComboboxProps) {
               <button
                 type="button"
                 onClick={clear}
-                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm"
+                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-start text-sm"
               >
                 {t("admin.players.presentation.flagClear")}
               </button>
@@ -149,14 +149,14 @@ export function CountryCombobox({ id, value, onChange }: CountryComboboxProps) {
                 onMouseEnter={() => setHighlight(index)}
                 onClick={() => choose(country.code)}
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm",
+                  "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-start text-sm",
                   index === highlight && "bg-accent text-accent-foreground"
                 )}
               >
                 <Flag code={country.code} />
                 <span className="truncate">{country.name}</span>
                 {country.code === selectedCode ? (
-                  <Check className="ml-auto size-4 shrink-0" />
+                  <Check className="ms-auto size-4 shrink-0" />
                 ) : null}
               </button>
             </li>

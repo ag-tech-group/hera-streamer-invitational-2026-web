@@ -31,11 +31,11 @@ export function TournamentLayout({
         {/*
          * Tab row with an optional right-aligned trailing slot. `flex-wrap`
          * lets the trailing content drop to its own line on viewports too
-         * narrow to share a row with the tabs; `ml-auto` keeps it right.
+         * narrow to share a row with the tabs; `ms-auto` keeps it right.
          */}
         <div className="flex flex-wrap items-center gap-3">
           <ViewTabs value={view} />
-          {tabsTrailing ? <div className="ml-auto">{tabsTrailing}</div> : null}
+          {tabsTrailing ? <div className="ms-auto">{tabsTrailing}</div> : null}
         </div>
         {children}
       </div>
