@@ -32,7 +32,7 @@ function prefersReducedMotion(): boolean {
  * shifts elsewhere on the page. `prefers-reduced-motion` is honored.
  *
  * @param orderKey A string that changes iff the row order changes — it drives
- *   when re-measurement happens (e.g. the joined profile IDs).
+ *   when re-measurement happens (e.g. the joined row keys).
  */
 export function useFlipRows(orderKey: string) {
   const containerRef = useRef<HTMLTableSectionElement>(null)
@@ -45,11 +45,11 @@ export function useFlipRows(orderKey: string) {
   // so row identity is tracked without a new closure per render.
   const registerRow = useCallback((node: HTMLTableRowElement | null) => {
     if (!node) return
-    // The flip id is an opaque identity token (e.g. `id:123` /
-    // `placeholder:alias`) used purely as a Map key — keep it a string. Don't
-    // coerce to a number: non-numeric keys (placeholder rows) would all become
-    // `NaN`, which Map treats as a single key, collapsing every row onto one
-    // entry so all but one would snap instead of slide.
+    // The flip id is an opaque identity token (the caller's `rowKey`) used
+    // purely as a Map key — keep it a string. Don't coerce to a number: a
+    // non-numeric token would become `NaN`, which Map treats as a single key,
+    // collapsing every row onto one entry so all but one would snap instead of
+    // slide (#182).
     const id = node.dataset.flipId
     if (id === undefined) return
     rowNodes.current.set(id, node)

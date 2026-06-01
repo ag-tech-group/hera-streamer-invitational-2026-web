@@ -78,7 +78,7 @@ export function BioHint({
 }: {
   bio: string
   name: string
-  /** Relic profile id (null for placeholder rows) — carried for analytics. */
+  /** Relic profile id (null for an unlinked entrant) — carried for analytics. */
   profileId: number | null
   /** Raw ladder alias — carried for analytics alongside the display name. */
   alias: string

@@ -74,17 +74,14 @@ function streamPlatform(url: string): StreamPlatform {
 }
 
 /**
- * Stable per-row identifier for React keys, FLIP animation tracking, and
- * the position map. Real roster members key off their `profileId`;
- * placeholder rows (`profileId: null`) — announced-but-unjoined streamers
- * — fall back to their `alias`, which the API guarantees is unique within
- * a tournament's roster. The `id:` / `placeholder:` prefixes prevent a
- * profile id that happens to equal another row's alias from colliding.
+ * Stable per-row identifier for React keys, FLIP animation tracking, and the
+ * position map. Keys on `tournamentPlayerId` — the roster's first-class
+ * identity (#281), non-null for every row including an unlinked entrant whose
+ * `profileId` hasn't minted yet — so one key shape covers the whole table and
+ * an unlinked row is no longer special-cased onto an `alias` fallback.
  */
 function rowKey(row: StandingsRow): string {
-  return row.profileId !== null
-    ? `id:${row.profileId}`
-    : `placeholder:${row.alias}`
+  return String(row.tournamentPlayerId)
 }
 
 /**
@@ -115,17 +112,16 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
 
   // FLIP animation: rows slide to their new spots whenever the order
   // changes (either from a live SSE refresh or a header click). Keyed off
-  // the same `rowKey` the `<tr>` uses so placeholder rows (null
-  // `profileId`) don't collide on a single `null` identifier.
+  // the same `rowKey` (tournamentPlayerId) the `<tr>` uses, so the slide
+  // tracking and the rows agree on each row's identity.
   const orderKey = sortedRows.map(rowKey).join(",")
   const { containerRef, registerRow } = useFlipRows(orderKey)
 
   // The Position column shows the row's tournament rank — its place in the
   // peak-rating order (`rankedRows`), not the current sorted view. Without
   // this, sorting by another column would relabel "Position 1" as the top of
-  // that sort instead of the tournament leader. Keyed by `rowKey` so multiple
-  // placeholder rows (all with `profileId: null`) each get their own position
-  // rather than overwriting one Map entry.
+  // that sort instead of the tournament leader. Keyed by `rowKey`
+  // (tournamentPlayerId) so every row gets its own position entry.
   const positionMap = useMemo(() => {
     const map = new Map<string, number>()
     rankedRows.forEach((row, i) => map.set(rowKey(row), i + 1))
@@ -684,7 +680,7 @@ function PlayerCell({
   profileUrl,
   inMatch,
 }: {
-  /** Relic profile id, or null for placeholder rows — carried for analytics. */
+  /** Relic profile id, or null for an unlinked entrant — carried for analytics. */
   profileId: number | null
   alias: string
   displayName?: string
