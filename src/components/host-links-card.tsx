@@ -82,7 +82,7 @@ export function HostLinksCard({
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        className="pointer-events-none absolute -end-24 -top-24 size-64 rounded-full opacity-80 blur-3xl"
         style={{
           background: "color-mix(in oklch, var(--brand) 12%, transparent)",
         }}
@@ -100,11 +100,11 @@ export function HostLinksCard({
         {/*
          * Live badge: when the host is broadcasting, the eyebrow carries a
          * pulsing brand pill — the same ping-ring "right now" vocabulary as the
-         * standings "Live" badge. `ml-auto` parks it at the trailing edge.
+         * standings "Live" badge. `ms-auto` parks it at the trailing edge.
          */}
         {streamLive && (
           <span
-            className="bg-brand/15 text-brand ml-auto inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
+            className="bg-brand/15 text-brand ms-auto inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
             aria-label={t("hostLinks.streamingLive")}
           >
             <span className="relative flex size-1.5" aria-hidden>

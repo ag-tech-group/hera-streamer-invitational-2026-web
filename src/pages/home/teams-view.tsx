@@ -195,7 +195,7 @@ function TeamPanel({
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        className="pointer-events-none absolute -end-24 -top-24 size-64 rounded-full opacity-80 blur-3xl"
         style={{ background: "var(--team-color-bg)" }}
       />
 

@@ -2,13 +2,15 @@ import i18n from "i18next"
 import LanguageDetector from "i18next-browser-languagedetector"
 import { initReactI18next } from "react-i18next"
 
+import ar from "@/locales/ar.json"
 import en from "@/locales/en.json"
 import es from "@/locales/es.json"
 
 /**
- * i18n setup for the SPA. Two languages for now: English (default) and
- * Spanish (machine-translated for the 2026 invitational — community
- * polish welcome later, see #57). Language is detected from
+ * i18n setup for the SPA. English (default), Spanish, and Arabic
+ * (machine-translated for the 2026 invitational — community polish
+ * welcome later, see #57). Arabic is RTL: the `<html dir>` is synced
+ * from i18next's `i18n.dir()` below. Language is detected from
  * localStorage first, then the browser's navigator.language; the
  * user-facing dropdown in the navbar (`LanguageToggle`) is the
  * canonical way to switch and writes back to localStorage.
@@ -20,7 +22,7 @@ import es from "@/locales/es.json"
  */
 export const LANGUAGE_STORAGE_KEY = "app_language"
 
-export const SUPPORTED_LANGUAGES = ["en", "es"] as const
+export const SUPPORTED_LANGUAGES = ["en", "es", "ar"] as const
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 
 void i18n
@@ -30,6 +32,7 @@ void i18n
     resources: {
       en: { translation: en },
       es: { translation: es },
+      ar: { translation: ar },
     },
     fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGUAGES,
@@ -47,13 +50,17 @@ void i18n
     returnNull: false,
   })
 
-// Keep `<html lang="">` in sync so screen readers and the browser's
-// spellcheck pick the right locale. Done outside the React tree because
-// the document element is global anyway and this avoids a per-render effect.
+// Keep `<html lang>` and `<html dir>` in sync so screen readers and the
+// browser's spellcheck pick the right locale, and RTL languages (Arabic)
+// flip the whole layout. `i18n.dir(lng)` returns "rtl"/"ltr" from i18next's
+// built-in RTL language list. Done outside the React tree because the
+// document element is global anyway and this avoids a per-render effect.
 if (typeof document !== "undefined") {
   document.documentElement.lang = i18n.language
+  document.documentElement.dir = i18n.dir()
   i18n.on("languageChanged", (lng) => {
     document.documentElement.lang = lng
+    document.documentElement.dir = i18n.dir(lng)
   })
 }
 

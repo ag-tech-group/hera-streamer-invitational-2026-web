@@ -212,11 +212,11 @@ function TeamItem({
     // mode and the initials chip is hidden.
     <li
       data-team-color={color}
-      className="border-border/60 relative flex flex-col gap-3 overflow-hidden rounded-md border p-3 pl-4"
+      className="border-border/60 relative flex flex-col gap-3 overflow-hidden rounded-md border p-3 ps-4"
     >
       <span
         aria-hidden
-        className="absolute inset-y-0 left-0 w-[3px]"
+        className="absolute inset-y-0 start-0 w-[3px]"
         style={{ background: "var(--team-color)" }}
       />
       {editing ? (
@@ -499,7 +499,7 @@ function MemberChip({
   return (
     <li
       className={cn(
-        "bg-muted/40 inline-flex items-center gap-1.5 rounded-full py-1 pr-1 pl-2.5 text-xs",
+        "bg-muted/40 inline-flex items-center gap-1.5 rounded-full py-1 ps-2.5 pe-1 text-xs",
         member.isCaptain && "ring-brand/40 ring-1 ring-inset"
       )}
     >
@@ -730,7 +730,7 @@ function AddMemberForm({
                   >
                     <span>{optionName}</span>
                     {existing ? (
-                      <span className="text-muted-foreground ml-2 text-xs">
+                      <span className="text-muted-foreground ms-2 text-xs">
                         {t("admin.teams.memberOnTeam", {
                           name: existing.teamName,
                         })}

@@ -78,7 +78,7 @@ export function UserSearchPicker({
           type="button"
           variant="ghost"
           size="icon-xs"
-          className="ml-auto"
+          className="ms-auto"
           onClick={() => onSelect(null)}
           aria-label={t("userSearch.clear")}
         >
@@ -133,7 +133,7 @@ function SearchResults({
   return (
     <ul
       role="listbox"
-      className="bg-popover absolute top-full right-0 left-0 z-10 mt-1 max-h-64 overflow-y-auto rounded-md border shadow-md"
+      className="bg-popover absolute start-0 end-0 top-full z-10 mt-1 max-h-64 overflow-y-auto rounded-md border shadow-md"
     >
       {results.length === 0 && !isFetching ? (
         <li className="text-muted-foreground px-3 py-2 text-sm">

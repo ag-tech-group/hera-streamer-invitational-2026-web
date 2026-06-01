@@ -23,9 +23,9 @@ import { cn } from "@/lib/utils"
 type Align = "left" | "center" | "right"
 
 const TH_ALIGN: Record<Align, string> = {
-  left: "text-left",
+  left: "text-start",
   center: "text-center",
-  right: "text-right",
+  right: "text-end",
 }
 
 const BUTTON_JUSTIFY: Record<Align, string> = {

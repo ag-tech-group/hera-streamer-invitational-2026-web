@@ -208,7 +208,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
              */}
             <FlashCell
               value={row.maxRating}
-              className="font-display px-4 py-3 text-right text-lg tracking-wide tabular-nums"
+              className="font-display px-4 py-3 text-end text-lg tracking-wide tabular-nums"
             >
               {/*
                * Null peak = unrated roster member (left-joined onto the
@@ -226,7 +226,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
                 right of the headline peak (#197). */}
             <FlashCell
               value={row.currentRating}
-              className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+              className="text-muted-foreground px-4 py-3 text-end tabular-nums"
             >
               {row.currentRating === null ? (
                 <span className="text-muted-foreground text-xs">—</span>
@@ -236,7 +236,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             </FlashCell>
             <FlashCell
               value={row.gamesPlayed}
-              className="text-muted-foreground px-4 py-3 text-right tabular-nums"
+              className="text-muted-foreground px-4 py-3 text-end tabular-nums"
             >
               {row.gamesPlayed}
             </FlashCell>
@@ -244,7 +244,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
                 split behind the percentage (hover desktop / tap mobile). */}
             <FlashCell
               value={row.winPct}
-              className="px-4 py-3 text-right tabular-nums"
+              className="px-4 py-3 text-end tabular-nums"
             >
               <WinPctCell
                 winPct={row.winPct}
@@ -397,7 +397,7 @@ function StandingsHeaderRow({
 }) {
   const { t } = useTranslation()
   return (
-    <tr className="text-muted-foreground font-display border-b text-left text-sm tracking-widest uppercase">
+    <tr className="text-muted-foreground font-display border-b text-start text-sm tracking-widest uppercase">
       <SortableTh label={t("standings.headers.position")} />
       <SortableTh
         label={t("standings.headers.team")}
@@ -513,18 +513,18 @@ export function StandingsTableSkeleton() {
            * taller on data arrival.
            */}
           <td className="px-4 py-3">
-            <Skeleton className="ml-auto h-6 w-14" />
+            <Skeleton className="ms-auto h-6 w-14" />
           </td>
           <td className="px-4 py-3">
-            <Skeleton className="ml-auto h-4 w-12" />
+            <Skeleton className="ms-auto h-4 w-12" />
           </td>
           {/* Games placeholder */}
           <td className="px-4 py-3">
-            <Skeleton className="ml-auto h-4 w-8" />
+            <Skeleton className="ms-auto h-4 w-8" />
           </td>
           {/* Win% placeholder */}
           <td className="px-4 py-3">
-            <Skeleton className="ml-auto h-4 w-12" />
+            <Skeleton className="ms-auto h-4 w-12" />
           </td>
           {/* Streak placeholder — sits just left of Recent, matching the
               populated row order. */}
@@ -579,7 +579,7 @@ function TableShell({
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full opacity-80 blur-3xl"
+        className="pointer-events-none absolute -end-24 -top-24 size-64 rounded-full opacity-80 blur-3xl"
         style={{
           background: "color-mix(in oklch, var(--brand) 12%, transparent)",
         }}
