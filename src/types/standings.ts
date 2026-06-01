@@ -79,10 +79,11 @@ export interface StandingsRow {
    */
   currentRating: number | null
   /**
-   * Peak rating reached **within the tournament window** (#238 →
-   * `tournament_record.peak_rating`), not the lifetime ladder peak. `null`
-   * when the player has no in-window games yet, so the cell reads `—` until
-   * they play a tournament match rather than showing a misleading career peak.
+   * Lifetime peak rating on the tournament's leaderboard (#246 →
+   * `StandingRow.max_rating`). Renders pre-tournament too — it's the player's
+   * all-time peak and doesn't change when the event starts (this column was
+   * walked back from the in-window peak #238 briefly used). `null` only for
+   * brand-new accounts / placeholder rows, which read `—`.
    */
   maxRating: number | null
   wins: number

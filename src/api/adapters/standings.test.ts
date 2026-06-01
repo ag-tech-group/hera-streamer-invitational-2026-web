@@ -55,9 +55,8 @@ function snapshotOf(row: StandingRow) {
 }
 
 describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () => {
-  it("reads peak / streak / recent / win% / activity from tournament_record, not lifetime", () => {
+  it("reads streak / recent / win% / activity from tournament_record, not lifetime", () => {
     const row = snapshotOf(dto())
-    expect(row.maxRating).toBe(2180) // tournament_record.peak_rating, not 2400
     expect(row.streak).toBe(3) // tournament_record.streak, not 50
     expect(row.recentResults).toEqual(["win", "loss", "win"]) // not the lifetime trio
     expect(row.winPct).toBe(75.0) // tournament_record.win_pct, not 90
@@ -73,9 +72,16 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
     expect(snapshotOf(dto()).currentRating).toBe(2150)
   })
 
+  it("reads Peak from the lifetime max_rating, not the in-window peak (#246)", () => {
+    // Walked back from #238: Peak is the all-time ladder peak (2400), not the
+    // tournament_record.peak_rating (2180).
+    expect(snapshotOf(dto()).maxRating).toBe(2400)
+  })
+
   it("surfaces the empty state for a member with zero in-window games", () => {
     const row = snapshotOf(
       dto({
+        // No in-window games → the tournament-scoped fields are empty…
         tournament_record: {
           games_played: 0,
           wins: 0,
@@ -86,15 +92,22 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
           recent_results: [],
           win_pct: null,
         },
+        // …but the lifetime peak is still present (a player can have a career
+        // peak before playing any tournament match).
+        max_rating: 2400,
       })
     )
-    // Every tournament-scoped stat reads empty (→ "—" in the table)…
-    expect(row.maxRating).toBeNull()
+    // Tournament-scoped stats read empty (→ "—" in the table)…
     expect(row.winPct).toBeNull()
     expect(row.lastMatchAt).toBeNull()
     expect(row.recentResults).toEqual([])
     expect(row.streak).toBe(0)
-    // …but the live ladder rating still shows.
+    // …but Peak (lifetime, #246) and the live ladder rating still show.
+    expect(row.maxRating).toBe(2400)
     expect(row.currentRating).toBe(2150)
+  })
+
+  it("renders Peak as null only for a brand-new account (null max_rating)", () => {
+    expect(snapshotOf(dto({ max_rating: null })).maxRating).toBeNull()
   })
 })
