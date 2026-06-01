@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 
 import { TournamentLayout } from "@/components/tournament-layout"
 import type { StandingsView } from "@/components/view-tabs"
@@ -30,6 +30,21 @@ export function HomePage({ view }: { view: StandingsView }) {
   const standings = useStandings()
   // The team standings load lazily — only once the Teams view is opened.
   const teams = useTeamStandings(view === "teams")
+
+  // The team-standings endpoint carries only the raw ladder `alias`, not the
+  // host's `presentation.displayName` override — but the players standings
+  // (always loaded) does. Build a profileId → display name map from it so the
+  // Teams view can show the friendly name (e.g. "Day9TV") that viewers see on
+  // the standings table, not the ladder profile name (#242 follow-up).
+  const displayNameByProfileId = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const row of standings.data?.rows ?? []) {
+      if (row.profileId !== null && row.presentation.displayName) {
+        map.set(row.profileId, row.presentation.displayName)
+      }
+    }
+    return map
+  }, [standings.data?.rows])
 
   // Subscribe to the SSE nudge stream: each nudge invalidates the matching
   // query so the visible table refetches without a manual reload.
@@ -82,6 +97,7 @@ export function HomePage({ view }: { view: StandingsView }) {
           isError={teams.isError}
           error={teams.error}
           onRetry={handleRetryTeams}
+          displayNameByProfileId={displayNameByProfileId}
         />
       )}
     </TournamentLayout>
@@ -128,12 +144,15 @@ function TeamsSection({
   isError,
   error,
   onRetry,
+  displayNameByProfileId,
 }: {
   snapshot: TeamStandingsSnapshot | undefined
   isPending: boolean
   isError: boolean
   error: unknown
   onRetry: () => void
+  /** profileId → host display-name override, from the players standings. */
+  displayNameByProfileId: Map<number, string>
 }) {
   if (isPending) {
     return <TeamsViewSkeleton />
@@ -147,5 +166,10 @@ function TeamsSection({
     return <TeamsEmpty />
   }
 
-  return <TeamsView rows={snapshot.rows} />
+  return (
+    <TeamsView
+      rows={snapshot.rows}
+      displayNameByProfileId={displayNameByProfileId}
+    />
+  )
 }
