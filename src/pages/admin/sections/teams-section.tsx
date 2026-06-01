@@ -16,16 +16,6 @@ import {
   useUpdateTeamV1TournamentsTournamentSlugTeamsTeamIdPatch,
 } from "@/api/generated/hooks/teams/teams"
 import type { PlayerRead } from "@/api/generated/types"
-
-/**
- * Polled-only narrowing of `PlayerRead`. Team-member ops now key on
- * `tournament_player_id` (#184), so a placeholder *could* be teamed — but the
- * add-member UX (dropdown + name resolution for an unlinked entrant) hasn't had
- * a pass, so the teams admin still filters placeholders out at the source.
- * Downstream components type their roster prop as `PolledPlayer[]` so the
- * non-null `profile_id` guarantee propagates without per-site assertions.
- */
-type PolledPlayer = PlayerRead & { profile_id: number }
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import {
   AlertDialog,
@@ -93,26 +83,22 @@ export function TeamsSection() {
     [rows]
   )
 
-  // Filter placeholders out of the add-member source for now: team-member ops
-  // key on `tournament_player_id` (#184), so placeholders *could* be teamed, but
-  // the picker UX for an unlinked entrant is a follow-up. The type predicate
-  // narrows `profile_id` to non-null for every downstream consumer of
-  // `allPlayers`.
-  const allPlayers: PolledPlayer[] = useMemo(() => {
+  // Every roster player can be teamed — placeholders included. Team-member ops
+  // key on `tournament_player_id` (#184), which a placeholder carries even
+  // before its `profile_id` mints, so there's nothing to filter: to the admin,
+  // an announced entrant is just another player (#167).
+  const allPlayers: PlayerRead[] = useMemo(() => {
     if (playersQuery.data?.status !== 200) return []
-    return (
-      playersQuery.data.data.items
-        .filter((p): p is PolledPlayer => p.profile_id !== null)
-        // Alphabetical by visible name (display-name override, else alias) so the
-        // add-member dropdown reads in name order, not API add-order. Case-
-        // insensitive via localeCompare.
-        .sort((a, b) =>
-          (presentationDisplayName(a.presentation) ?? a.alias).localeCompare(
-            presentationDisplayName(b.presentation) ?? b.alias,
-            undefined,
-            { sensitivity: "base" }
-          )
-        )
+    // Spread before sorting — `items` is the query cache and sort is in-place.
+    return [...playersQuery.data.data.items].sort((a, b) =>
+      // Alphabetical by visible name (display-name override, else alias) so the
+      // add-member dropdown reads in name order, not API add-order. Case-
+      // insensitive via localeCompare.
+      (presentationDisplayName(a.presentation) ?? a.alias).localeCompare(
+        presentationDisplayName(b.presentation) ?? b.alias,
+        undefined,
+        { sensitivity: "base" }
+      )
     )
   }, [playersQuery.data])
 
@@ -195,7 +181,7 @@ function TeamItem({
 }: {
   team: TeamStandingsRow
   color: TeamColorSlot
-  allPlayers: PolledPlayer[]
+  allPlayers: PlayerRead[]
   playerTeamMap: PlayerTeamMap
   displayNameByTournamentPlayerId: DisplayNameMap
 }) {
@@ -381,7 +367,7 @@ function MembersBlock({
 }: {
   teamId: number
   members: TeamMember[]
-  allPlayers: PolledPlayer[]
+  allPlayers: PlayerRead[]
   playerTeamMap: PlayerTeamMap
   displayNameByTournamentPlayerId: DisplayNameMap
 }) {
@@ -600,7 +586,7 @@ function AddMemberForm({
 }: {
   teamId: number
   members: TeamMember[]
-  allPlayers: PolledPlayer[]
+  allPlayers: PlayerRead[]
   playerTeamMap: PlayerTeamMap
   displayNameByTournamentPlayerId: DisplayNameMap
 }) {

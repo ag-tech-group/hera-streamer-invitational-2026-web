@@ -110,6 +110,52 @@ describe("TeamsSection — member chips show the host's Display name", () => {
   })
 })
 
+describe("TeamsSection — add-member picker", () => {
+  it("offers a roster player that has no profile_id", async () => {
+    // An announced entrant with no linked ladder account (profile_id null) is
+    // just another roster player to the admin — it must be addable, not
+    // filtered out. With the source filter gone, a roster of only such entrants
+    // leaves the picker enabled ("Pick a player") instead of empty ("No players
+    // available"); the add keys on the always-present tournamentPlayerId.
+    server.use(
+      http.get("*/v1/tournaments/:slug/teams/standings", () =>
+        HttpResponse.json({
+          last_polled_at: null,
+          items: [
+            {
+              team_id: 1,
+              name: "Team Alpha",
+              initials: "TA",
+              member_count: 0,
+              combined_rating_sum: 0,
+              combined_rating_average: 0,
+              members: [],
+            },
+          ],
+        })
+      ),
+      http.get("*/v1/tournaments/:slug/players", () =>
+        HttpResponse.json({
+          last_polled_at: null,
+          items: [
+            {
+              tournament_player_id: 99,
+              profile_id: null,
+              alias: "Jabo",
+              country: null,
+              presentation: {},
+            },
+          ],
+        })
+      )
+    )
+    renderTeams()
+
+    expect(await screen.findByText("Pick a player")).toBeInTheDocument()
+    expect(screen.queryByText("No players available")).not.toBeInTheDocument()
+  })
+})
+
 describe("TeamsSection — team colours", () => {
   it("tints each card with its identity colour via data-team-color", async () => {
     mockTeamsAndRoster(teamStanding({ profile_id: 1234, alias: "uThermal" }), [
