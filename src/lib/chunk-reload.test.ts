@@ -19,6 +19,7 @@ describe("installChunkReloadHandler", () => {
     dispose?.()
     dispose = undefined
     sessionStorage.clear()
+    delete window.__chunkReloadInFlight
     vi.restoreAllMocks()
   })
 
@@ -63,6 +64,28 @@ describe("installChunkReloadHandler", () => {
     firePreloadError()
 
     expect(reload).toHaveBeenCalledTimes(1)
+  })
+
+  it("flags the teardown window so Sentry can drop the moot reload error", () => {
+    const reload = vi.fn()
+    dispose = installChunkReloadHandler(reload)
+    expect(window.__chunkReloadInFlight).toBeFalsy()
+
+    firePreloadError()
+
+    expect(reload).toHaveBeenCalledTimes(1)
+    expect(window.__chunkReloadInFlight).toBe(true)
+  })
+
+  it("does not flag the teardown window when the guard suppresses the reload", () => {
+    sessionStorage.setItem(RELOAD_MARK_KEY, String(Date.now()))
+    const reload = vi.fn()
+    dispose = installChunkReloadHandler(reload)
+
+    firePreloadError()
+
+    expect(reload).not.toHaveBeenCalled()
+    expect(window.__chunkReloadInFlight).toBeFalsy()
   })
 
   it("stops handling after the disposer runs", () => {

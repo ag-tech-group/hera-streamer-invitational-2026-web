@@ -17,6 +17,18 @@
  * second failure within the guard window is left to propagate (Vite re-throws
  * it, so it still reaches Sentry) instead of being suppressed.
  */
+declare global {
+  interface Window {
+    /**
+     * Set for the brief window between detecting a stale-chunk error and the
+     * recovery reload navigating away. Read by Sentry's `beforeSend` to drop
+     * errors thrown during that teardown — chiefly the router dereferencing the
+     * `undefined` the failed import resolves to under `preventDefault()`.
+     */
+    __chunkReloadInFlight?: boolean
+  }
+}
+
 const RELOAD_MARK_KEY = "chunkReloadAt"
 const RELOAD_GUARD_MS = 10_000
 
@@ -39,6 +51,10 @@ export function installChunkReloadHandler(
     // expected deploy churn stays out of Sentry.
     event.preventDefault()
     rememberReload()
+    // Under preventDefault the failed import resolves `undefined`, so the
+    // router can throw on it in the microtask before the reload navigates away.
+    // Flag the teardown so Sentry drops that moot error (see sentry.ts).
+    window.__chunkReloadInFlight = true
     reload()
   }
 

@@ -61,6 +61,17 @@ export function initSentry(): void {
       import.meta.env.VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE,
       DEFAULT_REPLAYS_ON_ERROR_SAMPLE_RATE
     ),
+    // Drop errors thrown during a stale-chunk recovery reload. When a tab on a
+    // previous build hits a rotated code-split chunk, chunk-reload.ts calls
+    // `preventDefault()` on Vite's preloadError and reloads; under
+    // preventDefault the failed import resolves `undefined`, so the router can
+    // throw on it ("...reading 'component'") in the microtask before the reload
+    // navigates away. We're leaving the page — that teardown error is moot, not
+    // a bug worth an event. (flag set in src/lib/chunk-reload.ts)
+    beforeSend(event) {
+      if (window.__chunkReloadInFlight) return null
+      return event
+    },
     integrations: [
       Sentry.browserTracingIntegration(),
       Sentry.replayIntegration(),
