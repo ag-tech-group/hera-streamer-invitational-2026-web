@@ -147,6 +147,7 @@ export function TeamsSection() {
 
   return (
     <div className="flex flex-col gap-4">
+      <CreateTeamForm />
       {teams.isPending ? (
         <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
       ) : teams.isError ? (
@@ -169,7 +170,6 @@ export function TeamsSection() {
           ))}
         </ul>
       )}
-      <CreateTeamForm />
     </div>
   )
 }
@@ -829,7 +829,7 @@ function CreateTeamForm() {
           data: { name, initials },
         })
       }}
-      className="border-border/60 flex flex-col gap-2 border-t pt-4"
+      className="border-border/60 flex flex-col gap-2 border-b pb-4"
     >
       <Label>{t("admin.teams.createLabel")}</Label>
       {/*
