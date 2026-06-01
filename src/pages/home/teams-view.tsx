@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Skeleton } from "@/components/ui/skeleton"
-import { normalizeCountryCode } from "@/lib/format"
+import { flagEmojiToCountryCode, normalizeCountryCode } from "@/lib/format"
 import {
   TEAM_COLOR_SLOTS,
   teamColorMap,
@@ -21,8 +21,13 @@ import type { TeamMember, TeamStandingsRow } from "@/types"
  */
 const COLISEUM_TEAM_COUNT = 2
 
-/** Placeholder roster sizes used by the loading skeleton, one per team panel. */
-const SKELETON_TEAM_SIZES = [4, 4]
+/**
+ * Placeholder roster sizes for the loading skeleton, one entry per team panel.
+ * This build runs 4 teams (> 2), so the populated view uses the stacked-banner
+ * layout (the coliseum is a 2-team-only arrangement) and the skeleton matches it
+ * — 4 stacked panels — so data arriving doesn't shift the layout.
+ */
+const SKELETON_TEAM_SIZES = [4, 4, 4, 4]
 
 /**
  * Replaces the flat team-standings table (#90) with a roster-first
@@ -41,12 +46,18 @@ const SKELETON_TEAM_SIZES = [4, 4]
  *  standings since the team-standings endpoint carries only the raw alias. */
 type DisplayNameMap = Map<number, string>
 
+/** profileId → host flag override (presentation.flag), likewise passed down from
+ *  the players standings: team-standings members carry only the raw `country`. */
+type FlagMap = Map<number, string>
+
 export function TeamsView({
   rows,
   displayNameByProfileId,
+  flagByProfileId,
 }: {
   rows: TeamStandingsRow[]
   displayNameByProfileId: DisplayNameMap
+  flagByProfileId: FlagMap
 }) {
   // Panels display in rank order — the API returns `rows` ranked by combined
   // rating, desc, so the incoming order IS the ranking (#230). Position is
@@ -72,6 +83,7 @@ export function TeamsView({
           rank={i + 1}
           revealOffset={i * team.members.length}
           displayNameByProfileId={displayNameByProfileId}
+          flagByProfileId={flagByProfileId}
           className={
             isPair ? (i === 0 ? "xl:col-start-1" : "xl:col-start-3") : undefined
           }
@@ -92,16 +104,14 @@ export function TeamsView({
  */
 export function TeamsViewSkeleton() {
   return (
-    <TeamsLayout isPair>
+    <TeamsLayout isPair={false}>
       {SKELETON_TEAM_SIZES.map((size, i) => (
         <TeamPanelSkeleton
           key={i}
           color={TEAM_COLOR_SLOTS[i]}
           rosterSize={size}
-          className={i === 0 ? "xl:col-start-1" : "xl:col-start-3"}
         />
       ))}
-      <VersusPillar className="hidden xl:col-start-2 xl:row-start-1 xl:flex" />
     </TeamsLayout>
   )
 }
@@ -149,6 +159,7 @@ function TeamPanel({
   rank,
   revealOffset,
   displayNameByProfileId,
+  flagByProfileId,
   className,
 }: {
   team: TeamStandingsRow
@@ -162,6 +173,7 @@ function TeamPanel({
    */
   revealOffset: number
   displayNameByProfileId: DisplayNameMap
+  flagByProfileId: FlagMap
   className?: string
 }) {
   // A team is "live" if any roster member is currently in a match. Drives
@@ -204,6 +216,7 @@ function TeamPanel({
         members={team.members}
         revealOffset={revealOffset}
         displayNameByProfileId={displayNameByProfileId}
+        flagByProfileId={flagByProfileId}
       />
     </section>
   )
@@ -364,10 +377,12 @@ function PlayerRoster({
   members,
   revealOffset,
   displayNameByProfileId,
+  flagByProfileId,
 }: {
   members: TeamMember[]
   revealOffset: number
   displayNameByProfileId: DisplayNameMap
+  flagByProfileId: FlagMap
 }) {
   const { t } = useTranslation()
   if (members.length === 0) {
@@ -391,6 +406,7 @@ function PlayerRoster({
           <PlayerPill
             member={member}
             displayName={displayNameByProfileId.get(member.profileId)}
+            flagOverride={flagByProfileId.get(member.profileId)}
           />
         </li>
       ))}
@@ -418,24 +434,44 @@ function PlayerRoster({
 function PlayerPill({
   member,
   displayName,
+  flagOverride,
 }: {
   member: TeamMember
   displayName: string | undefined
+  flagOverride: string | undefined
 }) {
   const countryCode = normalizeCountryCode(member.country)
+  // Host flag override (presentation.flag), passed down from the players
+  // standings since team-standings members carry only the raw `country`.
+  // Mirrors the standings table: a standard flag emoji decomposes to an ISO
+  // code and renders via the SVG `flag-icons` pipeline; a non-standard glyph
+  // (rainbow, regional tag, …) falls through to text; otherwise the raw country.
+  const overrideCode = flagOverride
+    ? flagEmojiToCountryCode(flagOverride)
+    : null
+  const effectiveFlagCode = overrideCode ?? countryCode
+  const renderOverrideAsText = Boolean(flagOverride && !overrideCode)
+  const visibleName = displayName ?? member.alias
   return (
     <div className="team-pill flex items-center gap-3 rounded-md border px-3 py-2.5">
-      {countryCode ? (
+      {effectiveFlagCode ? (
         <span
-          className={`fi fi-${countryCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
-          title={countryCode.toUpperCase()}
+          className={`fi fi-${effectiveFlagCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
+          title={effectiveFlagCode.toUpperCase()}
           aria-hidden
         />
+      ) : renderOverrideAsText ? (
+        <span
+          className="shrink-0 text-base leading-none"
+          aria-label={visibleName}
+        >
+          {flagOverride}
+        </span>
       ) : (
         <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
       )}
       <span className="min-w-0 flex-1 truncate text-sm font-medium">
-        {displayName ?? member.alias}
+        {visibleName}
       </span>
       {member.isCaptain && <CaptainBadge />}
       {member.inMatch && <LiveDot />}

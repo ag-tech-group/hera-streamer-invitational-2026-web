@@ -46,6 +46,21 @@ export function HomePage({ view }: { view: StandingsView }) {
     return map
   }, [standings.data?.rows])
 
+  // Same passthrough for the host's `presentation.flag` override: the team-
+  // standings members carry only the raw ladder `country`, so the Teams view
+  // can't render a flag override on its own. Build profileId → flag from the
+  // players standings (where the override lives) so the team pills show the same
+  // flag as the standings table (e.g. a host-set country swap).
+  const flagByProfileId = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const row of standings.data?.rows ?? []) {
+      if (row.profileId !== null && row.presentation.flag) {
+        map.set(row.profileId, row.presentation.flag)
+      }
+    }
+    return map
+  }, [standings.data?.rows])
+
   // Subscribe to the SSE nudge stream: each nudge invalidates the matching
   // query so the visible table refetches without a manual reload.
   useLiveUpdates()
@@ -98,6 +113,7 @@ export function HomePage({ view }: { view: StandingsView }) {
           error={teams.error}
           onRetry={handleRetryTeams}
           displayNameByProfileId={displayNameByProfileId}
+          flagByProfileId={flagByProfileId}
         />
       )}
     </TournamentLayout>
@@ -145,6 +161,7 @@ function TeamsSection({
   error,
   onRetry,
   displayNameByProfileId,
+  flagByProfileId,
 }: {
   snapshot: TeamStandingsSnapshot | undefined
   isPending: boolean
@@ -153,6 +170,8 @@ function TeamsSection({
   onRetry: () => void
   /** profileId → host display-name override, from the players standings. */
   displayNameByProfileId: Map<number, string>
+  /** profileId → host flag override, from the players standings. */
+  flagByProfileId: Map<number, string>
 }) {
   if (isPending) {
     return <TeamsViewSkeleton />
@@ -170,6 +189,7 @@ function TeamsSection({
     <TeamsView
       rows={snapshot.rows}
       displayNameByProfileId={displayNameByProfileId}
+      flagByProfileId={flagByProfileId}
     />
   )
 }
