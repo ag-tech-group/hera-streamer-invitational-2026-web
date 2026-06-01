@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Trans } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 
 import { Countdown } from "@/components/countdown"
 import { HostLinksCard } from "@/components/host-links-card"
@@ -21,6 +21,7 @@ import { useTournament } from "@/hooks/use-tournament"
  * reload re-evaluates whether the race has started.
  */
 export function ContextCards() {
+  const { t } = useTranslation()
   const tournament = useTournament()
   const [mountedAtMs] = useState(() => Date.now())
   const tournamentStarted = tournament.data?.startDate
@@ -71,7 +72,11 @@ export function ContextCards() {
         isLoading={tournament.isPending}
       />
       <HostLinksCard
-        label={activeTournament.hostLabel}
+        label={
+          activeTournament.hostName
+            ? t("hostLinks.hostedBy", { host: activeTournament.hostName })
+            : undefined
+        }
         logo={activeTournament.hostLogo}
         links={activeTournament.hostLinks}
         streamLive={tournament.data?.hostStreamLive ?? false}

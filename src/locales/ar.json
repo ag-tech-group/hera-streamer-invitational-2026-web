@@ -293,6 +293,7 @@
   },
   "hostLinks": {
     "defaultLabel": "استضافة",
+    "hostedBy": "استضافة {{host}}",
     "live": "مباشر",
     "streamingLive": "يبثّ مباشرةً"
   },

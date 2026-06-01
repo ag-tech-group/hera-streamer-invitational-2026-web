@@ -5,9 +5,9 @@ import { activeTournament } from "@/config/tournaments"
 /**
  * Sets `document.title` for the current page (#178, #179).
  *
- * The base title is `"<name> (<hostLabel>)"`, with the tournament's `game`
- * appended after an em-dash when set — e.g. `"The King's Gauntlet (Hosted
- * by Hera) — Age of Empires II"`. `hostLabel` and `game` are each optional
+ * The base title is `"<name> (Hosted by <hostName>)"`, with `game` appended
+ * after an em-dash when set — e.g. `"The King's Gauntlet (Hosted by Hera) —
+ * Age of Empires II"`. `hostName` and `game` are each optional
  * and dropped when unset. An optional `pageLabel` is appended after `" - "`
  * for sub-routes, so `/admin` resolves to `"… — Age of Empires II - Admin"`;
  * `/` stays at the bare base title.
@@ -22,8 +22,11 @@ import { activeTournament } from "@/config/tournaments"
  */
 export function useDocumentTitle(pageLabel?: string): void {
   useEffect(() => {
-    const brandHost = activeTournament.hostLabel
-      ? `${activeTournament.name} (${activeTournament.hostLabel})`
+    // "Hosted by" is hard-coded English on purpose: this title must mirror the
+    // canonical static <title> in index.html (non-JS scrapers read that), so it
+    // does NOT localize even when the UI does — only the promo card translates.
+    const brandHost = activeTournament.hostName
+      ? `${activeTournament.name} (Hosted by ${activeTournament.hostName})`
       : activeTournament.name
     const base = activeTournament.game
       ? `${brandHost} — ${activeTournament.game}`
