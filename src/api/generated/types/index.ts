@@ -45,6 +45,7 @@ export * from './rosterPlayerUpdatePresentation';
 export * from './standingRow';
 export * from './standingRowPresentation';
 export * from './standingTeam';
+export * from './teamCaptainSet';
 export * from './teamCreate';
 export * from './teamMemberCreate';
 export * from './teamMemberRead';

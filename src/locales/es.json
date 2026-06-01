@@ -121,7 +121,8 @@
     "rosterAriaLabel": "Plantilla del equipo",
     "versus": "VS",
     "rankLabel": "Puesto",
-    "rankAria": "Puesto #{{rank}} por promedio de puntos"
+    "rankAria": "Puesto #{{rank}} por promedio de puntos",
+    "captain": "Capitán"
   },
   "admin": {
     "title": "Admin",
@@ -248,7 +249,13 @@
       "loadError": "No se pudieron cargar los equipos.",
       "createSuccess": "Equipo creado.",
       "updateSuccess": "Equipo actualizado.",
-      "deleteSuccess": "Equipo eliminado."
+      "deleteSuccess": "Equipo eliminado.",
+      "setCaptain": "Hacer capitán",
+      "clearCaptain": "Quitar capitán",
+      "setCaptainAria": "Hacer a {{name}} capitán del equipo",
+      "clearCaptainAria": "Quitar a {{name}} como capitán del equipo",
+      "captainSetSuccess": "{{name}} ahora es capitán.",
+      "captainClearSuccess": "Capitán eliminado."
     }
   },
   "common": {

@@ -31,6 +31,7 @@ function member(
     country: null,
     inMatch: false,
     liveMatchId: null,
+    isCaptain: false,
     ...overrides,
   }
 }
@@ -271,5 +272,40 @@ describe("TeamsView", () => {
     expect(
       screen.queryByLabelText(/VS/i, { selector: "span" })
     ).not.toBeInTheDocument()
+  })
+
+  it("renders a Captain badge next to the captain, and none otherwise (#235)", () => {
+    render(
+      <TeamsView
+        rows={[
+          teamRow({
+            teamId: 1,
+            name: "Has Captain",
+            members: [
+              member({
+                profileId: 50,
+                alias: "Cap",
+                currentRating: 2000,
+                isCaptain: true,
+              }),
+              member({ profileId: 51, alias: "Regular", currentRating: 1900 }),
+            ],
+          }),
+          teamRow({
+            teamId: 2,
+            name: "No Captain",
+            members: [
+              member({ profileId: 60, alias: "Nobody", currentRating: 1850 }),
+            ],
+          }),
+        ]}
+      />
+    )
+    // Exactly one Captain badge across both teams — the captain's.
+    const badges = screen.getAllByText("Captain")
+    expect(badges).toHaveLength(1)
+    // It sits in the captain's pill (same row as their alias).
+    const capPill = screen.getByText("Cap").closest("div")
+    expect(within(capPill!).getByText("Captain")).toBeInTheDocument()
   })
 })

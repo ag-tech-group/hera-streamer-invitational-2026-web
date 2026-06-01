@@ -1,4 +1,4 @@
-import { Globe, Swords } from "lucide-react"
+import { Globe, Shield, Swords } from "lucide-react"
 import { useMemo } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -401,11 +401,35 @@ function PlayerPill({ member }: { member: TeamMember }) {
       <span className="min-w-0 flex-1 truncate text-sm font-medium">
         {member.alias}
       </span>
+      {member.isCaptain && <CaptainBadge />}
       {member.inMatch && <LiveDot />}
       <span className="text-muted-foreground shrink-0 text-sm font-semibold tabular-nums">
         {member.currentRating}
       </span>
     </div>
+  )
+}
+
+/**
+ * "Captain" badge for the team's captain (#235). Shield glyph + label in the
+ * team's own colour, reading off the panel-level `--team-color` vars like the
+ * rest of the pill so it tints blue/red/green per team. Teams view only —
+ * never shown on the per-player standings list.
+ */
+function CaptainBadge() {
+  const { t } = useTranslation()
+  return (
+    <span
+      className="ring-border inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ring-1 ring-inset"
+      style={{
+        background: "var(--team-color-bg)",
+        color: "var(--team-color-strong)",
+      }}
+      title={t("teams.captain")}
+    >
+      <Shield className="size-2.5" aria-hidden />
+      {t("teams.captain")}
+    </span>
   )
 }
 
