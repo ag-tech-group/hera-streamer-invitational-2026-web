@@ -53,12 +53,12 @@ export function PlayersSection() {
 
   return (
     <div className="flex flex-col gap-4">
+      <AddPlayerForm />
       <PlayersList
         loading={query.isPending}
         error={query.isError}
         players={players}
       />
-      <AddPlayerForm />
     </div>
   )
 }
@@ -664,7 +664,7 @@ export function AddPlayerForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="border-border/60 flex flex-col gap-3 border-t pt-4"
+      className="border-border/60 flex flex-col gap-3 border-b pb-4"
     >
       <p className="text-sm font-medium">{t("admin.players.addLabel")}</p>
       <div className="flex flex-col gap-1.5">

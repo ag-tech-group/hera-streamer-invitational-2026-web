@@ -42,12 +42,12 @@ export function OwnersSection() {
 
   return (
     <div className="flex flex-col gap-4">
+      <GrantOwnerForm />
       <OwnersList
         loading={query.isPending}
         error={query.isError}
         owners={owners}
       />
-      <GrantOwnerForm />
     </div>
   )
 }
@@ -260,7 +260,7 @@ function GrantOwnerForm() {
           data: { user_id: selected.id },
         })
       }}
-      className="border-border/60 flex flex-col gap-2 border-t pt-4"
+      className="border-border/60 flex flex-col gap-2 border-b pb-4"
     >
       <Label htmlFor="grant-owner-search">{t("admin.owners.grantLabel")}</Label>
       <div className="flex gap-2">
