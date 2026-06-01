@@ -24,6 +24,7 @@ null/empty — there's nothing to poll until the player's
 ``profile_id`` mints.
  */
 export interface PlayerRead {
+  tournament_player_id: number;
   profile_id: number | null;
   alias: string;
   country: string | null;

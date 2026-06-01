@@ -13,10 +13,10 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
 /**
  * Request body for ``PATCH /teams/{team_id}/captain`` — designates the captain.
 
-The profile must already be a member of the team; the endpoint
+The roster row must already be a member of the team; the endpoint
 atomically clears any existing captain on the team and sets this one.
  */
 export interface TeamCaptainSet {
   /** @exclusiveMinimum 0 */
-  profile_id: number;
+  tournament_player_id: number;
 }

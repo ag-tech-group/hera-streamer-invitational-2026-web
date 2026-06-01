@@ -20,10 +20,11 @@ already renders on the standings tab: ``country`` for the flag pill,
 member's status here matches their standings row in the same poll.
  */
 export interface TeamMemberRead {
-  profile_id: number;
-  alias: string;
+  tournament_player_id: number;
+  profile_id: number | null;
+  alias: string | null;
   country: string | null;
-  current_rating: number;
+  current_rating: number | null;
   max_rating: number | null;
   in_match: boolean;
   live_match_id: number | null;

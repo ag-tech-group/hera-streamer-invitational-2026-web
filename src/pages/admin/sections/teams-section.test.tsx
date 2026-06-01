@@ -20,6 +20,7 @@ function teamStanding(member: { profile_id: number; alias: string }) {
     combined_rating_average: 2000,
     members: [
       {
+        tournament_player_id: member.profile_id,
         profile_id: member.profile_id,
         alias: member.alias,
         country: null,
@@ -40,6 +41,7 @@ function rosterPlayer(player: {
   presentation?: Record<string, unknown>
 }) {
   return {
+    tournament_player_id: player.profile_id,
     profile_id: player.profile_id,
     alias: player.alias,
     country: null,

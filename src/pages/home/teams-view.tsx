@@ -399,19 +399,33 @@ function PlayerRoster({
       className="mt-6 grid gap-2 @md:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-5"
       aria-label={t("teams.rosterAriaLabel")}
     >
-      {members.map((member, i) => (
-        <li
-          key={member.profileId}
-          className="team-pill-reveal"
-          style={{ "--reveal-index": revealOffset + i } as React.CSSProperties}
-        >
-          <PlayerPill
-            member={member}
-            displayName={displayNameByProfileId.get(member.profileId)}
-            flagOverride={flagByProfileId.get(member.profileId)}
-          />
-        </li>
-      ))}
+      {members.map((member, i) => {
+        // profileId is null for placeholder / unlinked members; the override
+        // maps are keyed on it, so skip the lookup when it's absent. Identity
+        // and the React key use the always-present tournamentPlayerId (#184).
+        const profileId = member.profileId
+        return (
+          <li
+            key={member.tournamentPlayerId}
+            className="team-pill-reveal"
+            style={
+              { "--reveal-index": revealOffset + i } as React.CSSProperties
+            }
+          >
+            <PlayerPill
+              member={member}
+              displayName={
+                profileId != null
+                  ? displayNameByProfileId.get(profileId)
+                  : undefined
+              }
+              flagOverride={
+                profileId != null ? flagByProfileId.get(profileId) : undefined
+              }
+            />
+          </li>
+        )
+      })}
     </ul>
   )
 }
@@ -453,7 +467,10 @@ function PlayerPill({
     : null
   const effectiveFlagCode = overrideCode ?? countryCode
   const renderOverrideAsText = Boolean(flagOverride && !overrideCode)
-  const visibleName = displayName ?? member.alias
+  // `alias` is null for an unlinked / placeholder member; fall back so the pill
+  // never renders an empty name. (A teamed placeholder's display name would be
+  // joined from standings by tournamentPlayerId — a follow-up if that lands.)
+  const visibleName = displayName ?? member.alias ?? "—"
   return (
     <div className="team-pill flex items-center gap-3 rounded-md border px-3 py-2.5">
       {effectiveFlagCode ? (

@@ -29,6 +29,9 @@ function member(
     Pick<TeamMember, "profileId" | "alias" | "currentRating">
 ): TeamMember {
   return {
+    // Default the stable id to the profileId so each test member gets a unique
+    // key without spelling it out; tests override it when it matters.
+    tournamentPlayerId: overrides.profileId ?? 0,
     country: null,
     inMatch: false,
     liveMatchId: null,

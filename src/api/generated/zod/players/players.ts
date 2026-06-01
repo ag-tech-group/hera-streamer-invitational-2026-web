@@ -34,6 +34,7 @@ export const ListPlayersV1TournamentsTournamentSlugPlayersGetQueryParams = zod.o
 export const ListPlayersV1TournamentsTournamentSlugPlayersGetResponse = zod.object({
   "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "items": zod.array(zod.object({
+  "tournament_player_id": zod.number(),
   "profile_id": zod.union([zod.number(),zod.null()]),
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),
@@ -113,6 +114,7 @@ export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryParams 
 export const getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseRecentMatchesDefault = [];
 
 export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse = zod.object({
+  "tournament_player_id": zod.number(),
   "profile_id": zod.union([zod.number(),zod.null()]),
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),

@@ -707,8 +707,10 @@ tournament's leaderboard: a list of ``(completed_at, rating)`` points
 oldest-first, where ``rating`` is the post-match value. The consumer
 plots rating against ``completed_at`` for a by-date view, or against
 point index for a by-games-played view. Players with no such history
-are omitted, and points reach back only as far as the poller's match
-record — not a player's whole career.
+are omitted. Points are bounded by the tournament's date window
+(``[start_date, grand_finals_date]``; a null bound is open), mirroring
+``tournament_record`` — so the chart reflects in-event rating movement,
+not a player's whole tracked history.
  * @summary Get Progression
  */
 export type getProgressionV1TournamentsTournamentSlugProgressionGetResponse200 = {
@@ -830,12 +832,14 @@ export function useGetProgressionV1TournamentsTournamentSlugProgressionGet<TData
 
 A team's combined rating is the sum of its members' peak (lifetime
 ``max_rating``) ratings on the tournament's leaderboard; the average
-is that sum over the count of members with a non-null peak. Members
-without a rating row on that leaderboard are omitted; a member whose
-rating row has no recorded peak is listed under ``members`` but
-excluded from the aggregate (and the average's denominator). Teams
-are optional — a tournament with none returns an empty list. Sorted
-by combined sum desc.
+is that sum over the count of members with a non-null peak. Every
+``team_members`` row is returned regardless of whether the poller
+has rated the member yet — a linked-but-unrated member (no
+``PlayerRating`` row on the leaderboard, or no ``Player`` row at all
+if the poller hasn't picked them up) is listed under ``members``
+with null rating fields and excluded from the aggregate (and the
+average's denominator). Teams are optional — a tournament with none
+returns an empty list. Sorted by combined sum desc.
  * @summary Get Team Standings
  */
 export type getTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetResponse200 = {

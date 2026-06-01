@@ -22,6 +22,7 @@ const standings: ListEnvelopeStandingRow = {
   last_polled_at: "2026-05-20T17:26:34Z",
   items: [
     {
+      tournament_player_id: 1,
       profile_id: 101,
       alias: "Player One",
       country: "ca",
@@ -54,6 +55,7 @@ const standings: ListEnvelopeStandingRow = {
       win_pct: 75.0,
     },
     {
+      tournament_player_id: 2,
       profile_id: 102,
       alias: "Player Two",
       country: "au",
@@ -100,6 +102,7 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
       combined_rating_average: 2757.5,
       members: [
         {
+          tournament_player_id: 1,
           profile_id: 101,
           alias: "Player One",
           country: "us",
@@ -110,6 +113,7 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
           is_captain: false,
         },
         {
+          tournament_player_id: 2,
           profile_id: 102,
           alias: "Player Two",
           country: null,

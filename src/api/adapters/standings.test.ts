@@ -8,6 +8,7 @@ import type { StandingRow } from "@/api/generated/types"
  *  tournament_record, so a mapping that reads the wrong scope is obvious. */
 function dto(overrides: Partial<StandingRow> = {}): StandingRow {
   return {
+    tournament_player_id: 1,
     profile_id: 1,
     alias: "Player",
     country: "us",

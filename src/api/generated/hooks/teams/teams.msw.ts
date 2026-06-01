@@ -75,8 +75,8 @@ export const getAddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostMo
   }, options)
 }
 
-export const getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.delete('*/v1/tournaments/:tournamentSlug/teams/:teamId/members/:profileId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+export const getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/v1/tournaments/:tournamentSlug/teams/:teamId/members/:tournamentPlayerId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
   
     return new HttpResponse(null,
@@ -109,7 +109,7 @@ export const getTeamsMock = () => [
   getUpdateTeamV1TournamentsTournamentSlugTeamsTeamIdPatchMockHandler(),
   getDeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDeleteMockHandler(),
   getAddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostMockHandler(),
-  getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteMockHandler(),
+  getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteMockHandler(),
   getSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchMockHandler(),
   getClearTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainDeleteMockHandler()
 ]
