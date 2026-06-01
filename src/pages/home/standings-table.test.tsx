@@ -11,6 +11,9 @@ function row(
   overrides: Partial<StandingsRow> & Pick<StandingsRow, "profileId" | "alias">
 ): StandingsRow {
   return {
+    // Default the stable id to profileId so each test row has a unique key;
+    // tests override it when it matters.
+    tournamentPlayerId: overrides.profileId ?? 0,
     country: null,
     team: null,
     currentRating: 2500,

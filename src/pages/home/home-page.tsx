@@ -33,29 +33,28 @@ export function HomePage({ view }: { view: StandingsView }) {
 
   // The team-standings endpoint carries only the raw ladder `alias`, not the
   // host's `presentation.displayName` override — but the players standings
-  // (always loaded) does. Build a profileId → display name map from it so the
-  // Teams view can show the friendly name (e.g. "Day9TV") that viewers see on
-  // the standings table, not the ladder profile name (#242 follow-up).
+  // (always loaded) does. Key by tournamentPlayerId (shared by both sides and
+  // present even for an unlinked entrant whose profileId is null) so the Teams
+  // view shows the friendly name viewers see on the table (#242, #184).
   const displayNameByProfileId = useMemo(() => {
     const map = new Map<number, string>()
     for (const row of standings.data?.rows ?? []) {
-      if (row.profileId !== null && row.presentation.displayName) {
-        map.set(row.profileId, row.presentation.displayName)
+      if (row.presentation.displayName) {
+        map.set(row.tournamentPlayerId, row.presentation.displayName)
       }
     }
     return map
   }, [standings.data?.rows])
 
-  // Same passthrough for the host's `presentation.flag` override: the team-
-  // standings members carry only the raw ladder `country`, so the Teams view
-  // can't render a flag override on its own. Build profileId → flag from the
-  // players standings (where the override lives) so the team pills show the same
-  // flag as the standings table (e.g. a host-set country swap).
+  // Same passthrough for the host's `presentation.flag` override: team-standings
+  // members carry only the raw ladder `country`. Key by tournamentPlayerId so
+  // the pills show the override flag — including for an unlinked entrant (the bug
+  // where Jabo's flag showed on the standings table but not the team view).
   const flagByProfileId = useMemo(() => {
     const map = new Map<number, string>()
     for (const row of standings.data?.rows ?? []) {
-      if (row.profileId !== null && row.presentation.flag) {
-        map.set(row.profileId, row.presentation.flag)
+      if (row.presentation.flag) {
+        map.set(row.tournamentPlayerId, row.presentation.flag)
       }
     }
     return map

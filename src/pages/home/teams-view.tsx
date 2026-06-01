@@ -400,13 +400,13 @@ function PlayerRoster({
       aria-label={t("teams.rosterAriaLabel")}
     >
       {members.map((member, i) => {
-        // profileId is null for placeholder / unlinked members; the override
-        // maps are keyed on it, so skip the lookup when it's absent. Identity
-        // and the React key use the always-present tournamentPlayerId (#184).
-        const profileId = member.profileId
+        // Join the host overrides by tournamentPlayerId — present even for an
+        // unlinked entrant (profileId is null there) — so the flag and name show
+        // on the team pill just like on the standings table.
+        const id = member.tournamentPlayerId
         return (
           <li
-            key={member.tournamentPlayerId}
+            key={id}
             className="team-pill-reveal"
             style={
               { "--reveal-index": revealOffset + i } as React.CSSProperties
@@ -414,14 +414,8 @@ function PlayerRoster({
           >
             <PlayerPill
               member={member}
-              displayName={
-                profileId != null
-                  ? displayNameByProfileId.get(profileId)
-                  : undefined
-              }
-              flagOverride={
-                profileId != null ? flagByProfileId.get(profileId) : undefined
-              }
+              displayName={displayNameByProfileId.get(id)}
+              flagOverride={flagByProfileId.get(id)}
             />
           </li>
         )

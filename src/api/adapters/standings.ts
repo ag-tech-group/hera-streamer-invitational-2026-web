@@ -22,6 +22,7 @@ type StandingsResponse =
 
 function toStandingsRow(dto: StandingRow): StandingsRow {
   return {
+    tournamentPlayerId: dto.tournament_player_id,
     profileId: dto.profile_id,
     alias: dto.alias,
     country: dto.country,
