@@ -91,8 +91,8 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         rows={rows}
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
       />
     )
     expect(
@@ -112,8 +112,8 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         rows={[rows[1], rows[0]]}
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
       />
     )
     const headings = screen.getAllByRole("heading", { level: 2 })
@@ -134,8 +134,8 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         rows={rows}
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
       />
     )
     const rosters = screen.getAllByRole("list", { name: /team roster/i })
@@ -151,8 +151,8 @@ describe("TeamsView", () => {
     // a missing/zero number (mirrors the standings Peak column treatment).
     render(
       <TeamsView
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -180,8 +180,8 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         rows={rows}
-        displayNameByProfileId={new Map([[10, "Day9TV"]])}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map([[10, "Day9TV"]])}
+        flagByTournamentPlayerId={new Map()}
       />
     )
     expect(screen.getByText("Day9TV")).toBeInTheDocument()
@@ -197,8 +197,8 @@ describe("TeamsView", () => {
     const { container } = render(
       <TeamsView
         rows={rows}
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map([[10, "🇵🇸"]])}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map([[10, "🇵🇸"]])}
       />
     )
     // The override emoji decomposes to ISO "ps" → SVG flag-icons class.
@@ -213,8 +213,8 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         rows={[rows[1], rows[0]]}
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
       />
     )
     const alpha = screen
@@ -232,8 +232,8 @@ describe("TeamsView", () => {
     // the first-created, so it's blue — the raw id value doesn't pick green.
     render(
       <TeamsView
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
         rows={[
           teamRow({ teamId: 8, name: "Later Team" }),
           teamRow({ teamId: 3, name: "First Team" }),
@@ -249,8 +249,8 @@ describe("TeamsView", () => {
   it("shows a placeholder when a team has no rated members", () => {
     render(
       <TeamsView
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
         rows={[
           teamRow({ teamId: 1, name: "Empty Team", members: [] }),
           teamRow({
@@ -273,8 +273,8 @@ describe("TeamsView", () => {
   it("renders the country flag when one is set, falling back to a globe", () => {
     render(
       <TeamsView
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -311,8 +311,8 @@ describe("TeamsView", () => {
   it("shows a live indicator only on members currently in a match", () => {
     render(
       <TeamsView
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -346,8 +346,8 @@ describe("TeamsView", () => {
   it("marks a panel's accent stripe as live when any member is in a match", () => {
     const { container } = render(
       <TeamsView
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -392,8 +392,8 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         rows={[rows[0]]}
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
       />
     )
     expect(
@@ -404,8 +404,8 @@ describe("TeamsView", () => {
   it("renders a Captain badge next to the captain, and none otherwise (#235)", () => {
     render(
       <TeamsView
-        displayNameByProfileId={new Map()}
-        flagByProfileId={new Map()}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
         rows={[
           teamRow({
             teamId: 1,

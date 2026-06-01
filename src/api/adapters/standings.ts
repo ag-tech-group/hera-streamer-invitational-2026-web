@@ -40,7 +40,7 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     // max (#246 walks this one column back from #238): the host wants Peak to
     // show pre-tournament too, so it's the player's all-time peak on the
     // tournament's leaderboard and doesn't change when the event starts. Null
-    // only for brand-new accounts / placeholder rows → renders `—`.
+    // only for brand-new accounts / unlinked entrants → renders `—`.
     maxRating: dto.max_rating,
     // The remaining stats stay tournament-window scoped (#238): streak, recent
     // form, win%, and activity, so a streamer with no tournament matches yet

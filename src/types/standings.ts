@@ -60,12 +60,13 @@ export interface StandingsRow {
   /** Stable roster identity (#184) — non-null even for an unlinked entrant. */
   tournamentPlayerId: number
   /**
-   * AoE2 profile id, or `null` for **placeholder rows** — announced-but-
-   * unjoined streamers whose `profile_id` hasn't minted yet. Placeholder
-   * rows still appear on the standings (sorted to the tail) and carry an
-   * `alias` + `presentation` for display, but they have no rating data yet.
-   * The player-name link is driven by `presentation.profileUrl` (#131), not
-   * this id, so it's independent of whether a row is a placeholder.
+   * AoE2 profile id, or `null` for an **unlinked entrant** — an announced
+   * roster member whose `profile_id` hasn't minted yet. An unlinked entrant
+   * still appears on the standings (sorted to the tail) and carries an `alias`
+   * + `presentation` for display, but has no rating data yet: the profile link
+   * is an optional enrichment, not the row's identity (that's
+   * `tournamentPlayerId`, #281). The player-name link is driven by
+   * `presentation.profileUrl` (#131), not this id.
    */
   profileId: number | null
   alias: string
@@ -85,7 +86,7 @@ export interface StandingsRow {
    * `StandingRow.max_rating`). Renders pre-tournament too — it's the player's
    * all-time peak and doesn't change when the event starts (this column was
    * walked back from the in-window peak #238 briefly used). `null` only for
-   * brand-new accounts / placeholder rows, which read `—`.
+   * brand-new accounts / unlinked entrants, which read `—`.
    */
   maxRating: number | null
   wins: number
@@ -123,7 +124,8 @@ export interface StandingsRow {
   lastMatchAt: string | null
   /**
    * ISO-8601 timestamp of when this row was last refreshed upstream, or
-   * `null` for placeholder rows — they carry no polled refresh signal.
+   * `null` for an unlinked entrant — no upstream profile to poll yet, so no
+   * refresh signal.
    */
   updatedAt: string | null
   /**

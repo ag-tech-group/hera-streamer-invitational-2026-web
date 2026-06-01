@@ -90,9 +90,9 @@ describe("useFlipRows", () => {
     tops = { "id:1": 40, "id:2": 0, "id:3": 80 }
     rerender(<Table rowIds={["id:2", "id:1", "id:3"]} />)
 
-    // Both moved rows slide; the stationary one does not. The flip ids are the
-    // prefixed `rowKey` strings (#182) — under the `Number(flipId)` → `NaN`
-    // regression every row collapsed onto one Map entry and this was 0 slides.
+    // Both moved rows slide; the stationary one does not. The flip ids are
+    // opaque `rowKey` strings — under the `Number(flipId)` → `NaN` regression
+    // (#182) every row collapsed onto one Map entry and this was 0 slides.
     const movedIds = animateCalls.map((call) => call.id).sort()
     expect(movedIds).toEqual(["id:1", "id:2"])
   })
@@ -119,18 +119,20 @@ describe("useFlipRows", () => {
     ])
   })
 
-  it("tracks placeholder rows (non-numeric flip ids) without collapsing them", () => {
-    // Placeholder rows key off `placeholder:${alias}` — the exact shape that
-    // coerced to NaN before the fix. A mix of real and placeholder ids must
-    // each animate independently.
-    tops = { "id:1": 0, "placeholder:tbd": 40 }
-    const { rerender } = render(<Table rowIds={["id:1", "placeholder:tbd"]} />)
+  it("keys on the raw string id, so a non-numeric flip id never collapses to NaN", () => {
+    // The hook treats flip ids as opaque strings. A non-numeric id like `"tbd"`
+    // coerces to `NaN` under `Number(flipId)` — the exact #182 collapse where
+    // every such row folded onto one Map entry. A mix of a numeric-string id
+    // (the real `rowKey` shape) and a non-numeric one must each animate
+    // independently.
+    tops = { "19": 0, tbd: 40 }
+    const { rerender } = render(<Table rowIds={["19", "tbd"]} />)
 
-    tops = { "id:1": 40, "placeholder:tbd": 0 }
-    rerender(<Table rowIds={["placeholder:tbd", "id:1"]} />)
+    tops = { "19": 40, tbd: 0 }
+    rerender(<Table rowIds={["tbd", "19"]} />)
 
     const movedIds = animateCalls.map((call) => call.id).sort()
-    expect(movedIds).toEqual(["id:1", "placeholder:tbd"])
+    expect(movedIds).toEqual(["19", "tbd"])
   })
 
   it("does not animate when prefers-reduced-motion is set", () => {

@@ -43,22 +43,25 @@ const SKELETON_TEAM_SIZES = [5, 5, 5, 5]
  * container query, so a narrow coliseum panel shows one pill per line
  * and a wide banner panel shows several.
  */
-/** profileId → host display-name override (#242), sourced from the players
- *  standings since the team-standings endpoint carries only the raw alias. */
+/** tournamentPlayerId → host display-name override (#242), sourced from the
+ *  players standings since the team-standings endpoint carries only the raw
+ *  alias. Keyed on tournamentPlayerId so an unlinked entrant (null profileId)
+ *  joins identically to a linked one (#281). */
 type DisplayNameMap = Map<number, string>
 
-/** profileId → host flag override (presentation.flag), likewise passed down from
- *  the players standings: team-standings members carry only the raw `country`. */
+/** tournamentPlayerId → host flag override (presentation.flag), likewise passed
+ *  down from the players standings: team-standings members carry only the raw
+ *  `country`. */
 type FlagMap = Map<number, string>
 
 export function TeamsView({
   rows,
-  displayNameByProfileId,
-  flagByProfileId,
+  displayNameByTournamentPlayerId,
+  flagByTournamentPlayerId,
 }: {
   rows: TeamStandingsRow[]
-  displayNameByProfileId: DisplayNameMap
-  flagByProfileId: FlagMap
+  displayNameByTournamentPlayerId: DisplayNameMap
+  flagByTournamentPlayerId: FlagMap
 }) {
   // Panels display in rank order — the API returns `rows` ranked by combined
   // rating, desc, so the incoming order IS the ranking (#230). Position is
@@ -83,8 +86,8 @@ export function TeamsView({
           color={colorByTeamId.get(team.teamId) ?? TEAM_COLOR_SLOTS[0]}
           rank={i + 1}
           revealOffset={i * team.members.length}
-          displayNameByProfileId={displayNameByProfileId}
-          flagByProfileId={flagByProfileId}
+          displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
+          flagByTournamentPlayerId={flagByTournamentPlayerId}
           className={
             isPair ? (i === 0 ? "xl:col-start-1" : "xl:col-start-3") : undefined
           }
@@ -159,8 +162,8 @@ function TeamPanel({
   color,
   rank,
   revealOffset,
-  displayNameByProfileId,
-  flagByProfileId,
+  displayNameByTournamentPlayerId,
+  flagByTournamentPlayerId,
   className,
 }: {
   team: TeamStandingsRow
@@ -173,8 +176,8 @@ function TeamPanel({
    * wave instead of two distinct rosters arriving).
    */
   revealOffset: number
-  displayNameByProfileId: DisplayNameMap
-  flagByProfileId: FlagMap
+  displayNameByTournamentPlayerId: DisplayNameMap
+  flagByTournamentPlayerId: FlagMap
   className?: string
 }) {
   // A team is "live" if any roster member is currently in a match. Drives
@@ -216,8 +219,8 @@ function TeamPanel({
       <PlayerRoster
         members={team.members}
         revealOffset={revealOffset}
-        displayNameByProfileId={displayNameByProfileId}
-        flagByProfileId={flagByProfileId}
+        displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
+        flagByTournamentPlayerId={flagByTournamentPlayerId}
       />
     </section>
   )
@@ -378,13 +381,13 @@ function RankBadge({ rank }: { rank: number }) {
 function PlayerRoster({
   members,
   revealOffset,
-  displayNameByProfileId,
-  flagByProfileId,
+  displayNameByTournamentPlayerId,
+  flagByTournamentPlayerId,
 }: {
   members: TeamMember[]
   revealOffset: number
-  displayNameByProfileId: DisplayNameMap
-  flagByProfileId: FlagMap
+  displayNameByTournamentPlayerId: DisplayNameMap
+  flagByTournamentPlayerId: FlagMap
 }) {
   const { t } = useTranslation()
   if (members.length === 0) {
@@ -414,8 +417,8 @@ function PlayerRoster({
           >
             <PlayerPill
               member={member}
-              displayName={displayNameByProfileId.get(id)}
-              flagOverride={flagByProfileId.get(id)}
+              displayName={displayNameByTournamentPlayerId.get(id)}
+              flagOverride={flagByTournamentPlayerId.get(id)}
             />
           </li>
         )
@@ -461,9 +464,11 @@ function PlayerPill({
     : null
   const effectiveFlagCode = overrideCode ?? countryCode
   const renderOverrideAsText = Boolean(flagOverride && !overrideCode)
-  // `alias` is null for an unlinked / placeholder member; fall back so the pill
-  // never renders an empty name. (A teamed placeholder's display name would be
-  // joined from standings by tournamentPlayerId — a follow-up if that lands.)
+  // `alias` is null for an unlinked member. The host display-name override is
+  // already joined from standings by tournamentPlayerId (#281), so a named
+  // unlinked member still shows a name; `member.alias ?? "—"` only backstops a
+  // member with neither — that `"—"` retires once the API's `name` is non-null
+  // (Phase 3).
   const visibleName = displayName ?? member.alias ?? "—"
   return (
     <div className="team-pill flex items-center gap-3 rounded-md border px-3 py-2.5">

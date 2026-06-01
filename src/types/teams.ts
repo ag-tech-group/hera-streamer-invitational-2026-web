@@ -7,12 +7,12 @@
  */
 export interface TeamMember {
   /**
-   * Stable roster identity (#184): non-null even for placeholder / unlinked
-   * members (where `profileId` is null), so team-member operations key on it
-   * and it backs the React list key.
+   * Stable roster identity (#184): non-null even for an unlinked member (where
+   * `profileId` is null), so team-member operations key on it and it backs the
+   * React list key.
    */
   tournamentPlayerId: number
-  /** AoE2 profile id, or `null` for a placeholder / unlinked roster member. */
+  /** AoE2 profile id, or `null` for an unlinked roster member. */
   profileId: number | null
   /** Raw ladder alias, or `null` for an unlinked member with no ladder name. */
   alias: string | null

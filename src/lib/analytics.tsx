@@ -28,7 +28,7 @@ import { logger } from "@/lib/logger"
  * - `player.bio.open`      `{ profileId, alias }` — bio hover/tap reveal.
  * - `prize.sponsor.click`  `{ sponsor }` — sponsor link on the prize-pool card.
  *
- * `profileId` is null for placeholder rows (announced-but-unjoined entrants).
+ * `profileId` is null for an unlinked entrant (announced but not yet joined).
  */
 export interface AnalyticsBackend {
   track: (event: string, properties?: Record<string, unknown>) => void

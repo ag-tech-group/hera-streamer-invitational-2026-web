@@ -36,7 +36,7 @@ export function HomePage({ view }: { view: StandingsView }) {
   // (always loaded) does. Key by tournamentPlayerId (shared by both sides and
   // present even for an unlinked entrant whose profileId is null) so the Teams
   // view shows the friendly name viewers see on the table (#242, #184).
-  const displayNameByProfileId = useMemo(() => {
+  const displayNameByTournamentPlayerId = useMemo(() => {
     const map = new Map<number, string>()
     for (const row of standings.data?.rows ?? []) {
       if (row.presentation.displayName) {
@@ -50,7 +50,7 @@ export function HomePage({ view }: { view: StandingsView }) {
   // members carry only the raw ladder `country`. Key by tournamentPlayerId so
   // the pills show the override flag — including for an unlinked entrant (the bug
   // where Jabo's flag showed on the standings table but not the team view).
-  const flagByProfileId = useMemo(() => {
+  const flagByTournamentPlayerId = useMemo(() => {
     const map = new Map<number, string>()
     for (const row of standings.data?.rows ?? []) {
       if (row.presentation.flag) {
@@ -111,8 +111,8 @@ export function HomePage({ view }: { view: StandingsView }) {
           isError={teams.isError}
           error={teams.error}
           onRetry={handleRetryTeams}
-          displayNameByProfileId={displayNameByProfileId}
-          flagByProfileId={flagByProfileId}
+          displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
+          flagByTournamentPlayerId={flagByTournamentPlayerId}
         />
       )}
     </TournamentLayout>
@@ -159,18 +159,18 @@ function TeamsSection({
   isError,
   error,
   onRetry,
-  displayNameByProfileId,
-  flagByProfileId,
+  displayNameByTournamentPlayerId,
+  flagByTournamentPlayerId,
 }: {
   snapshot: TeamStandingsSnapshot | undefined
   isPending: boolean
   isError: boolean
   error: unknown
   onRetry: () => void
-  /** profileId → host display-name override, from the players standings. */
-  displayNameByProfileId: Map<number, string>
-  /** profileId → host flag override, from the players standings. */
-  flagByProfileId: Map<number, string>
+  /** tournamentPlayerId → host display-name override, from the players standings. */
+  displayNameByTournamentPlayerId: Map<number, string>
+  /** tournamentPlayerId → host flag override, from the players standings. */
+  flagByTournamentPlayerId: Map<number, string>
 }) {
   if (isPending) {
     return <TeamsViewSkeleton />
@@ -187,8 +187,8 @@ function TeamsSection({
   return (
     <TeamsView
       rows={snapshot.rows}
-      displayNameByProfileId={displayNameByProfileId}
-      flagByProfileId={flagByProfileId}
+      displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
+      flagByTournamentPlayerId={flagByTournamentPlayerId}
     />
   )
 }
