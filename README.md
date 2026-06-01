@@ -9,7 +9,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](https://nodejs.org/)
 
-Real-time standings frontend for an Age of Empires II: Definitive Edition 1v1 invitational tournament.
+Real-time standings frontend for **The King's Gauntlet** — an Age of Empires II: Definitive Edition 1v1 invitational tournament hosted by Hera.
 
 Scaffolded from the AG Tech Group [web-template](https://github.com/ag-tech-group/web-template) and paired with [aoe2-live-standings-api](https://github.com/ag-tech-group/aoe2-live-standings-api) (FastAPI + async PostgreSQL).
 
@@ -103,7 +103,7 @@ src/
 
 ## Deploy
 
-Deployed to Netlify, served from `hera-streamer-invitational-2026.criticalbit.gg`. Public traffic will eventually enter via the path-based router at `aoe2.criticalbit.gg/<slug>` (slug TBD; until then, the subdomain is the canonical URL).
+Deployed to Netlify and served to the public through the [criticalbit-router](https://github.com/ag-tech-group/criticalbit-router) (a Cloudflare Worker) at the canonical URL **`aoe2.criticalbit.gg/kings-gauntlet/`**. The router proxies that path to this site's Netlify origin; the app is built under a matching `/kings-gauntlet/` Vite `base`, so the slug is part of every asset path rather than stripped (#167).
 
 ### One-time Netlify setup
 
@@ -117,13 +117,11 @@ Deployed to Netlify, served from `hera-streamer-invitational-2026.criticalbit.gg
    - `VITE_TOURNAMENT_SLUG` → `hera-streamer-invitational-2026`
    - `VITE_LOG_LEVEL` → `warn`
    - `NODE_VERSION` → `24` (so Netlify installs Node 24 to match `package.json` engines)
-4. **Custom domain** (Domain management → Add a domain):
-   - Add `hera-streamer-invitational-2026.criticalbit.gg`.
-   - In Cloudflare DNS for `criticalbit.gg`, add a CNAME record: name `hera-streamer-invitational-2026`, target `<your-site>.netlify.app` (Netlify provides the exact value). Set proxy status to **DNS-only** (grey cloud) so Netlify's edge serves the traffic directly — proxying through Cloudflare on top of Netlify's CDN can cause issues with SSE buffering.
+4. **Routing** (no custom domain needed): the site is reached only through the criticalbit-router, which proxies `aoe2.criticalbit.gg/kings-gauntlet/*` to this site's default `*.netlify.app` origin (the worker's `HERA_STREAMER_INVITATIONAL_2026_ORIGIN` setting points at that `.netlify.app` hostname). Leave the Netlify site on its default domain — no `criticalbit.gg` custom domain or CNAME is required here. (An earlier setup pointed a `hera-streamer-invitational-2026.criticalbit.gg` custom domain straight at Netlify; it's been retired in favour of the router.)
 
 ### How it deploys
 
-Netlify auto-builds on every push to `main` once the project is wired. The build runs `pnpm install` → `pnpm build` (which itself runs `generate-routes` → `tsc -b` → `vite build`) and serves the resulting `dist/` from the custom domain.
+Netlify auto-builds on every push to `main` once the project is wired. The build runs `pnpm install` → `pnpm build` (which itself runs `generate-routes` → `tsc -b` → `vite build`) and serves the resulting `dist/` from its `*.netlify.app` origin, which the criticalbit-router fronts at `aoe2.criticalbit.gg/kings-gauntlet/`.
 
 `netlify.toml` at the repo root configures production headers and routing in one place: the CSP and standard security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy), long-lived `Cache-Control` for `/assets/*` (Vite-hashed bundles are immutable per build) with `must-revalidate` on `/index.html`, and the SPA fallback so deep links from the TanStack Router resolve through `index.html`.
 
@@ -136,7 +134,7 @@ PostHog ingestion is routed through a first-party path on the event domain so pr
 
 Both use `force = true` and sit above the SPA fallback so `index.html` doesn't shadow them. No CSP change is needed — `connect-src 'self'` already covers the first-party path; the explicit `us.i.posthog.com` / `us-assets.i.posthog.com` entries remain as the direct-ingestion fallback for any context where `VITE_POSTHOG_HOST` is unset. The proxy still needs `VITE_POSTHOG_KEY` set in the Netlify environment to emit anything.
 
-On the production domain, `aoe2.criticalbit.gg` is fronted by the [criticalbit-router](https://github.com/ag-tech-group/criticalbit-router) (Cloudflare Worker). Its event-hub config uses an empty `routes` map, so it serves only the apex `/` → `/<slug>/` redirect and passes every deeper path — including `/relay/*` — through to the Netlify origin unchanged; the rewrites above run at Netlify.
+On the production domain, `aoe2.criticalbit.gg` is fronted by the [criticalbit-router](https://github.com/ag-tech-group/criticalbit-router) (Cloudflare Worker). Its event-hub config uses an empty `routes` map, so it serves only the apex `/` → `/kings-gauntlet/` redirect and passes every deeper path — including `/relay/*` — through to the Netlify origin unchanged; the rewrites above run at Netlify.
 
 **Verify after deploy:** load the site with an ad-blocker (e.g. uBlock Origin) enabled, then in DevTools → Network confirm analytics requests go to `aoe2.criticalbit.gg/relay/*` (`200`) rather than `*.i.posthog.com`, and that events arrive in PostHog. Quick non-blocker smoke test:
 
@@ -149,9 +147,9 @@ curl -s 'https://aoe2.criticalbit.gg/relay/decide/?v=3'
 
 > A misconfigured proxy drops **all** events (versus losing only blocked ones today), so this check gates calling it done.
 
-### Path-router routing (deferred)
+### Path-router routing
 
-Once a public slug is announced, add a route entry in `criticalbit-router/wrangler.jsonc` mapping `/<slug>` → this app's Netlify subdomain. The SPA never sees the slug (criticalbit-router strips it before proxying), so adding the route is a router-only change — no redeploy of this app.
+The public slug is `kings-gauntlet`. The criticalbit-router proxies `aoe2.criticalbit.gg/kings-gauntlet/*` to this app's Netlify origin (set via the worker's `HERA_STREAMER_INVITATIONAL_2026_ORIGIN`). The aoe2 hub passes the path through unchanged rather than stripping the prefix, so the app is built under a matching `/kings-gauntlet/` Vite `base` and `netlify.toml` maps `/kings-gauntlet/*` onto the `dist/` files (#167). Changing the slug is a coordinated router + `base` + `netlify.toml` change.
 
 ## License
 
