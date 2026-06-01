@@ -63,7 +63,7 @@ const rows: TeamStandingsRow[] = [
 
 describe("TeamsView", () => {
   it("renders each team's identity and headline stats", () => {
-    render(<TeamsView rows={rows} />)
+    render(<TeamsView rows={rows} displayNameByProfileId={new Map()} />)
     expect(
       screen.getByRole("heading", { name: "Team Alpha", level: 2 })
     ).toBeInTheDocument()
@@ -78,7 +78,9 @@ describe("TeamsView", () => {
   it("displays panels in rank order (API order) and labels their position", () => {
     // Reverse the input so Team Bravo is ranked first — panels follow the
     // API rank order (#230), so Bravo's panel renders before Alpha's.
-    render(<TeamsView rows={[rows[1], rows[0]]} />)
+    render(
+      <TeamsView rows={[rows[1], rows[0]]} displayNameByProfileId={new Map()} />
+    )
     const headings = screen.getAllByRole("heading", { level: 2 })
     expect(headings[0]).toHaveTextContent("Team Bravo")
     expect(headings[1]).toHaveTextContent("Team Alpha")
@@ -91,7 +93,7 @@ describe("TeamsView", () => {
   })
 
   it("renders every roster member with their current rating", () => {
-    render(<TeamsView rows={rows} />)
+    render(<TeamsView rows={rows} displayNameByProfileId={new Map()} />)
     const rosters = screen.getAllByRole("list", { name: /team roster/i })
     expect(rosters).toHaveLength(2)
     expect(within(rosters[0]).getByText("PlayerX")).toBeInTheDocument()
@@ -100,12 +102,28 @@ describe("TeamsView", () => {
     expect(within(rosters[1]).getByText("2610")).toBeInTheDocument()
   })
 
+  it("shows the host display-name override when set, alias as fallback (#242)", () => {
+    // PlayerX (10) has an override; PlayerY (11) doesn't — so the override
+    // shows for the former and the raw alias for the latter.
+    render(
+      <TeamsView
+        rows={rows}
+        displayNameByProfileId={new Map([[10, "Day9TV"]])}
+      />
+    )
+    expect(screen.getByText("Day9TV")).toBeInTheDocument()
+    expect(screen.queryByText("PlayerX")).not.toBeInTheDocument()
+    expect(screen.getByText("PlayerY")).toBeInTheDocument()
+  })
+
   it("colours by creation order, pinned to team identity regardless of display order (#231)", () => {
     // Input reversed (Bravo ranked first), but colour follows creation order
     // (teamId ascending): Alpha (id 1) stays blue, Bravo (id 2) stays red —
     // even though Bravo's panel now renders first. A live rank flip reorders
     // panels without recolouring them.
-    render(<TeamsView rows={[rows[1], rows[0]]} />)
+    render(
+      <TeamsView rows={[rows[1], rows[0]]} displayNameByProfileId={new Map()} />
+    )
     const alpha = screen
       .getByRole("heading", { name: "Team Alpha" })
       .closest("[data-team-color]")
@@ -121,6 +139,7 @@ describe("TeamsView", () => {
     // the first-created, so it's blue — the raw id value doesn't pick green.
     render(
       <TeamsView
+        displayNameByProfileId={new Map()}
         rows={[
           teamRow({ teamId: 8, name: "Later Team" }),
           teamRow({ teamId: 3, name: "First Team" }),
@@ -136,6 +155,7 @@ describe("TeamsView", () => {
   it("shows a placeholder when a team has no rated members", () => {
     render(
       <TeamsView
+        displayNameByProfileId={new Map()}
         rows={[
           teamRow({ teamId: 1, name: "Empty Team", members: [] }),
           teamRow({
@@ -158,6 +178,7 @@ describe("TeamsView", () => {
   it("renders the country flag when one is set, falling back to a globe", () => {
     render(
       <TeamsView
+        displayNameByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -194,6 +215,7 @@ describe("TeamsView", () => {
   it("shows a live indicator only on members currently in a match", () => {
     render(
       <TeamsView
+        displayNameByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -227,6 +249,7 @@ describe("TeamsView", () => {
   it("marks a panel's accent stripe as live when any member is in a match", () => {
     const { container } = render(
       <TeamsView
+        displayNameByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -268,7 +291,7 @@ describe("TeamsView", () => {
 
   it("falls back to a single-column layout when not a pair", () => {
     // Only one team — no coliseum, no VS pillar.
-    render(<TeamsView rows={[rows[0]]} />)
+    render(<TeamsView rows={[rows[0]]} displayNameByProfileId={new Map()} />)
     expect(
       screen.queryByLabelText(/VS/i, { selector: "span" })
     ).not.toBeInTheDocument()
@@ -277,6 +300,7 @@ describe("TeamsView", () => {
   it("renders a Captain badge next to the captain, and none otherwise (#235)", () => {
     render(
       <TeamsView
+        displayNameByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,

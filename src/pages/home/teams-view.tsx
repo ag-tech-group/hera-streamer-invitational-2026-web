@@ -37,7 +37,17 @@ const SKELETON_TEAM_SIZES = [4, 4]
  * container query, so a narrow coliseum panel shows one pill per line
  * and a wide banner panel shows several.
  */
-export function TeamsView({ rows }: { rows: TeamStandingsRow[] }) {
+/** profileId → host display-name override (#242), sourced from the players
+ *  standings since the team-standings endpoint carries only the raw alias. */
+type DisplayNameMap = Map<number, string>
+
+export function TeamsView({
+  rows,
+  displayNameByProfileId,
+}: {
+  rows: TeamStandingsRow[]
+  displayNameByProfileId: DisplayNameMap
+}) {
   // Panels display in rank order — the API returns `rows` ranked by combined
   // rating, desc, so the incoming order IS the ranking (#230). Position is
   // therefore just the row index + 1.
@@ -61,6 +71,7 @@ export function TeamsView({ rows }: { rows: TeamStandingsRow[] }) {
           color={colorByTeamId.get(team.teamId) ?? TEAM_COLOR_SLOTS[0]}
           rank={i + 1}
           revealOffset={i * team.members.length}
+          displayNameByProfileId={displayNameByProfileId}
           className={
             isPair ? (i === 0 ? "xl:col-start-1" : "xl:col-start-3") : undefined
           }
@@ -137,6 +148,7 @@ function TeamPanel({
   color,
   rank,
   revealOffset,
+  displayNameByProfileId,
   className,
 }: {
   team: TeamStandingsRow
@@ -149,6 +161,7 @@ function TeamPanel({
    * wave instead of two distinct rosters arriving).
    */
   revealOffset: number
+  displayNameByProfileId: DisplayNameMap
   className?: string
 }) {
   // A team is "live" if any roster member is currently in a match. Drives
@@ -187,7 +200,11 @@ function TeamPanel({
       />
 
       <TeamHeader team={team} rank={rank} />
-      <PlayerRoster members={team.members} revealOffset={revealOffset} />
+      <PlayerRoster
+        members={team.members}
+        revealOffset={revealOffset}
+        displayNameByProfileId={displayNameByProfileId}
+      />
     </section>
   )
 }
@@ -345,9 +362,11 @@ function RankBadge({ rank }: { rank: number }) {
 function PlayerRoster({
   members,
   revealOffset,
+  displayNameByProfileId,
 }: {
   members: TeamMember[]
   revealOffset: number
+  displayNameByProfileId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   if (members.length === 0) {
@@ -368,7 +387,10 @@ function PlayerRoster({
           className="team-pill-reveal"
           style={{ "--reveal-index": revealOffset + i } as React.CSSProperties}
         >
-          <PlayerPill member={member} />
+          <PlayerPill
+            member={member}
+            displayName={displayNameByProfileId.get(member.profileId)}
+          />
         </li>
       ))}
     </ul>
@@ -384,8 +406,19 @@ function PlayerRoster({
  * Country flag falls back to a globe icon when the country is missing
  * or malformed — same treatment the standings table uses, so the two
  * surfaces stay visually consistent for a given player.
+ *
+ * Shows the host's display-name override when set (#242) — the same friendly
+ * name viewers see on the standings table (e.g. "Day9TV") — falling back to the
+ * raw ladder alias. The override isn't on the team-standings payload, so it's
+ * passed down from the players standings.
  */
-function PlayerPill({ member }: { member: TeamMember }) {
+function PlayerPill({
+  member,
+  displayName,
+}: {
+  member: TeamMember
+  displayName: string | undefined
+}) {
   const countryCode = normalizeCountryCode(member.country)
   return (
     <div className="team-pill flex items-center gap-3 rounded-md border px-3 py-2.5">
@@ -399,7 +432,7 @@ function PlayerPill({ member }: { member: TeamMember }) {
         <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
       )}
       <span className="min-w-0 flex-1 truncate text-sm font-medium">
-        {member.alias}
+        {displayName ?? member.alias}
       </span>
       {member.isCaptain && <CaptainBadge />}
       {member.inMatch && <LiveDot />}
