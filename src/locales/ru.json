@@ -291,6 +291,7 @@
   },
   "hostLinks": {
     "defaultLabel": "Ведущий",
+    "hostedBy": "Ведущий: {{host}}",
     "live": "В эфире",
     "streamingLive": "Прямой эфир"
   },

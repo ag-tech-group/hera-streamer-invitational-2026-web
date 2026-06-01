@@ -16,7 +16,7 @@ export interface Tournament {
   /**
    * Game this tournament is played in, appended to the document / SEO title
    * for search context — `"Age of Empires II"` yields a title like
-   * `"<name> (<hostLabel>) — Age of Empires II"` (#179). Kept short on
+   * `"<name> (Hosted by <hostName>) — Age of Empires II"` (#179). Kept short on
    * purpose (no "Definitive Edition") so the title stays under the ~60-char
    * SERP truncation; the full product name lives in the meta description.
    * When unset, the title stays brand-only.
@@ -39,12 +39,15 @@ export interface Tournament {
    */
   hostLinks?: HostLink[]
   /**
-   * Eyebrow label on the `HostLinksCard` (e.g., `"Hosted by Hera"`). When
-   * unset, the component falls back to a generic `"Hosted by"`.
+   * Host display name, e.g. `"Hera"`. The promo card renders a localized
+   * `"Hosted by {name}"` (the `hostLinks.hostedBy` key); the document title
+   * uses a canonical English `"Hosted by {name}"` so it stays in sync with
+   * the static `index.html` title (non-JS scrapers read that). When unset,
+   * the card shows a generic `"Hosted by"` and the title is brand-only.
    */
-  hostLabel?: string
+  hostName?: string
   /**
-   * Optional host brand mark shown beside `hostLabel` on the
+   * Optional host brand mark shown beside the host label on the
    * `HostLinksCard` — an absolute `public/` path (e.g. `"/hera-logo.png"`).
    * Keeps the host's own logo on the promo card while the component stays
    * generic (it takes no host-specific knowledge). When unset, the card

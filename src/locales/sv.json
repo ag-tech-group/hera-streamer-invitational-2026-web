@@ -289,6 +289,7 @@
   },
   "hostLinks": {
     "defaultLabel": "Värd",
+    "hostedBy": "Värd: {{host}}",
     "live": "Live",
     "streamingLive": "Sänder live"
   },

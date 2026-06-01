@@ -289,6 +289,7 @@
   },
   "hostLinks": {
     "defaultLabel": "Veranstaltet von",
+    "hostedBy": "Veranstaltet von {{host}}",
     "live": "Live",
     "streamingLive": "Live im Stream"
   },
