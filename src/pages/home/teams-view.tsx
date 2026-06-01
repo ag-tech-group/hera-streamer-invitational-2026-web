@@ -23,11 +23,12 @@ const COLISEUM_TEAM_COUNT = 2
 
 /**
  * Placeholder roster sizes for the loading skeleton, one entry per team panel.
- * This build runs 4 teams (> 2), so the populated view uses the stacked-banner
- * layout (the coliseum is a 2-team-only arrangement) and the skeleton matches it
- * — 4 stacked panels — so data arriving doesn't shift the layout.
+ * This build runs 4 teams (> 2) of 5 players each, so the populated view uses
+ * the stacked-banner layout (the coliseum is a 2-team-only arrangement) and the
+ * skeleton matches it — 4 stacked panels of 5 pills — so data arriving doesn't
+ * shift the layout.
  */
-const SKELETON_TEAM_SIZES = [4, 4, 4, 4]
+const SKELETON_TEAM_SIZES = [5, 5, 5, 5]
 
 /**
  * Replaces the flat team-standings table (#90) with a roster-first
@@ -263,7 +264,7 @@ function TeamPanelSkeleton({
         <Skeleton className="h-8 w-24" />
         <Skeleton className="h-4 w-32" />
       </div>
-      <div className="mt-6 grid gap-2 @md:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4">
+      <div className="mt-6 grid gap-2 @md:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-5">
         {Array.from({ length: rosterSize }, (_, i) => (
           <Skeleton key={i} className="h-14 rounded-md" />
         ))}
@@ -365,8 +366,9 @@ function RankBadge({ rank }: { rank: number }) {
 /**
  * The roster grid. Container queries on the parent panel decide how
  * many pills fit per row — narrow (coliseum-column) panels stay at one
- * per row, wide (banner) panels expand up to four. That keeps the same
- * markup working in both layouts without media-query branching.
+ * per row, wide (banner) panels expand up to five so a full 5-player
+ * roster sits on one row instead of wrapping 4 + a lonely 1. That keeps
+ * the same markup working in both layouts without media-query branching.
  *
  * `revealOffset` is added to each pill's own index so the stagger
  * continues across panels in coliseum view rather than firing twice in
@@ -394,7 +396,7 @@ function PlayerRoster({
   }
   return (
     <ul
-      className="mt-6 grid gap-2 @md:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4"
+      className="mt-6 grid gap-2 @md:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-5"
       aria-label={t("teams.rosterAriaLabel")}
     >
       {members.map((member, i) => (
