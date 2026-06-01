@@ -77,7 +77,20 @@ export function useLiveUpdates(): void {
       const handler = (): void => {
         logger.debug("SSE nudge received", { event })
         for (const queryKey of queryKeysFor[event]) {
-          void queryClient.invalidateQueries({ queryKey })
+          // Fire-and-forget, but catch the returned promise: a burst of nudges
+          // can invalidate a query whose refetch is still in flight, and React
+          // Query aborts that request — rejecting with AbortError. The abort is
+          // intentional (the newer nudge refetches), and any real refetch
+          // failure already surfaces via the query's own error state, so the
+          // rejection must not escape as an unhandled rejection.
+          void queryClient
+            .invalidateQueries({ queryKey })
+            .catch((error: unknown) => {
+              logger.debug("SSE-triggered invalidation rejected", {
+                event,
+                error,
+              })
+            })
         }
       }
       source.addEventListener(event, handler)

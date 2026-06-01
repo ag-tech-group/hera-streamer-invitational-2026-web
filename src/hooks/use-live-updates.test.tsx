@@ -10,6 +10,7 @@ import {
 } from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
+import { logger } from "@/lib/logger"
 import { MockEventSource } from "@/test/mock-event-source"
 
 function renderUseLiveUpdates() {
@@ -96,5 +97,37 @@ describe("useLiveUpdates", () => {
     unmount()
 
     expect(source.close).toHaveBeenCalledOnce()
+  })
+
+  it("swallows an aborted invalidation instead of leaking an unhandled rejection", async () => {
+    const queryClient = new QueryClient()
+    // A nudge that invalidates a query whose refetch is in flight makes React
+    // Query abort that request; the returned promise rejects with AbortError.
+    const abort = new DOMException("Fetch is aborted", "AbortError")
+    vi.spyOn(queryClient, "invalidateQueries").mockImplementation(() =>
+      Promise.reject(abort)
+    )
+    const debugSpy = vi.spyOn(logger, "debug")
+
+    renderHook(() => useLiveUpdates(), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
+    })
+
+    MockEventSource.last().emit("standings", {
+      polled_at: "2026-05-21T00:00:00Z",
+    })
+
+    // Let the rejected invalidation settle; the hook's `.catch` should handle
+    // it — if it didn't, this would surface as an unhandled rejection.
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(debugSpy).toHaveBeenCalledWith(
+      "SSE-triggered invalidation rejected",
+      expect.objectContaining({ error: abort })
+    )
   })
 })
