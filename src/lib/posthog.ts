@@ -42,8 +42,9 @@ interface PostHogClient {
  */
 
 // Ingestion host. Production sets VITE_POSTHOG_HOST to the first-party reverse
-// proxy (https://aoe2.criticalbit.gg/relay, wired as rewrites in netlify.toml)
-// so privacy / ad blockers don't drop events by blocking *.i.posthog.com.
+// proxy (https://aoe2.criticalbit.gg/relay), proxied to PostHog by the
+// criticalbit-router Cloudflare Worker, so privacy / ad blockers don't drop
+// events by blocking *.i.posthog.com.
 // Falls back to PostHog US cloud for local dev and direct ingestion.
 const DEFAULT_HOST = "https://us.i.posthog.com"
 

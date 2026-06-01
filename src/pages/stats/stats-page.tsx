@@ -19,7 +19,8 @@ import {
   type BarDatum,
 } from "@/pages/stats/horizontal-bar-chart"
 import { RatingProgressionChart } from "@/pages/stats/rating-progression-chart"
-import type { PlayerSeries, StandingsRow, TeamStandingsRow } from "@/types"
+import { labelSeries, type LabeledSeries } from "@/pages/stats/series-labels"
+import type { StandingsRow, TeamStandingsRow } from "@/types"
 
 /**
  * Tournament-wide stats (#164), mounted at `/stats` as the third top-level
@@ -54,6 +55,25 @@ export function StatsPage() {
   const teamAvgData = teams.data ? teamAvgBars(teams.data.rows) : []
   const peakData = standings.data ? peakBars(standings.data.rows) : []
 
+  // The /progression series carries only the raw ladder alias, so the chart
+  // and the series-derived summary cards would show profile names rather than
+  // the host's display override. Join profileId → display name from the
+  // standings rows (which do carry it) and feed the labeled series to both —
+  // mirroring the Teams view join (#266).
+  const displayNameByProfileId = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const row of standings.data?.rows ?? []) {
+      if (row.profileId !== null && row.presentation.displayName) {
+        map.set(row.profileId, row.presentation.displayName)
+      }
+    }
+    return map
+  }, [standings.data?.rows])
+  const labeledSeries = useMemo(
+    () => labelSeries(progression.data?.series ?? [], displayNameByProfileId),
+    [progression.data?.series, displayNameByProfileId]
+  )
+
   return (
     <TournamentLayout view="stats">
       {progression.isPending || standings.isPending ? (
@@ -64,7 +84,7 @@ export function StatsPage() {
         </div>
       ) : (
         <SummaryCards
-          series={progression.data?.series ?? []}
+          series={labeledSeries}
           standingsRows={standings.data?.rows ?? []}
         />
       )}
@@ -103,7 +123,7 @@ export function StatsPage() {
         skeletonHeight={460}
       >
         {progression.data ? (
-          <RatingProgressionChart series={progression.data.series} />
+          <RatingProgressionChart series={labeledSeries} />
         ) : null}
       </ChartSection>
 
@@ -236,7 +256,7 @@ interface Leader {
 }
 
 /** The three headline numbers, derived from the rating series. */
-function computeStats(series: PlayerSeries[]): {
+function computeStats(series: LabeledSeries[]): {
   biggestClimber: Leader | null
   highestPeak: Leader | null
   mostMatches: Leader | null
@@ -252,13 +272,13 @@ function computeStats(series: PlayerSeries[]): {
     const matches = s.points.length
 
     if (!biggestClimber || delta > biggestClimber.value) {
-      biggestClimber = { alias: s.alias, value: delta }
+      biggestClimber = { alias: s.label, value: delta }
     }
     if (!highestPeak || peak > highestPeak.value) {
-      highestPeak = { alias: s.alias, value: peak }
+      highestPeak = { alias: s.label, value: peak }
     }
     if (!mostMatches || matches > mostMatches.value) {
-      mostMatches = { alias: s.alias, value: matches }
+      mostMatches = { alias: s.label, value: matches }
     }
   }
 
@@ -291,7 +311,7 @@ function SummaryCards({
   series,
   standingsRows,
 }: {
-  series: PlayerSeries[]
+  series: LabeledSeries[]
   standingsRows: StandingsRow[]
 }) {
   const { t } = useTranslation()
