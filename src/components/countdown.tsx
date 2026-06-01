@@ -112,7 +112,14 @@ export function Countdown({
           {label}
         </p>
       ) : null}
+      {/*
+       * A countdown is a fixed days → hrs → min → sec sequence, like a clock
+       * face — it must read left-to-right even when the page is RTL. Pin the
+       * digits row to `dir="ltr"` so the flex order (and the leftmost-non-zero
+       * accent migration) doesn't reverse to sec → days under Arabic.
+       */}
       <div
+        dir="ltr"
         className={cn(
           "flex items-baseline tabular-nums",
           isHero ? "gap-3 sm:gap-5" : "gap-2 sm:gap-3"
