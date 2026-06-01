@@ -14,6 +14,7 @@ import { CanvasRenderer } from "echarts/renderers"
 import ReactEChartsCore from "echarts-for-react/esm/core"
 import { useMemo } from "react"
 
+import { useStableValue } from "@/hooks/use-stable-value"
 import {
   useChartColors,
   type ChartColors,
@@ -109,6 +110,10 @@ function buildOption(
     },
     series: series.map((s) => ({
       type: "line",
+      // Stable identity so echarts merges each player's series in place across
+      // live refetches (matching by id, not array position) instead of
+      // disposing and rebuilding it — see the chart component for why.
+      id: s.profileId,
       name: s.alias,
       // Filled-circle symbol so the legend marker reads as a solid coloured
       // dot — the default `emptyCircle` shows a hollow white centre.
@@ -145,12 +150,26 @@ function buildOption(
  */
 export function RatingProgressionChart({ series }: { series: PlayerSeries[] }) {
   const colors = useChartColors()
-  const option = useMemo(() => buildOption(series, colors), [series, colors])
+  // Hold the series reference steady across value-identical SSE refetches so a
+  // live nudge that changed nothing doesn't rebuild the chart (see
+  // useStableValue). Combined with merge updates below, the chart is only
+  // touched when ratings actually move.
+  const stableSeries = useStableValue(series)
+  const option = useMemo(
+    () => buildOption(stableSeries, colors),
+    [stableSeries, colors]
+  )
   return (
     <ReactEChartsCore
       echarts={echarts}
       option={option}
-      notMerge
+      // No `notMerge`: echarts merges each series by `id` (set in buildOption),
+      // updating its data model in place rather than disposing and rebuilding
+      // it. The destructive rebuild was racing echarts' own hover dispatch — a
+      // mousemove landing mid-rebuild called getDataParams on a disposed model
+      // (`undefined.getRawIndex`) and threw. Series only ever grow (a player
+      // joins the chart on their first completed match) and are never removed,
+      // so a plain merge never leaves a ghost line — no `replaceMerge` needed.
       lazyUpdate
       style={{ height: 460, width: "100%" }}
       opts={{ renderer: "canvas" }}

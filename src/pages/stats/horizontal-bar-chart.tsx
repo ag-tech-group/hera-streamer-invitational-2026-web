@@ -8,6 +8,7 @@ import { CanvasRenderer } from "echarts/renderers"
 import ReactEChartsCore from "echarts-for-react/esm/core"
 import { useMemo } from "react"
 
+import { useStableValue } from "@/hooks/use-stable-value"
 import {
   useChartColors,
   type ChartColors,
@@ -71,6 +72,9 @@ function buildOption(data: BarDatum[], colors: ChartColors): EChartsCoreOption {
     series: [
       {
         type: "bar",
+        // Stable single-series id so echarts merges this series in place across
+        // live refetches instead of rebuilding it — see the chart component.
+        id: "ranking",
         barWidth: "62%",
         // Per-bar colour (team palette / brand), rounded on the outer end. Base
         // opacity sits a touch below full so the hovered bar can brighten to
@@ -112,12 +116,23 @@ export function HorizontalBarChart({
   height?: number
 }) {
   const colors = useChartColors()
-  const option = useMemo(() => buildOption(data, colors), [data, colors])
+  // Steady reference across value-identical refetches so a live nudge that
+  // changed nothing doesn't rebuild the chart (see useStableValue).
+  const stableData = useStableValue(data)
+  const option = useMemo(
+    () => buildOption(stableData, colors),
+    [stableData, colors]
+  )
   return (
     <ReactEChartsCore
       echarts={echarts}
       option={option}
-      notMerge
+      // No `notMerge`: echarts merges the series by `id` (set in buildOption)
+      // and updates its data in place rather than disposing the model. The old
+      // destructive rebuild raced echarts' hover dispatch — a mousemove landing
+      // mid-rebuild read getRawIndex off a disposed model and threw. Bars only
+      // ever grow in count (a player appears once they have a rating), so a
+      // plain merge never strands a stale bar.
       lazyUpdate
       style={{ height, width: "100%" }}
       opts={{ renderer: "canvas" }}
