@@ -3,7 +3,9 @@
     "label": "Language",
     "en": "English",
     "es": "Español",
-    "ar": "العربية"
+    "ar": "العربية",
+    "nl": "Nederlands",
+    "de": "Deutsch"
   },
   "theme": {
     "label": "Theme",
