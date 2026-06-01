@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/react"
+import type { ErrorEvent as SentryErrorEvent, EventHint } from "@sentry/react"
 
 /**
  * Default sample rates (each overridable via `VITE_SENTRY_*_SAMPLE_RATE`),
@@ -61,16 +62,10 @@ export function initSentry(): void {
       import.meta.env.VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE,
       DEFAULT_REPLAYS_ON_ERROR_SAMPLE_RATE
     ),
-    // Drop errors thrown during a stale-chunk recovery reload. When a tab on a
-    // previous build hits a rotated code-split chunk, chunk-reload.ts calls
-    // `preventDefault()` on Vite's preloadError and reloads; under
-    // preventDefault the failed import resolves `undefined`, so the router can
-    // throw on it ("...reading 'component'") in the microtask before the reload
-    // navigates away. We're leaving the page — that teardown error is moot, not
-    // a bug worth an event. (flag set in src/lib/chunk-reload.ts)
-    beforeSend(event) {
-      if (window.__chunkReloadInFlight) return null
-      return event
+    // Drop non-actionable noise before sending — stale-chunk reload teardown
+    // and intentional fetch cancellation. See `shouldSuppressEvent`.
+    beforeSend(event, hint) {
+      return shouldSuppressEvent(event, hint) ? null : event
     },
     integrations: [
       Sentry.browserTracingIntegration(),
@@ -87,4 +82,33 @@ function parseSampleRate(value: string | undefined, fallback = 0): number {
   if (value === undefined) return fallback
   const n = parseFloat(value)
   return Number.isFinite(n) && n >= 0 && n <= 1 ? n : fallback
+}
+
+/**
+ * Whether a Sentry event is non-actionable noise that should be dropped in
+ * `beforeSend`. Two categories:
+ *
+ *  - **Stale-chunk recovery teardown.** When a tab on a previous build hits a
+ *    rotated code-split chunk, `chunk-reload.ts` `preventDefault()`s Vite's
+ *    preloadError and reloads; under preventDefault the failed import resolves
+ *    `undefined`, so the router can throw on it in the microtask before the
+ *    reload navigates away. We're leaving the page — the error is moot.
+ *  - **Aborted fetches.** On a live-updating site React Query routinely aborts
+ *    an in-flight request when a newer SSE nudge supersedes it; the resulting
+ *    `AbortError` — whatever the browser's wording ("Fetch is aborted",
+ *    "signal is aborted without reason", …) — is intentional cancellation and
+ *    never actionable. The rejection can leak from the *cancelled* fetch's own
+ *    promise (not the `invalidateQueries` promise we catch in use-live-updates),
+ *    so we drop it here rather than chase every owning call site.
+ */
+export function shouldSuppressEvent(
+  event: SentryErrorEvent,
+  hint?: EventHint
+): boolean {
+  if (window.__chunkReloadInFlight) return true
+  const exceptionType = event.exception?.values?.[0]?.type
+  const originalName = (
+    hint?.originalException as { name?: unknown } | undefined
+  )?.name
+  return exceptionType === "AbortError" || originalName === "AbortError"
 }
