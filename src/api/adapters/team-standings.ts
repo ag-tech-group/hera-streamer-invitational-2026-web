@@ -20,6 +20,7 @@ function toTeamStandingsRow(dto: TeamStandingRow): TeamStandingsRow {
     combinedRatingSum: dto.combined_rating_sum,
     combinedRatingAverage: dto.combined_rating_average,
     members: dto.members.map((member) => ({
+      tournamentPlayerId: member.tournament_player_id,
       profileId: member.profile_id,
       alias: member.alias,
       country: member.country,

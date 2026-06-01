@@ -255,30 +255,53 @@ interface Leader {
   value: number
 }
 
-/** The three headline numbers, derived from the rating series. */
-function computeStats(series: LabeledSeries[]): {
+/**
+ * The three headline numbers. Peak rating and match volume come from the
+ * tournament-scoped standings — the same source as the standings table and
+ * the PEAK RATING board — so the cards agree with the rest of the page. The
+ * climber is rating movement across the progression series (a player's
+ * tracked rating-over-time), which has no standings equivalent.
+ *
+ * These used to be derived entirely from the progression series, which spans
+ * a player's full tracked match history rather than the tournament window —
+ * so "highest peak" surfaced a lifetime peak and "most matches" counted every
+ * tracked match, neither matching the in-tournament figures the table shows.
+ */
+function computeStats(
+  series: LabeledSeries[],
+  rows: StandingsRow[]
+): {
   biggestClimber: Leader | null
   highestPeak: Leader | null
   mostMatches: Leader | null
 } {
   let biggestClimber: Leader | null = null
-  let highestPeak: Leader | null = null
-  let mostMatches: Leader | null = null
-
   for (const s of series) {
     if (s.points.length === 0) continue
     const delta = s.points[s.points.length - 1].rating - s.points[0].rating
-    const peak = Math.max(...s.points.map((p) => p.rating))
-    const matches = s.points.length
-
     if (!biggestClimber || delta > biggestClimber.value) {
       biggestClimber = { alias: s.label, value: delta }
     }
-    if (!highestPeak || peak > highestPeak.value) {
-      highestPeak = { alias: s.label, value: peak }
+  }
+
+  let highestPeak: Leader | null = null
+  let mostMatches: Leader | null = null
+  for (const r of rows) {
+    // Mirror the standings table + peak board: peak is the tournament
+    // leaderboard's max_rating, volume is in-window games. Label prefers the
+    // host display-name override, like those surfaces.
+    const alias = r.presentation.displayName ?? r.alias
+    if (
+      r.maxRating !== null &&
+      (!highestPeak || r.maxRating > highestPeak.value)
+    ) {
+      highestPeak = { alias, value: r.maxRating }
     }
-    if (!mostMatches || matches > mostMatches.value) {
-      mostMatches = { alias: s.label, value: matches }
+    if (
+      r.gamesPlayed > 0 &&
+      (!mostMatches || r.gamesPlayed > mostMatches.value)
+    ) {
+      mostMatches = { alias, value: r.gamesPlayed }
     }
   }
 
@@ -316,8 +339,8 @@ function SummaryCards({
 }) {
   const { t } = useTranslation()
   const { biggestClimber, highestPeak, mostMatches } = useMemo(
-    () => computeStats(series),
-    [series]
+    () => computeStats(series, standingsRows),
+    [series, standingsRows]
   )
   const winPctLeader = useMemo(
     () => computeWinPctLeader(standingsRows),

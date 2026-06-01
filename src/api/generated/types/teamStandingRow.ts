@@ -17,11 +17,11 @@ import type { TeamMemberRead } from './teamMemberRead';
 ``combined_rating_sum`` is the sum of the members' peak (lifetime
 ``max_rating``) ratings on the tournament's leaderboard;
 ``combined_rating_average`` is that sum over the count of members
-with a non-null peak. Only members with a rating on that leaderboard
-are counted — a member the poller hasn't rated yet is omitted. A
-member whose ``max_rating`` is null is still listed under
-``members`` but excluded from the combined sum and average's
-denominator.
+with a non-null peak. Every ``team_members`` row is listed under
+``members`` regardless of rating status — a linked-but-unrated
+member (no ``PlayerRating`` on the leaderboard yet) is included with
+null rating fields but excluded from the combined sum and the
+average's denominator (#166).
  */
 export interface TeamStandingRow {
   team_id: number;

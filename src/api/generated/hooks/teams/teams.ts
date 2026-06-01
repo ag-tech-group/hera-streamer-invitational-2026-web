@@ -319,11 +319,14 @@ export const useDeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDelete = <TError
       return useMutation(getDeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDeleteMutationOptions(options), queryClient);
     }
     /**
- * Add a profile to a team — owner-gated.
+ * Add a roster row to a team — owner-gated.
 
-409 if the profile is already on the team. Team membership is separate
-from the tournament roster — this does not add the profile to
-``TournamentPlayer``.
+Keys on ``tournament_player_id`` so a placeholder entrant (a roster
+row whose ``profile_id`` hasn't been minted yet) can be teamed —
+the original #167 ask. 404 if the id isn't a roster row in this
+tournament; 409 if it's already on the team. Team membership is
+separate from the tournament roster — this does not add or modify
+a ``TournamentPlayer``.
  * @summary Add Team Member
  */
 export type addTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostResponse204 = {
@@ -416,45 +419,46 @@ export const useAddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPost =
       return useMutation(getAddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostMutationOptions(options), queryClient);
     }
     /**
- * Remove a profile from a team — owner-gated.
+ * Remove a roster row from a team — owner-gated.
 
-404 if the profile isn't on the team.
+Keys on ``tournament_player_id`` to match ``POST``. 404 if the row
+isn't on the team.
  * @summary Remove Team Member
  */
-export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponse204 = {
+export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponse204 = {
   data: void
   status: 204
 }
 
-export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponse422 = {
+export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponse422 = {
   data: HTTPValidationError
   status: 422
 }
 
-export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponseSuccess = (removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponse204) & {
+export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponseSuccess = (removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponse204) & {
   headers: Headers;
 };
-export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponseError = (removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponse422) & {
+export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponseError = (removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponse422) & {
   headers: Headers;
 };
 
-export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponse = (removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponseSuccess | removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponseError)
+export type removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponse = (removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponseSuccess | removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponseError)
 
-export const getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteUrl = (tournamentSlug: string,
+export const getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteUrl = (tournamentSlug: string,
     teamId: number,
-    profileId: number,) => {
+    tournamentPlayerId: number,) => {
 
 
   
 
-  return `/v1/tournaments/${tournamentSlug}/teams/${teamId}/members/${profileId}`
+  return `/v1/tournaments/${tournamentSlug}/teams/${teamId}/members/${tournamentPlayerId}`
 }
 
-export const removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete = async (tournamentSlug: string,
+export const removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete = async (tournamentSlug: string,
     teamId: number,
-    profileId: number, options?: RequestInit): Promise<removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponse> => {
+    tournamentPlayerId: number, options?: RequestInit): Promise<removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponse> => {
   
-  return orvalClient<removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteResponse>(getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteUrl(tournamentSlug,teamId,profileId),
+  return orvalClient<removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteResponse>(getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteUrl(tournamentSlug,teamId,tournamentPlayerId),
   {      
     ...options,
     method: 'DELETE'
@@ -466,11 +470,11 @@ export const removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfil
 
 
 
-export const getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete>>, TError,{tournamentSlug: string;teamId: number;profileId: number}, TContext>, request?: SecondParameter<typeof orvalClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete>>, TError,{tournamentSlug: string;teamId: number;profileId: number}, TContext> => {
+export const getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete>>, TError,{tournamentSlug: string;teamId: number;tournamentPlayerId: number}, TContext>, request?: SecondParameter<typeof orvalClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete>>, TError,{tournamentSlug: string;teamId: number;tournamentPlayerId: number}, TContext> => {
 
-const mutationKey = ['removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete'];
+const mutationKey = ['removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -480,10 +484,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete>>, {tournamentSlug: string;teamId: number;profileId: number}> = (props) => {
-          const {tournamentSlug,teamId,profileId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete>>, {tournamentSlug: string;teamId: number;tournamentPlayerId: number}> = (props) => {
+          const {tournamentSlug,teamId,tournamentPlayerId} = props ?? {};
 
-          return  removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete(tournamentSlug,teamId,profileId,requestOptions)
+          return  removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete(tournamentSlug,teamId,tournamentPlayerId,requestOptions)
         }
 
 
@@ -493,30 +497,30 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type RemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete>>>
+    export type RemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete>>>
     
-    export type RemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteMutationError = HTTPValidationError
+    export type RemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteMutationError = HTTPValidationError
 
     /**
  * @summary Remove Team Member
  */
-export const useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete>>, TError,{tournamentSlug: string;teamId: number;profileId: number}, TContext>, request?: SecondParameter<typeof orvalClient>}
+export const useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete>>, TError,{tournamentSlug: string;teamId: number;tournamentPlayerId: number}, TContext>, request?: SecondParameter<typeof orvalClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete>>,
+        Awaited<ReturnType<typeof removeTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete>>,
         TError,
-        {tournamentSlug: string;teamId: number;profileId: number},
+        {tournamentSlug: string;teamId: number;tournamentPlayerId: number},
         TContext
       > => {
-      return useMutation(getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteMutationOptions(options), queryClient);
+      return useMutation(getRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteMutationOptions(options), queryClient);
     }
     /**
  * Designate a team member as the team's captain — owner-gated.
 
 Atomic: clears any existing captain on the team, then sets the new
-one. The target profile must already be a member of the team (404
-otherwise). Idempotent — re-PATCHing the current captain is a 204
-no-op with no audit event.
+one. The target roster row must already be a member of the team
+(404 otherwise). Idempotent — re-PATCHing the current captain is a
+204 no-op with no audit event.
  * @summary Set Team Captain
  */
 export type setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchResponse204 = {

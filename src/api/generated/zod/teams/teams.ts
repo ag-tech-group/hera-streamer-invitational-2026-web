@@ -76,11 +76,14 @@ export const DeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDeleteParams = zod.
 })
 
 /**
- * Add a profile to a team — owner-gated.
+ * Add a roster row to a team — owner-gated.
 
-409 if the profile is already on the team. Team membership is separate
-from the tournament roster — this does not add the profile to
-``TournamentPlayer``.
+Keys on ``tournament_player_id`` so a placeholder entrant (a roster
+row whose ``profile_id`` hasn't been minted yet) can be teamed —
+the original #167 ask. 404 if the id isn't a roster row in this
+tournament; 409 if it's already on the team. Team membership is
+separate from the tournament roster — this does not add or modify
+a ``TournamentPlayer``.
  * @summary Add Team Member
  */
 export const AddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostParams = zod.object({
@@ -88,22 +91,23 @@ export const AddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostParam
   "tournament_slug": zod.string()
 })
 
-export const addTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostBodyProfileIdExclusiveMin = 0;
+export const addTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostBodyTournamentPlayerIdExclusiveMin = 0;
 
 
 
 export const AddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostBody = zod.object({
-  "profile_id": zod.number().gt(addTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostBodyProfileIdExclusiveMin)
-}).describe('Request body for adding a profile to a team.')
+  "tournament_player_id": zod.number().gt(addTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostBodyTournamentPlayerIdExclusiveMin)
+}).describe('Request body for adding a roster row to a team.\n\nKeys on the roster row\'s surrogate ``id`` (``tournament_player_id``)\nrather than the polled ``profile_id`` so a placeholder entrant — a\nroster row whose ``profile_id`` hasn\'t been minted yet — can be\nteamed (#167).')
 
 /**
- * Remove a profile from a team — owner-gated.
+ * Remove a roster row from a team — owner-gated.
 
-404 if the profile isn't on the team.
+Keys on ``tournament_player_id`` to match ``POST``. 404 if the row
+isn't on the team.
  * @summary Remove Team Member
  */
-export const RemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDeleteParams = zod.object({
-  "profile_id": zod.number(),
+export const RemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDeleteParams = zod.object({
+  "tournament_player_id": zod.number(),
   "team_id": zod.number(),
   "tournament_slug": zod.string()
 })
@@ -112,9 +116,9 @@ export const RemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfil
  * Designate a team member as the team's captain — owner-gated.
 
 Atomic: clears any existing captain on the team, then sets the new
-one. The target profile must already be a member of the team (404
-otherwise). Idempotent — re-PATCHing the current captain is a 204
-no-op with no audit event.
+one. The target roster row must already be a member of the team
+(404 otherwise). Idempotent — re-PATCHing the current captain is a
+204 no-op with no audit event.
  * @summary Set Team Captain
  */
 export const SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchParams = zod.object({
@@ -122,13 +126,13 @@ export const SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchPar
   "tournament_slug": zod.string()
 })
 
-export const setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchBodyProfileIdExclusiveMin = 0;
+export const setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchBodyTournamentPlayerIdExclusiveMin = 0;
 
 
 
 export const SetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchBody = zod.object({
-  "profile_id": zod.number().gt(setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchBodyProfileIdExclusiveMin)
-}).describe('Request body for ``PATCH \/teams\/{team_id}\/captain`` — designates the captain.\n\nThe profile must already be a member of the team; the endpoint\natomically clears any existing captain on the team and sets this one.')
+  "tournament_player_id": zod.number().gt(setTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatchBodyTournamentPlayerIdExclusiveMin)
+}).describe('Request body for ``PATCH \/teams\/{team_id}\/captain`` — designates the captain.\n\nThe roster row must already be a member of the team; the endpoint\natomically clears any existing captain on the team and sets this one.')
 
 /**
  * Clear the team's captain — owner-gated.

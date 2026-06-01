@@ -11,18 +11,19 @@ import {
   useClearTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainDelete,
   useCreateTeamV1TournamentsTournamentSlugTeamsPost,
   useDeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDelete,
-  useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete,
+  useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete,
   useSetTeamCaptainV1TournamentsTournamentSlugTeamsTeamIdCaptainPatch,
   useUpdateTeamV1TournamentsTournamentSlugTeamsTeamIdPatch,
 } from "@/api/generated/hooks/teams/teams"
 import type { PlayerRead } from "@/api/generated/types"
 
 /**
- * Polled-only narrowing of `PlayerRead` (#185). The teams admin filters
- * out placeholder rows at the source because the API's team-member ops
- * still key off `profile_id`; downstream components type their roster
- * prop as `PolledPlayer[]` rather than `PlayerRead[]` so the non-null
- * guarantee propagates without per-site assertions.
+ * Polled-only narrowing of `PlayerRead`. Team-member ops now key on
+ * `tournament_player_id` (#184), so a placeholder *could* be teamed — but the
+ * add-member UX (dropdown + name resolution for an unlinked entrant) hasn't had
+ * a pass, so the teams admin still filters placeholders out at the source.
+ * Downstream components type their roster prop as `PolledPlayer[]` so the
+ * non-null `profile_id` guarantee propagates without per-site assertions.
  */
 type PolledPlayer = PlayerRead & { profile_id: number }
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -92,12 +93,11 @@ export function TeamsSection() {
     [rows]
   )
 
-  // Teams require a polled `profile_id` to add a member (the API's team-
-  // member rows still key off it, unchanged by the unified roster in
-  // #185). Placeholders surface on the players-admin tab but can't be put
-  // on teams until they're promoted, so filter them out at the source
-  // here. The type predicate narrows `profile_id` to non-null for every
-  // downstream consumer of `allPlayers`.
+  // Filter placeholders out of the add-member source for now: team-member ops
+  // key on `tournament_player_id` (#184), so placeholders *could* be teamed, but
+  // the picker UX for an unlinked entrant is a follow-up. The type predicate
+  // narrows `profile_id` to non-null for every downstream consumer of
+  // `allPlayers`.
   const allPlayers: PolledPlayer[] = useMemo(() => {
     if (playersQuery.data?.status !== 200) return []
     return (
@@ -123,7 +123,7 @@ export function TeamsSection() {
     const map = new Map<number, { teamId: number; teamName: string }>()
     for (const team of rows) {
       for (const member of team.members) {
-        map.set(member.profileId, {
+        map.set(member.tournamentPlayerId, {
           teamId: team.teamId,
           teamName: team.name,
         })
@@ -136,11 +136,11 @@ export function TeamsSection() {
   // roster the Players tab edits. Lets the member chips and add-member picker
   // show the friendly name viewers see, rather than the raw ladder alias the
   // team-standings endpoint returns (it carries no presentation bag).
-  const displayNameByProfileId = useMemo(() => {
+  const displayNameByTournamentPlayerId = useMemo(() => {
     const map: DisplayNameMap = new Map()
     for (const player of allPlayers) {
       const name = presentationDisplayName(player.presentation)
-      if (name) map.set(player.profile_id, name)
+      if (name) map.set(player.tournament_player_id, name)
     }
     return map
   }, [allPlayers])
@@ -165,7 +165,7 @@ export function TeamsSection() {
               color={colorByTeamId.get(team.teamId) ?? TEAM_COLOR_SLOTS[0]}
               allPlayers={allPlayers}
               playerTeamMap={playerTeamMap}
-              displayNameByProfileId={displayNameByProfileId}
+              displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
             />
           ))}
         </ul>
@@ -191,13 +191,13 @@ function TeamItem({
   color,
   allPlayers,
   playerTeamMap,
-  displayNameByProfileId,
+  displayNameByTournamentPlayerId,
 }: {
   team: TeamStandingsRow
   color: TeamColorSlot
   allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
-  displayNameByProfileId: DisplayNameMap
+  displayNameByTournamentPlayerId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
@@ -255,7 +255,7 @@ function TeamItem({
         members={team.members}
         allPlayers={allPlayers}
         playerTeamMap={playerTeamMap}
-        displayNameByProfileId={displayNameByProfileId}
+        displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
       />
     </li>
   )
@@ -377,13 +377,13 @@ function MembersBlock({
   members,
   allPlayers,
   playerTeamMap,
-  displayNameByProfileId,
+  displayNameByTournamentPlayerId,
 }: {
   teamId: number
   members: TeamMember[]
   allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
-  displayNameByProfileId: DisplayNameMap
+  displayNameByTournamentPlayerId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   return (
@@ -396,10 +396,10 @@ function MembersBlock({
         <ul className="flex flex-wrap gap-1.5">
           {members.map((member) => (
             <MemberChip
-              key={member.profileId}
+              key={member.tournamentPlayerId}
               teamId={teamId}
               member={member}
-              displayNameByProfileId={displayNameByProfileId}
+              displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
             />
           ))}
         </ul>
@@ -409,7 +409,7 @@ function MembersBlock({
         members={members}
         allPlayers={allPlayers}
         playerTeamMap={playerTeamMap}
-        displayNameByProfileId={displayNameByProfileId}
+        displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
       />
     </div>
   )
@@ -418,23 +418,29 @@ function MembersBlock({
 function MemberChip({
   teamId,
   member,
-  displayNameByProfileId,
+  displayNameByTournamentPlayerId,
 }: {
   teamId: number
   member: TeamMember
-  displayNameByProfileId: DisplayNameMap
+  displayNameByTournamentPlayerId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const captainIdempotencyKey = useIdempotencyKey()
-  const name = displayNameByProfileId.get(member.profileId) ?? member.alias
+  // Resolve the chip name by the stable tournamentPlayerId: display-name
+  // override, else the member's ladder alias, else the id (alias is null for an
+  // unlinked member).
+  const name =
+    displayNameByTournamentPlayerId.get(member.tournamentPlayerId) ??
+    member.alias ??
+    String(member.tournamentPlayerId)
 
   const invalidateTeams = () =>
     void queryClient.invalidateQueries({ queryKey: teamsQueryKey() })
 
   const mutation =
-    useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete(
+    useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete(
       {
         request: { headers: { "Idempotency-Key": idempotencyKey.current } },
         mutation: {
@@ -491,7 +497,7 @@ function MemberChip({
       setCaptain.mutate({
         tournamentSlug: activeTournament.apiTournamentSlug,
         teamId,
-        data: { profile_id: member.profileId },
+        data: { tournament_player_id: member.tournamentPlayerId },
       })
     }
   }
@@ -557,7 +563,7 @@ function MemberChip({
           mutation.mutate({
             tournamentSlug: activeTournament.apiTournamentSlug,
             teamId,
-            profileId: member.profileId,
+            tournamentPlayerId: member.tournamentPlayerId,
           })
         }
       />
@@ -590,13 +596,13 @@ function AddMemberForm({
   members,
   allPlayers,
   playerTeamMap,
-  displayNameByProfileId,
+  displayNameByTournamentPlayerId,
 }: {
   teamId: number
   members: TeamMember[]
   allPlayers: PolledPlayer[]
   playerTeamMap: PlayerTeamMap
-  displayNameByProfileId: DisplayNameMap
+  displayNameByTournamentPlayerId: DisplayNameMap
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
@@ -604,7 +610,7 @@ function AddMemberForm({
   const removeIdempotencyKey = useIdempotencyKey()
   const [selectedId, setSelectedId] = useState<string>("")
   const [pendingMove, setPendingMove] = useState<{
-    profileId: number
+    tournamentPlayerId: number
     name: string
     fromTeamId: number
     fromTeamName: string
@@ -629,7 +635,7 @@ function AddMemberForm({
   // for the whole move, so the UI sees the consistent post-move state in
   // one render rather than briefly seeing the player on neither team.
   const removeMutation =
-    useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersProfileIdDelete(
+    useRemoveTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersTournamentPlayerIdDelete(
       {
         request: {
           headers: { "Idempotency-Key": removeIdempotencyKey.current },
@@ -642,31 +648,36 @@ function AddMemberForm({
   // the user can't pick a no-op. Players on *other* teams stay in the
   // list with their current team noted; picking them triggers the
   // move-confirm dialog.
-  const memberIds = useMemo(
-    () => new Set(members.map((m) => m.profileId)),
+  const memberTournamentPlayerIds = useMemo(
+    () => new Set(members.map((m) => m.tournamentPlayerId)),
     [members]
   )
-  const options = allPlayers.filter((p) => !memberIds.has(p.profile_id))
+  const options = allPlayers.filter(
+    (p) => !memberTournamentPlayerIds.has(p.tournament_player_id)
+  )
 
-  const submitAdd = (profileId: number) => {
+  const submitAdd = (tournamentPlayerId: number) => {
     addMutation.mutate({
       tournamentSlug: activeTournament.apiTournamentSlug,
       teamId,
-      data: { profile_id: profileId },
+      data: { tournament_player_id: tournamentPlayerId },
     })
   }
 
-  const submitMove = (move: { profileId: number; fromTeamId: number }) => {
+  const submitMove = (move: {
+    tournamentPlayerId: number
+    fromTeamId: number
+  }) => {
     removeMutation.mutate(
       {
         tournamentSlug: activeTournament.apiTournamentSlug,
         teamId: move.fromTeamId,
-        profileId: move.profileId,
+        tournamentPlayerId: move.tournamentPlayerId,
       },
       {
         onSuccess: () => {
           removeIdempotencyKey.reset()
-          submitAdd(move.profileId)
+          submitAdd(move.tournamentPlayerId)
         },
       }
     )
@@ -675,22 +686,24 @@ function AddMemberForm({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!selectedId) return
-    const profileId = Number(selectedId)
-    const existing = playerTeamMap.get(profileId)
+    const tournamentPlayerId = Number(selectedId)
+    const existing = playerTeamMap.get(tournamentPlayerId)
     if (existing && existing.teamId !== teamId) {
-      const player = allPlayers.find((p) => p.profile_id === profileId)
+      const player = allPlayers.find(
+        (p) => p.tournament_player_id === tournamentPlayerId
+      )
       setPendingMove({
-        profileId,
+        tournamentPlayerId,
         name:
-          displayNameByProfileId.get(profileId) ??
+          displayNameByTournamentPlayerId.get(tournamentPlayerId) ??
           player?.alias ??
-          String(profileId),
+          String(tournamentPlayerId),
         fromTeamId: existing.teamId,
         fromTeamName: existing.teamName,
       })
       return
     }
-    submitAdd(profileId)
+    submitAdd(tournamentPlayerId)
   }
 
   return (
@@ -720,13 +733,15 @@ function AddMemberForm({
             </SelectTrigger>
             <SelectContent>
               {options.map((player) => {
-                const existing = playerTeamMap.get(player.profile_id)
+                const existing = playerTeamMap.get(player.tournament_player_id)
                 const optionName =
-                  displayNameByProfileId.get(player.profile_id) ?? player.alias
+                  displayNameByTournamentPlayerId.get(
+                    player.tournament_player_id
+                  ) ?? player.alias
                 return (
                   <SelectItem
-                    key={player.profile_id}
-                    value={String(player.profile_id)}
+                    key={player.tournament_player_id}
+                    value={String(player.tournament_player_id)}
                   >
                     <span>{optionName}</span>
                     {existing ? (
@@ -785,7 +800,7 @@ function AddMemberForm({
               onClick={() => {
                 if (pendingMove)
                   submitMove({
-                    profileId: pendingMove.profileId,
+                    tournamentPlayerId: pendingMove.tournamentPlayerId,
                     fromTeamId: pendingMove.fromTeamId,
                   })
               }}

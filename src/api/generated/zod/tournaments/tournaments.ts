@@ -181,6 +181,7 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetParams = zod.obj
 export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.object({
   "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "items": zod.array(zod.object({
+  "tournament_player_id": zod.number(),
   "profile_id": zod.union([zod.number(),zod.null()]),
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),
@@ -226,8 +227,10 @@ tournament's leaderboard: a list of ``(completed_at, rating)`` points
 oldest-first, where ``rating`` is the post-match value. The consumer
 plots rating against ``completed_at`` for a by-date view, or against
 point index for a by-games-played view. Players with no such history
-are omitted, and points reach back only as far as the poller's match
-record — not a player's whole career.
+are omitted. Points are bounded by the tournament's date window
+(``[start_date, grand_finals_date]``; a null bound is open), mirroring
+``tournament_record`` — so the chart reflects in-event rating movement,
+not a player's whole tracked history.
  * @summary Get Progression
  */
 export const GetProgressionV1TournamentsTournamentSlugProgressionGetParams = zod.object({
@@ -251,12 +254,14 @@ export const GetProgressionV1TournamentsTournamentSlugProgressionGetResponse = z
 
 A team's combined rating is the sum of its members' peak (lifetime
 ``max_rating``) ratings on the tournament's leaderboard; the average
-is that sum over the count of members with a non-null peak. Members
-without a rating row on that leaderboard are omitted; a member whose
-rating row has no recorded peak is listed under ``members`` but
-excluded from the aggregate (and the average's denominator). Teams
-are optional — a tournament with none returns an empty list. Sorted
-by combined sum desc.
+is that sum over the count of members with a non-null peak. Every
+``team_members`` row is returned regardless of whether the poller
+has rated the member yet — a linked-but-unrated member (no
+``PlayerRating`` row on the leaderboard, or no ``Player`` row at all
+if the poller hasn't picked them up) is listed under ``members``
+with null rating fields and excluded from the aggregate (and the
+average's denominator). Teams are optional — a tournament with none
+returns an empty list. Sorted by combined sum desc.
  * @summary Get Team Standings
  */
 export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetParams = zod.object({
@@ -273,15 +278,16 @@ export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetRespons
   "combined_rating_sum": zod.number(),
   "combined_rating_average": zod.number(),
   "members": zod.array(zod.object({
-  "profile_id": zod.number(),
-  "alias": zod.string(),
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.union([zod.number(),zod.null()]),
+  "alias": zod.union([zod.string(),zod.null()]),
   "country": zod.union([zod.string(),zod.null()]),
-  "current_rating": zod.number(),
+  "current_rating": zod.union([zod.number(),zod.null()]),
   "max_rating": zod.union([zod.number(),zod.null()]),
   "in_match": zod.boolean(),
   "live_match_id": zod.union([zod.number(),zod.null()]),
   "is_captain": zod.boolean()
 }).describe('One member of a team, with their ratings + live-match status.\n\nShape parallels the per-player ``StandingRow`` fields the web app\nalready renders on the standings tab: ``country`` for the flag pill,\n``in_match`` \/ ``live_match_id`` for the live badge. Same source as\n``StandingRow`` (see ``get_team_standings`` for the query), so a\nmember\'s status here matches their standings row in the same poll.'))
-}).describe('One row in a tournament\'s team standings.\n\n``combined_rating_sum`` is the sum of the members\' peak (lifetime\n``max_rating``) ratings on the tournament\'s leaderboard;\n``combined_rating_average`` is that sum over the count of members\nwith a non-null peak. Only members with a rating on that leaderboard\nare counted — a member the poller hasn\'t rated yet is omitted. A\nmember whose ``max_rating`` is null is still listed under\n``members`` but excluded from the combined sum and average\'s\ndenominator.'))
+}).describe('One row in a tournament\'s team standings.\n\n``combined_rating_sum`` is the sum of the members\' peak (lifetime\n``max_rating``) ratings on the tournament\'s leaderboard;\n``combined_rating_average`` is that sum over the count of members\nwith a non-null peak. Every ``team_members`` row is listed under\n``members`` regardless of rating status — a linked-but-unrated\nmember (no ``PlayerRating`` on the leaderboard yet) is included with\nnull rating fields but excluded from the combined sum and the\naverage\'s denominator (#166).'))
 })
 

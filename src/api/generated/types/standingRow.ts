@@ -35,6 +35,7 @@ work identically), and every other field is null/zero. ``updated_at``
 is null too — no polled refresh signal applies.
  */
 export interface StandingRow {
+  tournament_player_id: number;
   profile_id: number | null;
   alias: string;
   country: string | null;

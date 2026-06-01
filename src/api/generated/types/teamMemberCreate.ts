@@ -11,9 +11,14 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  */
 
 /**
- * Request body for adding a profile to a team.
+ * Request body for adding a roster row to a team.
+
+Keys on the roster row's surrogate ``id`` (``tournament_player_id``)
+rather than the polled ``profile_id`` so a placeholder entrant — a
+roster row whose ``profile_id`` hasn't been minted yet — can be
+teamed (#167).
  */
 export interface TeamMemberCreate {
   /** @exclusiveMinimum 0 */
-  profile_id: number;
+  tournament_player_id: number;
 }

@@ -6,11 +6,20 @@
  * teams tab match their row on the players tab in the same poll.
  */
 export interface TeamMember {
-  profileId: number
-  alias: string
+  /**
+   * Stable roster identity (#184): non-null even for placeholder / unlinked
+   * members (where `profileId` is null), so team-member operations key on it
+   * and it backs the React list key.
+   */
+  tournamentPlayerId: number
+  /** AoE2 profile id, or `null` for a placeholder / unlinked roster member. */
+  profileId: number | null
+  /** Raw ladder alias, or `null` for an unlinked member with no ladder name. */
+  alias: string | null
   /** ISO 3166-1 alpha-2 country code (lowercase), or null if unknown. */
   country: string | null
-  currentRating: number
+  /** Current tournament-leaderboard rating, or `null` for an unrated member. */
+  currentRating: number | null
   /**
    * Lifetime ladder peak (`max_rating`) — the per-player figure the team's
    * combined-peak sum/average is built from (API #158), and the value shown on

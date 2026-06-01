@@ -22,6 +22,7 @@ only accepts a ``profile_id``, so placeholder rows aren't addressable
 here (they have no detail to show).
  */
 export interface PlayerDetail {
+  tournament_player_id: number;
   profile_id: number | null;
   alias: string;
   country: string | null;
