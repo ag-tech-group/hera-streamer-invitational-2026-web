@@ -24,6 +24,10 @@ function toTeamStandingsRow(dto: TeamStandingRow): TeamStandingsRow {
       alias: member.alias,
       country: member.country,
       currentRating: member.current_rating,
+      // Lifetime ladder peak — the per-player value behind the team's
+      // combined-peak sum/average (API #158). Null for a brand-new account
+      // with no recorded peak → the pill renders `—`.
+      peakRating: member.max_rating,
       inMatch: member.in_match,
       liveMatchId: member.live_match_id,
       isCaptain: member.is_captain,

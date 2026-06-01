@@ -11,7 +11,7 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  */
 
 /**
- * One member of a team, with their current rating + live-match status.
+ * One member of a team, with their ratings + live-match status.
 
 Shape parallels the per-player ``StandingRow`` fields the web app
 already renders on the standings tab: ``country`` for the flag pill,
@@ -24,6 +24,7 @@ export interface TeamMemberRead {
   alias: string;
   country: string | null;
   current_rating: number;
+  max_rating: number | null;
   in_match: boolean;
   live_match_id: number | null;
   is_captain: boolean;

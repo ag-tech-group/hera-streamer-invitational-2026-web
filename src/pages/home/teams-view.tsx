@@ -262,9 +262,10 @@ function TeamPanelSkeleton({
 /**
  * Team identity + headline stats at the top of a panel.
  *
- * Combined-rating **sum** is the headline (#242) — it's the metric teams are
- * actually ranked by, so the big number matches the order and the rank badge.
- * Roster size is noted beside it.
+ * Combined **peak** sum is the headline (#242, peak-based since API #158) —
+ * it's the metric teams are actually ranked by, so the big number matches the
+ * order and the rank badge, and the per-player peaks in the pills below sum to
+ * it. Roster size is noted beside it.
  */
 function TeamHeader({ team, rank }: { team: TeamStandingsRow; rank: number }) {
   const { t } = useTranslation()
@@ -399,8 +400,10 @@ function PlayerRoster({
 
 /**
  * One player on a team — a horizontal pill carrying their identity,
- * current rating, and (when applicable) a pulsing "in a live match"
- * indicator. Pulls colour from the panel-level `--team-color` vars via
+ * peak rating, and (when applicable) a pulsing "in a live match"
+ * indicator. The peak (not current) rating is shown because it's what the
+ * team's combined headline sums (API #158), so the pills add up to the
+ * number above them. Pulls colour from the panel-level `--team-color` vars via
  * inline styles, so the pill never hard-codes blue or red.
  *
  * Country flag falls back to a globe icon when the country is missing
@@ -437,7 +440,7 @@ function PlayerPill({
       {member.isCaptain && <CaptainBadge />}
       {member.inMatch && <LiveDot />}
       <span className="text-muted-foreground shrink-0 text-sm font-semibold tabular-nums">
-        {member.currentRating}
+        {member.peakRating ?? "—"}
       </span>
     </div>
   )

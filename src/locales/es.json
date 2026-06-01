@@ -61,8 +61,8 @@
     "title": "Estadísticas",
     "subtitle": "Progreso de puntuación a lo largo del torneo.",
     "chartTitle": "Puntuación a lo largo del tiempo",
-    "teamEloTitle": "Elo combinado por equipo",
-    "teamAvgEloTitle": "Elo promedio por equipo",
+    "teamEloTitle": "Elo máximo combinado por equipo",
+    "teamAvgEloTitle": "Elo máximo promedio por equipo",
     "peakRatingTitle": "Puntuación máxima",
     "noData": "Nada que mostrar aún.",
     "ratingAxis": "Puntuación",
@@ -115,7 +115,7 @@
     "bioLabel": "Sobre {{name}}"
   },
   "teams": {
-    "sum": "suma",
+    "sum": "suma máx.",
     "playersCount_one": "{{count}} jugador",
     "playersCount_other": "{{count}} jugadores",
     "noMembers": "Aún no hay integrantes con clasificación.",

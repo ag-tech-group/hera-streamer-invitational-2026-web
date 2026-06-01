@@ -20,8 +20,9 @@ function teamRow(
 
 /**
  * Builds a `TeamMember` with sensible inert defaults — country `null`,
- * not in a match — so each test only spells out the fields it cares
- * about.
+ * not in a match, no recorded peak — so each test only spells out the
+ * fields it cares about. `peakRating` defaults to `null` (pill shows `—`);
+ * tests that assert the displayed rating set it explicitly.
  */
 function member(
   overrides: Partial<TeamMember> &
@@ -32,6 +33,7 @@ function member(
     inMatch: false,
     liveMatchId: null,
     isCaptain: false,
+    peakRating: null,
     ...overrides,
   }
 }
@@ -44,8 +46,18 @@ const rows: TeamStandingsRow[] = [
     combinedRatingSum: 5400,
     combinedRatingAverage: 2700,
     members: [
-      member({ profileId: 10, alias: "PlayerX", currentRating: 2720 }),
-      member({ profileId: 11, alias: "PlayerY", currentRating: 2680 }),
+      member({
+        profileId: 10,
+        alias: "PlayerX",
+        currentRating: 2720,
+        peakRating: 2800,
+      }),
+      member({
+        profileId: 11,
+        alias: "PlayerY",
+        currentRating: 2680,
+        peakRating: 2750,
+      }),
     ],
   }),
   teamRow({
@@ -55,8 +67,18 @@ const rows: TeamStandingsRow[] = [
     combinedRatingSum: 5100,
     combinedRatingAverage: 2550,
     members: [
-      member({ profileId: 20, alias: "PlayerZ", currentRating: 2610 }),
-      member({ profileId: 21, alias: "PlayerQ", currentRating: 2490 }),
+      member({
+        profileId: 20,
+        alias: "PlayerZ",
+        currentRating: 2610,
+        peakRating: 2700,
+      }),
+      member({
+        profileId: 21,
+        alias: "PlayerQ",
+        currentRating: 2490,
+        peakRating: 2600,
+      }),
     ],
   }),
 ]
@@ -92,14 +114,44 @@ describe("TeamsView", () => {
     ).toHaveTextContent("#2")
   })
 
-  it("renders every roster member with their current rating", () => {
+  it("renders every roster member with their peak rating", () => {
+    // The pill shows peak, not current (API #158) — it's what the headline
+    // sums — so the asserted numbers are the members' peaks, not their current
+    // ratings (which are also set on the fixture but never rendered).
     render(<TeamsView rows={rows} displayNameByProfileId={new Map()} />)
     const rosters = screen.getAllByRole("list", { name: /team roster/i })
     expect(rosters).toHaveLength(2)
     expect(within(rosters[0]).getByText("PlayerX")).toBeInTheDocument()
-    expect(within(rosters[0]).getByText("2720")).toBeInTheDocument()
+    expect(within(rosters[0]).getByText("2800")).toBeInTheDocument()
     expect(within(rosters[1]).getByText("PlayerZ")).toBeInTheDocument()
-    expect(within(rosters[1]).getByText("2610")).toBeInTheDocument()
+    expect(within(rosters[1]).getByText("2700")).toBeInTheDocument()
+  })
+
+  it("renders an em dash for a member with no recorded peak", () => {
+    // A brand-new account can have a null peak; the pill shows `—` rather than
+    // a missing/zero number (mirrors the standings Peak column treatment).
+    render(
+      <TeamsView
+        displayNameByProfileId={new Map()}
+        rows={[
+          teamRow({
+            teamId: 1,
+            name: "Fresh",
+            members: [
+              member({
+                profileId: 70,
+                alias: "Rookie",
+                currentRating: 1200,
+                peakRating: null,
+              }),
+            ],
+          }),
+          teamRow({ teamId: 2, name: "Other", members: [] }),
+        ]}
+      />
+    )
+    const pill = screen.getByText("Rookie").closest("div")
+    expect(within(pill!).getByText("—")).toBeInTheDocument()
   })
 
   it("shows the host display-name override when set, alias as fallback (#242)", () => {
