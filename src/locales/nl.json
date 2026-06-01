@@ -1,0 +1,333 @@
+{
+  "language": {
+    "label": "Taal",
+    "en": "English",
+    "es": "Español",
+    "ar": "العربية",
+    "nl": "Nederlands",
+    "de": "Deutsch"
+  },
+  "theme": {
+    "label": "Thema",
+    "light": "Licht",
+    "dark": "Donker",
+    "auto": "Automatisch"
+  },
+  "nav": {
+    "brandAriaLabel": "Live klassement",
+    "signIn": "Inloggen",
+    "signOut": "Uitloggen",
+    "profile": "Profiel",
+    "admin": "Beheer",
+    "accountMenu": "Accountmenu"
+  },
+  "home": {
+    "title": "Live klassement",
+    "subtitle": "Live ratings, teamklassement en toernooiverloop — <product>Age of Empires 2: Definitive Edition</product>.",
+    "tabs": {
+      "players": "Spelers",
+      "teams": "Teams",
+      "stats": "Statistieken"
+    },
+    "viewTabsAria": "Klassementweergave",
+    "lastUpdated": "Bijgewerkt {{time}}",
+    "ladderRace": {
+      "begins": "Ladderrace <accent>begint</accent>",
+      "ends": "Ladderrace <accent>eindigt</accent>",
+      "active": {
+        "title": "Ladderrace <accent>actief</accent>",
+        "body": "De spelers zijn verdeeld over 4 teams en strijden om de hoogst mogelijke gecombineerde elo te behalen. Voor de eindstand tellen alleen de piek-elo's mee."
+      }
+    },
+    "noStandings": {
+      "title": "Nog geen klassement",
+      "body": "Spelers verschijnen hier zodra het toernooiklassement is gevuld."
+    },
+    "noTeams": {
+      "title": "Nog geen teams",
+      "body": "Teams verschijnen hier zodra ze voor dit toernooi zijn ingesteld."
+    },
+    "loadErrorStandings": {
+      "title": "Klassement laden mislukt",
+      "body": "Er ging iets mis bij het ophalen van het klassement."
+    },
+    "loadErrorTeams": {
+      "title": "Teams laden mislukt",
+      "body": "Er ging iets mis bij het ophalen van het teamklassement."
+    },
+    "prizePool": {
+      "label": "Prijzenpot",
+      "sponsoredBy": "Gesponsord door "
+    }
+  },
+  "stats": {
+    "title": "Statistieken",
+    "subtitle": "Ratingverloop gedurende het toernooi.",
+    "chartTitle": "Rating in de tijd",
+    "teamEloTitle": "Gecombineerde piek-elo van team",
+    "teamAvgEloTitle": "Gemiddelde piek-elo van team",
+    "peakRatingTitle": "Piekrating",
+    "noData": "Nog niets te tonen.",
+    "ratingAxis": "Rating",
+    "empty": "Nog geen voltooide wedstrijden — het verloop verschijnt zodra spelers ranked games beginnen af te ronden.",
+    "error": "Statistieken laden mislukt.",
+    "retry": "Opnieuw proberen",
+    "cards": {
+      "biggestClimber": "Grootste stijger",
+      "highestPeak": "Hoogste piek",
+      "mostMatches": "Meeste wedstrijden",
+      "winPct": "Beste winstpercentage"
+    }
+  },
+  "standings": {
+    "caption": "Live toernooiklassement",
+    "captionLoading": "Klassement laden",
+    "headers": {
+      "position": "Positie",
+      "team": "Team",
+      "player": "Speler",
+      "rating": "Rating",
+      "peak": "Piek",
+      "streak": "Reeks",
+      "games": "Duels",
+      "winPct": "Winst %",
+      "recent": "Recent",
+      "activity": "Activiteit",
+      "watch": "Kijken"
+    },
+    "winPctBreakdown": {
+      "title": "Winstpercentage",
+      "wins": "{{count}} W",
+      "losses": "{{count}} V",
+      "aria": "{{wins}} overwinningen, {{losses}} nederlagen"
+    },
+    "live": "Live",
+    "liveAriaLabel": "In een live wedstrijd",
+    "active": "Actief",
+    "idle": "Inactief",
+    "recentAriaLabel": "Recente resultaten, meest recente eerst: {{results}}",
+    "win": "Winst",
+    "loss": "Verlies",
+    "viewProfile": "Bekijk het profiel van {{name}}",
+    "watchOn": {
+      "twitch": "Kijk op Twitch",
+      "youtube": "Kijk op YouTube",
+      "other": "Stream bekijken"
+    },
+    "streamingLive": "Streamt live",
+    "bioLabel": "Over {{name}}"
+  },
+  "teams": {
+    "sum": "pieksom",
+    "playersCount_one": "{{count}} speler",
+    "playersCount_other": "{{count}} spelers",
+    "noMembers": "Nog geen leden met een rating.",
+    "rosterAriaLabel": "Teamsamenstelling",
+    "versus": "VS",
+    "rankLabel": "Positie",
+    "rankAria": "Positie #{{rank}} op gecombineerde rating",
+    "captain": "Aanvoerder"
+  },
+  "admin": {
+    "title": "Beheer",
+    "backToStandings": "Terug naar klassement",
+    "sections": {
+      "tournamentDetails": "Toernooigegevens",
+      "owners": "Eigenaren",
+      "players": "Spelers",
+      "teams": "Teams"
+    },
+    "tournament": {
+      "nameLabel": "Naam",
+      "startDate": "Startdatum",
+      "grandFinalsDate": "Datum grote finale",
+      "save": "Wijzigingen opslaan",
+      "saving": "Opslaan…",
+      "successToast": "Toernooi bijgewerkt.",
+      "loadError": "Toernooigegevens laden mislukt.",
+      "prizePoolLabel": "Prijzenpot",
+      "hostStreamUrls": {
+        "label": "Stream-URL's van de host",
+        "help": "Kanaal-URL's (Twitch/YouTube) waarmee wordt gedetecteerd wanneer de host live is en de promokaart oplicht. Maximaal {{max}}.",
+        "add": "URL toevoegen",
+        "rowPlaceholder": "https://twitch.tv/channel",
+        "rowAria": "Stream-URL van de host {{index}}",
+        "removeAria": "Stream-URL van de host {{index}} verwijderen",
+        "errorTooLong": "URL mag maximaal {{max}} tekens bevatten.",
+        "errorTooMany": "Maximaal {{max}} URL's."
+      }
+    },
+    "owners": {
+      "grantLabel": "Eigenaarschap verlenen",
+      "addPlaceholder": "Zoek op naam of e-mail",
+      "addAction": "Verlenen",
+      "addingAction": "Verlenen…",
+      "grantedOn": "Verleend {{date}}",
+      "removeAria": "{{name}} intrekken",
+      "removeTitle": "Eigenaarschap intrekken?",
+      "removeDescription": "{{name}} verliest de beheerderstoegang tot dit toernooi.",
+      "removeConfirm": "Intrekken",
+      "soleOwnerHint": "Je bent de enige eigenaar — verleen eerst eigenaarschap aan een andere gebruiker voordat je jezelf verwijdert.",
+      "grantSuccess": "Eigenaar verleend.",
+      "revokeSuccess": "Eigenaar ingetrokken.",
+      "noOwners": "Nog geen eigenaren.",
+      "loadError": "Eigenaren laden mislukt — vereist inloggen."
+    },
+    "players": {
+      "addLabel": "Speler toevoegen",
+      "addNameLabel": "Weergavenaam",
+      "addNamePlaceholder": "Streamer-handle (bijv. uThermal)",
+      "addProfileIdLabel": "Profiel-ID",
+      "addProfileIdPlaceholder": "aoe2 profile_id — optioneel",
+      "addAction": "Toevoegen",
+      "addingAction": "Toevoegen…",
+      "addSuccess": "Speler toegevoegd.",
+      "addErrorProfileId": "Profiel-ID moet een positief getal zijn.",
+      "addErrorNumericName": "Dit lijkt op een profiel-ID — vul het in bij het veld Profiel-ID.",
+      "removeAria": "{{name}} verwijderen",
+      "removeTitle": "{{name}} verwijderen?",
+      "removeDescription": "Hiermee wordt de speler uit de toernooiselectie verwijderd. Hun wedstrijdgeschiedenis en ratings blijven bovenstrooms intact.",
+      "removeConfirm": "Verwijderen",
+      "removeSuccess": "Speler verwijderd.",
+      "noPlayers": "Nog geen spelers.",
+      "loadError": "Selectie laden mislukt.",
+      "editAria": "{{name}} bewerken",
+      "linkedAccount": "Gekoppeld ladderaccount",
+      "notYetRated": "Nog geen rating (0 ranked games)",
+      "presentation": {
+        "title": "Weergave-overrides",
+        "profileId": "Profiel-ID",
+        "profileIdPlaceholder": "bijv. 1819870",
+        "displayName": "Weergavenaam",
+        "displayNamePlaceholder": "Streamer-handle (bijv. uThermal)",
+        "flag": "Vlag",
+        "flagPlaceholder": "Selecteer een land",
+        "flagSearch": "Zoek landen",
+        "flagClear": "Geen vlag",
+        "flagNoResults": "Geen landen gevonden",
+        "streamUrls": "Stream-URL's",
+        "streamUrlPlaceholder": "https://twitch.tv/handle",
+        "addStreamUrl": "Stream-URL toevoegen",
+        "removeStreamUrlAria": "Een stream-URL voor {{name}} verwijderen",
+        "invalidUrl": "Voer een geldige http(s)-URL in",
+        "bio": "Bio",
+        "bioPlaceholder": "Korte achtergrond die aan kijkers wordt getoond — bijv. 2× kampioen, speelt agressieve Scouts.",
+        "profileUrl": "Profiel-URL",
+        "profileUrlPlaceholder": "https://www.aoe2insights.com/user/12449433/",
+        "cancel": "Annuleren",
+        "save": "Opslaan",
+        "saving": "Opslaan…",
+        "saveSuccess": "Speler bijgewerkt."
+      },
+      "profileHint": "Op de <link>aoe2insights</link>-pagina van een speler is de <code>profile_id</code> het <code>Game Id</code> (het getal in de <code>/user/relic/…</code>-link) — <strong>niet</strong> het getal in de pagina-URL, dat voor nieuwere accounts anders is."
+    },
+    "teams": {
+      "createLabel": "Team aanmaken",
+      "initialsPlaceholder": "Initialen",
+      "namePlaceholder": "Teamnaam",
+      "createAction": "Aanmaken",
+      "creatingAction": "Aanmaken…",
+      "save": "Opslaan",
+      "saving": "Opslaan…",
+      "cancel": "Annuleren",
+      "editAria": "{{name}} bewerken",
+      "deleteAria": "{{name}} verwijderen",
+      "deleteTitle": "Team \"{{name}}\" verwijderen?",
+      "deleteDescription": "Het team en al zijn leden worden verwijderd. De spelers zelf blijven in de toernooiselectie.",
+      "deleteConfirm": "Team verwijderen",
+      "addMember": "Lid toevoegen",
+      "addMemberPlaceholder": "Kies een speler",
+      "addMemberNone": "Geen spelers beschikbaar",
+      "addMemberAction": "Toevoegen",
+      "addMemberAdding": "Toevoegen…",
+      "memberOnTeam": "(in {{name}})",
+      "noMembers": "Nog geen leden.",
+      "removeMemberAria": "{{name}} uit team verwijderen",
+      "removeMemberTitle": "{{name}} uit dit team verwijderen?",
+      "removeMemberDescription": "De speler blijft in de toernooiselectie.",
+      "removeMemberConfirm": "Verwijderen",
+      "moveTitle": "Speler naar dit team verplaatsen?",
+      "moveDescription": "{{name}} zit momenteel in {{from}}.",
+      "moveConfirm": "Speler verplaatsen",
+      "noTeams": "Nog geen teams.",
+      "loadError": "Teams laden mislukt.",
+      "createSuccess": "Team aangemaakt.",
+      "updateSuccess": "Team bijgewerkt.",
+      "deleteSuccess": "Team verwijderd.",
+      "setCaptain": "Aanvoerder maken",
+      "clearCaptain": "Aanvoerder wissen",
+      "setCaptainAria": "{{name}} aanvoerder maken",
+      "clearCaptainAria": "{{name}} als aanvoerder wissen",
+      "captainSetSuccess": "{{name}} is nu aanvoerder.",
+      "captainClearSuccess": "Aanvoerder gewist."
+    }
+  },
+  "common": {
+    "cancel": "Annuleren",
+    "confirm": "Bevestigen",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "loading": "Laden…",
+    "error": "Fout",
+    "tryAgain": "Opnieuw proberen",
+    "reference": "Referentie: {{id}}",
+    "goHome": "Naar startpagina"
+  },
+  "userSearch": {
+    "placeholder": "Zoek op naam of e-mail",
+    "clear": "Geselecteerde gebruiker wissen",
+    "noMatches": "Geen gebruikers komen overeen met die zoekopdracht.",
+    "searching": "Zoeken…"
+  },
+  "countdown": {
+    "days": "dagen",
+    "hours": "uur",
+    "minutes": "min",
+    "seconds": "sec"
+  },
+  "hostLinks": {
+    "defaultLabel": "Gehost door",
+    "live": "Live",
+    "streamingLive": "Streamt live"
+  },
+  "notFound": {
+    "eyebrow": "Pagina niet gevonden",
+    "code": "404",
+    "body": "Sorry, we konden de pagina die je zoekt niet vinden.",
+    "homeAction": "Terug naar startpagina"
+  },
+  "errorBoundary": {
+    "eyebrow": "Er ging iets mis",
+    "heading": "Fout",
+    "body": "Er is een onverwachte fout opgetreden. Probeer het opnieuw.",
+    "retry": "Opnieuw proberen",
+    "home": "Naar startpagina"
+  },
+  "errors": {
+    "default": "Er is een onverwachte fout opgetreden.",
+    "400": "Ongeldige aanvraag. Controleer je invoer.",
+    "401": "Je sessie is verlopen. Log opnieuw in.",
+    "403": "Je hebt geen toestemming om dat te doen.",
+    "404": "De gevraagde bron is niet gevonden.",
+    "409": "Dit conflicteert met een bestaande bron.",
+    "422": "Controleer je invoer en probeer het opnieuw.",
+    "429": "Te veel aanvragen. Wacht even.",
+    "500": "Er ging iets mis aan onze kant. Probeer het later opnieuw.",
+    "idempotencyKeyReused": "Er is iets veranderd — probeer het opnieuw.",
+    "tournamentNotFound": "Toernooi niet gevonden.",
+    "sessionExpired": "Je sessie is verlopen — log opnieuw in om door te gaan.",
+    "signInAction": "Inloggen"
+  },
+  "footer": {
+    "criticalbitProjectPrefix": "Een project van ",
+    "criticalbitProjectLink": "criticalbit.gg",
+    "criticalbitProjectSuffix": ".",
+    "microsoftDisclaimerPrefix": "Age of Empires II © Microsoft Corporation. Deze site is gemaakt onder de ",
+    "microsoftDisclaimerLink": "Game Content Usage Rules",
+    "microsoftDisclaimerSuffix": " van Microsoft met materiaal uit Age of Empires II en wordt niet onderschreven door of is niet gelieerd aan Microsoft.",
+    "legalNavLabel": "Juridisch",
+    "privacyLink": "Privacy",
+    "termsLink": "Voorwaarden",
+    "copyright": "© {{year}} AG Technology Group LLC. Alle rechten voorbehouden."
+  }
+}

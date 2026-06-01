@@ -3,12 +3,14 @@ import LanguageDetector from "i18next-browser-languagedetector"
 import { initReactI18next } from "react-i18next"
 
 import ar from "@/locales/ar.json"
+import de from "@/locales/de.json"
 import en from "@/locales/en.json"
 import es from "@/locales/es.json"
+import nl from "@/locales/nl.json"
 
 /**
- * i18n setup for the SPA. English (default), Spanish, and Arabic
- * (machine-translated for the 2026 invitational — community polish
+ * i18n setup for the SPA. English (default), Spanish, Arabic, Dutch, and
+ * German (machine-translated for the 2026 invitational — community polish
  * welcome later, see #57). Arabic is RTL: the `<html dir>` is synced
  * from i18next's `i18n.dir()` below. Language is detected from
  * localStorage first, then the browser's navigator.language; the
@@ -22,7 +24,7 @@ import es from "@/locales/es.json"
  */
 export const LANGUAGE_STORAGE_KEY = "app_language"
 
-export const SUPPORTED_LANGUAGES = ["en", "es", "ar"] as const
+export const SUPPORTED_LANGUAGES = ["en", "es", "ar", "nl", "de"] as const
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 
 void i18n
@@ -33,6 +35,8 @@ void i18n
       en: { translation: en },
       es: { translation: es },
       ar: { translation: ar },
+      nl: { translation: nl },
+      de: { translation: de },
     },
     fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGUAGES,
