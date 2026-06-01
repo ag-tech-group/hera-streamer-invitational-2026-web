@@ -79,19 +79,31 @@ export interface StandingsRow {
    */
   currentRating: number | null
   /**
-   * Highest rating reached on the tournament leaderboard. `null` for the
-   * same unrated-member reason as `currentRating`.
+   * Peak rating reached **within the tournament window** (#238 →
+   * `tournament_record.peak_rating`), not the lifetime ladder peak. `null`
+   * when the player has no in-window games yet, so the cell reads `—` until
+   * they play a tournament match rather than showing a misleading career peak.
    */
   maxRating: number | null
   wins: number
   losses: number
-  /** Current win/loss streak as reported by the upstream ladder. */
+  /**
+   * Current win/loss streak **within the tournament window** (#238 →
+   * `tournament_record.streak`): positive a win streak, negative a loss
+   * streak, 0 when no in-window games.
+   */
   streak: number
   /**
-   * Outcomes of the player's most recent completed matches, most-recent
-   * first, capped at 10 by the API. Empty when they have no completed match.
+   * Outcomes of the player's most recent **in-window** completed matches,
+   * most-recent first (#238 → `tournament_record.recent_results`). Empty when
+   * they have no completed tournament match.
    */
   recentResults: MatchResult[]
+  /**
+   * Win percentage (0–100, 1dp) over in-window games (#238 →
+   * `tournament_record.win_pct`), or `null` when they have no decided games.
+   */
+  winPct: number | null
   /** Matches the player has completed within the tournament's date window. */
   gamesPlayed: number
   /** Position on the leaderboard, or null if unranked. */
@@ -100,7 +112,11 @@ export interface StandingsRow {
   rankTotal: number | null
   /** Whether the player is in a live match right now. */
   inMatch: boolean
-  /** ISO-8601 timestamp of the player's most recent match, or null. */
+  /**
+   * ISO-8601 timestamp of the player's most recent **in-window** match (#238
+   * → `tournament_record.last_match_at`), or `null` when none. Backs the
+   * Activity "Active 1h" / "Idle 3d" badge.
+   */
   lastMatchAt: string | null
   /**
    * ISO-8601 timestamp of when this row was last refreshed upstream, or

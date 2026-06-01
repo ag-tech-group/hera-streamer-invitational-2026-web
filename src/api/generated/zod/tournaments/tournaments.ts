@@ -200,8 +200,12 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "games_played": zod.number(),
   "wins": zod.number(),
   "losses": zod.number(),
-  "streak": zod.number()
-}).describe('A player\'s win\/loss record within a tournament\'s date window.\n\nCounts only completed matches on the tournament\'s leaderboard between\nits ``start_date`` and ``grand_finals_date`` (a null bound is treated as open).\nDistinct from the lifetime-ladder ``wins`` \/ ``losses`` \/ ``streak``\non ``StandingRow``.'),
+  "streak": zod.number(),
+  "peak_rating": zod.union([zod.number(),zod.null()]),
+  "last_match_at": zod.union([zod.iso.datetime({}),zod.null()]),
+  "recent_results": zod.array(zod.enum(['win', 'loss'])),
+  "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp) over in-window games; null when none.')
+}).describe('A player\'s stats within a tournament\'s date window.\n\nCounts only completed matches on the tournament\'s leaderboard between\nits ``start_date`` and ``grand_finals_date`` (a null bound is treated as open).\nDistinct from the lifetime-ladder ``wins`` \/ ``losses`` \/ ``streak`` \/\n``max_rating`` \/ ``last_match_at`` \/ ``recent_results`` on ``StandingRow``;\nevery field here is in-window only.'),
   "rank": zod.union([zod.number(),zod.null()]),
   "rank_total": zod.union([zod.number(),zod.null()]),
   "in_match": zod.boolean(),
