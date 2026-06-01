@@ -85,7 +85,13 @@ const rows: TeamStandingsRow[] = [
 
 describe("TeamsView", () => {
   it("renders each team's identity and headline stats", () => {
-    render(<TeamsView rows={rows} displayNameByProfileId={new Map()} />)
+    render(
+      <TeamsView
+        rows={rows}
+        displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
+      />
+    )
     expect(
       screen.getByRole("heading", { name: "Team Alpha", level: 2 })
     ).toBeInTheDocument()
@@ -101,7 +107,11 @@ describe("TeamsView", () => {
     // Reverse the input so Team Bravo is ranked first — panels follow the
     // API rank order (#230), so Bravo's panel renders before Alpha's.
     render(
-      <TeamsView rows={[rows[1], rows[0]]} displayNameByProfileId={new Map()} />
+      <TeamsView
+        rows={[rows[1], rows[0]]}
+        displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
+      />
     )
     const headings = screen.getAllByRole("heading", { level: 2 })
     expect(headings[0]).toHaveTextContent("Team Bravo")
@@ -118,7 +128,13 @@ describe("TeamsView", () => {
     // The pill shows peak, not current (API #158) — it's what the headline
     // sums — so the asserted numbers are the members' peaks, not their current
     // ratings (which are also set on the fixture but never rendered).
-    render(<TeamsView rows={rows} displayNameByProfileId={new Map()} />)
+    render(
+      <TeamsView
+        rows={rows}
+        displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
+      />
+    )
     const rosters = screen.getAllByRole("list", { name: /team roster/i })
     expect(rosters).toHaveLength(2)
     expect(within(rosters[0]).getByText("PlayerX")).toBeInTheDocument()
@@ -133,6 +149,7 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -161,11 +178,28 @@ describe("TeamsView", () => {
       <TeamsView
         rows={rows}
         displayNameByProfileId={new Map([[10, "Day9TV"]])}
+        flagByProfileId={new Map()}
       />
     )
     expect(screen.getByText("Day9TV")).toBeInTheDocument()
     expect(screen.queryByText("PlayerX")).not.toBeInTheDocument()
     expect(screen.getByText("PlayerY")).toBeInTheDocument()
+  })
+
+  it("applies the host flag override on a team pill, passed down from standings", () => {
+    // The team-standings payload carries only the raw `country`, so the flag
+    // override (presentation.flag) is threaded down from the players standings
+    // like the display name. PlayerX (10) gets a Palestine override → the pill
+    // renders that flag, not their ladder country.
+    const { container } = render(
+      <TeamsView
+        rows={rows}
+        displayNameByProfileId={new Map()}
+        flagByProfileId={new Map([[10, "🇵🇸"]])}
+      />
+    )
+    // The override emoji decomposes to ISO "ps" → SVG flag-icons class.
+    expect(container.querySelector(".fi-ps")).not.toBeNull()
   })
 
   it("colours by creation order, pinned to team identity regardless of display order (#231)", () => {
@@ -174,7 +208,11 @@ describe("TeamsView", () => {
     // even though Bravo's panel now renders first. A live rank flip reorders
     // panels without recolouring them.
     render(
-      <TeamsView rows={[rows[1], rows[0]]} displayNameByProfileId={new Map()} />
+      <TeamsView
+        rows={[rows[1], rows[0]]}
+        displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
+      />
     )
     const alpha = screen
       .getByRole("heading", { name: "Team Alpha" })
@@ -192,6 +230,7 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
         rows={[
           teamRow({ teamId: 8, name: "Later Team" }),
           teamRow({ teamId: 3, name: "First Team" }),
@@ -208,6 +247,7 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
         rows={[
           teamRow({ teamId: 1, name: "Empty Team", members: [] }),
           teamRow({
@@ -231,6 +271,7 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -268,6 +309,7 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -302,6 +344,7 @@ describe("TeamsView", () => {
     const { container } = render(
       <TeamsView
         displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
@@ -343,7 +386,13 @@ describe("TeamsView", () => {
 
   it("falls back to a single-column layout when not a pair", () => {
     // Only one team — no coliseum, no VS pillar.
-    render(<TeamsView rows={[rows[0]]} displayNameByProfileId={new Map()} />)
+    render(
+      <TeamsView
+        rows={[rows[0]]}
+        displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
+      />
+    )
     expect(
       screen.queryByLabelText(/VS/i, { selector: "span" })
     ).not.toBeInTheDocument()
@@ -353,6 +402,7 @@ describe("TeamsView", () => {
     render(
       <TeamsView
         displayNameByProfileId={new Map()}
+        flagByProfileId={new Map()}
         rows={[
           teamRow({
             teamId: 1,
