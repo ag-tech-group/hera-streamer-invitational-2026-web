@@ -1,25 +1,38 @@
-# Keep dependencies patched on a steady cadence (#64, pre-launch security
-# audit). Dependabot reads pnpm-lock.yaml under the `npm` ecosystem. Minor and
-# patch bumps are grouped to cut PR noise; majors open individually so breaking
-# changes get their own review. CI (lint + tests + build with the bundle-size
-# check) gates every Dependabot PR like any other.
+# Security-only Dependabot (set at the v1.0.0 launch).
+#
+# We do NOT want routine version-bump PRs anymore — every version update
+# (all dependencies, every semver level) is ignored below, so Dependabot
+# stops opening the weekly minor/patch/major bump PRs. Routine upgrades are
+# handled manually from here on.
+#
+# Security fixes still come through, untouched:
+#   * Dependabot alerts are enabled, and Dependabot security updates are
+#     enabled at the repo level (the `automated-security-fixes` setting),
+#     which raises PRs for real vulnerability advisories.
+#   * Those `version-update:semver-*` ignore rules apply ONLY to version
+#     updates — security updates are not matched by them, so advisory PRs
+#     are unaffected.
+#
+# To resume scheduled version updates later, delete the `ignore` blocks.
 version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
-    groups:
-      production:
-        applies-to: version-updates
-        dependency-type: "production"
-        update-types: ["minor", "patch"]
-      development:
-        applies-to: version-updates
-        dependency-type: "development"
-        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
