@@ -28,7 +28,7 @@ export interface Tournament {
    * Distinct from `slug` above: `slug` selects this build's config, while
    * this is the server-side tournament identifier the standings, live, and
    * matches queries are scoped to. The API is multi-tournament; this build
-   * tracks the tournament with slug `"default"`.
+   * tracks the tournament with slug `"kings-gauntlet"`.
    */
   apiTournamentSlug: string
   /**

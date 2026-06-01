@@ -128,7 +128,7 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
 // hidden in tests that aren't about it. Overridden per-test where needed.
 const tournament: TournamentRead = {
   id: 1,
-  slug: "default",
+  slug: "kings-gauntlet",
   name: "Test Tournament",
   leaderboard_id: 3,
   start_date: null,

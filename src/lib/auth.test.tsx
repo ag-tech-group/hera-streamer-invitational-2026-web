@@ -9,7 +9,7 @@ import { server } from "@/test/setup"
 /**
  * Direct tests of the auth provider — exercises the /v1/me probe path
  * and the derived `isAdmin` rule against `activeTournament.apiTournamentSlug`
- * (the active tournament's API slug is `"default"` for this build).
+ * (the active tournament's API slug is `"kings-gauntlet"` for this build).
  */
 
 const AUTH_HINT_KEY = "criticalbit_auth_hint"
@@ -155,7 +155,7 @@ describe("AuthProvider", () => {
   })
 
   it("sets isAdmin when the active tournament is in owned_tournaments", async () => {
-    // `activeTournament.apiTournamentSlug` is "default" for this build.
+    // `activeTournament.apiTournamentSlug` is "kings-gauntlet" for this build.
     server.use(
       http.get("*/v1/me", () =>
         HttpResponse.json(
@@ -164,8 +164,8 @@ describe("AuthProvider", () => {
             owned_tournaments: [
               {
                 id: 1,
-                slug: "default",
-                name: "Default Tournament",
+                slug: "kings-gauntlet",
+                name: "The King's Gauntlet",
                 leaderboard_id: 3,
                 start_date: null,
                 grand_finals_date: null,
