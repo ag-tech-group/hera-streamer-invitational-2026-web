@@ -57,6 +57,8 @@ export interface StandingsTeam {
  * (`src/api/adapters/standings.ts`) and never reaches components.
  */
 export interface StandingsRow {
+  /** Stable roster identity (#184) — non-null even for an unlinked entrant. */
+  tournamentPlayerId: number
   /**
    * AoE2 profile id, or `null` for **placeholder rows** — announced-but-
    * unjoined streamers whose `profile_id` hasn't minted yet. Placeholder
