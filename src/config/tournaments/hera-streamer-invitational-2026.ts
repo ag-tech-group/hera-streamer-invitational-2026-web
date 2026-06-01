@@ -1,17 +1,18 @@
 import type { Tournament } from "@/types"
 
 /**
- * Config for this build's tournament. `apiTournamentSlug` `"default"` is the
- * API's sole tournament for now — its standings, live, and matches endpoints
- * are what this build reads. The host promo block (`hostLabel` + `hostLinks`)
- * feeds the `HostLinksCard` on the standings page.
+ * Config for this build's tournament. `apiTournamentSlug` is the routing
+ * key the API serves this tournament under — its standings, live, and
+ * matches endpoints are what this build reads. The host promo block
+ * (`hostLabel` + `hostLinks`) feeds the `HostLinksCard` on the standings
+ * page.
  */
 export const heraStreamerInvitational2026: Tournament = {
   slug: "hera-streamer-invitational-2026",
   name: "The King's Gauntlet",
   // Appended to the document/SEO title after the host label (#179).
   game: "Age of Empires II",
-  apiTournamentSlug: "default",
+  apiTournamentSlug: "kings-gauntlet",
   hostLabel: "Hosted by Hera",
   // Host brand mark headlining the promo card, demoted here from the navbar
   // when the tournament logo took over the site chrome (#180).

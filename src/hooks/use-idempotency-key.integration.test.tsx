@@ -20,7 +20,7 @@ import { server } from "@/test/setup"
  * header, regenerated key, stale closure) breaks this test.
  */
 
-const TOURNAMENT_SLUG = "default"
+const TOURNAMENT_SLUG = "kings-gauntlet"
 // Wildcard prefix so the handler matches regardless of `VITE_API_URL` in
 // the test environment — the orval-generated MSW handlers use the same
 // pattern.
