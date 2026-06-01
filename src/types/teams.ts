@@ -1,5 +1,5 @@
 /**
- * One member of a team, with their current rating and live-match status.
+ * One member of a team, with their ratings and live-match status.
  *
  * Mirrors the per-player `StandingsRow` fields the standings table
  * already renders, so a member's flag and "live" indicator on the
@@ -11,6 +11,13 @@ export interface TeamMember {
   /** ISO 3166-1 alpha-2 country code (lowercase), or null if unknown. */
   country: string | null
   currentRating: number
+  /**
+   * Lifetime ladder peak (`max_rating`) — the per-player figure the team's
+   * combined-peak sum/average is built from (API #158), and the value shown on
+   * the team pill. `null` for a brand-new account with no recorded peak, which
+   * the pill renders as `—`; such a member is excluded from the combined sum.
+   */
+  peakRating: number | null
   /** Whether the player is in a live match right now. */
   inMatch: boolean
   /** ID of the live match they're in, or null. */
@@ -36,11 +43,14 @@ export interface TeamStandingsRow {
   name: string
   /** Short team initials — shown where a player row shows a country flag. */
   initials: string
-  /** Sum of the members' current ratings; the metric teams are ranked by. */
+  /**
+   * Sum of the members' peak (lifetime `max_rating`) ratings; the metric teams
+   * are ranked by (API #158). Members with no recorded peak are excluded.
+   */
   combinedRatingSum: number
-  /** Mean of the members' current ratings. */
+  /** Mean of the members' peak ratings (over those that have one). */
   combinedRatingAverage: number
-  /** The team's roster, each member with their current rating. */
+  /** The team's roster, each member with their current and peak rating. */
   members: TeamMember[]
 }
 

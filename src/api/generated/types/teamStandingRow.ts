@@ -14,10 +14,14 @@ import type { TeamMemberRead } from './teamMemberRead';
 /**
  * One row in a tournament's team standings.
 
-``combined_rating_sum`` is the sum of the members' current ratings on
-the tournament's leaderboard; ``combined_rating_average`` is that sum
-over the member count. Only members with a rating on that leaderboard
-are counted — a member the poller hasn't rated yet is omitted.
+``combined_rating_sum`` is the sum of the members' peak (lifetime
+``max_rating``) ratings on the tournament's leaderboard;
+``combined_rating_average`` is that sum over the count of members
+with a non-null peak. Only members with a rating on that leaderboard
+are counted — a member the poller hasn't rated yet is omitted. A
+member whose ``max_rating`` is null is still listed under
+``members`` but excluded from the combined sum and average's
+denominator.
  */
 export interface TeamStandingRow {
   team_id: number;

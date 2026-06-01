@@ -826,13 +826,16 @@ export function useGetProgressionV1TournamentsTournamentSlugProgressionGet<TData
 
 
 /**
- * The tournament's teams, ranked by combined current rating.
+ * The tournament's teams, ranked by combined peak rating.
 
-A team's combined rating is the sum of its members' current ratings
-on the tournament's leaderboard; the average is that sum over the
-member count. Members without a rating on that leaderboard are
-omitted. Teams are optional — a tournament with none returns an empty
-list. Sorted by combined sum desc.
+A team's combined rating is the sum of its members' peak (lifetime
+``max_rating``) ratings on the tournament's leaderboard; the average
+is that sum over the count of members with a non-null peak. Members
+without a rating row on that leaderboard are omitted; a member whose
+rating row has no recorded peak is listed under ``members`` but
+excluded from the aggregate (and the average's denominator). Teams
+are optional — a tournament with none returns an empty list. Sorted
+by combined sum desc.
  * @summary Get Team Standings
  */
 export type getTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetResponse200 = {

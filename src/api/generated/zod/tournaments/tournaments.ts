@@ -247,13 +247,16 @@ export const GetProgressionV1TournamentsTournamentSlugProgressionGetResponse = z
 })
 
 /**
- * The tournament's teams, ranked by combined current rating.
+ * The tournament's teams, ranked by combined peak rating.
 
-A team's combined rating is the sum of its members' current ratings
-on the tournament's leaderboard; the average is that sum over the
-member count. Members without a rating on that leaderboard are
-omitted. Teams are optional — a tournament with none returns an empty
-list. Sorted by combined sum desc.
+A team's combined rating is the sum of its members' peak (lifetime
+``max_rating``) ratings on the tournament's leaderboard; the average
+is that sum over the count of members with a non-null peak. Members
+without a rating row on that leaderboard are omitted; a member whose
+rating row has no recorded peak is listed under ``members`` but
+excluded from the aggregate (and the average's denominator). Teams
+are optional — a tournament with none returns an empty list. Sorted
+by combined sum desc.
  * @summary Get Team Standings
  */
 export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetParams = zod.object({
@@ -274,10 +277,11 @@ export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetRespons
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),
   "current_rating": zod.number(),
+  "max_rating": zod.union([zod.number(),zod.null()]),
   "in_match": zod.boolean(),
   "live_match_id": zod.union([zod.number(),zod.null()]),
   "is_captain": zod.boolean()
-}).describe('One member of a team, with their current rating + live-match status.\n\nShape parallels the per-player ``StandingRow`` fields the web app\nalready renders on the standings tab: ``country`` for the flag pill,\n``in_match`` \/ ``live_match_id`` for the live badge. Same source as\n``StandingRow`` (see ``get_team_standings`` for the query), so a\nmember\'s status here matches their standings row in the same poll.'))
-}).describe('One row in a tournament\'s team standings.\n\n``combined_rating_sum`` is the sum of the members\' current ratings on\nthe tournament\'s leaderboard; ``combined_rating_average`` is that sum\nover the member count. Only members with a rating on that leaderboard\nare counted — a member the poller hasn\'t rated yet is omitted.'))
+}).describe('One member of a team, with their ratings + live-match status.\n\nShape parallels the per-player ``StandingRow`` fields the web app\nalready renders on the standings tab: ``country`` for the flag pill,\n``in_match`` \/ ``live_match_id`` for the live badge. Same source as\n``StandingRow`` (see ``get_team_standings`` for the query), so a\nmember\'s status here matches their standings row in the same poll.'))
+}).describe('One row in a tournament\'s team standings.\n\n``combined_rating_sum`` is the sum of the members\' peak (lifetime\n``max_rating``) ratings on the tournament\'s leaderboard;\n``combined_rating_average`` is that sum over the count of members\nwith a non-null peak. Only members with a rating on that leaderboard\nare counted — a member the poller hasn\'t rated yet is omitted. A\nmember whose ``max_rating`` is null is still listed under\n``members`` but excluded from the combined sum and average\'s\ndenominator.'))
 })
 

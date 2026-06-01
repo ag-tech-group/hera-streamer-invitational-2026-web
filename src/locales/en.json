@@ -61,8 +61,8 @@
     "title": "Stats",
     "subtitle": "Rating progression across the tournament.",
     "chartTitle": "Rating over time",
-    "teamEloTitle": "Team combined elo",
-    "teamAvgEloTitle": "Team average elo",
+    "teamEloTitle": "Team combined peak elo",
+    "teamAvgEloTitle": "Team average peak elo",
     "peakRatingTitle": "Peak rating",
     "noData": "Nothing to show yet.",
     "ratingAxis": "Rating",
@@ -115,7 +115,7 @@
     "bioLabel": "About {{name}}"
   },
   "teams": {
-    "sum": "sum",
+    "sum": "peak sum",
     "playersCount_one": "{{count}} player",
     "playersCount_other": "{{count}} players",
     "noMembers": "No rated members yet.",
