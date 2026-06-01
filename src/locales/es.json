@@ -62,6 +62,7 @@
     "subtitle": "Progreso de puntuación a lo largo del torneo.",
     "chartTitle": "Puntuación a lo largo del tiempo",
     "teamEloTitle": "Clasificación por equipos — elo combinado",
+    "teamAvgEloTitle": "Elo promedio por equipo",
     "peakRatingTitle": "Puntuación máxima",
     "noData": "Nada que mostrar aún.",
     "ratingAxis": "Puntuación",
@@ -114,14 +115,14 @@
     "bioLabel": "Sobre {{name}}"
   },
   "teams": {
-    "average": "prom",
+    "sum": "suma",
     "playersCount_one": "{{count}} jugador",
     "playersCount_other": "{{count}} jugadores",
     "noMembers": "Aún no hay integrantes con clasificación.",
     "rosterAriaLabel": "Plantilla del equipo",
     "versus": "VS",
     "rankLabel": "Puesto",
-    "rankAria": "Puesto #{{rank}} por promedio de puntos",
+    "rankAria": "Puesto #{{rank}} por puntos combinados",
     "captain": "Capitán"
   },
   "admin": {

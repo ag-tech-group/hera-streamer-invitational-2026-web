@@ -39,6 +39,7 @@ export function StatsPage() {
   const standings = useStandings()
 
   const teamData = teams.data ? teamBars(teams.data.rows) : []
+  const teamAvgData = teams.data ? teamAvgBars(teams.data.rows) : []
   const peakData = standings.data ? peakBars(standings.data.rows) : []
 
   return (
@@ -65,6 +66,18 @@ export function StatsPage() {
         <HorizontalBarChart
           data={teamData}
           height={Math.max(180, teamData.length * 56)}
+        />
+      </ChartSection>
+
+      <ChartSection
+        title={t("stats.teamAvgEloTitle")}
+        query={teams}
+        isEmpty={teamAvgData.length === 0}
+        skeletonHeight={260}
+      >
+        <HorizontalBarChart
+          data={teamAvgData}
+          height={Math.max(180, teamAvgData.length * 56)}
         />
       </ChartSection>
 
@@ -109,7 +122,7 @@ const TEAM_HEX: Record<TeamColorSlot, string> = {
 /** Per-player peak-rating bars share a single brand-blue (no team join). */
 const PEAK_COLOR = "#60a5fa"
 
-/** Teams ranked by combined elo — the tournament's actual scoring metric. */
+/** Teams ranked by combined elo **sum** — the tournament's scoring metric. */
 function teamBars(rows: TeamStandingsRow[]): BarDatum[] {
   // Colour by team identity (creation order, #231) so a team's bar matches its
   // panel on the Teams tab and its chip on the standings — built from the full
@@ -118,6 +131,21 @@ function teamBars(rows: TeamStandingsRow[]): BarDatum[] {
   return rows.map((r) => ({
     label: r.name,
     value: r.combinedRatingSum,
+    color: TEAM_HEX[colorByTeamId.get(r.teamId) ?? "p1"],
+  }))
+}
+
+/**
+ * Teams by combined elo **average** (#242). The Teams tab headline switched
+ * from average to sum (sum is what teams are ranked by), so this chart keeps
+ * the average visible somewhere — useful for comparing teams of different
+ * sizes, where the sum favours the larger roster.
+ */
+function teamAvgBars(rows: TeamStandingsRow[]): BarDatum[] {
+  const colorByTeamId = teamColorMap(rows.map((r) => r.teamId))
+  return rows.map((r) => ({
+    label: r.name,
+    value: Math.round(r.combinedRatingAverage),
     color: TEAM_HEX[colorByTeamId.get(r.teamId) ?? "p1"],
   }))
 }

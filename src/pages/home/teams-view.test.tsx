@@ -68,10 +68,10 @@ describe("TeamsView", () => {
       screen.getByRole("heading", { name: "Team Alpha", level: 2 })
     ).toBeInTheDocument()
     expect(screen.getByText("ALP")).toBeInTheDocument()
-    // Headline is avg rating, rounded; player count tagline follows.
-    // Both teams in the fixture have 2 players, so the player-count
+    // Headline is the combined-rating SUM (#242), thousands-formatted; the
+    // player-count tagline follows. Both teams have 2 players, so the count
     // string appears twice — once per panel.
-    expect(screen.getByText("2,700")).toBeInTheDocument()
+    expect(screen.getByText("5,400")).toBeInTheDocument()
     expect(screen.getAllByText("2 players")).toHaveLength(2)
   })
 
@@ -83,10 +83,10 @@ describe("TeamsView", () => {
     expect(headings[0]).toHaveTextContent("Team Bravo")
     expect(headings[1]).toHaveTextContent("Team Alpha")
     expect(
-      screen.getByLabelText("Rank #1 by average rating")
+      screen.getByLabelText("Rank #1 by combined rating")
     ).toHaveTextContent("#1")
     expect(
-      screen.getByLabelText("Rank #2 by average rating")
+      screen.getByLabelText("Rank #2 by combined rating")
     ).toHaveTextContent("#2")
   })
 
