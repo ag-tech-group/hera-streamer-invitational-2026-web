@@ -1,0 +1,335 @@
+{
+  "language": {
+    "label": "Språk",
+    "en": "English",
+    "es": "Español",
+    "ar": "العربية",
+    "nl": "Nederlands",
+    "de": "Deutsch",
+    "sv": "Svenska",
+    "ru": "Русский"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Ljust",
+    "dark": "Mörkt",
+    "auto": "Auto"
+  },
+  "nav": {
+    "brandAriaLabel": "Liveställning",
+    "signIn": "Logga in",
+    "signOut": "Logga ut",
+    "profile": "Profil",
+    "admin": "Admin",
+    "accountMenu": "Kontomeny"
+  },
+  "home": {
+    "title": "Liveställning",
+    "subtitle": "Live-rating, lagställningar och turneringsutveckling — <product>Age of Empires 2: Definitive Edition</product>.",
+    "tabs": {
+      "players": "Spelare",
+      "teams": "Lag",
+      "stats": "Statistik"
+    },
+    "viewTabsAria": "Ställningsvy",
+    "lastUpdated": "Uppdaterad {{time}}",
+    "ladderRace": {
+      "begins": "Ladderrace <accent>börjar</accent>",
+      "ends": "Ladderrace <accent>slutar</accent>",
+      "active": {
+        "title": "Ladderrace <accent>pågår</accent>",
+        "body": "Spelarna är indelade i 4 lag och tävlar om att uppnå högsta möjliga sammanlagda elo. Endast topp-elo räknas för den slutliga rankingen."
+      }
+    },
+    "noStandings": {
+      "title": "Inga ställningar ännu",
+      "body": "Spelare visas här när turneringens topplista har fyllts på."
+    },
+    "noTeams": {
+      "title": "Inga lag ännu",
+      "body": "Lag visas här när de har satts upp för den här turneringen."
+    },
+    "loadErrorStandings": {
+      "title": "Kunde inte ladda ställningar",
+      "body": "Något gick fel vid anslutning till topplistan."
+    },
+    "loadErrorTeams": {
+      "title": "Kunde inte ladda lag",
+      "body": "Något gick fel vid anslutning till lagställningarna."
+    },
+    "prizePool": {
+      "label": "Prispott",
+      "sponsoredBy": "Sponsras av "
+    }
+  },
+  "stats": {
+    "title": "Statistik",
+    "subtitle": "Ratingutveckling under turneringen.",
+    "chartTitle": "Rating över tid",
+    "teamEloTitle": "Lagets sammanlagda topp-elo",
+    "teamAvgEloTitle": "Lagets genomsnittliga topp-elo",
+    "peakRatingTitle": "Topprating",
+    "noData": "Inget att visa ännu.",
+    "ratingAxis": "Rating",
+    "empty": "Inga avslutade matcher ännu — utvecklingen visas när spelarna börjar spela rankade matcher.",
+    "error": "Kunde inte ladda statistik.",
+    "retry": "Försök igen",
+    "cards": {
+      "biggestClimber": "Störst klättrare",
+      "highestPeak": "Högsta topp",
+      "mostMatches": "Flest matcher",
+      "winPct": "Bästa vinstandel"
+    }
+  },
+  "standings": {
+    "caption": "Liveställning för turneringen",
+    "captionLoading": "Laddar ställningar",
+    "headers": {
+      "position": "Placering",
+      "team": "Lag",
+      "player": "Spelare",
+      "rating": "Rating",
+      "peak": "Topp",
+      "streak": "Svit",
+      "games": "Matcher",
+      "winPct": "Vinst %",
+      "recent": "Senaste",
+      "activity": "Aktivitet",
+      "watch": "Titta"
+    },
+    "winPctBreakdown": {
+      "title": "Vinstandel",
+      "wins": "{{count}} V",
+      "losses": "{{count}} F",
+      "aria": "{{wins}} vinster, {{losses}} förluster"
+    },
+    "live": "Live",
+    "liveAriaLabel": "I en livematch",
+    "active": "Aktiv",
+    "idle": "Inaktiv",
+    "recentAriaLabel": "Senaste resultaten, nyaste först: {{results}}",
+    "win": "Vinst",
+    "loss": "Förlust",
+    "viewProfile": "Visa {{name}}s profil",
+    "watchOn": {
+      "twitch": "Titta på Twitch",
+      "youtube": "Titta på YouTube",
+      "other": "Titta på stream"
+    },
+    "streamingLive": "Sänder live",
+    "bioLabel": "Om {{name}}"
+  },
+  "teams": {
+    "sum": "topp-summa",
+    "playersCount_one": "{{count}} spelare",
+    "playersCount_other": "{{count}} spelare",
+    "noMembers": "Inga rankade medlemmar ännu.",
+    "rosterAriaLabel": "Laguppställning",
+    "versus": "VS",
+    "rankLabel": "Rank",
+    "rankAria": "Rank #{{rank}} efter sammanlagd rating",
+    "captain": "Lagkapten"
+  },
+  "admin": {
+    "title": "Admin",
+    "backToStandings": "Tillbaka till ställningar",
+    "sections": {
+      "tournamentDetails": "Turneringsdetaljer",
+      "owners": "Ägare",
+      "players": "Spelare",
+      "teams": "Lag"
+    },
+    "tournament": {
+      "nameLabel": "Namn",
+      "startDate": "Startdatum",
+      "grandFinalsDate": "Datum för grand final",
+      "save": "Spara ändringar",
+      "saving": "Sparar…",
+      "successToast": "Turneringen uppdaterad.",
+      "loadError": "Kunde inte ladda turneringsdetaljer.",
+      "prizePoolLabel": "Prispott",
+      "hostStreamUrls": {
+        "label": "Värdens stream-URL:er",
+        "help": "Kanal-URL:er (Twitch/YouTube) som används för att upptäcka när värden sänder live och tända promokortet. Upp till {{max}}.",
+        "add": "Lägg till URL",
+        "rowPlaceholder": "https://twitch.tv/channel",
+        "rowAria": "Värdens stream-URL {{index}}",
+        "removeAria": "Ta bort värdens stream-URL {{index}}",
+        "errorTooLong": "URL:en får vara högst {{max}} tecken.",
+        "errorTooMany": "Högst {{max}} URL:er."
+      }
+    },
+    "owners": {
+      "grantLabel": "Tilldela ägarskap",
+      "addPlaceholder": "Sök efter namn eller e-post",
+      "addAction": "Tilldela",
+      "addingAction": "Tilldelar…",
+      "grantedOn": "Tilldelad {{date}}",
+      "removeAria": "Återkalla {{name}}",
+      "removeTitle": "Återkalla ägarskap?",
+      "removeDescription": "{{name}} förlorar adminåtkomst till den här turneringen.",
+      "removeConfirm": "Återkalla",
+      "soleOwnerHint": "Du är den enda ägaren — tilldela ägarskap till en annan användare innan du tar bort dig själv.",
+      "grantSuccess": "Ägare tilldelad.",
+      "revokeSuccess": "Ägare återkallad.",
+      "noOwners": "Inga ägare ännu.",
+      "loadError": "Kunde inte ladda ägare — kräver inloggning."
+    },
+    "players": {
+      "addLabel": "Lägg till spelare",
+      "addNameLabel": "Visningsnamn",
+      "addNamePlaceholder": "Streamer-handle (t.ex. uThermal)",
+      "addProfileIdLabel": "Profil-ID",
+      "addProfileIdPlaceholder": "aoe2 profile_id — valfritt",
+      "addAction": "Lägg till",
+      "addingAction": "Lägger till…",
+      "addSuccess": "Spelare tillagd.",
+      "addErrorProfileId": "Profil-ID måste vara ett positivt tal.",
+      "addErrorNumericName": "Det där ser ut som ett profil-ID — ange det i fältet Profil-ID.",
+      "removeAria": "Ta bort {{name}}",
+      "removeTitle": "Ta bort {{name}}?",
+      "removeDescription": "Detta tar bort spelaren från turneringens uppställning. Deras matchhistorik och rating förblir intakta uppströms.",
+      "removeConfirm": "Ta bort",
+      "removeSuccess": "Spelare borttagen.",
+      "noPlayers": "Inga spelare ännu.",
+      "loadError": "Kunde inte ladda uppställningen.",
+      "editAria": "Redigera {{name}}",
+      "linkedAccount": "Länkat ladderkonto",
+      "notYetRated": "Inte rankad ännu (0 rankade matcher)",
+      "presentation": {
+        "title": "Visningsöverstyrningar",
+        "profileId": "Profil-ID",
+        "profileIdPlaceholder": "t.ex. 1819870",
+        "displayName": "Visningsnamn",
+        "displayNamePlaceholder": "Streamer-handle (t.ex. uThermal)",
+        "flag": "Flagga",
+        "flagPlaceholder": "Välj ett land",
+        "flagSearch": "Sök länder",
+        "flagClear": "Ingen flagga",
+        "flagNoResults": "Inga länder hittades",
+        "streamUrls": "Stream-URL:er",
+        "streamUrlPlaceholder": "https://twitch.tv/handle",
+        "addStreamUrl": "Lägg till stream-URL",
+        "removeStreamUrlAria": "Ta bort en stream-URL för {{name}}",
+        "invalidUrl": "Ange en giltig http(s)-URL",
+        "bio": "Bio",
+        "bioPlaceholder": "Kort bakgrund som visas för tittare — t.ex. 2× mästare, spelar aggressiva Scouts.",
+        "profileUrl": "Profil-URL",
+        "profileUrlPlaceholder": "https://www.aoe2insights.com/user/12449433/",
+        "cancel": "Avbryt",
+        "save": "Spara",
+        "saving": "Sparar…",
+        "saveSuccess": "Spelare uppdaterad."
+      },
+      "profileHint": "På en spelares <link>aoe2insights</link>-sida är <code>profile_id</code> samma som <code>Game Id</code> (numret i <code>/user/relic/…</code>-länken) — <strong>inte</strong> numret i sidans URL, som skiljer sig för nyare konton."
+    },
+    "teams": {
+      "createLabel": "Skapa lag",
+      "initialsPlaceholder": "Initialer",
+      "namePlaceholder": "Lagnamn",
+      "createAction": "Skapa",
+      "creatingAction": "Skapar…",
+      "save": "Spara",
+      "saving": "Sparar…",
+      "cancel": "Avbryt",
+      "editAria": "Redigera {{name}}",
+      "deleteAria": "Radera {{name}}",
+      "deleteTitle": "Radera laget \"{{name}}\"?",
+      "deleteDescription": "Laget och alla dess medlemmar tas bort. Spelarna själva stannar kvar i turneringens uppställning.",
+      "deleteConfirm": "Radera lag",
+      "addMember": "Lägg till medlem",
+      "addMemberPlaceholder": "Välj en spelare",
+      "addMemberNone": "Inga spelare tillgängliga",
+      "addMemberAction": "Lägg till",
+      "addMemberAdding": "Lägger till…",
+      "memberOnTeam": "(i {{name}})",
+      "noMembers": "Inga medlemmar ännu.",
+      "removeMemberAria": "Ta bort {{name}} från laget",
+      "removeMemberTitle": "Ta bort {{name}} från det här laget?",
+      "removeMemberDescription": "Spelaren stannar kvar i turneringens uppställning.",
+      "removeMemberConfirm": "Ta bort",
+      "moveTitle": "Flytta spelaren till det här laget?",
+      "moveDescription": "{{name}} är för närvarande i {{from}}.",
+      "moveConfirm": "Flytta spelare",
+      "noTeams": "Inga lag ännu.",
+      "loadError": "Kunde inte ladda lag.",
+      "createSuccess": "Lag skapat.",
+      "updateSuccess": "Lag uppdaterat.",
+      "deleteSuccess": "Lag raderat.",
+      "setCaptain": "Gör till lagkapten",
+      "clearCaptain": "Ta bort lagkapten",
+      "setCaptainAria": "Gör {{name}} till lagkapten",
+      "clearCaptainAria": "Ta bort {{name}} som lagkapten",
+      "captainSetSuccess": "{{name}} är nu lagkapten.",
+      "captainClearSuccess": "Lagkapten borttagen."
+    }
+  },
+  "common": {
+    "cancel": "Avbryt",
+    "confirm": "Bekräfta",
+    "save": "Spara",
+    "saving": "Sparar…",
+    "loading": "Laddar…",
+    "error": "Fel",
+    "tryAgain": "Försök igen",
+    "reference": "Referens: {{id}}",
+    "goHome": "Gå till startsidan"
+  },
+  "userSearch": {
+    "placeholder": "Sök efter namn eller e-post",
+    "clear": "Rensa vald användare",
+    "noMatches": "Inga användare matchar sökningen.",
+    "searching": "Söker…"
+  },
+  "countdown": {
+    "days": "dagar",
+    "hours": "tim",
+    "minutes": "min",
+    "seconds": "sek"
+  },
+  "hostLinks": {
+    "defaultLabel": "Värd",
+    "live": "Live",
+    "streamingLive": "Sänder live"
+  },
+  "notFound": {
+    "eyebrow": "Sidan hittades inte",
+    "code": "404",
+    "body": "Tyvärr, vi kunde inte hitta sidan du letar efter.",
+    "homeAction": "Gå tillbaka till startsidan"
+  },
+  "errorBoundary": {
+    "eyebrow": "Något gick fel",
+    "heading": "Fel",
+    "body": "Ett oväntat fel uppstod. Försök igen.",
+    "retry": "Försök igen",
+    "home": "Gå till startsidan"
+  },
+  "errors": {
+    "default": "Ett oväntat fel uppstod.",
+    "400": "Ogiltig begäran. Kontrollera din inmatning.",
+    "401": "Din session har gått ut. Logga in igen.",
+    "403": "Du har inte behörighet att göra det.",
+    "404": "Den begärda resursen hittades inte.",
+    "409": "Detta står i konflikt med en befintlig resurs.",
+    "422": "Kontrollera din inmatning och försök igen.",
+    "429": "För många förfrågningar. Vänta ett ögonblick.",
+    "500": "Något gick fel hos oss. Försök igen senare.",
+    "idempotencyKeyReused": "Något ändrades — försök igen.",
+    "tournamentNotFound": "Turneringen hittades inte.",
+    "sessionExpired": "Din session gick ut — logga in igen för att fortsätta.",
+    "signInAction": "Logga in"
+  },
+  "footer": {
+    "criticalbitProjectPrefix": "Ett ",
+    "criticalbitProjectLink": "criticalbit.gg",
+    "criticalbitProjectSuffix": "-projekt.",
+    "microsoftDisclaimerPrefix": "Age of Empires II © Microsoft Corporation. Den här sidan skapades under Microsofts ",
+    "microsoftDisclaimerLink": "Game Content Usage Rules",
+    "microsoftDisclaimerSuffix": " med tillgångar från Age of Empires II och den stöds inte av eller är ansluten till Microsoft.",
+    "legalNavLabel": "Juridik",
+    "privacyLink": "Integritet",
+    "termsLink": "Villkor",
+    "copyright": "© {{year}} AG Technology Group LLC. Alla rättigheter förbehållna."
+  }
+}
