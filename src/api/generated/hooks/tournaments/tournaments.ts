@@ -567,22 +567,23 @@ export const useDeleteTournamentV1TournamentsTournamentSlugDelete = <TError = HT
       return useMutation(getDeleteTournamentV1TournamentsTournamentSlugDeleteMutationOptions(options), queryClient);
     }
     /**
- * The tournament's roster — polled identities ranked, placeholders at tail.
+ * The tournament's roster — rated rows ranked, then every other row by name.
 
 One query over ``tournament_players`` left-joined to ``Player`` (the
-polled identity, when one exists) and ``PlayerRating`` (when the
-polled identity has a rating on the tournament's leaderboard). Three
-row shapes fall out of the same SELECT, ordered by:
+polled identity, when one is linked) and ``PlayerRating`` (when that
+identity has a rating on the tournament's leaderboard), ordered by:
 
-1. ranked polled rows first, by current_rating DESC (NULLS LAST);
-2. unrated polled rows next, by profile_id ASC;
-3. placeholder rows last, by name ASC.
+1. rated rows first, by current_rating DESC (NULLS LAST);
+2. then every unrated row — linked or not — by ``name`` ASC.
+
+(#187 unified the old three-tier sort that special-cased an unlinked
+tail; ``name`` is NOT NULL, so it's the sole display-order key.)
 
 The leaderboard filter lives in the join condition, not the WHERE
 clause — putting it in WHERE would re-filter the outer-join right
-back to inner-join behaviour. The outer filter keeps a real entry
+back to inner-join behaviour. The outer filter keeps a linked entry
 visible only once its ``Player`` row has been polled (no half-state
-where a newly-added profile_id surfaces without an alias).
+where a newly-linked profile_id surfaces without an alias).
  * @summary Get Standings
  */
 export type getStandingsV1TournamentsTournamentSlugStandingsGetResponse200 = {
