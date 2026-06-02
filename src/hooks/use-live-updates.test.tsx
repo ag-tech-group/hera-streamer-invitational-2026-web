@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { renderHook } from "@testing-library/react"
 import type { ReactNode } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import {
   getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey,
@@ -24,7 +24,39 @@ function renderUseLiveUpdates() {
   return { ...view, invalidateSpy }
 }
 
+// jsdom defaults document.visibilityState to "visible". These drive the Page
+// Visibility API the hook keys off (#285): `setVisibility` flips the state and
+// fires the event a real browser would; `resetVisibility` restores the default
+// after each test so state never leaks between them.
+function setVisibility(state: DocumentVisibilityState): void {
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    get: () => state,
+  })
+  Object.defineProperty(document, "hidden", {
+    configurable: true,
+    get: () => state === "hidden",
+  })
+  document.dispatchEvent(new Event("visibilitychange"))
+}
+
+function resetVisibility(): void {
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    get: () => "visible",
+  })
+  Object.defineProperty(document, "hidden", {
+    configurable: true,
+    get: () => false,
+  })
+}
+
 describe("useLiveUpdates", () => {
+  afterEach(() => {
+    vi.useRealTimers()
+    resetVisibility()
+  })
+
   it("opens an SSE connection to the stream endpoint", () => {
     renderUseLiveUpdates()
     expect(MockEventSource.last().url).toMatch(/\/v1\/stream$/)
@@ -129,5 +161,72 @@ describe("useLiveUpdates", () => {
       "SSE-triggered invalidation rejected",
       expect.objectContaining({ error: abort })
     )
+  })
+
+  it("keeps the connection through a brief hide within the grace period", () => {
+    vi.useFakeTimers()
+    renderUseLiveUpdates()
+    const source = MockEventSource.last()
+
+    setVisibility("hidden")
+    // Well under any reasonable grace window — a quick tab-flip.
+    vi.advanceTimersByTime(1_000)
+    setVisibility("visible")
+
+    // The original connection was never dropped, so there's no reconnect.
+    expect(source.close).not.toHaveBeenCalled()
+    expect(MockEventSource.instances).toHaveLength(1)
+  })
+
+  it("drops the connection after the tab stays hidden past the grace period", () => {
+    vi.useFakeTimers()
+    renderUseLiveUpdates()
+    const source = MockEventSource.last()
+
+    setVisibility("hidden")
+    // Far past any reasonable grace window — an abandoned background tab.
+    vi.advanceTimersByTime(5 * 60_000)
+
+    expect(source.close).toHaveBeenCalledOnce()
+  })
+
+  it("reopens and refetches to catch up when the tab returns after being dropped", () => {
+    vi.useFakeTimers()
+    const { invalidateSpy } = renderUseLiveUpdates()
+    expect(MockEventSource.instances).toHaveLength(1)
+
+    setVisibility("hidden")
+    vi.advanceTimersByTime(5 * 60_000)
+    invalidateSpy.mockClear()
+
+    setVisibility("visible")
+
+    // A fresh connection replaces the dropped one...
+    expect(MockEventSource.instances).toHaveLength(2)
+    // ...and a standings refetch catches up on anything missed while away.
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
+        activeTournament.apiTournamentSlug
+      ),
+    })
+  })
+
+  it("does not open a connection while mounted in a hidden tab, until it becomes visible", () => {
+    setVisibility("hidden")
+
+    const { invalidateSpy } = renderUseLiveUpdates()
+    // Never hold a server seat for a tab the user hasn't looked at.
+    expect(MockEventSource.instances).toHaveLength(0)
+
+    setVisibility("visible")
+
+    expect(MockEventSource.instances).toHaveLength(1)
+    expect(MockEventSource.last().url).toMatch(/\/v1\/stream$/)
+    // First reveal connects and catches up.
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(
+        activeTournament.apiTournamentSlug
+      ),
+    })
   })
 })
