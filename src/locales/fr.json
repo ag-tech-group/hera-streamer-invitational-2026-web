@@ -95,7 +95,7 @@
       "games": "Parties",
       "winPct": "% victoires",
       "recent": "Récent",
-      "activity": "Activité",
+      "lastMatch": "Dernier match",
       "watch": "Regarder"
     },
     "winPctBreakdown": {
@@ -106,7 +106,6 @@
     },
     "live": "En direct",
     "liveAriaLabel": "Dans un match en direct",
-    "lastMatch": "Dernier match",
     "recentAriaLabel": "Résultats récents, du plus récent au plus ancien : {{results}}",
     "win": "Victoire",
     "loss": "Défaite",

@@ -257,7 +257,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
               <RecentResultsCell results={row.recentResults} />
             </td>
             <td className="px-4 py-3">
-              <ActivityCell lastMatchAt={row.lastMatchAt} now={now} />
+              <LastMatchCell lastMatchAt={row.lastMatchAt} now={now} />
             </td>
             <td className="px-4 py-3 text-center">
               <WatchCell
@@ -454,7 +454,7 @@ function StandingsHeaderRow({
       />
       <SortableTh label={t("standings.headers.recent")} />
       <SortableTh
-        label={t("standings.headers.activity")}
+        label={t("standings.headers.lastMatch")}
         sortKey="lastMatchAt"
         defaultDirection="desc"
         sortState={sortState}
@@ -940,20 +940,20 @@ function WinPctCell({
 }
 
 /**
- * The "status band": a player's last completed tournament match as a
- * "Last match 4h" readout. The dot + text go green when that match landed
- * within the last 24h and grey when older; a player with no recorded match
- * shows a neutral placeholder. Tracks match *completion*, so "playing right
+ * The "Last match" cell: the relative time since a player's last completed
+ * tournament match (e.g. "4h"), led by a coloured dot — green when that match
+ * landed within the last 24h, grey when older. A player with no recorded match
+ * shows a neutral placeholder. The column header names the metric, so the badge
+ * carries the timestamp alone. Tracks match *completion*, so "playing right
  * now" lives on the separate Live badge, not here.
  */
-function ActivityCell({
+function LastMatchCell({
   lastMatchAt,
   now,
 }: {
   lastMatchAt: string | null
   now: Date
 }) {
-  const { t } = useTranslation()
   if (!lastMatchAt) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
@@ -974,11 +974,9 @@ function ActivityCell({
           isRecent ? "bg-chart-2" : "bg-muted-foreground/50"
         )}
       />
-      {t("standings.lastMatch")}
       {/* No opacity on the time: the badge text colour already meets AA on its
           background, but opacity-70 dropped it under the 4.5:1 ratio for this
-          small text (#73 / #65 audit). The dot + label still lead the
-          hierarchy. */}
+          small text (#73 / #65 audit). */}
       <span className="tabular-nums">
         {formatRelativeTime(lastMatchAt, now)}
       </span>

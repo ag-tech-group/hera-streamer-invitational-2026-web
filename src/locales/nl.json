@@ -95,7 +95,7 @@
       "games": "Duels",
       "winPct": "Winst %",
       "recent": "Recent",
-      "activity": "Activiteit",
+      "lastMatch": "Laatste match",
       "watch": "Kijken"
     },
     "winPctBreakdown": {
@@ -106,7 +106,6 @@
     },
     "live": "Live",
     "liveAriaLabel": "In een live wedstrijd",
-    "lastMatch": "Laatste match",
     "recentAriaLabel": "Recente resultaten, meest recente eerst: {{results}}",
     "win": "Winst",
     "loss": "Verlies",

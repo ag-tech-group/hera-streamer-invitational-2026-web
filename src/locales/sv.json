@@ -95,7 +95,7 @@
       "games": "Matcher",
       "winPct": "Vinst %",
       "recent": "Senaste",
-      "activity": "Aktivitet",
+      "lastMatch": "Senaste match",
       "watch": "Titta"
     },
     "winPctBreakdown": {
@@ -106,7 +106,6 @@
     },
     "live": "Live",
     "liveAriaLabel": "I en livematch",
-    "lastMatch": "Senaste match",
     "recentAriaLabel": "Senaste resultaten, nyaste först: {{results}}",
     "win": "Vinst",
     "loss": "Förlust",

@@ -276,7 +276,7 @@ describe("StandingsTable — games played", () => {
       />
     )
     // Games is the 6th column (index 5): Position, Team, Player, Peak,
-    // Rating, Games, Win%, Recent, Streak, Activity, Watch. (Streak moved
+    // Rating, Games, Win%, Recent, Streak, Last match, Watch. (Streak moved
     // to follow Recent; Win% was inserted right after Games.)
     const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell")
     expect(cells[5]).toHaveTextContent("14")
