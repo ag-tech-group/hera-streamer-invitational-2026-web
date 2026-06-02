@@ -125,6 +125,10 @@ Netlify auto-builds on every push to `main` once the project is wired. The build
 
 `netlify.toml` at the repo root configures production headers and routing in one place: the CSP and standard security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy), long-lived `Cache-Control` for `/assets/*` (Vite-hashed bundles are immutable per build) with `must-revalidate` on `/index.html`, and the SPA fallback so deep links from the TanStack Router resolve through `index.html`.
 
+### Deploy freeze (live-event peaks)
+
+Netlify auto-deploys on every push to `main`, so a merge during a marquee match is a live deploy to the largest possible audience — forcing a stale-chunk reload on open tabs and a cache-cold origin burst at the worst moment. **Do not merge to `main` during scheduled peak windows** (default: from 30 min before a marquee match until 30 min after its expected end); land changes in an off-peak lull. Full policy, rationale, and the cross-service freeze (API + router) live in [`docs/deploy-freeze.md`](docs/deploy-freeze.md).
+
 ### PostHog analytics reverse proxy
 
 PostHog ingestion is routed through a first-party path on the event domain so privacy / ad-block extensions — common in the AoE2 audience — don't silently drop events by blocking the `*.i.posthog.com` destinations. In production `VITE_POSTHOG_HOST` is set to `https://aoe2.criticalbit.gg/relay` (baked into `netlify.toml`'s `[context.production.environment]`, so it applies to `main` builds only — deploy previews fall back to direct ingestion). `posthog-js` therefore only ever talks to the same origin as the app, and the [criticalbit-router](https://github.com/ag-tech-group/criticalbit-router) Cloudflare Worker that fronts this domain proxies those paths to PostHog in a single hop:
