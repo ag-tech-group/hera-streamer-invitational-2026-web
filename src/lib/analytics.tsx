@@ -26,6 +26,10 @@ import { logger } from "@/lib/logger"
  * - `tournament.link.click` `{ kind, source: "resource_bar" }`
  *                          — tournament resource-bar link, by kind (video/
  *                          trailer/handbook/wiki/discord/other).
+ * - `product.link.click`   `{ product, source: "hero_subtitle" }`
+ *                          — the AoE2:DE store link in the hero tagline
+ *                          (learn-about-the-game, distinct from the tournament
+ *                          resource pills above). `product` is "aoe2_de".
  * - `player.profile.click` `{ profileId, alias, source: "standings" }`
  *                          — player name → `presentation.profileUrl`.
  * - `player.bio.open`      `{ profileId, alias }` — bio hover/tap reveal.

@@ -2,6 +2,7 @@ import { Trans, useTranslation } from "react-i18next"
 
 import { TournamentLinksBar } from "@/components/tournament-links-bar"
 import { activeTournament } from "@/config/tournaments"
+import { useAnalytics } from "@/lib/analytics"
 
 /**
  * The shared page hero across the standings views (#164, #180): the full
@@ -20,6 +21,7 @@ export function TournamentHero() {
   // switch so the subtitle below stays in sync (every other `<Trans>` user in
   // the app pairs it with this hook for the same reason).
   const { t } = useTranslation()
+  const analytics = useAnalytics()
 
   return (
     <header className="relative flex flex-col items-center gap-4 pb-6 text-center">
@@ -56,6 +58,15 @@ export function TournamentHero() {
                 href="https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/"
                 target="_blank"
                 rel="noopener noreferrer"
+                // #215 click-through, mirroring the resource pills. `source`
+                // distinguishes this game link in the tagline from the
+                // tournament resource bar's `tournament.link.click`.
+                onClick={() =>
+                  analytics.track("product.link.click", {
+                    product: "aoe2_de",
+                    source: "hero_subtitle",
+                  })
+                }
                 className="hover:text-foreground underline underline-offset-2 transition-colors"
               />
             ),
