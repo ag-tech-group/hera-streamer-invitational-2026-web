@@ -5,6 +5,18 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <!--
+      Search-result favicon (#296). Google renders the icon beside a result
+      from a `rel="icon"` of at least 48px square (it recommends a multiple of
+      48px); the 16/32 icons above are under that floor, so Search fell back to
+      its generic globe. Point it at the existing 256×256 brand mark so Search
+      has a large square to downscale — `/logo.png` already ships in `public/`
+      and is base-path-redirected in netlify.toml, so no new asset or rule is
+      needed. PNG, not SVG: the mark is a detailed raster emblem, not vector
+      art. Browser tabs still choose the 16/32 icons by `sizes`; this larger
+      one serves Search and high-DPI surfaces.
+    -->
+    <link rel="icon" type="image/png" sizes="256x256" href="/logo.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
