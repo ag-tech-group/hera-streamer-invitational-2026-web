@@ -43,10 +43,10 @@ const SKELETON_TEAM_SIZES = [5, 5, 5, 5]
  * container query, so a narrow coliseum panel shows one pill per line
  * and a wide banner panel shows several.
  */
-/** tournamentPlayerId → host display-name override (#242), sourced from the
- *  players standings since the team-standings endpoint carries only the raw
- *  alias. Keyed on tournamentPlayerId so an unlinked entrant (null profileId)
- *  joins identically to a linked one (#281). */
+/** tournamentPlayerId → resolved display label (override else the unified
+ *  `name`, #187), sourced from the players standings since the team-standings
+ *  endpoint carries no display label. Keyed on tournamentPlayerId so an unlinked
+ *  entrant (null profileId) joins identically to a linked one (#281). */
 type DisplayNameMap = Map<number, string>
 
 /** tournamentPlayerId → host flag override (presentation.flag), likewise passed
@@ -439,10 +439,10 @@ function PlayerRoster({
  * or malformed — same treatment the standings table uses, so the two
  * surfaces stay visually consistent for a given player.
  *
- * Shows the host's display-name override when set (#242) — the same friendly
- * name viewers see on the standings table (e.g. "Day9TV") — falling back to the
- * raw ladder alias. The override isn't on the team-standings payload, so it's
- * passed down from the players standings.
+ * Shows the resolved display label (#242, #187) — the same friendly name
+ * viewers see on the standings table (e.g. "Day9TV"): the host's display-name
+ * override when set, else the unified `name`. The label isn't on the
+ * team-standings payload, so it's passed down from the players standings.
  */
 function PlayerPill({
   member,
@@ -464,11 +464,10 @@ function PlayerPill({
     : null
   const effectiveFlagCode = overrideCode ?? countryCode
   const renderOverrideAsText = Boolean(flagOverride && !overrideCode)
-  // `alias` is null for an unlinked member. The host display-name override is
-  // already joined from standings by tournamentPlayerId (#281), so a named
-  // unlinked member still shows a name; `member.alias ?? "—"` only backstops a
-  // member with neither — that `"—"` retires once the API's `name` is non-null
-  // (Phase 3).
+  // The resolved display label (override else the unified `name`, #187) is
+  // joined from standings by tournamentPlayerId (#281), so every roster member
+  // — an unlinked entrant included — shows a real name. `member.alias ?? "—"`
+  // only backstops a member somehow absent from standings.
   const visibleName = displayName ?? member.alias ?? "—"
   return (
     <div className="team-pill flex items-center gap-3 rounded-md border px-3 py-2.5">

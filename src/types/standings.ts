@@ -69,6 +69,19 @@ export interface StandingsRow {
    * `presentation.profileUrl` (#131), not this id.
    */
   profileId: number | null
+  /**
+   * The unified display label (#187) — always present, for linked and unlinked
+   * entrants alike. This is the canonical name to render: surfaces resolve to
+   * `presentation.displayName ?? name`. The old `alias` fallback is gone — see
+   * `alias`.
+   */
+  name: string
+  /**
+   * Raw ladder handle (enrichment, not identity). For a linked entrant it's the
+   * polled aoe2 alias; for an unlinked one the API falls it back to `name`. Kept
+   * for where the genuine ladder handle is wanted (analytics, mis-link checks),
+   * not for the display label — use `presentation.displayName ?? name`.
+   */
   alias: string
   /** ISO 3166-1 alpha-2 country code (lowercase), or null if unknown. */
   country: string | null

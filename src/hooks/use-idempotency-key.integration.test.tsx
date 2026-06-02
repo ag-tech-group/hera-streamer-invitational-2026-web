@@ -51,7 +51,7 @@ function AddPlayerHarness() {
         onClick={() =>
           mutation.mutate({
             tournamentSlug: TOURNAMENT_SLUG,
-            data: { profile_id: 12345 },
+            data: { name: "Test Player", profile_id: 12345 },
           })
         }
       >

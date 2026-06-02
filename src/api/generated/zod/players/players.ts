@@ -13,14 +13,12 @@ import * as zod from 'zod';
 
 
 /**
- * The tournament's roster — polled identities and placeholders interleaved.
+ * The tournament's roster — every entry, linked and unlinked interleaved.
 
-Sorted alphabetically by the row's display name (``alias`` for polled
-rows, ``name`` for placeholders). Placeholders carry empty ``ratings``
-and null polled fields; the ``leaderboard_id`` filter is a no-op on
-them. Real entries whose poller hasn't fetched the ``Player`` row yet
-(newly added, < one polling cycle old) are hidden — same as before
-the unification.
+Sorted alphabetically by display name. An unlinked entry carries empty
+``ratings`` and null polled fields; the ``leaderboard_id`` filter is a
+no-op on it. A linked entry whose poller hasn't fetched the ``Player``
+row yet (newly added, < one polling cycle old) is hidden until it has.
  * @summary List Players
  */
 export const ListPlayersV1TournamentsTournamentSlugPlayersGetParams = zod.object({
@@ -36,6 +34,7 @@ export const ListPlayersV1TournamentsTournamentSlugPlayersGetResponse = zod.obje
   "items": zod.array(zod.object({
   "tournament_player_id": zod.number(),
   "profile_id": zod.union([zod.number(),zod.null()]),
+  "name": zod.string(),
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),
   "steam_id": zod.union([zod.string(),zod.null()]),
@@ -60,62 +59,64 @@ export const ListPlayersV1TournamentsTournamentSlugPlayersGetResponse = zod.obje
   "last_match_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "updated_at": zod.iso.datetime({})
 }).describe('One PlayerRating row, embedded inside PlayerRead.')).optional()
-}).describe('A roster entry — either a polled identity or an announced placeholder.\n\n``profile_id`` \/ ``alias`` \/ polled fields (``country``, ``steam_id``,\n``level``, ``xp``, ``region_id``, ``clan_name``, ``updated_at``,\n``ratings``) are populated from a ``Player`` row when the entry has a\npolled identity. For an announced placeholder (no ``profile_id`` yet),\n``alias`` is the host-given display name and the polled fields are\nnull\/empty — there\'s nothing to poll until the player\'s\n``profile_id`` mints.'))
+}).describe('A roster entry — one tournament player, polled enrichment optional.\n\n``name`` is the display label, always present. ``profile_id`` and the\npolled fields (``alias``, ``country``, ``steam_id``, ``level``, ``xp``,\n``region_id``, ``clan_name``, ``updated_at``, ``ratings``) are populated\nfrom the linked ``Player`` when the entry carries a ``profile_id``; for\nan unlinked entry they\'re null\/empty and ``alias`` falls back to\n``name``. Display resolves to ``presentation.displayName ?? name``;\n``alias`` is the current polled ladder alias (enrichment), which may\ndiffer from the tournament ``name`` (#187).'))
 })
 
 /**
  * Add a roster entry — owner-gated.
 
-Body carries either ``profile_id`` (a polled identity that the
-poller will pick up next cycle) or ``name`` (an announced
-placeholder). 409 if the identifier is already on the roster.
+Body carries a required ``name`` (display label) and an optional
+``profile_id`` linking it to a polled identity the poller will pick up
+next cycle. 409 if the ``name`` is already on the roster, or if the
+``profile_id`` (when given) is.
  * @summary Add Roster Player
  */
 export const AddRosterPlayerV1TournamentsTournamentSlugPlayersPostParams = zod.object({
   "tournament_slug": zod.string()
 })
 
-export const addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyProfileIdOneExclusiveMin = 0;
+export const addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyNameMax = 64;
 
-export const addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyNameOneMax = 64;
+export const addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyProfileIdOneExclusiveMin = 0;
 
 
 
 export const AddRosterPlayerV1TournamentsTournamentSlugPlayersPostBody = zod.object({
+  "name": zod.string().min(1).max(addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyNameMax),
   "profile_id": zod.union([zod.number().gt(addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyProfileIdOneExclusiveMin),zod.null()]).optional(),
-  "name": zod.union([zod.string().min(1).max(addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyNameOneMax),zod.null()]).optional(),
   "presentation": zod.record(zod.string(), zod.unknown()).optional()
-}).describe('Request body for adding a roster entry — polled identity or placeholder.\n\nPass ``profile_id`` for a polled identity, or ``name`` for an\nannounced placeholder. Exactly one of the two — sending both or\nneither is a 422. ``presentation`` is optional in both cases and can\nbe set later via PATCH.\n\n``name`` is rejected if it parses as an integer so the API can\npolymorphically dispatch URL lookups (``\/players\/{12345}`` →\nprofile_id, ``\/players\/{iyouxin}`` → name) without ambiguity.')
+}).describe('Request body for adding a roster entry (#187 unified shape).\n\n``name`` is the required display label. ``profile_id`` optionally links\nthe entry to a polled identity (ratings\/country\/matches\/live); omit it\nfor an entry whose account hasn\'t minted yet — it stays first-class and\ncan be linked later via PATCH. ``presentation`` is optional and can be\nset later via PATCH.\n\n``name`` is rejected if it parses as an integer — transitional, until\n#187 Phase 3 retires the validator — so a display label can\'t be\nconfused with the numeric surrogate id used in URL routing.')
 
 /**
- * A polled roster player's profile + ratings + most recent matches.
+ * A roster player's profile — addressed by surrogate id (#187).
 
-Only addressable by ``profile_id`` (a positive integer in the path) —
-placeholder rows aren't shown here because there's no polled data to
-surface. 404 if the profile isn't on this tournament's roster or if
-it is, but as a placeholder. Matches are joined via
-``MatchPlayer.profile_id`` (no FK back to ``Player``).
+A linked entry folds in its polled ``Player`` (ratings) and most recent
+matches. An unlinked entry — or a linked one the poller hasn't fetched
+yet — returns the same shape with empty polled enrichment (empty
+``ratings`` / ``recent_matches``, null ``last_polled_at``). 404 if the
+id isn't on this tournament's roster.
  * @summary Get Player
  */
-export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams = zod.object({
-  "profile_id": zod.number(),
+export const GetPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetParams = zod.object({
+  "tournament_player_id": zod.number(),
   "tournament_slug": zod.string()
 })
 
-export const getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryMatchLimitDefault = 20;
-export const getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryMatchLimitMax = 100;
+export const getPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetQueryMatchLimitDefault = 20;
+export const getPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetQueryMatchLimitMax = 100;
 
 
 
-export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryParams = zod.object({
-  "match_limit": zod.number().min(1).max(getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryMatchLimitMax).default(getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetQueryMatchLimitDefault).describe('Max recent matches to include (1-100, default 20).')
+export const GetPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetQueryParams = zod.object({
+  "match_limit": zod.number().min(1).max(getPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetQueryMatchLimitMax).default(getPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetQueryMatchLimitDefault).describe('Max recent matches to include (1-100, default 20).')
 })
 
-export const getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseRecentMatchesDefault = [];
+export const getPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetResponseRecentMatchesDefault = [];
 
-export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse = zod.object({
+export const GetPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetResponse = zod.object({
   "tournament_player_id": zod.number(),
   "profile_id": zod.union([zod.number(),zod.null()]),
+  "name": zod.string(),
   "alias": zod.string(),
   "country": zod.union([zod.string(),zod.null()]),
   "steam_id": zod.union([zod.string(),zod.null()]),
@@ -160,51 +161,45 @@ export const GetPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponse = z
   "new_rating": zod.union([zod.number(),zod.null()]),
   "xp_gained": zod.number()
 }).describe('One MatchPlayer row, embedded inside MatchRead.\n\n`outcome`, `old_rating`, `new_rating` are null while the match is in\nprogress; the upstream fills them in on completion.'))
-}).describe('A match plus all of its MatchPlayer rows.\n\nPlayers are always included — even in list views — so a tournament UI\ncan render a full match card (both sides, outcome, Elo delta) without a\nsecond round-trip. 1v1 ranked is two rows, team games top out at eight.')).default(getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetResponseRecentMatchesDefault)
-}).describe('Single-player response (``GET \/v1\/players\/{profile_id}``).\n\nExtends ``PlayerRead`` with ``last_polled_at`` and the player\'s recent\nmatches. Always represents a polled identity — the detail endpoint\nonly accepts a ``profile_id``, so placeholder rows aren\'t addressable\nhere (they have no detail to show).')
+}).describe('A match plus all of its MatchPlayer rows.\n\nPlayers are always included — even in list views — so a tournament UI\ncan render a full match card (both sides, outcome, Elo delta) without a\nsecond round-trip. 1v1 ranked is two rows, team games top out at eight.')).default(getPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetResponseRecentMatchesDefault)
+}).describe('Single-player response (``GET \/v1\/...\/players\/{tournament_player_id}``).\n\nExtends ``PlayerRead`` with ``last_polled_at`` and recent matches. The\ndetail endpoint addresses the roster row by its surrogate\n``tournament_player_id`` (#187), so an unlinked entry is addressable\ntoo — it just carries empty polled enrichment (no ``profile_id``, empty\n``ratings`` \/ ``recent_matches``, null ``last_polled_at``).')
 
 /**
- * Remove a roster entry — owner-gated.
+ * Remove a roster entry by surrogate id — owner-gated.
 
-Polymorphic lookup: numeric path segment is a ``profile_id``,
-non-numeric is a placeholder ``name``. 404 if no matching entry.
-The polled ``Player`` and rating rows are left untouched: the
-profile may still belong to another tournament's roster.
+404 if no matching entry. The polled ``Player`` and rating rows are
+left untouched: the profile may still belong to another tournament's
+roster.
  * @summary Remove Roster Player
  */
-export const RemoveRosterPlayerV1TournamentsTournamentSlugPlayersLookupDeleteParams = zod.object({
-  "lookup": zod.string(),
+export const RemoveRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdDeleteParams = zod.object({
+  "tournament_player_id": zod.number(),
   "tournament_slug": zod.string()
 })
 
 /**
- * Edit a roster entry's presentation, or promote a placeholder — owner-gated.
+ * Edit a roster entry's presentation, or link it to a polled identity.
 
-Polymorphic lookup: numeric path segment is a ``profile_id``,
-non-numeric is a placeholder ``name``. 404 if no matching entry.
-
+Owner-gated; addressed by surrogate id. 404 if no matching entry.
 Body fields are both optional:
 - ``presentation``: replaces the whole bag (read-modify-write).
-- ``profile_id``: only valid against a placeholder row, where it
-  **promotes** the row to a polled identity in the same transaction
-  (the ``name`` is cleared, ``profile_id`` is set; the
-  ``presentation`` bag carries through unless the body also sets it).
-  422 if the entry is already a polled identity (``profile_id`` is
-  immutable on a real-player row); 409 if the target ``profile_id``
-  is already on the roster.
+- ``profile_id``: **links** an unlinked entry to a polled identity —
+  additive, the row's ``name`` is kept. 422 if the entry is already
+  linked (the link is immutable once set); 409 if the target
+  ``profile_id`` is already on the roster.
  * @summary Update Roster Player
  */
-export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatchParams = zod.object({
-  "lookup": zod.string(),
+export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdPatchParams = zod.object({
+  "tournament_player_id": zod.number(),
   "tournament_slug": zod.string()
 })
 
-export const updateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatchBodyProfileIdOneExclusiveMin = 0;
+export const updateRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdPatchBodyProfileIdOneExclusiveMin = 0;
 
 
 
-export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatchBody = zod.object({
+export const UpdateRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdPatchBody = zod.object({
   "presentation": zod.union([zod.record(zod.string(), zod.unknown()),zod.null()]).optional(),
-  "profile_id": zod.union([zod.number().gt(updateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatchBodyProfileIdOneExclusiveMin),zod.null()]).optional()
-}).describe('Owner edit for a roster entry — presentation, and optionally promote.\n\n``presentation`` is an opaque per-player bag the consumer renders —\nstream links, bio text, whatever the frontend defines. The API stores\nit verbatim and never interprets its keys. The whole bag is replaced\non PATCH, so callers read-modify-write.\n\n``profile_id`` is optional and only meaningful when PATCHing a\nplaceholder row: setting it \*\*promotes\*\* the placeholder to a polled\nidentity in the same transaction (the placeholder\'s ``name`` is\ncleared, ``profile_id`` is set, and the row\'s ``presentation``\ncarries through unchanged unless the body also supplies a new bag).\nA real-player row can\'t change its ``profile_id`` — that\'s the\nrouting key and identity. 409 if the target ``profile_id`` is\nalready on the roster.')
+  "profile_id": zod.union([zod.number().gt(updateRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdPatchBodyProfileIdOneExclusiveMin),zod.null()]).optional()
+}).describe('Owner edit for a roster entry — presentation, and optionally link.\n\n``presentation`` is an opaque per-player bag the consumer renders —\nstream links, bio text, whatever the frontend defines. The API stores\nit verbatim and never interprets its keys. The whole bag is replaced\non PATCH, so callers read-modify-write.\n\n``profile_id`` is optional: setting it \*\*links\*\* an unlinked entry to a\npolled identity (additive — the row\'s ``name`` is kept, ``profile_id``\nis set, and ``presentation`` carries through unless the body also\nsupplies a new bag). An entry that\'s already linked can\'t change its\n``profile_id`` (422 — the link is immutable once set); 409 if the\ntarget ``profile_id`` is already on the roster.')
 

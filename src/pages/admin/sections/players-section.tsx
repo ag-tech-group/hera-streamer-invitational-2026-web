@@ -8,8 +8,8 @@ import {
   getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey,
   useAddRosterPlayerV1TournamentsTournamentSlugPlayersPost,
   useListPlayersV1TournamentsTournamentSlugPlayersGet,
-  useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersLookupDelete,
-  useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatch,
+  useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdDelete,
+  useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdPatch,
 } from "@/api/generated/hooks/players/players"
 import type { PlayerRead } from "@/api/generated/types"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -36,15 +36,15 @@ export function PlayersSection() {
   )
 
   // Narrow the generated 200|422 union (see `owners-section.tsx`) and sort
-  // alphabetically by the visible name (display-name override, else the ladder
-  // alias) rather than the API's add-order, so the roster is scannable.
+  // alphabetically by the visible name (display-name override, else the unified
+  // `name`, #187) rather than the API's add-order, so the roster is scannable.
   // Case-insensitive; `localeCompare` keeps it stable and locale-aware. Keyed
   // on `query.data` so the array identity is stable across renders.
   const players: PlayerRead[] = useMemo(() => {
     if (query.data?.status !== 200) return []
     return [...query.data.data.items].sort((a, b) =>
-      (presentationDisplayName(a.presentation) ?? a.alias).localeCompare(
-        presentationDisplayName(b.presentation) ?? b.alias,
+      (presentationDisplayName(a.presentation) ?? a.name).localeCompare(
+        presentationDisplayName(b.presentation) ?? b.name,
         undefined,
         { sensitivity: "base" }
       )
@@ -93,7 +93,7 @@ function PlayersList({
   return (
     <ul className="flex flex-col gap-2">
       {players.map((player) => (
-        <PlayerRow key={playerLookup(player)} player={player} />
+        <PlayerRow key={player.tournament_player_id} player={player} />
       ))}
     </ul>
   )
@@ -104,63 +104,63 @@ function PlayerRow({ player }: { player: PlayerRead }) {
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const [editing, setEditing] = useState(false)
-  const isPlaceholder = player.profile_id === null
+  const isUnlinked = player.profile_id === null
 
   // Lead with the host-set Display name (the presentation override) — the same
-  // name viewers see on the public standings, where `displayName ?? alias`
-  // wins (#152). The line below spells out the *linked ladder account* (the
-  // relic identity we actually poll) so an admin can catch a mis-link: a
+  // name viewers see on the public standings, where `displayName ?? name`
+  // wins (#152, #187). The line below spells out the *linked ladder account*
+  // (the relic identity we actually poll) so an admin can catch a mis-link: a
   // profile_id pasted from the aoe2insights page URL (its site id) instead of
   // the relic "Game Id" resolves to an unrelated account, and that shows up
   // here straight away.
   const overrideName = presentationDisplayName(player.presentation)
-  const visibleName = overrideName ?? player.alias
-  // Surface the ladder alias only when an override is hiding it — without an
-  // override the title already *is* the alias, so a wrong link is visible there
-  // and repeating it would just be noise.
-  const aliasMasked =
-    overrideName !== undefined && overrideName !== player.alias
+  const visibleName = overrideName ?? player.name
+  // Surface the ladder alias on the linked-account line whenever it isn't
+  // already the headline — `name` is now the display label and `alias` the
+  // polled handle, so the alias is what verifies the link landed on the right
+  // ladder account.
+  const ladderAliasHidden = player.alias !== visibleName
   const linkedAccount: string[] = []
-  if (!isPlaceholder) {
-    if (aliasMasked) linkedAccount.push(player.alias)
+  if (!isUnlinked) {
+    if (ladderAliasHidden) linkedAccount.push(player.alias)
     linkedAccount.push(String(player.profile_id))
     if (player.country) linkedAccount.push(player.country)
   }
-  // A polled identity with no rating row hasn't placed on the tracked ladder
+  // A linked identity with no rating row hasn't placed on the tracked ladder
   // yet — a brand-new account, or (per the mis-link above) a 0-game stranger.
-  // `ratings` is populated for polled rows; guard on the array so an absent
+  // `ratings` is populated for linked rows; guard on the array so an absent
   // field never false-flags a rated player as unrated.
   const notYetRated =
-    !isPlaceholder &&
-    Array.isArray(player.ratings) &&
-    player.ratings.length === 0
+    !isUnlinked && Array.isArray(player.ratings) && player.ratings.length === 0
 
   const mutation =
-    useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersLookupDelete({
-      request: {
-        headers: { "Idempotency-Key": idempotencyKey.current },
-      },
-      mutation: {
-        onSuccess: () => {
-          idempotencyKey.reset()
-          void queryClient.invalidateQueries({
-            queryKey:
-              getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
-                activeTournament.apiTournamentSlug
-              ),
-          })
-          toast.success(t("admin.players.removeSuccess"))
+    useRemoveRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdDelete(
+      {
+        request: {
+          headers: { "Idempotency-Key": idempotencyKey.current },
         },
-        onError: idempotencyKey.resetOnReusedKey,
-      },
-    })
+        mutation: {
+          onSuccess: () => {
+            idempotencyKey.reset()
+            void queryClient.invalidateQueries({
+              queryKey:
+                getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
+                  activeTournament.apiTournamentSlug
+                ),
+            })
+            toast.success(t("admin.players.removeSuccess"))
+          },
+          onError: idempotencyKey.resetOnReusedKey,
+        },
+      }
+    )
 
   return (
     <li className="bg-muted/30 flex flex-col gap-3 rounded-md px-3 py-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-sm font-medium">{visibleName}</span>
-          {!isPlaceholder && (
+          {!isUnlinked && (
             <span className="text-muted-foreground font-mono text-xs">
               {t("admin.players.linkedAccount")}: {linkedAccount.join(" · ")}
             </span>
@@ -203,7 +203,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
             onConfirm={() =>
               mutation.mutate({
                 tournamentSlug: activeTournament.apiTournamentSlug,
-                lookup: playerLookup(player),
+                tournamentPlayerId: player.tournament_player_id,
               })
             }
           />
@@ -211,7 +211,7 @@ function PlayerRow({ player }: { player: PlayerRead }) {
       </div>
       {editing && (
         <PresentationForm
-          lookup={playerLookup(player)}
+          tournamentPlayerId={player.tournament_player_id}
           alias={player.alias}
           profileId={player.profile_id}
           presentation={
@@ -238,24 +238,20 @@ function PlayerRow({ player }: { player: PlayerRead }) {
  * three fields can reach in practice.
  */
 function PresentationForm({
-  lookup,
+  tournamentPlayerId,
   alias,
   profileId,
   presentation,
   onDone,
 }: {
-  /**
-   * Polymorphic lookup the API's `/players/{lookup}` URL family uses —
-   * `profile_id` (numeric string) for polled rows, `alias` for placeholder
-   * rows. See `playerLookup` for the derivation.
-   */
-  lookup: string
+  /** Surrogate roster id the API addresses for PATCH (`/players/{id}`, #187). */
+  tournamentPlayerId: number
   alias: string
   /**
-   * The row's polled identity, or `null` for a placeholder. When null the
-   * form surfaces an editable Profile ID field — filling it promotes the
-   * placeholder in the same PATCH. A polled row's identity is immutable, so
-   * the field is omitted there.
+   * The row's linked identity, or `null` for an unlinked entry. When null the
+   * form surfaces an editable Profile ID field — filling it **links** the entry
+   * to a polled identity in the same PATCH (the row's `name` is kept). A linked
+   * row's profile_id is immutable, so the field is omitted there.
    */
   profileId: number | null
   presentation: Record<string, unknown>
@@ -264,36 +260,39 @@ function PresentationForm({
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
-  const isPlaceholder = profileId === null
+  const isUnlinked = profileId === null
   const [form, setForm] = useState<PresentationFormState>(() =>
     toPresentationFormState(presentation)
   )
-  // Promotion is just another edit field: a placeholder's Profile ID starts
-  // empty and, once filled, rides the same PATCH that saves the overrides.
+  // Linking is just another edit field: an unlinked entry's Profile ID starts
+  // empty and, once filled, rides the same PATCH that saves the overrides
+  // (additive — the entry's `name` is kept, #187).
   const [profileIdInput, setProfileIdInput] = useState(
     profileId !== null ? String(profileId) : ""
   )
 
   const mutation =
-    useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersLookupPatch({
-      request: {
-        headers: { "Idempotency-Key": idempotencyKey.current },
-      },
-      mutation: {
-        onSuccess: () => {
-          idempotencyKey.reset()
-          void queryClient.invalidateQueries({
-            queryKey:
-              getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
-                activeTournament.apiTournamentSlug
-              ),
-          })
-          toast.success(t("admin.players.presentation.saveSuccess"))
-          onDone()
+    useUpdateRosterPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdPatch(
+      {
+        request: {
+          headers: { "Idempotency-Key": idempotencyKey.current },
         },
-        onError: idempotencyKey.resetOnReusedKey,
-      },
-    })
+        mutation: {
+          onSuccess: () => {
+            idempotencyKey.reset()
+            void queryClient.invalidateQueries({
+              queryKey:
+                getListPlayersV1TournamentsTournamentSlugPlayersGetQueryKey(
+                  activeTournament.apiTournamentSlug
+                ),
+            })
+            toast.success(t("admin.players.presentation.saveSuccess"))
+            onDone()
+          },
+          onError: idempotencyKey.resetOnReusedKey,
+        },
+      }
+    )
 
   // Disable save when any non-empty URL field doesn't parse — preserves
   // empty rows (used to add a slot) without false-flagging them.
@@ -301,12 +300,12 @@ function PresentationForm({
     (url) => url.trim().length > 0 && !isHttpUrl(url)
   )
 
-  // A profile_id is optional (a placeholder can be edited without promoting),
+  // A profile_id is optional (an unlinked entry can be edited without linking),
   // but once one is typed it must be a positive integer before save is allowed.
-  const promotedId = Number(profileIdInput)
-  const wantsPromote = isPlaceholder && profileIdInput.trim().length > 0
+  const linkedId = Number(profileIdInput)
+  const wantsLink = isUnlinked && profileIdInput.trim().length > 0
   const invalidProfileId =
-    wantsPromote && !(Number.isInteger(promotedId) && promotedId > 0)
+    wantsLink && !(Number.isInteger(linkedId) && linkedId > 0)
 
   // The profile URL is optional, but if set must parse as an http(s) URL —
   // same guard as the stream links, since the player name's href comes
@@ -318,14 +317,12 @@ function PresentationForm({
     event.preventDefault()
     mutation.mutate({
       tournamentSlug: activeTournament.apiTournamentSlug,
-      lookup,
+      tournamentPlayerId,
       data: {
         presentation: toPresentationUpdate(presentation, form),
-        // Only a placeholder promotes; the API rejects changing a polled
-        // row's profile_id, so it's never sent for one.
-        ...(wantsPromote && !invalidProfileId
-          ? { profile_id: promotedId }
-          : {}),
+        // Only an unlinked entry links; the API rejects changing an already-
+        // linked row's profile_id, so it's never sent for one.
+        ...(wantsLink && !invalidProfileId ? { profile_id: linkedId } : {}),
       },
     })
   }
@@ -353,13 +350,13 @@ function PresentationForm({
       onSubmit={handleSubmit}
       className="border-border/60 flex flex-col gap-3 border-t pt-3"
     >
-      {isPlaceholder && (
+      {isUnlinked && (
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`presentation-profile-id-${lookup}`}>
+          <Label htmlFor={`presentation-profile-id-${tournamentPlayerId}`}>
             {t("admin.players.presentation.profileId")}
           </Label>
           <Input
-            id={`presentation-profile-id-${lookup}`}
+            id={`presentation-profile-id-${tournamentPlayerId}`}
             type="number"
             inputMode="numeric"
             value={profileIdInput}
@@ -376,11 +373,11 @@ function PresentationForm({
       </p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`presentation-name-${lookup}`}>
+          <Label htmlFor={`presentation-name-${tournamentPlayerId}`}>
             {t("admin.players.presentation.displayName")}
           </Label>
           <Input
-            id={`presentation-name-${lookup}`}
+            id={`presentation-name-${tournamentPlayerId}`}
             value={form.displayName}
             onChange={(event) =>
               setForm({ ...form, displayName: event.target.value })
@@ -392,11 +389,11 @@ function PresentationForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`presentation-flag-${lookup}`}>
+          <Label htmlFor={`presentation-flag-${tournamentPlayerId}`}>
             {t("admin.players.presentation.flag")}
           </Label>
           <CountryCombobox
-            id={`presentation-flag-${lookup}`}
+            id={`presentation-flag-${tournamentPlayerId}`}
             value={form.flag}
             onChange={(flag) => setForm({ ...form, flag })}
           />
@@ -453,11 +450,11 @@ function PresentationForm({
         </Button>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={`presentation-bio-${lookup}`}>
+        <Label htmlFor={`presentation-bio-${tournamentPlayerId}`}>
           {t("admin.players.presentation.bio")}
         </Label>
         <Textarea
-          id={`presentation-bio-${lookup}`}
+          id={`presentation-bio-${tournamentPlayerId}`}
           value={form.bio}
           onChange={(event) => setForm({ ...form, bio: event.target.value })}
           placeholder={t("admin.players.presentation.bioPlaceholder")}
@@ -469,11 +466,11 @@ function PresentationForm({
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={`presentation-profile-url-${lookup}`}>
+        <Label htmlFor={`presentation-profile-url-${tournamentPlayerId}`}>
           {t("admin.players.presentation.profileUrl")}
         </Label>
         <Input
-          id={`presentation-profile-url-${lookup}`}
+          id={`presentation-profile-url-${tournamentPlayerId}`}
           type="url"
           value={form.profileUrl}
           onChange={(event) =>
@@ -573,27 +570,13 @@ function toPresentationUpdate(
 }
 
 /**
- * Polymorphic lookup string for the `/players/{lookup}` URL family
- * (#185). Polled rows use the `profile_id` (a numeric string); placeholder
- * rows use the host-given `alias`. The API rejects integer-looking names
- * on POST so the routing key stays unambiguous: a numeric path segment
- * is always a `profile_id`, a non-numeric segment is always a name.
- */
-function playerLookup(player: PlayerRead): string {
-  return player.profile_id !== null
-    ? player.profile_id.toString()
-    : player.alias
-}
-
-/**
- * Add a roster entry — polled player or placeholder, one form (#198). A roster
- * member is one logical entity; whether it has a relic profile_id is just an
- * attribute, so adding is the same action either way. The single
- * `POST /v1/tournaments/{slug}/players` endpoint takes `profile_id` XOR `name`
- * (422 on both/neither, or a name that parses as an integer), so the form
- * dispatches on which fields are filled: a profile ID adds a polled identity
- * (with the typed name, if any, riding along as a `displayName` override); a
- * name alone adds a placeholder to promote later.
+ * Add a roster entry — one form (#198, #187). A roster member is one logical
+ * entity: `name` is the required display label, and an optional `profile_id`
+ * links it to a polled identity (ratings/country/matches/live). The single
+ * `POST /v1/tournaments/{slug}/players` endpoint always takes `name`; the
+ * Profile ID just rides along when filled. `name` is still rejected if it
+ * parses as an integer (Phase-2 validator, retired in Phase 3), so a digits-only
+ * name is blocked client-side as an ID typed into the wrong box.
  */
 export function AddPlayerForm() {
   const { t } = useTranslation()
@@ -628,11 +611,10 @@ export function AddPlayerForm() {
   const hasId = trimmedId.length > 0
   const validId =
     hasId && Number.isInteger(Number(trimmedId)) && Number(trimmedId) > 0
-  // A digits-only name with no profile ID would 422 — the API reserves integer
-  // lookups for profile IDs — and almost always means an ID typed into the
-  // wrong field. (A numeric name *with* an ID is fine: it rides along as a
-  // displayName override, not a top-level `name`.)
-  const numericNameBlocked = !hasId && hasName && /^\d+$/.test(trimmedName)
+  // `name` is the required display label and is always sent top-level, so a
+  // digits-only name is rejected by the Phase-2 validator (retired in Phase 3) —
+  // it almost always means an ID typed into the wrong field.
+  const numericNameBlocked = hasName && /^\d+$/.test(trimmedName)
 
   const errorKey =
     hasId && !validId
@@ -640,24 +622,21 @@ export function AddPlayerForm() {
       : numericNameBlocked
         ? "admin.players.addErrorNumericName"
         : null
-  // Need at least one of name / ID, a valid ID when one is given, and not a
-  // digits-only placeholder name.
-  const canSubmit = (hasId ? validId : hasName) && !numericNameBlocked
+  // Need a name (required), a valid ID when one is given, and not a digits-only
+  // name. The Profile ID is optional — an unlinked entry can be linked later.
+  const canSubmit = hasName && !numericNameBlocked && (!hasId || validId)
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!canSubmit) return
-    // `profile_id` XOR top-level `name`; a name alongside an ID becomes a
-    // display override rather than a second identity key.
-    const data = hasId
-      ? {
-          profile_id: Number(trimmedId),
-          ...(hasName ? { presentation: { displayName: trimmedName } } : {}),
-        }
-      : { name: trimmedName }
+    // `name` is always sent; an optional `profile_id` rides along only when
+    // provided, linking the entry to a polled identity (#187).
     mutation.mutate({
       tournamentSlug: activeTournament.apiTournamentSlug,
-      data,
+      data: {
+        name: trimmedName,
+        ...(hasId ? { profile_id: Number(trimmedId) } : {}),
+      },
     })
   }
 

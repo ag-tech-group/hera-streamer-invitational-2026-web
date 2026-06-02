@@ -37,12 +37,16 @@ function teamStanding(member: { profile_id: number; alias: string }) {
 /** A polled roster entry carrying an optional presentation override. */
 function rosterPlayer(player: {
   profile_id: number
+  name?: string
   alias: string
   presentation?: Record<string, unknown>
 }) {
   return {
     tournament_player_id: player.profile_id,
     profile_id: player.profile_id,
+    // `name` (the unified display label, #187) defaults to the alias for
+    // fixtures that don't care; the real DTO always carries it.
+    name: player.name ?? player.alias,
     alias: player.alias,
     country: null,
     presentation: player.presentation,

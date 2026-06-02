@@ -13,19 +13,21 @@ import type { PlayerRatingRead } from './playerRatingRead';
 import type { PlayerReadPresentation } from './playerReadPresentation';
 
 /**
- * A roster entry — either a polled identity or an announced placeholder.
+ * A roster entry — one tournament player, polled enrichment optional.
 
-``profile_id`` / ``alias`` / polled fields (``country``, ``steam_id``,
-``level``, ``xp``, ``region_id``, ``clan_name``, ``updated_at``,
-``ratings``) are populated from a ``Player`` row when the entry has a
-polled identity. For an announced placeholder (no ``profile_id`` yet),
-``alias`` is the host-given display name and the polled fields are
-null/empty — there's nothing to poll until the player's
-``profile_id`` mints.
+``name`` is the display label, always present. ``profile_id`` and the
+polled fields (``alias``, ``country``, ``steam_id``, ``level``, ``xp``,
+``region_id``, ``clan_name``, ``updated_at``, ``ratings``) are populated
+from the linked ``Player`` when the entry carries a ``profile_id``; for
+an unlinked entry they're null/empty and ``alias`` falls back to
+``name``. Display resolves to ``presentation.displayName ?? name``;
+``alias`` is the current polled ladder alias (enrichment), which may
+differ from the tournament ``name`` (#187).
  */
 export interface PlayerRead {
   tournament_player_id: number;
   profile_id: number | null;
+  name: string;
   alias: string;
   country: string | null;
   steam_id: string | null;

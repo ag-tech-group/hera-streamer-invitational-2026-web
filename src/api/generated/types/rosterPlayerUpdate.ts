@@ -12,21 +12,19 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
 import type { RosterPlayerUpdatePresentation } from './rosterPlayerUpdatePresentation';
 
 /**
- * Owner edit for a roster entry — presentation, and optionally promote.
+ * Owner edit for a roster entry — presentation, and optionally link.
 
 ``presentation`` is an opaque per-player bag the consumer renders —
 stream links, bio text, whatever the frontend defines. The API stores
 it verbatim and never interprets its keys. The whole bag is replaced
 on PATCH, so callers read-modify-write.
 
-``profile_id`` is optional and only meaningful when PATCHing a
-placeholder row: setting it **promotes** the placeholder to a polled
-identity in the same transaction (the placeholder's ``name`` is
-cleared, ``profile_id`` is set, and the row's ``presentation``
-carries through unchanged unless the body also supplies a new bag).
-A real-player row can't change its ``profile_id`` — that's the
-routing key and identity. 409 if the target ``profile_id`` is
-already on the roster.
+``profile_id`` is optional: setting it **links** an unlinked entry to a
+polled identity (additive — the row's ``name`` is kept, ``profile_id``
+is set, and ``presentation`` carries through unless the body also
+supplies a new bag). An entry that's already linked can't change its
+``profile_id`` (422 — the link is immutable once set); 409 if the
+target ``profile_id`` is already on the roster.
  */
 export interface RosterPlayerUpdate {
   presentation?: RosterPlayerUpdatePresentation;
