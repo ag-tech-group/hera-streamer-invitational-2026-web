@@ -49,3 +49,39 @@ export function teamColorMap(teamIds: number[]): Map<number, TeamColorSlot> {
     ordered.map((id, i) => [id, TEAM_COLOR_SLOTS[i % TEAM_COLOR_SLOTS.length]])
   )
 }
+
+/**
+ * The AoE2 player-colour slots (#146) as concrete `#rrggbb` hex.
+ *
+ * The canonical colours live in `index.css` as `--team-pN` tokens (oklch), but
+ * echarts paints to a `<canvas>` and can't read CSS custom properties — so the
+ * stats charts need the same palette as plain hex. These approximate the oklch
+ * tokens closely enough to read as the same colour beside the HTML surfaces.
+ */
+export const TEAM_HEX: Record<TeamColorSlot, string> = {
+  p1: "#3b82f6",
+  p2: "#ef4444",
+  p3: "#22c55e",
+  p4: "#eab308",
+  p5: "#06b6d4",
+  p6: "#ec4899",
+  p7: "#94a3b8",
+  p8: "#f97316",
+}
+
+/**
+ * Lightens a `#rrggbb` hex toward white by `amount` (0 = unchanged, 1 = white),
+ * clamped to that range. Used to shade members within a team's hue on the
+ * roster-depth bars (#300) so stacked segments of one team stay distinguishable
+ * while still reading as that team's colour.
+ */
+export function lightenHex(hex: string, amount: number): string {
+  const t = Math.min(1, Math.max(0, amount))
+  const n = Number.parseInt(hex.slice(1), 16)
+  const mix = (channel: number) => Math.round(channel + (255 - channel) * t)
+  const r = mix((n >> 16) & 0xff)
+  const g = mix((n >> 8) & 0xff)
+  const b = mix(n & 0xff)
+  const to2 = (channel: number) => channel.toString(16).padStart(2, "0")
+  return `#${to2(r)}${to2(g)}${to2(b)}`
+}
