@@ -289,6 +289,9 @@
     "minutes": "мин",
     "seconds": "сек"
   },
+  "tournamentLinks": {
+    "navLabel": "Ресурсы турнира"
+  },
   "hostLinks": {
     "defaultLabel": "Ведущий",
     "hostedBy": "Ведущий: {{host}}",

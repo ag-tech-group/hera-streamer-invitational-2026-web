@@ -287,6 +287,9 @@
     "minutes": "Min.",
     "seconds": "Sek."
   },
+  "tournamentLinks": {
+    "navLabel": "Turnier-Ressourcen"
+  },
   "hostLinks": {
     "defaultLabel": "Veranstaltet von",
     "hostedBy": "Veranstaltet von {{host}}",

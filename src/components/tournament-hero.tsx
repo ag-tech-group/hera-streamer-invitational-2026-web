@@ -1,5 +1,6 @@
 import { Trans, useTranslation } from "react-i18next"
 
+import { TournamentLinksBar } from "@/components/tournament-links-bar"
 import { activeTournament } from "@/config/tournaments"
 
 /**
@@ -61,6 +62,13 @@ export function TournamentHero() {
           }}
         />
       </p>
+      {/* Tournament resource links (#273/#274/#276/#277), centered as part of
+          the hero — quick links to follow the event, distinct from the host's
+          watch/support channels on the card strip below. */}
+      <TournamentLinksBar
+        links={activeTournament.tournamentLinks}
+        className="justify-center"
+      />
     </header>
   )
 }

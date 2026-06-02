@@ -39,6 +39,14 @@ export interface Tournament {
    */
   hostLinks?: HostLink[]
   /**
+   * Tournament resource / info links — info video + trailer, handbook, wiki,
+   * community invite (#273/#274/#276/#277). Distinct from `hostLinks`: those
+   * are the host's own watch/support channels, these are "learn about / follow
+   * the event" links. Rendered as a slim chip bar (`TournamentLinksBar`) below
+   * the context cards rather than as a fifth card. Empty/unset → nothing renders.
+   */
+  tournamentLinks?: TournamentLink[]
+  /**
    * Host display name, e.g. `"Hera"`. The promo card renders a localized
    * `"Hosted by {name}"` (the `hostLinks.hostedBy` key); the document title
    * uses a canonical English `"Hosted by {name}"` so it stays in sync with
@@ -103,4 +111,28 @@ export type HostLinkKind =
   | "stream"
   | "donate"
   | "social"
+  | "other"
+
+/** A single tournament resource / info link rendered in the `TournamentLinksBar`. */
+export interface TournamentLink {
+  /** Short display label, e.g. `"Handbook"` or `"Liquipedia"`. */
+  label: string
+  /** Absolute URL (`https://…`). Opens in a new tab. */
+  url: string
+  /** Category, used to pick an icon. Unknown values fall back to a generic external-link glyph. */
+  kind: TournamentLinkKind
+}
+
+/**
+ * Recognised `TournamentLink.kind` values. Each maps to an icon in
+ * `TournamentLinksBar`: `discord` uses an inlined brand glyph (Lucide ships
+ * none, like the host card's Patreon mark); the rest use Lucide category
+ * icons. `other` is the generic external-link fallback.
+ */
+export type TournamentLinkKind =
+  | "video"
+  | "trailer"
+  | "handbook"
+  | "wiki"
+  | "discord"
   | "other"
