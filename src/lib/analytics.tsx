@@ -23,6 +23,9 @@ import { logger } from "@/lib/logger"
  * - `host.link.click`      `{ kind, streamLive, source: "host_card" }`
  *                          — host promo-card link, by kind (twitch/youtube/
  *                          donate/patreon/social/other).
+ * - `tournament.link.click` `{ kind, source: "resource_bar" }`
+ *                          — tournament resource-bar link, by kind (video/
+ *                          trailer/handbook/wiki/discord/other).
  * - `player.profile.click` `{ profileId, alias, source: "standings" }`
  *                          — player name → `presentation.profileUrl`.
  * - `player.bio.open`      `{ profileId, alias }` — bio hover/tap reveal.

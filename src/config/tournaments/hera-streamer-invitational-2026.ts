@@ -48,4 +48,34 @@ export const heraStreamerInvitational2026: Tournament = {
       kind: "patreon",
     },
   ],
+  // Tournament resource / info links rendered as a slim chip bar below the
+  // context cards (#273/#274/#276/#277) — distinct from `hostLinks` (the host's
+  // watch/support channels); these are "learn about / follow the event" links.
+  tournamentLinks: [
+    {
+      label: "Tournament Details",
+      url: "https://www.youtube.com/watch?v=zQag90FLvDw",
+      kind: "video",
+    },
+    {
+      label: "Trailer",
+      url: "https://www.youtube.com/watch?v=kN8QTpaII_0",
+      kind: "trailer",
+    },
+    {
+      label: "Handbook",
+      url: "https://docs.google.com/document/d/e/2PACX-1vQHOlzB6Zc8xWqLJEtqy26atxFKYZ5PjWZoQ-h2rkFl5W331Dz0r6MuY2UpMSOiUgjgCBOuGKReKDeJ/pub",
+      kind: "handbook",
+    },
+    {
+      label: "Liquipedia",
+      url: "https://liquipedia.net/ageofempires/The_King%27s_Gauntlet",
+      kind: "wiki",
+    },
+    {
+      label: "Discord",
+      url: "https://discord.com/invite/Vj936kargR",
+      kind: "discord",
+    },
+  ],
 }

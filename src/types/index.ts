@@ -1,4 +1,10 @@
-export type { HostLink, HostLinkKind, Tournament } from "./tournament"
+export type {
+  HostLink,
+  HostLinkKind,
+  Tournament,
+  TournamentLink,
+  TournamentLinkKind,
+} from "./tournament"
 export type { TournamentInfo } from "./tournament-info"
 export type {
   MatchResult,

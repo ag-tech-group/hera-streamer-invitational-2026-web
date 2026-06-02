@@ -287,6 +287,9 @@
     "minutes": "min",
     "seconds": "sec"
   },
+  "tournamentLinks": {
+    "navLabel": "Toernooibronnen"
+  },
   "hostLinks": {
     "defaultLabel": "Gehost door",
     "hostedBy": "Gehost door {{host}}",

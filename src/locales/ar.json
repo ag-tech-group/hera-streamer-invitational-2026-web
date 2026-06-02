@@ -291,6 +291,9 @@
     "minutes": "دقيقة",
     "seconds": "ثانية"
   },
+  "tournamentLinks": {
+    "navLabel": "موارد البطولة"
+  },
   "hostLinks": {
     "defaultLabel": "استضافة",
     "hostedBy": "استضافة {{host}}",
