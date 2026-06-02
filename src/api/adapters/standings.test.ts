@@ -113,3 +113,26 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
     expect(snapshotOf(dto({ max_rating: null })).maxRating).toBeNull()
   })
 })
+
+describe("toStandingsSnapshot — defensive name coercion (#313)", () => {
+  // A stale API revision served mid-rollover can omit `name` even though the
+  // generated DTO marks it required. The adapter must still yield a string so
+  // the standings sort (`comparePeakRank` → `name.localeCompare`) can't throw
+  // and take down the whole table. `undefined as unknown as string` simulates
+  // that contract-violating response.
+  it("coerces a missing name to the alias so the sort comparator can't crash", () => {
+    const row = snapshotOf(dto({ name: undefined as unknown as string }))
+    expect(typeof row.name).toBe("string")
+    expect(row.name).toBe("Player") // falls back to the ladder handle (alias)
+  })
+
+  it("falls back to an empty string when both name and alias are missing", () => {
+    const row = snapshotOf(
+      dto({
+        name: undefined as unknown as string,
+        alias: undefined as unknown as string,
+      })
+    )
+    expect(row.name).toBe("")
+  })
+})
