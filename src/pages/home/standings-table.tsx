@@ -941,7 +941,7 @@ function WinPctCell({
 
 /**
  * The "status band": a player's last completed tournament match as a
- * "Last Match 4h" readout. The dot + text go green when that match landed
+ * "Last match 4h" readout. The dot + text go green when that match landed
  * within the last 24h and grey when older; a player with no recorded match
  * shows a neutral placeholder. Tracks match *completion*, so "playing right
  * now" lives on the separate Live badge, not here.

@@ -132,7 +132,7 @@ export interface StandingsRow {
   /**
    * ISO-8601 timestamp of the player's most recent **in-window** match (#238
    * → `tournament_record.last_match_at`), or `null` when none. Backs the
-   * Activity "Last Match 1h" badge (green within 24h, grey when older).
+   * Activity "Last match 1h" badge (green within 24h, grey when older).
    */
   lastMatchAt: string | null
   /**
