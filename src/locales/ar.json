@@ -95,7 +95,7 @@
       "games": "المباريات",
       "winPct": "نسبة الفوز",
       "recent": "الأخيرة",
-      "activity": "النشاط",
+      "lastMatch": "آخر مباراة",
       "watch": "المشاهدة"
     },
     "winPctBreakdown": {
@@ -106,7 +106,6 @@
     },
     "live": "مباشر",
     "liveAriaLabel": "في مباراة مباشرة",
-    "lastMatch": "آخر مباراة",
     "recentAriaLabel": "النتائج الأخيرة، الأحدث أولاً: {{results}}",
     "win": "فوز",
     "loss": "خسارة",

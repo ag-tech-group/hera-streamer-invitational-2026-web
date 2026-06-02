@@ -95,7 +95,7 @@
       "games": "Игры",
       "winPct": "% побед",
       "recent": "Недавние",
-      "activity": "Активность",
+      "lastMatch": "Последний матч",
       "watch": "Смотреть"
     },
     "winPctBreakdown": {
@@ -106,7 +106,6 @@
     },
     "live": "В эфире",
     "liveAriaLabel": "В прямом матче",
-    "lastMatch": "Последний матч",
     "recentAriaLabel": "Недавние результаты, сначала самые свежие: {{results}}",
     "win": "Победа",
     "loss": "Поражение",
