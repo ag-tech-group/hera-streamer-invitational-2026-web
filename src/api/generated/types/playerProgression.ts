@@ -19,8 +19,15 @@ leaderboard, oldest-first — the consumer plots ``rating`` against
 ``completed_at`` for a by-date view, or against point index for a
 by-games-played view. A player with no completed-match history on the
 leaderboard is omitted from the series list entirely.
+
+``tournament_player_id`` is the stable per-series key (#187) — a series
+only exists for a player with rated matches, so the row is always
+linked and ``profile_id`` is non-null too, but the consumer keys its
+chart on ``tournament_player_id`` for consistency with the rest of the
+read surface.
  */
 export interface PlayerProgression {
+  tournament_player_id: number;
   profile_id: number;
   alias: string;
   points: RatingPoint[];

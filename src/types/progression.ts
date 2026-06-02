@@ -11,6 +11,15 @@ export interface RatingObservation {
  * history on the leaderboard are absent from the series list entirely.
  */
 export interface PlayerSeries {
+  /**
+   * Stable per-series identity (#187) — the key the chart and the display-name
+   * join use, matching the rest of the unified read surface. A series only
+   * exists for a player with rated matches, so it's always a linked entrant
+   * (hence `profileId` is non-null here too); we still key on this for
+   * consistency, not because `profileId` could be missing.
+   */
+  tournamentPlayerId: number
+  /** Raw ladder profile id (enrichment, like `alias`) — non-null for a series. */
   profileId: number
   alias: string
   points: RatingObservation[]

@@ -8,22 +8,23 @@ export type LabeledSeries = PlayerSeries & {
 
 /**
  * Joins the host `presentation.displayName` override onto each progression
- * series by `profileId`.
+ * series by `tournamentPlayerId`.
  *
  * The `/progression` payload carries only the raw ladder `alias` (no
  * `presentation`), so the `/stats` charts and cards would otherwise show
  * profile names instead of the display names viewers see everywhere else. The
  * override lives on the standings rows, so `StatsPage` builds a
- * `profileId → displayName` map from them and we resolve each label here —
- * mirroring the Teams view join (#266). The raw `alias` is preserved so callers
- * that need the ladder name (e.g. analytics) still have it.
+ * `tournamentPlayerId → displayName` map from them and we resolve each label
+ * here — mirroring the Teams view join (#266) and keying on the same unified
+ * identity (#187) the rest of the read surface uses. The raw `alias` is
+ * preserved so callers that need the ladder name (e.g. analytics) still have it.
  */
 export function labelSeries(
   series: PlayerSeries[],
-  displayNameByProfileId: Map<number, string>
+  displayNameByTournamentPlayerId: Map<number, string>
 ): LabeledSeries[] {
   return series.map((s) => ({
     ...s,
-    label: displayNameByProfileId.get(s.profileId) ?? s.alias,
+    label: displayNameByTournamentPlayerId.get(s.tournamentPlayerId) ?? s.alias,
   }))
 }

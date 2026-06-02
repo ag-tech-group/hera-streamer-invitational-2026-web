@@ -112,8 +112,9 @@ function buildOption(
       type: "line",
       // Stable identity so echarts merges each player's series in place across
       // live refetches (matching by id, not array position) instead of
-      // disposing and rebuilding it — see the chart component for why.
-      id: s.profileId,
+      // disposing and rebuilding it — see the chart component for why. Keyed on
+      // the unified tournamentPlayerId (#187), matching the series' own identity.
+      id: s.tournamentPlayerId,
       // The host's display-name override (joined upstream in StatsPage), else
       // the raw ladder alias — so the legend/tooltip match the rest of the site.
       name: s.label,

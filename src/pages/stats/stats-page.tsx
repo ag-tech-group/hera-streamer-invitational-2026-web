@@ -57,21 +57,28 @@ export function StatsPage() {
 
   // The /progression series carries only the raw ladder alias, so the chart
   // and the series-derived summary cards would show profile names rather than
-  // the host's display override. Join profileId → display name from the
-  // standings rows (which do carry it) and feed the labeled series to both —
-  // mirroring the Teams view join (#266).
-  const displayNameByProfileId = useMemo(() => {
+  // the host's display override. Join tournamentPlayerId → display name from
+  // the standings rows (which do carry it) and feed the labeled series to both
+  // — mirroring the Teams view join (#266) and keying on the unified identity
+  // (#187) the series itself is keyed on. `tournamentPlayerId` is non-null on
+  // every row, so an unlinked entrant's override would join too (a series only
+  // ever exists for a linked, rated player, but the key is the same either way).
+  const displayNameByTournamentPlayerId = useMemo(() => {
     const map = new Map<number, string>()
     for (const row of standings.data?.rows ?? []) {
-      if (row.profileId !== null && row.presentation.displayName) {
-        map.set(row.profileId, row.presentation.displayName)
+      if (row.presentation.displayName) {
+        map.set(row.tournamentPlayerId, row.presentation.displayName)
       }
     }
     return map
   }, [standings.data?.rows])
   const labeledSeries = useMemo(
-    () => labelSeries(progression.data?.series ?? [], displayNameByProfileId),
-    [progression.data?.series, displayNameByProfileId]
+    () =>
+      labelSeries(
+        progression.data?.series ?? [],
+        displayNameByTournamentPlayerId
+      ),
+    [progression.data?.series, displayNameByTournamentPlayerId]
   )
 
   return (

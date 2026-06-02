@@ -12,6 +12,7 @@ describe("toProgressionSnapshot", () => {
           last_polled_at: "2026-05-30T00:00:00Z",
           items: [
             {
+              tournament_player_id: 11,
               profile_id: 1,
               alias: "Alpha",
               points: [
@@ -29,6 +30,7 @@ describe("toProgressionSnapshot", () => {
     expect(snapshot.lastPolledAt).toBe("2026-05-30T00:00:00Z")
     expect(snapshot.series).toEqual([
       {
+        tournamentPlayerId: 11,
         profileId: 1,
         alias: "Alpha",
         points: [

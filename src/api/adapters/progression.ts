@@ -13,6 +13,7 @@ type ProgressionResponse =
 
 function toPlayerSeries(dto: PlayerProgression): PlayerSeries {
   return {
+    tournamentPlayerId: dto.tournament_player_id,
     profileId: dto.profile_id,
     alias: dto.alias,
     points: dto.points.map((p) => ({

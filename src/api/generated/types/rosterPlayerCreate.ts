@@ -19,10 +19,6 @@ the entry to a polled identity (ratings/country/matches/live); omit it
 for an entry whose account hasn't minted yet — it stays first-class and
 can be linked later via PATCH. ``presentation`` is optional and can be
 set later via PATCH.
-
-``name`` is rejected if it parses as an integer — transitional, until
-#187 Phase 3 retires the validator — so a display label can't be
-confused with the numeric surrogate id used in URL routing.
  */
 export interface RosterPlayerCreate {
   /**
