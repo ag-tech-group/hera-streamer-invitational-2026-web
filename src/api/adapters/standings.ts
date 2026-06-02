@@ -24,6 +24,7 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
   return {
     tournamentPlayerId: dto.tournament_player_id,
     profileId: dto.profile_id,
+    name: dto.name,
     alias: dto.alias,
     country: dto.country,
     team: dto.team

@@ -192,9 +192,9 @@ function peakBars(rows: StandingsRow[]): BarDatum[] {
       (r): r is StandingsRow & { maxRating: number } => r.maxRating !== null
     )
     .map((r) => ({
-      // Prefer the host's display-name override (matches the standings table)
-      // over the raw ladder alias.
-      label: r.presentation.displayName ?? r.alias,
+      // Prefer the host's display-name override (matches the standings table),
+      // else the unified `name` (#187).
+      label: r.presentation.displayName ?? r.name,
       value: r.maxRating,
       color: PEAK_COLOR,
     }))
@@ -290,7 +290,7 @@ function computeStats(
     // Mirror the standings table + peak board: peak is the tournament
     // leaderboard's max_rating, volume is in-window games. Label prefers the
     // host display-name override, like those surfaces.
-    const alias = r.presentation.displayName ?? r.alias
+    const alias = r.presentation.displayName ?? r.name
     if (
       r.maxRating !== null &&
       (!highestPeak || r.maxRating > highestPeak.value)
@@ -324,7 +324,7 @@ function computeWinPctLeader(rows: StandingsRow[]): Leader | null {
     if (decided === 0) continue
     const pct = (r.wins / decided) * 100
     if (!leader || pct > leader.value) {
-      leader = { alias: r.presentation.displayName ?? r.alias, value: pct }
+      leader = { alias: r.presentation.displayName ?? r.name, value: pct }
     }
   }
   return leader

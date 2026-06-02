@@ -83,19 +83,19 @@ export function TeamsSection() {
     [rows]
   )
 
-  // Every roster player can be teamed — placeholders included. Team-member ops
-  // key on `tournament_player_id` (#184), which a placeholder carries even
-  // before its `profile_id` mints, so there's nothing to filter: to the admin,
-  // an announced entrant is just another player (#167).
+  // Every roster player can be teamed — unlinked entrants included. Team-member
+  // ops key on `tournament_player_id` (#184), which an unlinked entrant carries
+  // even before its `profile_id` mints, so there's nothing to filter: to the
+  // admin, an announced entrant is just another player (#167).
   const allPlayers: PlayerRead[] = useMemo(() => {
     if (playersQuery.data?.status !== 200) return []
     // Spread before sorting — `items` is the query cache and sort is in-place.
     return [...playersQuery.data.data.items].sort((a, b) =>
-      // Alphabetical by visible name (display-name override, else alias) so the
-      // add-member dropdown reads in name order, not API add-order. Case-
-      // insensitive via localeCompare.
-      (presentationDisplayName(a.presentation) ?? a.alias).localeCompare(
-        presentationDisplayName(b.presentation) ?? b.alias,
+      // Alphabetical by visible name (display-name override, else the unified
+      // `name`, #187) so the add-member dropdown reads in name order, not API
+      // add-order. Case-insensitive via localeCompare.
+      (presentationDisplayName(a.presentation) ?? a.name).localeCompare(
+        presentationDisplayName(b.presentation) ?? b.name,
         undefined,
         { sensitivity: "base" }
       )
@@ -118,15 +118,18 @@ export function TeamsSection() {
     return map
   }, [rows])
 
-  // profile_id → host-set Display name override (when set), built from the same
-  // roster the Players tab edits. Lets the member chips and add-member picker
-  // show the friendly name viewers see, rather than the raw ladder alias the
-  // team-standings endpoint returns (it carries no presentation bag).
+  // tournamentPlayerId → resolved display label (override else the unified
+  // `name`, #187), built from the same roster the Players tab edits. Lets the
+  // member chips and add-member picker show the friendly name viewers see,
+  // rather than the raw ladder alias the team-standings endpoint returns (it
+  // carries no display label).
   const displayNameByTournamentPlayerId = useMemo(() => {
     const map: DisplayNameMap = new Map()
     for (const player of allPlayers) {
-      const name = presentationDisplayName(player.presentation)
-      if (name) map.set(player.tournament_player_id, name)
+      map.set(
+        player.tournament_player_id,
+        presentationDisplayName(player.presentation) ?? player.name
+      )
     }
     return map
   }, [allPlayers])
@@ -414,9 +417,9 @@ function MemberChip({
   const queryClient = useQueryClient()
   const idempotencyKey = useIdempotencyKey()
   const captainIdempotencyKey = useIdempotencyKey()
-  // Resolve the chip name by the stable tournamentPlayerId: display-name
-  // override, else the member's ladder alias, else the id (alias is null for an
-  // unlinked member).
+  // Resolve the chip name by the stable tournamentPlayerId: the joined display
+  // label (override else the unified `name`, #187), else the member's ladder
+  // alias as a last resort (null for an unlinked member), else the id.
   const name =
     displayNameByTournamentPlayerId.get(member.tournamentPlayerId) ??
     member.alias ??
@@ -682,7 +685,7 @@ function AddMemberForm({
         tournamentPlayerId,
         name:
           displayNameByTournamentPlayerId.get(tournamentPlayerId) ??
-          player?.alias ??
+          player?.name ??
           String(tournamentPlayerId),
         fromTeamId: existing.teamId,
         fromTeamName: existing.teamName,
@@ -723,7 +726,7 @@ function AddMemberForm({
                 const optionName =
                   displayNameByTournamentPlayerId.get(
                     player.tournament_player_id
-                  ) ?? player.alias
+                  ) ?? player.name
                 return (
                   <SelectItem
                     key={player.tournament_player_id}

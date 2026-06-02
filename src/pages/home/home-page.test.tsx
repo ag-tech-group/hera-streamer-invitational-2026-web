@@ -24,6 +24,7 @@ const standings: ListEnvelopeStandingRow = {
     {
       tournament_player_id: 1,
       profile_id: 101,
+      name: "Player One",
       alias: "Player One",
       country: "ca",
       team: null,
@@ -57,6 +58,7 @@ const standings: ListEnvelopeStandingRow = {
     {
       tournament_player_id: 2,
       profile_id: 102,
+      name: "Player Two",
       alias: "Player Two",
       country: "au",
       team: null,

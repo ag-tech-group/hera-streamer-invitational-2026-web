@@ -12,19 +12,24 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
 import type { RosterPlayerCreatePresentation } from './rosterPlayerCreatePresentation';
 
 /**
- * Request body for adding a roster entry — polled identity or placeholder.
+ * Request body for adding a roster entry (#187 unified shape).
 
-Pass ``profile_id`` for a polled identity, or ``name`` for an
-announced placeholder. Exactly one of the two — sending both or
-neither is a 422. ``presentation`` is optional in both cases and can
-be set later via PATCH.
+``name`` is the required display label. ``profile_id`` optionally links
+the entry to a polled identity (ratings/country/matches/live); omit it
+for an entry whose account hasn't minted yet — it stays first-class and
+can be linked later via PATCH. ``presentation`` is optional and can be
+set later via PATCH.
 
-``name`` is rejected if it parses as an integer so the API can
-polymorphically dispatch URL lookups (``/players/{12345}`` →
-profile_id, ``/players/{iyouxin}`` → name) without ambiguity.
+``name`` is rejected if it parses as an integer — transitional, until
+#187 Phase 3 retires the validator — so a display label can't be
+confused with the numeric surrogate id used in URL routing.
  */
 export interface RosterPlayerCreate {
+  /**
+   * @minLength 1
+   * @maxLength 64
+   */
+  name: string;
   profile_id?: number | null;
-  name?: string | null;
   presentation?: RosterPlayerCreatePresentation;
 }

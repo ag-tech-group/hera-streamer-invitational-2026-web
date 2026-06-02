@@ -34,19 +34,19 @@ function captureAddRequests() {
 }
 
 describe("AddPlayerForm — unified add (#198)", () => {
-  it("adds a polled player by profile ID alone", async () => {
+  it("requires a name — a Profile ID alone can't be submitted", async () => {
     const bodies = captureAddRequests()
     const user = userEvent.setup()
     renderAddPlayer()
 
     await user.type(screen.getByLabelText("Profile ID"), "1819870")
-    await user.click(screen.getByRole("button", { name: "Add" }))
-
-    await waitFor(() => expect(bodies).toHaveLength(1))
-    expect(bodies[0]).toEqual({ profile_id: 1819870 })
+    // `name` is required in the unified contract (#187), so a Profile ID alone
+    // leaves Add disabled and fires no request.
+    expect(screen.getByRole("button", { name: "Add" })).toBeDisabled()
+    expect(bodies).toHaveLength(0)
   })
 
-  it("adds a placeholder by display name alone", async () => {
+  it("adds an entry by name alone", async () => {
     const bodies = captureAddRequests()
     const user = userEvent.setup()
     renderAddPlayer()
@@ -58,7 +58,7 @@ describe("AddPlayerForm — unified add (#198)", () => {
     expect(bodies[0]).toEqual({ name: "uThermal" })
   })
 
-  it("sends the name as a displayName override when both are given", async () => {
+  it("sends name + profile_id when both are given (links at add time)", async () => {
     const bodies = captureAddRequests()
     const user = userEvent.setup()
     renderAddPlayer()
@@ -68,24 +68,27 @@ describe("AddPlayerForm — unified add (#198)", () => {
     await user.click(screen.getByRole("button", { name: "Add" }))
 
     await waitFor(() => expect(bodies).toHaveLength(1))
-    expect(bodies[0]).toEqual({
-      profile_id: 1819870,
-      presentation: { displayName: "uThermal" },
-    })
+    // `name` is the top-level display label; an optional `profile_id` rides
+    // along to link the entry to a polled identity (#187) — no displayName XOR.
+    expect(bodies[0]).toEqual({ name: "uThermal", profile_id: 1819870 })
   })
 
-  it("disables Add until a name or profile ID is entered", async () => {
+  it("disables Add until a name is entered (a Profile ID alone isn't enough)", async () => {
     const user = userEvent.setup()
     renderAddPlayer()
 
     const button = screen.getByRole("button", { name: "Add" })
     expect(button).toBeDisabled()
 
+    // A Profile ID without a name stays disabled — name is required (#187).
+    await user.type(screen.getByLabelText("Profile ID"), "1819870")
+    expect(button).toBeDisabled()
+
     await user.type(screen.getByLabelText("Display name"), "uThermal")
     expect(button).toBeEnabled()
   })
 
-  it("blocks a digits-only name when no profile ID is given", async () => {
+  it("blocks a digits-only name (reserved for the Profile ID field)", async () => {
     const user = userEvent.setup()
     renderAddPlayer()
 
@@ -99,6 +102,7 @@ describe("AddPlayerForm — unified add (#198)", () => {
 
 type Player = {
   profile_id: number | null
+  name: string
   alias: string
   country: string | null
   presentation?: Record<string, unknown>
@@ -106,7 +110,14 @@ type Player = {
 }
 
 function player(overrides: Partial<Player> & Pick<Player, "alias">): Player {
-  return { profile_id: 1819870, country: null, ...overrides }
+  // `name` (the unified display label, #187) defaults to the alias so display +
+  // sort match what the tests assert; tests set a distinct name where it matters.
+  return {
+    profile_id: 1819870,
+    country: null,
+    name: overrides.alias,
+    ...overrides,
+  }
 }
 
 /** Stub the roster GET with the API's `{ last_polled_at, items }` envelope. */
@@ -141,7 +152,7 @@ describe("PlayersSection — roster shows the host's Display name", () => {
     renderRoster()
 
     // The host's Display name is the primary label — matching the public
-    // standings, where `displayName ?? alias` wins.
+    // standings, where `displayName ?? name` wins (#187).
     expect(await screen.findByText("TheViper")).toBeInTheDocument()
     // …and the raw ladder alias stays in the linked-account line so admins
     // can still confirm which relic profile is wired up.
@@ -150,15 +161,19 @@ describe("PlayersSection — roster shows the host's Display name", () => {
     ).toBeInTheDocument()
   })
 
-  it("falls back to the ladder alias when no override is set", async () => {
-    mockRoster([player({ profile_id: 1234, alias: "uThermal" })])
+  it("falls back to the unified name when no override; surfaces the ladder alias", async () => {
+    // No override → the visible name is the unified `name` (#187), and the
+    // ladder alias (now distinct) moves to the linked-account line so an admin
+    // can still verify the link landed on the right relic account.
+    mockRoster([
+      player({ profile_id: 1234, name: "uThermal", alias: "uThermal_aM" }),
+    ])
     renderRoster()
 
     expect(await screen.findByText("uThermal")).toBeInTheDocument()
-    // No override → the title already is the ladder alias, so the
-    // linked-account line carries just the profile_id, not a repeated alias.
-    expect(screen.getByText(/Linked ladder account: 1234/)).toBeInTheDocument()
-    expect(screen.queryByText(/alias /)).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/Linked ladder account: uThermal_aM · 1234/)
+    ).toBeInTheDocument()
   })
 
   it("ignores a blank override and shows the alias", async () => {

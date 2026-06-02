@@ -10,6 +10,7 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
   return {
     tournament_player_id: 1,
     profile_id: 1,
+    name: "Player",
     alias: "Player",
     country: "us",
     team: null,

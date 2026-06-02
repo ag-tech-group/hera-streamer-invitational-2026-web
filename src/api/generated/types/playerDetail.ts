@@ -14,16 +14,18 @@ import type { PlayerDetailPresentation } from './playerDetailPresentation';
 import type { PlayerRatingRead } from './playerRatingRead';
 
 /**
- * Single-player response (``GET /v1/players/{profile_id}``).
+ * Single-player response (``GET /v1/.../players/{tournament_player_id}``).
 
-Extends ``PlayerRead`` with ``last_polled_at`` and the player's recent
-matches. Always represents a polled identity — the detail endpoint
-only accepts a ``profile_id``, so placeholder rows aren't addressable
-here (they have no detail to show).
+Extends ``PlayerRead`` with ``last_polled_at`` and recent matches. The
+detail endpoint addresses the roster row by its surrogate
+``tournament_player_id`` (#187), so an unlinked entry is addressable
+too — it just carries empty polled enrichment (no ``profile_id``, empty
+``ratings`` / ``recent_matches``, null ``last_polled_at``).
  */
 export interface PlayerDetail {
   tournament_player_id: number;
   profile_id: number | null;
+  name: string;
   alias: string;
   country: string | null;
   steam_id: string | null;

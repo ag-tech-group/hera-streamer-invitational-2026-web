@@ -14,6 +14,9 @@ function row(
     // Default the stable id to profileId so each test row has a unique key;
     // tests override it when it matters.
     tournamentPlayerId: overrides.profileId ?? 0,
+    // Default `name` (the unified display label, #187) to the alias so display
+    // and name-sort match what the tests assert; overridden where it matters.
+    name: overrides.alias,
     country: null,
     team: null,
     currentRating: 2500,

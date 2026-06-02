@@ -22,21 +22,21 @@ plus folded-in derived fields, so a consumer renders a full standings
 table from one response with no per-player fan-out. ``recent_results``
 is completed-match form; ``tournament_record`` is the player's record
 within the tournament's date window; ``in_match`` / ``live_match_id``
-are current live-match status. Sorted by ``current_rating`` desc, with
-unrated roster members (no rating row on the tournament's leaderboard
-— typically brand-new accounts) next by ``profile_id``, and announced
-placeholder roster slots last by ``alias`` (their display name).
+are current live-match status. Sorted by ``current_rating`` desc
+(NULLS LAST), then every unrated row — linked or not — by display
+``name`` (#187 unified the old three-tier sort that special-cased an
+unlinked tail).
 
-Placeholder rows surface announced-but-unjoined entrants — streamers
-whose ``profile_id`` hasn't minted yet. ``profile_id`` is null on
-these rows (no detail page to link to), ``alias`` carries their
-display name, ``presentation`` carries their bag (so flag/streamUrls
-work identically), and every other field is null/zero. ``updated_at``
-is null too — no polled refresh signal applies.
+An unlinked row (no ``profile_id`` yet — a streamer whose account
+hasn't minted) carries null ``profile_id``, its ``name`` as the display
+label (``alias`` falls back to it), its ``presentation`` bag (so
+flag/streamUrls work identically), and null/zero for every polled
+field. ``updated_at`` is null too — no polled refresh signal applies.
  */
 export interface StandingRow {
   tournament_player_id: number;
   profile_id: number | null;
+  name: string;
   alias: string;
   country: string | null;
   team: StandingTeam | null;

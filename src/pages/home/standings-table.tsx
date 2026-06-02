@@ -184,6 +184,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
             <td className="px-4 py-3">
               <PlayerCell
                 profileId={row.profileId}
+                name={row.name}
                 alias={row.alias}
                 displayName={row.presentation.displayName}
                 country={row.country}
@@ -315,7 +316,9 @@ function getSortValue(row: StandingsRow, key: string): SortableValue {
       // Sort groups players by team (by initials); the un-teamed sort last.
       return row.team?.initials ?? null
     case "alias":
-      return row.alias
+      // Sort by the visible label (override else the unified `name`, #187) so
+      // the Player column orders by what's actually shown, not the raw alias.
+      return row.presentation.displayName ?? row.name
     case "currentRating":
       return row.currentRating
     case "maxRating":
@@ -355,14 +358,14 @@ function watchSortRank(row: StandingsRow): number {
 /**
  * Ranks two rows for tournament position by peak (max) rating, descending
  * (#197). Nulls (unrated roster members) pin to the tail, matching the sort
- * hook's null handling; ties break on current rating, then alias, so a shared
+ * hook's null handling; ties break on current rating, then name, so a shared
  * peak still orders by who's higher right now and the result is deterministic.
  */
 function comparePeakRank(a: StandingsRow, b: StandingsRow): number {
   return (
     descNullsLast(a.maxRating, b.maxRating) ||
     descNullsLast(a.currentRating, b.currentRating) ||
-    a.alias.localeCompare(b.alias)
+    a.name.localeCompare(b.name)
   )
 }
 
@@ -660,7 +663,7 @@ function TeamCell({
  * Player identity: flag (or globe fallback) and visible name, plus a pulsing
  * "Live" badge when the player is in a match right now. The visible name
  * comes from `displayName` when the host has set a presentation override
- * (#152); otherwise it falls back to the raw ladder `alias`. The aoe2insights
+ * (#152); otherwise it falls back to the unified `name` (#187). The aoe2insights
  * link always uses the raw `alias` so the search lands on the actual ladder
  * profile, even when the host is displaying a friendlier name.
  *
@@ -672,6 +675,7 @@ function TeamCell({
  */
 function PlayerCell({
   profileId,
+  name,
   alias,
   displayName,
   country,
@@ -682,6 +686,9 @@ function PlayerCell({
 }: {
   /** Relic profile id, or null for an unlinked entrant — carried for analytics. */
   profileId: number | null
+  /** Unified display label (#187) — the fallback when no override is set. */
+  name: string
+  /** Raw ladder handle — the aoe2insights search + analytics use it, not display. */
   alias: string
   displayName?: string
   country: string | null
@@ -711,7 +718,7 @@ function PlayerCell({
     : null
   const effectiveFlagCode = overrideCode ?? countryCode
   const renderOverrideAsText = Boolean(flagOverride && !overrideCode)
-  const visibleName = displayName ?? alias
+  const visibleName = displayName ?? name
 
   // The visible name links to the host-curated profile URL when set, otherwise
   // it's plain text — a link always means a real profile (#131). On
