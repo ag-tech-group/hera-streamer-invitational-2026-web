@@ -78,8 +78,8 @@ export const DeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDeleteParams = zod.
 /**
  * Add a roster row to a team — owner-gated.
 
-Keys on ``tournament_player_id`` so a placeholder entrant (a roster
-row whose ``profile_id`` hasn't been minted yet) can be teamed —
+Keys on ``tournament_player_id`` so an unlinked entrant (a roster
+row with no ``profile_id`` yet) can be teamed —
 the original #167 ask. 404 if the id isn't a roster row in this
 tournament; 409 if it's already on the team. Team membership is
 separate from the tournament roster — this does not add or modify
@@ -97,7 +97,7 @@ export const addTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostBodyT
 
 export const AddTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostBody = zod.object({
   "tournament_player_id": zod.number().gt(addTeamMemberV1TournamentsTournamentSlugTeamsTeamIdMembersPostBodyTournamentPlayerIdExclusiveMin)
-}).describe('Request body for adding a roster row to a team.\n\nKeys on the roster row\'s surrogate ``id`` (``tournament_player_id``)\nrather than the polled ``profile_id`` so a placeholder entrant — a\nroster row whose ``profile_id`` hasn\'t been minted yet — can be\nteamed (#167).')
+}).describe('Request body for adding a roster row to a team.\n\nKeys on the roster row\'s surrogate ``id`` (``tournament_player_id``)\nrather than the polled ``profile_id`` so an unlinked entrant — a\nroster row with no ``profile_id`` yet — can be teamed (#167).')
 
 /**
  * Remove a roster row from a team — owner-gated.

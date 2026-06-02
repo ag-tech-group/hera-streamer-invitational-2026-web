@@ -321,8 +321,8 @@ export const useDeleteTeamV1TournamentsTournamentSlugTeamsTeamIdDelete = <TError
     /**
  * Add a roster row to a team — owner-gated.
 
-Keys on ``tournament_player_id`` so a placeholder entrant (a roster
-row whose ``profile_id`` hasn't been minted yet) can be teamed —
+Keys on ``tournament_player_id`` so an unlinked entrant (a roster
+row with no ``profile_id`` yet) can be teamed —
 the original #167 ask. 404 if the id isn't a roster row in this
 tournament; 409 if it's already on the team. Team membership is
 separate from the tournament roster — this does not add or modify
