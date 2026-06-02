@@ -12,12 +12,13 @@ import { useProgression } from "@/hooks/use-progression"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
-import { teamColorMap } from "@/lib/team-colors"
-import type { TeamColorSlot } from "@/lib/team-colors"
+import { teamColorMap, TEAM_HEX } from "@/lib/team-colors"
 import {
   HorizontalBarChart,
   type BarDatum,
 } from "@/pages/stats/horizontal-bar-chart"
+import { toDepthBars } from "@/pages/stats/team-depth"
+import { TeamDepthChart } from "@/pages/stats/team-depth-chart"
 import { RatingProgressionChart } from "@/pages/stats/rating-progression-chart"
 import { labelSeries, type LabeledSeries } from "@/pages/stats/series-labels"
 import type { StandingsRow, TeamStandingsRow } from "@/types"
@@ -51,7 +52,6 @@ export function StatsPage() {
     ? new Date(tournament.data.startDate).getTime() <= mountedAtMs
     : false
 
-  const teamData = teams.data ? teamBars(teams.data.rows) : []
   const teamAvgData = teams.data ? teamAvgBars(teams.data.rows) : []
   const peakData = standings.data ? peakBars(standings.data.rows) : []
 
@@ -81,6 +81,17 @@ export function StatsPage() {
     [progression.data?.series, displayNameByTournamentPlayerId]
   )
 
+  // Roster-depth bars decompose each team's combined-peak sum into its members'
+  // contributions (#300). Member names aren't on the team payload, so the same
+  // display-name map joins them by tournamentPlayerId.
+  const depthBars = useMemo(
+    () =>
+      teams.data
+        ? toDepthBars(teams.data.rows, displayNameByTournamentPlayerId)
+        : [],
+    [teams.data, displayNameByTournamentPlayerId]
+  )
+
   return (
     <TournamentLayout view="stats">
       {progression.isPending || standings.isPending ? (
@@ -96,18 +107,22 @@ export function StatsPage() {
         />
       )}
 
-      {/* Team charts stay visible but show their empty state until the ladder
-          race starts (#242) — pre-start the team ratings carry no signal, so
-          the section renders its "nothing yet" placeholder rather than bars. */}
+      {/* The combined-peak board (#300): a stacked bar per team whose segments
+          are the members' peak contributions, so the bar total is the team's
+          combined peak elo (the scoring metric) while its shape shows roster
+          balance — one carry vs. even depth. Stays visible but shows its empty
+          state until the ladder race starts (#242); pre-start the team ratings
+          carry no signal, so the section renders its placeholder rather than
+          bars. */}
       <ChartSection
         title={t("stats.teamEloTitle")}
         query={teams}
-        isEmpty={!tournamentStarted || teamData.length === 0}
+        isEmpty={!tournamentStarted || depthBars.length === 0}
         skeletonHeight={260}
       >
-        <HorizontalBarChart
-          data={teamData}
-          height={Math.max(180, teamData.length * 56)}
+        <TeamDepthChart
+          bars={depthBars}
+          height={Math.max(180, depthBars.length * 56)}
         />
       </ChartSection>
 
@@ -149,33 +164,8 @@ export function StatsPage() {
   )
 }
 
-/** AoE2 player-colour slots (#146) as concrete hex for the echarts canvas. */
-const TEAM_HEX: Record<TeamColorSlot, string> = {
-  p1: "#3b82f6",
-  p2: "#ef4444",
-  p3: "#22c55e",
-  p4: "#eab308",
-  p5: "#06b6d4",
-  p6: "#ec4899",
-  p7: "#94a3b8",
-  p8: "#f97316",
-}
-
 /** Per-player peak-rating bars share a single brand-blue (no team join). */
 const PEAK_COLOR = "#60a5fa"
-
-/** Teams ranked by combined **peak** elo sum — the tournament's scoring metric (API #158). */
-function teamBars(rows: TeamStandingsRow[]): BarDatum[] {
-  // Colour by team identity (creation order, #231) so a team's bar matches its
-  // panel on the Teams tab and its chip on the standings — built from the full
-  // id set, keyed by id, independent of this list's rating-rank order.
-  const colorByTeamId = teamColorMap(rows.map((r) => r.teamId))
-  return rows.map((r) => ({
-    label: r.name,
-    value: r.combinedRatingSum,
-    color: TEAM_HEX[colorByTeamId.get(r.teamId) ?? "p1"],
-  }))
-}
 
 /**
  * Teams by combined **peak** elo average (#242, peak-based since API #158). The
