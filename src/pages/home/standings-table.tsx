@@ -34,8 +34,8 @@ import { useFlipRows } from "@/pages/home/use-flip-rows"
 import { WinPctHint } from "@/pages/home/win-pct-hint"
 import type { MatchResult, StandingsRow, StandingsTeam } from "@/types"
 
-/** A player's last match counts as "active" if it landed within this window. */
-const ACTIVE_WITHIN_MS = 24 * 60 * 60 * 1000
+/** A player's last match shows as recent (green) if it landed within this window. */
+const RECENT_WITHIN_MS = 24 * 60 * 60 * 1000
 
 /** Placeholder row count rendered while the standings request is in flight. */
 const SKELETON_ROW_COUNT = 6
@@ -940,9 +940,11 @@ function WinPctCell({
 }
 
 /**
- * The "status band": at-a-glance recency of a player's last match. Active when
- * that match landed within the last 24h, otherwise idle; a player with no
- * recorded match shows a neutral placeholder.
+ * The "status band": a player's last completed tournament match as a
+ * "Last match 4h" readout. The dot + text go green when that match landed
+ * within the last 24h and grey when older; a player with no recorded match
+ * shows a neutral placeholder. Tracks match *completion*, so "playing right
+ * now" lives on the separate Live badge, not here.
  */
 function ActivityCell({
   lastMatchAt,
@@ -955,13 +957,13 @@ function ActivityCell({
   if (!lastMatchAt) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
-  const active =
-    now.getTime() - new Date(lastMatchAt).getTime() <= ACTIVE_WITHIN_MS
+  const isRecent =
+    now.getTime() - new Date(lastMatchAt).getTime() <= RECENT_WITHIN_MS
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
-        active
+        isRecent
           ? "bg-chart-2/10 text-chart-2-deep"
           : "bg-muted text-muted-foreground"
       )}
@@ -969,13 +971,13 @@ function ActivityCell({
       <span
         className={cn(
           "size-1.5 rounded-full",
-          active ? "bg-chart-2" : "bg-muted-foreground/50"
+          isRecent ? "bg-chart-2" : "bg-muted-foreground/50"
         )}
       />
-      {active ? t("standings.active") : t("standings.idle")}
+      {t("standings.lastMatch")}
       {/* No opacity on the time: the badge text colour already meets AA on its
           background, but opacity-70 dropped it under the 4.5:1 ratio for this
-          small text (#73 / #65 audit). The dot + status word still lead the
+          small text (#73 / #65 audit). The dot + label still lead the
           hierarchy. */}
       <span className="tabular-nums">
         {formatRelativeTime(lastMatchAt, now)}
