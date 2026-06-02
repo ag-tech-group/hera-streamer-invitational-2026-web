@@ -13,6 +13,8 @@ import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
 import { teamColorMap, TEAM_HEX } from "@/lib/team-colors"
+import { BumpChart } from "@/pages/stats/bump-chart"
+import { toBumpSeries } from "@/pages/stats/bump-series"
 import {
   HorizontalBarChart,
   type BarDatum,
@@ -92,6 +94,41 @@ export function StatsPage() {
     [teams.data, displayNameByTournamentPlayerId]
   )
 
+  // Team identity + base hue per player, for colouring the rank bump lines
+  // (#299). Progression series carry no team, so join teamId from the team
+  // rosters and resolve each team's palette hue once (the same teamColorMap /
+  // TEAM_HEX the team boards use, so a player's line matches their team's bar).
+  const { teamIdByTournamentPlayerId, baseHexByTeamId } = useMemo(() => {
+    const rows = teams.data?.rows ?? []
+    const teamIdByPlayer = new Map<number, number>()
+    for (const row of rows) {
+      for (const member of row.members) {
+        teamIdByPlayer.set(member.tournamentPlayerId, row.teamId)
+      }
+    }
+    const slotByTeam = teamColorMap(rows.map((r) => r.teamId))
+    const baseHexByTeam = new Map<number, string>(
+      rows.map((r) => [r.teamId, TEAM_HEX[slotByTeam.get(r.teamId) ?? "p1"]])
+    )
+    return {
+      teamIdByTournamentPlayerId: teamIdByPlayer,
+      baseHexByTeamId: baseHexByTeam,
+    }
+  }, [teams.data?.rows])
+
+  // The rank bump chart ("The Climb", #299): each top-contender's leaderboard
+  // rank over the tournament window, derived client-side from the progression
+  // series and coloured by team.
+  const bumpSeries = useMemo(
+    () =>
+      toBumpSeries(labeledSeries, {
+        teamIdByTournamentPlayerId,
+        baseHexByTeamId,
+        topN: 8,
+      }),
+    [labeledSeries, teamIdByTournamentPlayerId, baseHexByTeamId]
+  )
+
   return (
     <TournamentLayout view="stats">
       {progression.isPending || standings.isPending ? (
@@ -147,6 +184,17 @@ export function StatsPage() {
         {progression.data ? (
           <RatingProgressionChart series={labeledSeries} />
         ) : null}
+      </ChartSection>
+
+      {/* Rank over time ("The Climb", #299) — the rank counterpart to the
+          rating chart above, derived from the same progression series. */}
+      <ChartSection
+        title={t("stats.bumpChartTitle")}
+        query={progression}
+        isEmpty={bumpSeries.length === 0}
+        skeletonHeight={420}
+      >
+        <BumpChart series={bumpSeries} />
       </ChartSection>
 
       <ChartSection
