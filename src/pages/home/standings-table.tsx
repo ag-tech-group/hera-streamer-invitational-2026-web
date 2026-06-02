@@ -365,7 +365,10 @@ function comparePeakRank(a: StandingsRow, b: StandingsRow): number {
   return (
     descNullsLast(a.maxRating, b.maxRating) ||
     descNullsLast(a.currentRating, b.currentRating) ||
-    a.name.localeCompare(b.name)
+    // Null-safe: a sort comparator must never throw — one bad row would crash
+    // the whole table sort. The adapter already coerces `name` to a string
+    // (#313); this guards any future non-adapter row source.
+    (a.name ?? "").localeCompare(b.name ?? "")
   )
 }
 

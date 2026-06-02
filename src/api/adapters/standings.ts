@@ -24,7 +24,13 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
   return {
     tournamentPlayerId: dto.tournament_player_id,
     profileId: dto.profile_id,
-    name: dto.name,
+    // The generated DTO marks `name` required, but a stale API revision served
+    // mid-rollover can omit it (#313) — coerce to a string so the
+    // `StandingsRow.name: string` contract every consumer relies on (the sort
+    // comparator, PlayerCell, getSortValue) actually holds. Falls back to the
+    // ladder handle, then empty, so a malformed row degrades to a label rather
+    // than crashing the whole standings render.
+    name: dto.name ?? dto.alias ?? "",
     alias: dto.alias,
     country: dto.country,
     team: dto.team
