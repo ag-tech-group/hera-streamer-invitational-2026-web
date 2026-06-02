@@ -79,6 +79,22 @@ describe("index.html SEO metadata", () => {
     expect(metaContent("name", "twitter:image")).toBe(OG_IMAGE)
   })
 
+  it("declares a search-grade favicon (>= 48px) so Google shows the icon (#296)", () => {
+    // Google renders the favicon beside a search result from a rel="icon"
+    // that's at least 48px square; below that it falls back to a generic
+    // globe. The 16/32 icons don't clear that floor, so assert at least one
+    // rel="icon" advertises a >= 48px square via its `sizes` attribute.
+    const iconLinks = html.match(/<link\b[^>]*\brel="icon"[^>]*>/g) ?? []
+    const largestSquare = Math.max(
+      0,
+      ...iconLinks.flatMap((tag) => {
+        const size = tag.match(/\bsizes="(\d+)x(\d+)"/)
+        return size ? [Math.min(Number(size[1]), Number(size[2]))] : []
+      })
+    )
+    expect(largestSquare).toBeGreaterThanOrEqual(48)
+  })
+
   it("sets a theme-color for mobile browser chrome", () => {
     expect(metaContent("name", "theme-color")).toMatch(/^#[0-9a-fA-F]{6}$/)
   })
