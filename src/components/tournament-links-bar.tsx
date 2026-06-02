@@ -3,6 +3,11 @@ import type { LucideIcon } from "lucide-react"
 import type { ComponentType, SVGProps } from "react"
 import { useTranslation } from "react-i18next"
 
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import { useAnalytics } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import type { TournamentLink, TournamentLinkKind } from "@/types"
@@ -48,7 +53,7 @@ export function TournamentLinksBar({
     >
       {links.map((link) => {
         const Icon = KIND_ICON[link.kind] ?? ExternalLink
-        return (
+        const chip = (
           <a
             key={link.url}
             href={link.url}
@@ -70,6 +75,20 @@ export function TournamentLinksBar({
             <Icon className="text-brand size-4 shrink-0" aria-hidden />
             <span>{link.label}</span>
           </a>
+        )
+        if (!link.tooltip) return chip
+        // Optional easter-egg blurb. The long `openDelay` means it only
+        // surfaces on a deliberate, lingering hover — not a casual pass — so it
+        // stays a hidden treat. HoverCard (desktop hover) is the same tooltip
+        // primitive the win% / bio hints use; no touch popover, since a hidden
+        // joke needs no tap affordance.
+        return (
+          <HoverCard key={link.url} openDelay={3500} closeDelay={100}>
+            <HoverCardTrigger asChild>{chip}</HoverCardTrigger>
+            <HoverCardContent className="tooltip-surface w-auto max-w-xs text-sm">
+              {link.tooltip}
+            </HoverCardContent>
+          </HoverCard>
         )
       })}
     </nav>

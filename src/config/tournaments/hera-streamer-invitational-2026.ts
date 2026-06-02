@@ -56,6 +56,8 @@ export const heraStreamerInvitational2026: Tournament = {
       label: "Tournament Details",
       url: "https://www.youtube.com/watch?v=zQag90FLvDw",
       kind: "video",
+      // Easter egg: a long-delay hover blurb (see TournamentLinksBar's openDelay).
+      tooltip: "incredibly-clear and not-confusing-at-all video",
     },
     {
       label: "Trailer",

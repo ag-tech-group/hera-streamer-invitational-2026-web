@@ -58,4 +58,25 @@ describe("TournamentLinksBar", () => {
       source: "resource_bar",
     })
   })
+
+  it("wraps a tooltip link in a hover trigger but still renders the link", () => {
+    render(
+      <TournamentLinksBar
+        links={[
+          {
+            label: "Secret",
+            url: "https://example.com/secret",
+            kind: "video",
+            tooltip: "an easter egg",
+          },
+        ]}
+      />
+    )
+    // The link is the hover trigger; HoverCard renders its blurb lazily on
+    // hover, so we just assert the trigger link is present and unbroken.
+    expect(screen.getByRole("link", { name: "Secret" })).toHaveAttribute(
+      "href",
+      "https://example.com/secret"
+    )
+  })
 })

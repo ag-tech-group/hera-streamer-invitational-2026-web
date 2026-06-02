@@ -121,6 +121,12 @@ export interface TournamentLink {
   url: string
   /** Category, used to pick an icon. Unknown values fall back to a generic external-link glyph. */
   kind: TournamentLinkKind
+  /**
+   * Optional hover blurb shown on desktop via a `HoverCard` with a long open
+   * delay — used sparingly (e.g. an easter-egg aside), so it only surfaces on a
+   * deliberate, lingering hover. Omit for a plain link.
+   */
+  tooltip?: string
 }
 
 /**
