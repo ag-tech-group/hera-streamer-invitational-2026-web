@@ -241,13 +241,14 @@ export const GetProgressionV1TournamentsTournamentSlugProgressionGetParams = zod
 export const GetProgressionV1TournamentsTournamentSlugProgressionGetResponse = zod.object({
   "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "items": zod.array(zod.object({
+  "tournament_player_id": zod.number(),
   "profile_id": zod.number(),
   "alias": zod.string(),
   "points": zod.array(zod.object({
   "completed_at": zod.iso.datetime({}),
   "rating": zod.number()
 }).describe('One rating observation: the player\'s post-match rating and when that match finished.'))
-}).describe('A single player\'s rating-over-time series for a tournament.\n\n``points`` are completed-match rating observations on the tournament\'s\nleaderboard, oldest-first — the consumer plots ``rating`` against\n``completed_at`` for a by-date view, or against point index for a\nby-games-played view. A player with no completed-match history on the\nleaderboard is omitted from the series list entirely.'))
+}).describe('A single player\'s rating-over-time series for a tournament.\n\n``points`` are completed-match rating observations on the tournament\'s\nleaderboard, oldest-first — the consumer plots ``rating`` against\n``completed_at`` for a by-date view, or against point index for a\nby-games-played view. A player with no completed-match history on the\nleaderboard is omitted from the series list entirely.\n\n``tournament_player_id`` is the stable per-series key (#187) — a series\nonly exists for a player with rated matches, so the row is always\nlinked and ``profile_id`` is non-null too, but the consumer keys its\nchart on ``tournament_player_id`` for consistency with the rest of the\nread surface.'))
 })
 
 /**

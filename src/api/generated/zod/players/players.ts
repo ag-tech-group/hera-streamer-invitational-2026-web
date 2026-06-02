@@ -85,7 +85,7 @@ export const AddRosterPlayerV1TournamentsTournamentSlugPlayersPostBody = zod.obj
   "name": zod.string().min(1).max(addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyNameMax),
   "profile_id": zod.union([zod.number().gt(addRosterPlayerV1TournamentsTournamentSlugPlayersPostBodyProfileIdOneExclusiveMin),zod.null()]).optional(),
   "presentation": zod.record(zod.string(), zod.unknown()).optional()
-}).describe('Request body for adding a roster entry (#187 unified shape).\n\n``name`` is the required display label. ``profile_id`` optionally links\nthe entry to a polled identity (ratings\/country\/matches\/live); omit it\nfor an entry whose account hasn\'t minted yet — it stays first-class and\ncan be linked later via PATCH. ``presentation`` is optional and can be\nset later via PATCH.\n\n``name`` is rejected if it parses as an integer — transitional, until\n#187 Phase 3 retires the validator — so a display label can\'t be\nconfused with the numeric surrogate id used in URL routing.')
+}).describe('Request body for adding a roster entry (#187 unified shape).\n\n``name`` is the required display label. ``profile_id`` optionally links\nthe entry to a polled identity (ratings\/country\/matches\/live); omit it\nfor an entry whose account hasn\'t minted yet — it stays first-class and\ncan be linked later via PATCH. ``presentation`` is optional and can be\nset later via PATCH.')
 
 /**
  * A roster player's profile — addressed by surrogate id (#187).
