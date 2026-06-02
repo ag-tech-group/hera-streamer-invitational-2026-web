@@ -15,6 +15,10 @@ import ReactEChartsCore from "echarts-for-react/esm/core"
 import { useMemo } from "react"
 
 import { useStableValue } from "@/hooks/use-stable-value"
+import {
+  toForwardFilledSeries,
+  type ChartSeries,
+} from "@/pages/stats/progression-series"
 import type { LabeledSeries } from "@/pages/stats/series-labels"
 import {
   useChartColors,
@@ -52,8 +56,66 @@ const LINE_PALETTE = [
   "#f97316",
 ]
 
+/** The subset of an echarts axis-tooltip param the formatter reads. */
+interface LineTooltipParam {
+  /** Axis value at the pointer — milliseconds, since the x-axis is `time`. */
+  axisValue: number
+  /** The data item: `[timestampMs, rating | null]`. */
+  value: [number, number | null]
+  /** Resolved series colour (from the palette). */
+  color: string
+  /** Series display label. */
+  seriesName: string
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+}
+
+/** Absolute date + time header, e.g. "May 29, 2026, 5:36 AM". */
+function formatTooltipDate(ms: number): string {
+  return new Date(ms).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
+/**
+ * Axis tooltip: a date header over every player's held rating at the hovered
+ * instant, ranked high-to-low — a live leaderboard for that moment (#280). Each
+ * row is tinted with the player's own line colour. Players with no rating yet at
+ * that time (before their first match) are dropped. Returns an HTML string that
+ * echarts inserts as innerHTML, so the player label is escaped.
+ */
+function formatTooltip(params: LineTooltipParam | LineTooltipParam[]): string {
+  const list = Array.isArray(params) ? params : [params]
+  const rows = list
+    .filter((p) => p.value?.[1] != null)
+    .sort((a, b) => (b.value[1] as number) - (a.value[1] as number))
+  if (rows.length === 0) return ""
+
+  const header = `<div style="margin-bottom:6px;font-weight:600;color:#e2e8f0">${formatTooltipDate(
+    rows[0].axisValue
+  )}</div>`
+  const body = rows
+    .map((p) => {
+      const dot = `<span style="display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:9999px;background:${p.color}"></span>`
+      const name = `<span style="color:${p.color}">${dot}${escapeHtml(p.seriesName)}</span>`
+      const value = `<span style="margin-left:20px;color:#e2e8f0;font-variant-numeric:tabular-nums">${p.value[1]}</span>`
+      return `<div style="display:flex;align-items:center;justify-content:space-between;line-height:1.6">${name}${value}</div>`
+    })
+    .join("")
+  return header + body
+}
+
 function buildOption(
-  series: LabeledSeries[],
+  series: ChartSeries[],
   colors: ChartColors
 ): EChartsCoreOption {
   return {
@@ -86,13 +148,20 @@ function buildOption(
     ],
     tooltip: {
       trigger: "axis",
-      // Rank the hovered instant's players high-to-low — turns the tooltip
-      // into a live leaderboard for that moment.
-      order: "valueDesc",
       backgroundColor: "rgba(15,23,42,0.95)",
       borderColor: "rgba(148,163,184,0.2)",
       borderWidth: 1,
+      padding: [10, 12],
       textStyle: { color: "#e2e8f0", fontSize: 12 },
+      // Snap the crosshair to the shared timeline so it sits on real data for
+      // every line at once — the root of #280's "hover doesn't match the
+      // cursor / shows the wrong player".
+      axisPointer: {
+        type: "line",
+        snap: true,
+        lineStyle: { color: "rgba(148,163,184,0.45)", width: 1 },
+      },
+      formatter: formatTooltip,
     },
     xAxis: {
       type: "time",
@@ -113,43 +182,46 @@ function buildOption(
       // Stable identity so echarts merges each player's series in place across
       // live refetches (matching by id, not array position) instead of
       // disposing and rebuilding it — see the chart component for why. Keyed on
-      // the unified tournamentPlayerId (#187), matching the series' own identity.
+      // the unified tournamentPlayerId (#187).
       id: s.tournamentPlayerId,
       // The host's display-name override (joined upstream in StatsPage), else
       // the raw ladder alias — so the legend/tooltip match the rest of the site.
       name: s.label,
-      // Filled-circle symbol so the legend marker reads as a solid coloured
-      // dot — the default `emptyCircle` shows a hollow white centre.
-      // `showSymbol` stays false, so the line itself carries no point markers.
+      // Ratings are discrete: they hold between matches, then jump at the one
+      // that moved them. Step *after* each point so the line reads that way, and
+      // no smoothing — a smoothed step implies gradual drift the rating never had.
+      step: "end",
+      // Filled-circle symbol so the legend marker reads as a solid coloured dot
+      // (the default `emptyCircle` is a hollow white centre). `showSymbol` stays
+      // false, so the line itself carries no per-point markers.
       symbol: "circle",
       showSymbol: false,
-      // Gentle smoothing reads as a trend rather than jagged match-to-match
-      // noise; a soft drop shadow lifts the lines off the dark card.
-      smooth: 0.2,
       lineStyle: {
-        width: 2.5,
-        shadowBlur: 8,
-        shadowColor: "rgba(2,6,23,0.55)",
-        shadowOffsetY: 2,
+        width: 2,
+        shadowBlur: 6,
+        shadowColor: "rgba(2,6,23,0.5)",
+        shadowOffsetY: 1,
       },
-      // Hovering a line (or its legend entry) thickens it and fades the rest,
-      // so a single player's arc is easy to follow through the tangle.
-      emphasis: { focus: "series", lineStyle: { width: 3.5 } },
-      blur: { lineStyle: { opacity: 0.12 } },
-      // Each point is a [timestamp, rating] pair — the time xAxis plots the
-      // rating against the completed-match date.
-      data: s.points.map((p) => [p.completedAt, p.rating]),
+      // No hover emphasis or dimming on the lines: the axis crosshair already
+      // lists every player at that instant, so fading all-but-one would
+      // contradict the tooltip. Hover responds through the crosshair only —
+      // the tooltip and the line states stay consistent (#280 follow-up).
+      emphasis: { disabled: true },
+      // Forward-filled `[timestampMs, rating | null]` over the shared timeline
+      // (see progression-series) — null before the player's first match.
+      data: s.data,
     })),
   }
 }
 
 /**
  * Multi-line chart of every player's rating over the tournament timeline
- * (#164), one line per player. Hovering a line focuses it and dims the rest;
- * the legend scrolls and toggles individual players, and the tooltip ranks
- * that instant's players high-to-low. Built on a tree-shaken echarts core
- * (see registrations above) and rendered via the `echarts-for-react` core
- * wrapper so no full-echarts import sneaks in.
+ * (#164), one stepped line per player. Hovering anywhere drops a crosshair and
+ * lists every player's held rating at that instant, ranked high-to-low (#280);
+ * the legend scrolls and toggles individual players. Lines hold their last
+ * value to the right edge when a player stops, rather than ending early. Built
+ * on a tree-shaken echarts core (see registrations above) and rendered via the
+ * `echarts-for-react` core wrapper so no full-echarts import sneaks in.
  */
 export function RatingProgressionChart({
   series,
@@ -162,9 +234,16 @@ export function RatingProgressionChart({
   // useStableValue). Combined with merge updates below, the chart is only
   // touched when ratings actually move.
   const stableSeries = useStableValue(series)
+  // Resample onto the shared timeline: crisp steps, lines that hold their value
+  // to the right edge when a player stops, and an axis tooltip that lists every
+  // player's exact rating at the hovered instant (see progression-series).
+  const chartSeries = useMemo(
+    () => toForwardFilledSeries(stableSeries),
+    [stableSeries]
+  )
   const option = useMemo(
-    () => buildOption(stableSeries, colors),
-    [stableSeries, colors]
+    () => buildOption(chartSeries, colors),
+    [chartSeries, colors]
   )
   return (
     <ReactEChartsCore
