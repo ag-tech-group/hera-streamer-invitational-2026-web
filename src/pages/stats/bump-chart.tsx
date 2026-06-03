@@ -100,6 +100,14 @@ function buildOption(
       // toggle buttons sit out in the open instead of crammed past a pager.
       type: "plain",
       bottom: 0,
+      // Pin the box across the chart width and left-align it. The default
+      // `left: "center"` sizes the box to the legend's *natural one-line*
+      // width and centres that block, so a full roster overflows and clips
+      // *both* ends — taking the leading "All" button with it. Bounding
+      // left+right gives the box a finite width to wrap inside, and the
+      // left anchor keeps the buttons at the top-left, fully visible.
+      left: 8,
+      right: 18,
       textStyle: { color: colors.label },
       inactiveColor: colors.legendInactive,
       // "All / Invert" toggle-all buttons, styled as small bordered pills
@@ -116,8 +124,7 @@ function buildOption(
         padding: [4, 8],
         fontSize: 11,
       },
-      // Lead the legend with the buttons (top-left): "end" floats them to the
-      // right of the first wrapped row, where they clip off the edge.
+      // Buttons lead the legend (top-left), ahead of the wrapped names.
       selectorPosition: "start",
       selectorButtonGap: 8,
     },
