@@ -29,6 +29,7 @@ import type {
   ListEnvelopePlayerProgression,
   ListEnvelopeStandingRow,
   ListEnvelopeTeamStandingRow,
+  StandingsHistory,
   TournamentRead
 } from '../../types';
 
@@ -46,6 +47,8 @@ export const getGetStandingsV1TournamentsTournamentSlugStandingsGetResponseMock 
 export const getGetCivStatsV1TournamentsTournamentSlugCivStatsGetResponseMock = (overrideResponse: Partial<Extract<CivStats, object>> = {}): CivStats => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), overall: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({civilization_id: faker.number.int(), picks: faker.number.int(), wins: faker.number.int()})), by_player: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({tournament_player_id: faker.number.int(), profile_id: faker.number.int(), civs: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({civilization_id: faker.number.int(), picks: faker.number.int(), wins: faker.number.int()}))})), ...overrideResponse})
 
 export const getGetProgressionV1TournamentsTournamentSlugProgressionGetResponseMock = (overrideResponse: Partial<Extract<ListEnvelopePlayerProgression, object>> = {}): ListEnvelopePlayerProgression => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({tournament_player_id: faker.number.int(), profile_id: faker.number.int(), alias: faker.string.alpha({length: {min: 10, max: 20}}), points: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({completed_at: faker.date.past().toISOString().slice(0, 19) + 'Z', rating: faker.number.int()}))})), ...overrideResponse})
+
+export const getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponseMock = (overrideResponse: Partial<Extract<StandingsHistory, object>> = {}): StandingsHistory => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), buckets: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.date.past().toISOString().slice(0, 19) + 'Z')), players: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({tournament_player_id: faker.number.int(), profile_id: faker.number.int(), points: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.helpers.arrayElement([{position: faker.number.int(), peak_rating: faker.number.int()},null,])))})), teams: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({team_id: faker.number.int(), points: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.helpers.arrayElement([{position: faker.number.int(), combined_peak_elo: faker.number.int()},null,])))})), ...overrideResponse})
 
 export const getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetResponseMock = (overrideResponse: Partial<Extract<ListEnvelopeTeamStandingRow, object>> = {}): ListEnvelopeTeamStandingRow => ({last_polled_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z',null,]), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({team_id: faker.number.int(), name: faker.string.alpha({length: {min: 10, max: 20}}), initials: faker.string.alpha({length: {min: 10, max: 20}}), member_count: faker.number.int(), combined_rating_sum: faker.number.int(), combined_rating_average: faker.number.float({fractionDigits: 2}), members: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({tournament_player_id: faker.number.int(), profile_id: faker.helpers.arrayElement([faker.number.int(),null,]), alias: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), country: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}),null,]), current_rating: faker.helpers.arrayElement([faker.number.int(),null,]), max_rating: faker.helpers.arrayElement([faker.number.int(),null,]), in_match: faker.datatype.boolean(), live_match_id: faker.helpers.arrayElement([faker.number.int(),null,]), is_captain: faker.datatype.boolean()}))})), ...overrideResponse})
 
@@ -144,6 +147,18 @@ export const getGetProgressionV1TournamentsTournamentSlugProgressionGetMockHandl
   }, options)
 }
 
+export const getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetMockHandler = (overrideResponse?: StandingsHistory | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<StandingsHistory> | StandingsHistory), options?: RequestHandlerOptions) => {
+  return http.get('*/v1/tournaments/:tournamentSlug/standings/history', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+  
+  
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetMockHandler = (overrideResponse?: ListEnvelopeTeamStandingRow | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ListEnvelopeTeamStandingRow> | ListEnvelopeTeamStandingRow), options?: RequestHandlerOptions) => {
   return http.get('*/v1/tournaments/:tournamentSlug/teams/standings', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
   
@@ -164,5 +179,6 @@ export const getTournamentsMock = () => [
   getGetStandingsV1TournamentsTournamentSlugStandingsGetMockHandler(),
   getGetCivStatsV1TournamentsTournamentSlugCivStatsGetMockHandler(),
   getGetProgressionV1TournamentsTournamentSlugProgressionGetMockHandler(),
+  getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetMockHandler(),
   getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetMockHandler()
 ]

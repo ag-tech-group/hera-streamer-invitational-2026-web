@@ -293,6 +293,47 @@ export const GetProgressionV1TournamentsTournamentSlugProgressionGetResponse = z
 })
 
 /**
+ * Per-entrant position + per-team combined-elo over daily buckets (#219).
+
+Reconstructs the standings at each past day from the immutable match
+log — for every completed in-window match on the tournament's
+leaderboard, the post-match rating at its completion time (the same
+source as ``/progression``). For each daily bucket (a midnight-UTC date
+label), an entrant's ``peak_rating`` is the highest post-match rating
+they reached on or before that day; ``position`` ranks debuted entrants
+by ``comparePeakRank`` (peak desc, current rating desc, display name). A
+team's ``combined_peak_elo`` sums its members' peak-so-far. Points are
+``null`` before the entity's first match. Because peaks are taken over
+matches that have already completed, a past bucket's values never shift
+as new matches arrive — the append-only invariant the live charts rely
+on. Bounded by the tournament's date window, mirroring ``/progression``.
+ * @summary Get Standings History
+ */
+export const GetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const GetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse = zod.object({
+  "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
+  "buckets": zod.array(zod.iso.datetime({})),
+  "players": zod.array(zod.object({
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.number(),
+  "points": zod.array(zod.union([zod.object({
+  "position": zod.number(),
+  "peak_rating": zod.number()
+}).describe('A player\'s leaderboard position + peak rating at one time bucket.'),zod.null()]))
+}).describe('One entrant\'s position-over-time series, aligned to the shared buckets.\n\n``points[i]`` is the entrant\'s standing at ``buckets[i]`` (see\n``StandingsHistory``), or ``null`` for buckets before their first\nin-window match (pre-debut).')),
+  "teams": zod.array(zod.object({
+  "team_id": zod.number(),
+  "points": zod.array(zod.union([zod.object({
+  "position": zod.number(),
+  "combined_peak_elo": zod.number()
+}).describe('A team\'s position + combined peak elo at one time bucket.'),zod.null()]))
+}).describe('One team\'s combined-peak-elo-over-time series, aligned to the buckets.\n\n``points[i]`` is the team\'s standing at ``buckets[i]``, or ``null`` for\nbuckets before any member\'s first in-window match.'))
+}).describe('Tournament standings reconstructed at past daily buckets (#219).\n\n``buckets`` is the shared daily time axis (midnight-UTC date labels);\na bucket\'s values reflect every completed in-window match on or before\nthat calendar day, so a past bucket never shifts as new matches arrive\n(peak-so-far over the immutable match log). ``players`` and ``teams``\ncarry per-entity series aligned index-for-index to ``buckets``, with\n``null`` points before the entity\'s first match. Position is by peak\n(``max_rating``), matching the standings table\'s peak ordering — not by\nthe live rating, which would retroactively rewrite earlier positions.')
+
+/**
  * The tournament's teams, ranked by combined peak rating.
 
 A team's combined rating is the sum of its members' peak (lifetime

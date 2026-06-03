@@ -34,6 +34,7 @@ import type {
   ListEnvelopePlayerProgression,
   ListEnvelopeStandingRow,
   ListEnvelopeTeamStandingRow,
+  StandingsHistory,
   TournamentCreate,
   TournamentRead,
   TournamentUpdate
@@ -945,6 +946,137 @@ export function useGetProgressionV1TournamentsTournamentSlugProgressionGet<TData
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetProgressionV1TournamentsTournamentSlugProgressionGetQueryOptions(tournamentSlug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * Per-entrant position + per-team combined-elo over daily buckets (#219).
+
+Reconstructs the standings at each past day from the immutable match
+log — for every completed in-window match on the tournament's
+leaderboard, the post-match rating at its completion time (the same
+source as ``/progression``). For each daily bucket (a midnight-UTC date
+label), an entrant's ``peak_rating`` is the highest post-match rating
+they reached on or before that day; ``position`` ranks debuted entrants
+by ``comparePeakRank`` (peak desc, current rating desc, display name). A
+team's ``combined_peak_elo`` sums its members' peak-so-far. Points are
+``null`` before the entity's first match. Because peaks are taken over
+matches that have already completed, a past bucket's values never shift
+as new matches arrive — the append-only invariant the live charts rely
+on. Bounded by the tournament's date window, mirroring ``/progression``.
+ * @summary Get Standings History
+ */
+export type getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse200 = {
+  data: StandingsHistory
+  status: 200
+}
+
+export type getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponseSuccess = (getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse200) & {
+  headers: Headers;
+};
+export type getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponseError = (getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse422) & {
+  headers: Headers;
+};
+
+export type getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse = (getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponseSuccess | getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponseError)
+
+export const getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetUrl = (tournamentSlug: string,) => {
+
+
+  
+
+  return `/v1/tournaments/${tournamentSlug}/standings/history`
+}
+
+export const getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet = async (tournamentSlug: string, options?: RequestInit): Promise<getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse> => {
+  
+  return orvalClient<getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse>(getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetUrl(tournamentSlug),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetQueryKey = (tournamentSlug: string,) => {
+    return [
+    `/v1/tournaments/${tournamentSlug}/standings/history`
+    ] as const;
+    }
+
+    
+export const getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetQueryOptions = <TData = Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError = HTTPValidationError>(tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetQueryKey(tournamentSlug);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>> = ({ signal }) => getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet(tournamentSlug, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(tournamentSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetQueryResult = NonNullable<Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>>
+export type GetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetQueryError = HTTPValidationError
+
+
+export function useGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet<TData = Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>,
+          TError,
+          Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet<TData = Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>,
+          TError,
+          Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet<TData = Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Standings History
+ */
+
+export function useGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet<TData = Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetQueryOptions(tournamentSlug,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
