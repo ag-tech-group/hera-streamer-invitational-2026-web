@@ -85,6 +85,9 @@ function buildOption(bars: DepthBar[], colors: ChartColors): EChartsCoreOption {
       // Per-item (not axis): hovering a segment fires its own emphasis/blur and
       // names that one member, rather than banding the whole team row.
       trigger: "item",
+      // Stay inside the card (which is overflow-hidden) so the tooltip isn't
+      // clipped near an edge (#314).
+      confine: true,
       backgroundColor: "rgba(15,23,42,0.95)",
       borderColor: "rgba(148,163,184,0.2)",
       borderWidth: 1,

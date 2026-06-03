@@ -148,6 +148,10 @@ function buildOption(
     ],
     tooltip: {
       trigger: "axis",
+      // Keep the tooltip within the chart bounds: the `ChartSection` card is
+      // `overflow-hidden`, so a tooltip drifting past an edge gets clipped
+      // (#314). `confine` flips/clamps it to stay inside instead.
+      confine: true,
       backgroundColor: "rgba(15,23,42,0.95)",
       borderColor: "rgba(148,163,184,0.2)",
       borderWidth: 1,
