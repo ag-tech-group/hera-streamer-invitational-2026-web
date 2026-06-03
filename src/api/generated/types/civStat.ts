@@ -15,6 +15,7 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  */
 export interface CivStat {
   civilization_id: number;
+  name: string | null;
   picks: number;
   wins: number;
 }

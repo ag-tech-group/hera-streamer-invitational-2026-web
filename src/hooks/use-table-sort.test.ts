@@ -75,6 +75,15 @@ describe("useTableSort", () => {
     ])
   })
 
+  it("clearSort jumps back to unsorted in one call", () => {
+    const { result } = renderHook(() => useTableSort(ROWS, getValue))
+    act(() => result.current.sortBy("name", "asc"))
+    expect(result.current.sortState).not.toBeNull()
+    act(() => result.current.clearSort())
+    expect(result.current.sortState).toBeNull()
+    expect(result.current.sortedRows).toEqual(ROWS) // original order restored
+  })
+
   it("resets to the new column's default direction when switching columns", () => {
     const { result } = renderHook(() => useTableSort(ROWS, getValue))
     act(() => result.current.sortBy("score", "desc"))

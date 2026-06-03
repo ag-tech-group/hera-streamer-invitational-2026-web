@@ -70,6 +70,18 @@
     "teamEloTitle": "Elo de pointe combiné de l'équipe",
     "teamAvgEloTitle": "Elo de pointe moyen de l'équipe",
     "peakRatingTitle": "Pic de classement",
+    "civTitle": "Civilisations",
+    "civ": {
+      "pickRate": "Taux de choix",
+      "winRate": "Taux de victoire",
+      "matchSample": "{{count}} parties",
+      "minGames": "Min. {{count}} parties",
+      "notEnough": "Pas encore assez de parties",
+      "sortLabel": "Trier",
+      "sortBoth": "Les deux",
+      "sortName": "A–Z",
+      "civHeader": "Civ."
+    },
     "noData": "Rien à afficher pour l'instant.",
     "ratingAxis": "Classement",
     "empty": "Aucun match terminé pour l'instant — la progression apparaît dès que les joueurs commencent à terminer des parties classées.",

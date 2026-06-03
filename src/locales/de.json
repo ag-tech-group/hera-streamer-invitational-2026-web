@@ -70,6 +70,18 @@
     "teamEloTitle": "Kombinierte Höchst-Elo des Teams",
     "teamAvgEloTitle": "Durchschnittliche Höchst-Elo des Teams",
     "peakRatingTitle": "Höchstwertung",
+    "civTitle": "Zivilisationen",
+    "civ": {
+      "pickRate": "Wahlrate",
+      "winRate": "Siegrate",
+      "matchSample": "{{count}} Partien",
+      "minGames": "Min. {{count}} Partien",
+      "notEnough": "Noch nicht genug Partien",
+      "sortLabel": "Sortieren",
+      "sortBoth": "Beide",
+      "sortName": "A–Z",
+      "civHeader": "Volk"
+    },
     "noData": "Noch nichts anzuzeigen.",
     "ratingAxis": "Wertung",
     "empty": "Noch keine abgeschlossenen Partien — der Verlauf erscheint, sobald die Spieler ihre ersten Ranglistenpartien beenden.",

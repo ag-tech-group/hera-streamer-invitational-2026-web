@@ -40,6 +40,7 @@ export function useTableSort<T>(
   sortedRows: T[]
   sortState: SortState | null
   sortBy: (key: string, defaultDirection?: SortDirection) => void
+  clearSort: () => void
 } {
   const [sort, setSort] = useState<SortState | null>(null)
 
@@ -81,7 +82,13 @@ export function useTableSort<T>(
     []
   )
 
-  return { sortedRows, sortState: sort, sortBy }
+  // Jump straight back to the unsorted state in one call. The `sortBy` cycle
+  // also reaches it (third click on a column), but some UIs want an explicit
+  // "reset" affordance — e.g. the civ board's "Both" chip, which returns to its
+  // dual-leaderboard default rather than making the user cycle a column.
+  const clearSort = useCallback(() => setSort(null), [])
+
+  return { sortedRows, sortState: sort, sortBy, clearSort }
 }
 
 /**

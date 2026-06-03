@@ -70,6 +70,18 @@
     "teamEloTitle": "Elo máximo combinado por equipo",
     "teamAvgEloTitle": "Elo máximo promedio por equipo",
     "peakRatingTitle": "Puntuación máxima",
+    "civTitle": "Civilizaciones",
+    "civ": {
+      "pickRate": "Tasa de elección",
+      "winRate": "Tasa de victorias",
+      "matchSample": "{{count}} partidas",
+      "minGames": "Mín. {{count}} partidas",
+      "notEnough": "Aún no hay suficientes partidas",
+      "sortLabel": "Ordenar",
+      "sortBoth": "Ambos",
+      "sortName": "A–Z",
+      "civHeader": "Civ."
+    },
     "noData": "Nada que mostrar aún.",
     "ratingAxis": "Puntuación",
     "empty": "Aún no hay partidas completadas — el progreso aparece cuando los jugadores empiezan a terminar partidas clasificatorias.",

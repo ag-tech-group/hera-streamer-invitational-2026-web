@@ -30,3 +30,4 @@ export type {
   MatchPlayer,
   MatchState,
 } from "./matches"
+export type { CivCount, CivStatsSnapshot, PlayerCivCounts } from "./civ-stats"

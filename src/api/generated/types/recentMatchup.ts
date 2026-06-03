@@ -23,7 +23,9 @@ each recent-result icon. The consumer maps civ ids to names/emblems.
 export interface RecentMatchup {
   outcome: MatchOutcome;
   civilization_id: number;
+  civilization_name: string | null;
   opponent_civilization_id: number | null;
+  opponent_civilization_name: string | null;
   map_name: string;
   completed_at: string | null;
 }

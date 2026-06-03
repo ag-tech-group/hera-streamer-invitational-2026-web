@@ -29,4 +29,6 @@ export interface TeamMemberRead {
   in_match: boolean;
   live_match_id: number | null;
   is_captain: boolean;
+  wins: number;
+  losses: number;
 }

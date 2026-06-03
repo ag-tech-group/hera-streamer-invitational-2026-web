@@ -210,7 +210,9 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "recent_matchups": zod.array(zod.object({
   "outcome": zod.enum(['win', 'loss']),
   "civilization_id": zod.number(),
+  "civilization_name": zod.union([zod.string(),zod.null()]),
   "opponent_civilization_id": zod.union([zod.number(),zod.null()]),
+  "opponent_civilization_name": zod.union([zod.string(),zod.null()]),
   "map_name": zod.string(),
   "completed_at": zod.union([zod.iso.datetime({}),zod.null()])
 }).describe('One recent in-window game with its civ matchup, for a standings tooltip.\n\nThe expand half of the recent-results enrichment (#218): the same\noutcome carried in ``TournamentRecord.recent_results`` plus the\nentrant\'s civ and — on a 1v1 leaderboard — the opposing player\'s civ,\nso the consumer can render a \"<your civ> vs <their civ>\" tooltip on\neach recent-result icon. The consumer maps civ ids to names\/emblems.')),
@@ -247,6 +249,7 @@ export const GetCivStatsV1TournamentsTournamentSlugCivStatsGetResponse = zod.obj
   "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "overall": zod.array(zod.object({
   "civilization_id": zod.number(),
+  "name": zod.union([zod.string(),zod.null()]),
   "picks": zod.number(),
   "wins": zod.number()
 }).describe('Pick\/win counts for one civilization.')),
@@ -255,6 +258,7 @@ export const GetCivStatsV1TournamentsTournamentSlugCivStatsGetResponse = zod.obj
   "profile_id": zod.number(),
   "civs": zod.array(zod.object({
   "civilization_id": zod.number(),
+  "name": zod.union([zod.string(),zod.null()]),
   "picks": zod.number(),
   "wins": zod.number()
 }).describe('Pick\/win counts for one civilization.'))
@@ -346,6 +350,11 @@ if the poller hasn't picked them up) is listed under ``members``
 with null rating fields and excluded from the aggregate (and the
 average's denominator). Teams are optional — a tournament with none
 returns an empty list. Sorted by combined sum desc.
+
+Each row also carries the team's combined in-window win/loss (sum of the
+members' ``tournament_record`` W/L, plus a server-computed ``win_pct``)
+and a per-team civ pick/win aggregate, with the same per-member figures on
+each ``TeamMemberRead`` (#220).
  * @summary Get Team Standings
  */
 export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetParams = zod.object({
@@ -361,6 +370,14 @@ export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetRespons
   "member_count": zod.number(),
   "combined_rating_sum": zod.number(),
   "combined_rating_average": zod.number(),
+  "combined_wins": zod.number(),
+  "combined_losses": zod.number(),
+  "civs": zod.array(zod.object({
+  "civilization_id": zod.number(),
+  "name": zod.union([zod.string(),zod.null()]),
+  "picks": zod.number(),
+  "wins": zod.number()
+}).describe('Pick\/win counts for one civilization.')),
   "members": zod.array(zod.object({
   "tournament_player_id": zod.number(),
   "profile_id": zod.union([zod.number(),zod.null()]),
@@ -370,8 +387,11 @@ export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetRespons
   "max_rating": zod.union([zod.number(),zod.null()]),
   "in_match": zod.boolean(),
   "live_match_id": zod.union([zod.number(),zod.null()]),
-  "is_captain": zod.boolean()
-}).describe('One member of a team, with their ratings + live-match status.\n\nShape parallels the per-player ``StandingRow`` fields the web app\nalready renders on the standings tab: ``country`` for the flag pill,\n``in_match`` \/ ``live_match_id`` for the live badge. Same source as\n``StandingRow`` (see ``get_team_standings`` for the query), so a\nmember\'s status here matches their standings row in the same poll.'))
-}).describe('One row in a tournament\'s team standings.\n\n``combined_rating_sum`` is the sum of the members\' peak (lifetime\n``max_rating``) ratings on the tournament\'s leaderboard;\n``combined_rating_average`` is that sum over the count of members\nwith a non-null peak. Every ``team_members`` row is listed under\n``members`` regardless of rating status — a linked-but-unrated\nmember (no ``PlayerRating`` on the leaderboard yet) is included with\nnull rating fields but excluded from the combined sum and the\naverage\'s denominator (#166).'))
+  "is_captain": zod.boolean(),
+  "wins": zod.number(),
+  "losses": zod.number()
+}).describe('One member of a team, with their ratings + live-match status.\n\nShape parallels the per-player ``StandingRow`` fields the web app\nalready renders on the standings tab: ``country`` for the flag pill,\n``in_match`` \/ ``live_match_id`` for the live badge. Same source as\n``StandingRow`` (see ``get_team_standings`` for the query), so a\nmember\'s status here matches their standings row in the same poll.')),
+  "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp) over the team\'s combined in-window games; null when none.')
+}).describe('One row in a tournament\'s team standings.\n\n``combined_rating_sum`` is the sum of the members\' peak (lifetime\n``max_rating``) ratings on the tournament\'s leaderboard;\n``combined_rating_average`` is that sum over the count of members\nwith a non-null peak. Every ``team_members`` row is listed under\n``members`` regardless of rating status — a linked-but-unrated\nmember (no ``PlayerRating`` on the leaderboard yet) is included with\nnull rating fields but excluded from the combined sum and the\naverage\'s denominator (#166).\n\n``combined_wins`` \/ ``combined_losses`` sum the members\' in-window\n``tournament_record`` win\/loss; ``win_pct`` is over that combined total\n(server-computed, null when no in-window games). ``civs`` aggregates the\nmembers\' civ picks\/wins across the team (#220) — same per-civ shape and\nordering as ``\/civ-stats``.'))
 })
 

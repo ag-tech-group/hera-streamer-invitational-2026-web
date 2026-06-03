@@ -70,6 +70,18 @@
     "teamEloTitle": "Lagets sammanlagda topp-elo",
     "teamAvgEloTitle": "Lagets genomsnittliga topp-elo",
     "peakRatingTitle": "Topprating",
+    "civTitle": "Civilisationer",
+    "civ": {
+      "pickRate": "Valfrekvens",
+      "winRate": "Vinstfrekvens",
+      "matchSample": "{{count}} matcher",
+      "minGames": "Minst {{count}} matcher",
+      "notEnough": "Inte tillräckligt med matcher än",
+      "sortLabel": "Sortera",
+      "sortBoth": "Båda",
+      "sortName": "A–Ö",
+      "civHeader": "Civ"
+    },
     "noData": "Inget att visa ännu.",
     "ratingAxis": "Rating",
     "empty": "Inga avslutade matcher ännu — utvecklingen visas när spelarna börjar spela rankade matcher.",
