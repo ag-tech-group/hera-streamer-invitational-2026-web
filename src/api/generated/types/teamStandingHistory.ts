@@ -14,10 +14,10 @@ import type { TeamStandingHistoryPoint } from './teamStandingHistoryPoint';
 /**
  * One team's combined-peak-elo-over-time series, aligned to the buckets.
 
-``points[i]`` is the team's standing at ``buckets[i]``, or ``null`` for
-buckets before any member's first in-window match.
+``points[i]`` is the team's standing at ``buckets[i]``. Every team holds a
+position at every bucket (#226) — no null points.
  */
 export interface TeamStandingHistory {
   team_id: number;
-  points: (TeamStandingHistoryPoint | null)[];
+  points: TeamStandingHistoryPoint[];
 }

@@ -12,9 +12,10 @@ import { CanvasRenderer } from "echarts/renderers"
 // wrapper that Vite hands back as `{ default }` (an object), which React
 // rejects as an element type. `esm/core` is a clean ESM default export.
 import ReactEChartsCore from "echarts-for-react/esm/core"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { useStableValue } from "@/hooks/use-stable-value"
+import { ChartLegend, type ChartLegendItem } from "@/pages/stats/chart-legend"
 import {
   toForwardFilledSeries,
   type ChartSeries,
@@ -116,20 +117,21 @@ function formatTooltip(params: LineTooltipParam | LineTooltipParam[]): string {
 
 function buildOption(
   series: ChartSeries[],
-  colors: ChartColors
+  colors: ChartColors,
+  selected: Record<string, boolean>
 ): EChartsCoreOption {
   return {
     color: LINE_PALETTE,
     backgroundColor: "transparent",
-    grid: { left: 8, right: 18, top: 28, bottom: 78, containLabel: true },
+    grid: { left: 8, right: 18, top: 28, bottom: 50, containLabel: true },
     legend: {
-      type: "scroll",
-      bottom: 0,
-      textStyle: { color: colors.label },
-      inactiveColor: colors.legendInactive,
-      pageTextStyle: { color: colors.axis },
-      pageIconColor: colors.axis,
-      pageIconInactiveColor: colors.legendInactive,
+      // The legend itself is rendered in HTML below the canvas (ChartLegend) so
+      // it can match the civ-card pills and cap names per row — the canvas
+      // legend couldn't (#326). We still configure the legend *model* (hidden)
+      // and feed it `selected` so toggling a pill filters the series; series
+      // visibility is echarts' job, the HTML is just the control surface.
+      show: false,
+      selected,
     },
     // A slider rail along the bottom: drag the edges to focus a window of the
     // timeline; once zoomed in, grab the middle to pan. `inside` adds
@@ -138,8 +140,8 @@ function buildOption(
       { type: "inside" },
       {
         type: "slider",
-        bottom: 36,
-        height: 16,
+        bottom: 10,
+        height: 18,
         borderColor: "transparent",
         backgroundColor: "rgba(148,163,184,0.08)",
         fillerColor: "rgba(96,165,250,0.15)",
@@ -221,10 +223,11 @@ function buildOption(
 /**
  * Multi-line chart of every player's rating over the tournament timeline
  * (#164), one stepped line per player. Hovering anywhere drops a crosshair and
- * lists every player's held rating at that instant, ranked high-to-low (#280);
- * the legend scrolls and toggles individual players. Lines hold their last
- * value to the right edge when a player stops, rather than ending early. Built
- * on a tree-shaken echarts core (see registrations above) and rendered via the
+ * lists every player's held rating at that instant, ranked high-to-low (#280).
+ * Lines hold their last value to the right edge when a player stops, rather
+ * than ending early. The legend lives in HTML below the canvas (ChartLegend)
+ * and toggles series via `legend.selected` (#326). Built on a tree-shaken
+ * echarts core (see registrations above) and rendered via the
  * `echarts-for-react` core wrapper so no full-echarts import sneaks in.
  */
 export function RatingProgressionChart({
@@ -245,24 +248,56 @@ export function RatingProgressionChart({
     () => toForwardFilledSeries(stableSeries),
     [stableSeries]
   )
+  // Legend pills mirror echarts' own colour assignment: it cycles LINE_PALETTE
+  // across the series in order, so index i → LINE_PALETTE[i % len].
+  const items = useMemo<ChartLegendItem[]>(
+    () =>
+      chartSeries.map((s, i) => ({
+        name: s.label,
+        color: LINE_PALETTE[i % LINE_PALETTE.length],
+      })),
+    [chartSeries]
+  )
+  // Which series are shown. A name absent from the map counts as shown, so the
+  // empty initial state shows everyone; toggling writes explicit booleans.
+  const [selected, setSelected] = useState<Record<string, boolean>>({})
+  const toggle = (name: string) =>
+    setSelected((prev) => ({ ...prev, [name]: prev[name] === false }))
+  const showAll = () =>
+    setSelected(Object.fromEntries(items.map((it) => [it.name, true])))
+  const invert = () =>
+    setSelected((prev) =>
+      Object.fromEntries(items.map((it) => [it.name, prev[it.name] === false]))
+    )
   const option = useMemo(
-    () => buildOption(chartSeries, colors),
-    [chartSeries, colors]
+    () => buildOption(chartSeries, colors, selected),
+    [chartSeries, colors, selected]
   )
   return (
-    <ReactEChartsCore
-      echarts={echarts}
-      option={option}
-      // No `notMerge`: echarts merges each series by `id` (set in buildOption),
-      // updating its data model in place rather than disposing and rebuilding
-      // it. The destructive rebuild was racing echarts' own hover dispatch — a
-      // mousemove landing mid-rebuild called getDataParams on a disposed model
-      // (`undefined.getRawIndex`) and threw. Series only ever grow (a player
-      // joins the chart on their first completed match) and are never removed,
-      // so a plain merge never leaves a ghost line — no `replaceMerge` needed.
-      lazyUpdate
-      style={{ height: 460, width: "100%" }}
-      opts={{ renderer: "canvas" }}
-    />
+    <>
+      <ReactEChartsCore
+        echarts={echarts}
+        option={option}
+        // No `notMerge`: echarts merges each series by `id` (set in
+        // buildOption), updating its data model in place rather than disposing
+        // and rebuilding it. The destructive rebuild was racing echarts' own
+        // hover dispatch — a mousemove landing mid-rebuild called getDataParams
+        // on a disposed model (`undefined.getRawIndex`) and threw. Series only
+        // ever grow (a player joins on their first completed match) and are
+        // never removed, so a plain merge never leaves a ghost line — no
+        // `replaceMerge` needed. Toggling `legend.selected` rides the same
+        // merge, so it never rebuilds either.
+        lazyUpdate
+        style={{ height: 460, width: "100%" }}
+        opts={{ renderer: "canvas" }}
+      />
+      <ChartLegend
+        items={items}
+        selected={selected}
+        onToggle={toggle}
+        onAll={showAll}
+        onInvert={invert}
+      />
+    </>
   )
 }

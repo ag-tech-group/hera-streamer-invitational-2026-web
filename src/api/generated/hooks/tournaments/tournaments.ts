@@ -569,17 +569,21 @@ export const useDeleteTournamentV1TournamentsTournamentSlugDelete = <TError = HT
       return useMutation(getDeleteTournamentV1TournamentsTournamentSlugDeleteMutationOptions(options), queryClient);
     }
     /**
- * The tournament's roster — rated rows ranked, then every other row by name.
+ * The tournament's roster — rated rows ranked by peak, then every other row by name.
 
 One query over ``tournament_players`` left-joined to ``Player`` (the
 polled identity, when one is linked) and ``PlayerRating`` (when that
 identity has a rating on the tournament's leaderboard), ordered by:
 
-1. rated rows first, by current_rating DESC (NULLS LAST);
+1. rated rows by peak (``max_rating``) DESC (NULLS LAST), then
+   ``current_rating`` DESC and ``name`` as tie-breaks;
 2. then every unrated row — linked or not — by ``name`` ASC.
 
-(#187 unified the old three-tier sort that special-cased an unlinked
-tail; ``name`` is NOT NULL, so it's the sole display-order key.)
+Position is by peak so it matches the table's ``comparePeakRank`` and
+``/standings/history`` (#226): peak elo is carried in and only ever rises
+on a new all-time high. Both ``current_rating`` and ``max_rating`` are
+returned, so a tournament can rank on either. (#187 unified the old
+three-tier sort; #226 switched the rank key from current_rating to peak.)
 
 The leaderboard filter lives in the join condition, not the WHERE
 clause — putting it in WHERE would re-filter the outer-join right
@@ -956,20 +960,27 @@ export function useGetProgressionV1TournamentsTournamentSlugProgressionGet<TData
 
 
 /**
- * Per-entrant position + per-team combined-elo over daily buckets (#219).
+ * Every roster entity's standings position over time (#219, #226).
 
-Reconstructs the standings at each past day from the immutable match
-log — for every completed in-window match on the tournament's
-leaderboard, the post-match rating at its completion time (the same
-source as ``/progression``). For each daily bucket (a midnight-UTC date
-label), an entrant's ``peak_rating`` is the highest post-match rating
-they reached on or before that day; ``position`` ranks debuted entrants
-by ``comparePeakRank`` (peak desc, current rating desc, display name). A
-team's ``combined_peak_elo`` sums its members' peak-so-far. Points are
-``null`` before the entity's first match. Because peaks are taken over
-matches that have already completed, a past bucket's values never shift
-as new matches arrive — the append-only invariant the live charts rely
-on. Bounded by the tournament's date window, mirroring ``/progression``.
+A bump chart. Each bucket is a snapshot "as of" its timestamp, emitted at a
+**daily anchor** (midnight UTC) and **at every position shift** (stamped at
+the match-completion time that caused it) — so quiet days still show a
+point and every reorder is captured. Every roster entity holds a
+``position`` at every bucket, ranked the same way the live table is — by
+peak (``max_rating``) desc, then current rating, then name
+(``comparePeakRank``). Unrated members are included and rank at the tail by
+name, so the chart is complete (everyone has a line).
+
+Peak elo is carried in and only rises on a new all-time high, so an
+entity's ``peak_rating`` as of a bucket is ``max(pre-event baseline,
+in-window peak-so-far)`` — flat at their lifetime peak unless they set a
+new high mid-event. The baseline is the current ``max_rating`` when it tops
+every in-window rating (the common case, exact); the in-window series comes
+from the immutable match log (same source as ``/progression``), windowed to
+the tournament dates. So the latest bucket equals the live ``/standings``
+order and past buckets stay stable. Teams (``teams[].points``) rank by
+combined peak (sum of members' as-of-bucket ``max_rating``), matching the
+Teams page.
  * @summary Get Standings History
  */
 export type getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse200 = {

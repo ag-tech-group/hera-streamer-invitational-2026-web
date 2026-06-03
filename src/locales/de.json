@@ -67,6 +67,11 @@
     "title": "Statistiken",
     "subtitle": "Wertungsverlauf über das gesamte Turnier.",
     "chartTitle": "Wertung im Zeitverlauf",
+    "bumpChartTitle": "Platzierung im Zeitverlauf",
+    "legend": {
+      "all": "Alle",
+      "invert": "Umkehren"
+    },
     "teamEloTitle": "Kombinierte Höchst-Elo des Teams",
     "teamAvgEloTitle": "Durchschnittliche Höchst-Elo des Teams",
     "peakRatingTitle": "Höchstwertung",

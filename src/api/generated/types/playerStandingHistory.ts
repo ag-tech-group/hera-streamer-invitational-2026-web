@@ -15,11 +15,12 @@ import type { StandingHistoryPoint } from './standingHistoryPoint';
  * One entrant's position-over-time series, aligned to the shared buckets.
 
 ``points[i]`` is the entrant's standing at ``buckets[i]`` (see
-``StandingsHistory``), or ``null`` for buckets before their first
-in-window match (pre-debut).
+``StandingsHistory``). Every entrant holds a position at every bucket
+(#226) — there are no null points; an unrated entrant simply sits at the
+name-sorted tail with a null ``peak_rating``.
  */
 export interface PlayerStandingHistory {
   tournament_player_id: number;
-  profile_id: number;
-  points: (StandingHistoryPoint | null)[];
+  profile_id: number | null;
+  points: StandingHistoryPoint[];
 }
