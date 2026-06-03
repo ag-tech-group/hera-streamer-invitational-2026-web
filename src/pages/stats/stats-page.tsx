@@ -205,7 +205,7 @@ export function StatsPage() {
         title={t("stats.chartTitle")}
         query={progression}
         isEmpty={!progression.data || progression.data.series.length === 0}
-        skeletonHeight={460}
+        skeletonHeight={496}
       >
         {progression.data ? (
           <RatingProgressionChart series={labeledSeries} />
@@ -219,7 +219,7 @@ export function StatsPage() {
         title={t("stats.bumpChartTitle")}
         query={standingsHistory}
         isEmpty={bump.series.length === 0}
-        skeletonHeight={420}
+        skeletonHeight={460}
       >
         <BumpChart buckets={bump.buckets} series={bump.series} />
       </ChartSection>

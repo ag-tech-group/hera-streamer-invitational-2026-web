@@ -121,24 +121,38 @@ function buildOption(
   return {
     color: LINE_PALETTE,
     backgroundColor: "transparent",
-    grid: { left: 8, right: 18, top: 28, bottom: 78, containLabel: true },
+    grid: { left: 8, right: 18, top: 28, bottom: 96, containLabel: true },
     legend: {
-      type: "scroll",
+      // Plain (wrapping) legend rather than a single scrolling line, with
+      // "All / Invert" toggle-all buttons styled as small bordered pills
+      // (echarts only exposes label styling for the selector).
+      type: "plain",
       bottom: 0,
       textStyle: { color: colors.label },
       inactiveColor: colors.legendInactive,
-      pageTextStyle: { color: colors.axis },
-      pageIconColor: colors.axis,
-      pageIconInactiveColor: colors.legendInactive,
+      selector: [
+        { type: "all", title: "All" },
+        { type: "inverse", title: "Invert" },
+      ],
+      selectorLabel: {
+        color: colors.label,
+        borderColor: colors.axis,
+        borderWidth: 1,
+        borderRadius: 4,
+        padding: [4, 8],
+        fontSize: 11,
+      },
+      selectorPosition: "end",
+      selectorButtonGap: 8,
     },
     // A slider rail along the bottom: drag the edges to focus a window of the
     // timeline; once zoomed in, grab the middle to pan. `inside` adds
-    // wheel-zoom over the plot area.
+    // wheel-zoom over the plot area. Sits above the wrapped legend.
     dataZoom: [
       { type: "inside" },
       {
         type: "slider",
-        bottom: 36,
+        bottom: 52,
         height: 16,
         borderColor: "transparent",
         backgroundColor: "rgba(148,163,184,0.08)",
@@ -261,7 +275,7 @@ export function RatingProgressionChart({
       // joins the chart on their first completed match) and are never removed,
       // so a plain merge never leaves a ghost line — no `replaceMerge` needed.
       lazyUpdate
-      style={{ height: 460, width: "100%" }}
+      style={{ height: 496, width: "100%" }}
       opts={{ renderer: "canvas" }}
     />
   )

@@ -92,15 +92,32 @@ function buildOption(
   )
   return {
     backgroundColor: "transparent",
-    grid: { left: 8, right: 18, top: 12, bottom: 44, containLabel: true },
+    // Extra bottom room for the wrapped (multi-row) legend + selector buttons.
+    grid: { left: 8, right: 18, top: 12, bottom: 76, containLabel: true },
     legend: {
-      type: "scroll",
+      // Plain (wrapping) legend rather than a single scrolling line: the 20
+      // names spread over a couple of rows so the roster is scannable and the
+      // toggle buttons sit out in the open instead of crammed past a pager.
+      type: "plain",
       bottom: 0,
       textStyle: { color: colors.label },
       inactiveColor: colors.legendInactive,
-      pageTextStyle: { color: colors.axis },
-      pageIconColor: colors.axis,
-      pageIconInactiveColor: colors.legendInactive,
+      // "All / Invert" toggle-all buttons, styled as small bordered pills
+      // (echarts only exposes label styling for the selector).
+      selector: [
+        { type: "all", title: "All" },
+        { type: "inverse", title: "Invert" },
+      ],
+      selectorLabel: {
+        color: colors.label,
+        borderColor: colors.axis,
+        borderWidth: 1,
+        borderRadius: 4,
+        padding: [4, 8],
+        fontSize: 11,
+      },
+      selectorPosition: "end",
+      selectorButtonGap: 8,
     },
     tooltip: {
       // Axis trigger: hovering a bucket lists the whole standings at that
@@ -226,7 +243,7 @@ export function BumpChart({
       echarts={echarts}
       option={option}
       lazyUpdate
-      style={{ height: 420, width: "100%" }}
+      style={{ height: 460, width: "100%" }}
       opts={{ renderer: "canvas" }}
     />
   )
