@@ -12,7 +12,12 @@ type CivStatsResponse =
   getCivStatsV1TournamentsTournamentSlugCivStatsGetResponse
 
 function toCivCount(dto: CivStat): CivCount {
-  return { civId: dto.civilization_id, picks: dto.picks, wins: dto.wins }
+  return {
+    civId: dto.civilization_id,
+    name: dto.name,
+    picks: dto.picks,
+    wins: dto.wins,
+  }
 }
 
 function toPlayerCivCounts(dto: PlayerCivStats): PlayerCivCounts {

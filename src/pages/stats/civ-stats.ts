@@ -1,12 +1,12 @@
-import { civById } from "@/lib/civilizations"
+import { civEmblemUrl } from "@/lib/civilizations"
 import type { CivCount } from "@/types"
 
 /** One civilization's aggregate, resolved for display. */
 export interface CivStat {
   civId: number
   name: string
-  /** Emblem basename → `public/civ-emblems/<emblem>.webp`. */
-  emblem: string
+  /** Resolved emblem URL, or `null` when we have no shield for this civ. */
+  emblemUrl: string | null
   /** Games an entrant played this civ (over the whole tournament). */
   picks: number
   wins: number
@@ -30,22 +30,21 @@ export interface CivStats {
  * Derives the two civ views from the API's `/civ-stats` aggregate (#302).
  *
  * The API already counts entrants' picks/wins per civ over the whole
- * tournament (opponents excluded), so this just resolves each civ id to its
- * name + emblem, computes win rate, and orders the two views. Win rate is only
- * shown for civs with at least `minPicks` games — so a 1–0 civ can't top the
- * board — while every civ still counts toward pick rate. An id the static map
- * doesn't cover (Gaia, or a civ newer than the snapshot) is skipped rather than
- * labelled.
+ * tournament (opponents excluded) and now names each civ, so this just attaches
+ * the emblem (resolved from the name), computes win rate, and orders the two
+ * views. Win rate is only shown for civs with at least `minPicks` games — so a
+ * 1–0 civ can't top the board — while every civ still counts toward pick rate.
+ * A civ the API couldn't name is skipped (nothing to label the row with); one
+ * we have no shield for still shows, name-only.
  */
 export function toCivStats(overall: CivCount[], minPicks: number): CivStats {
   const stats: CivStat[] = overall.flatMap((c) => {
-    const civ = civById(c.civId)
-    if (!civ) return []
+    if (c.name === null) return []
     return [
       {
         civId: c.civId,
-        name: civ.name,
-        emblem: civ.emblem,
+        name: c.name,
+        emblemUrl: civEmblemUrl(c.name),
         picks: c.picks,
         wins: c.wins,
         winPct: c.picks >= minPicks ? (c.wins / c.picks) * 100 : null,

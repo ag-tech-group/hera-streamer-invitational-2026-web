@@ -1099,6 +1099,11 @@ if the poller hasn't picked them up) is listed under ``members``
 with null rating fields and excluded from the aggregate (and the
 average's denominator). Teams are optional — a tournament with none
 returns an empty list. Sorted by combined sum desc.
+
+Each row also carries the team's combined in-window win/loss (sum of the
+members' ``tournament_record`` W/L, plus a server-computed ``win_pct``)
+and a per-team civ pick/win aggregate, with the same per-member figures on
+each ``TeamMemberRead`` (#220).
  * @summary Get Team Standings
  */
 export type getTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetResponse200 = {

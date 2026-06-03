@@ -9,6 +9,7 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
+import type { CivStat } from './civStat';
 import type { TeamMemberRead } from './teamMemberRead';
 
 /**
@@ -22,6 +23,12 @@ with a non-null peak. Every ``team_members`` row is listed under
 member (no ``PlayerRating`` on the leaderboard yet) is included with
 null rating fields but excluded from the combined sum and the
 average's denominator (#166).
+
+``combined_wins`` / ``combined_losses`` sum the members' in-window
+``tournament_record`` win/loss; ``win_pct`` is over that combined total
+(server-computed, null when no in-window games). ``civs`` aggregates the
+members' civ picks/wins across the team (#220) — same per-civ shape and
+ordering as ``/civ-stats``.
  */
 export interface TeamStandingRow {
   team_id: number;
@@ -30,5 +37,10 @@ export interface TeamStandingRow {
   member_count: number;
   combined_rating_sum: number;
   combined_rating_average: number;
+  combined_wins: number;
+  combined_losses: number;
+  civs: CivStat[];
   members: TeamMemberRead[];
+  /** Win percentage (0–100, 1 dp) over the team's combined in-window games; null when none. */
+  readonly win_pct: number | null;
 }

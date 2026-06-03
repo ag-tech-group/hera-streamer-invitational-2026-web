@@ -104,6 +104,10 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
       member_count: 2,
       combined_rating_sum: 5515,
       combined_rating_average: 2757.5,
+      combined_wins: 0,
+      combined_losses: 0,
+      win_pct: null,
+      civs: [],
       members: [
         {
           tournament_player_id: 1,
@@ -115,6 +119,8 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
           in_match: false,
           live_match_id: null,
           is_captain: false,
+          wins: 0,
+          losses: 0,
         },
         {
           tournament_player_id: 2,
@@ -126,6 +132,8 @@ const teamStandings: ListEnvelopeTeamStandingRow = {
           in_match: false,
           live_match_id: null,
           is_captain: false,
+          wins: 0,
+          losses: 0,
         },
       ],
     },

@@ -11,11 +11,14 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  */
 
 /**
- * Pick/win counts for one civilization.
+ * Civilization metadata, sourced from the ``civilizations`` table.
+
+The polling worker upserts rows from the ``races`` array of upstream
+``getAvailableLeaderboards``. ``civilization_id`` matches what the
+civ-stats and recent-matchup endpoints return, so a consumer maps id →
+``name`` from this authoritative reference (#227).
  */
-export interface CivStat {
+export interface CivilizationRead {
   civilization_id: number;
-  name: string | null;
-  picks: number;
-  wins: number;
+  name: string;
 }

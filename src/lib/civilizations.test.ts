@@ -1,34 +1,28 @@
 import { describe, expect, it } from "vitest"
 
-import { civById, civEmblemUrl, CIV_BY_ID } from "@/lib/civilizations"
-
-describe("civById", () => {
-  it("resolves a known relic civ id to its display data", () => {
-    expect(civById(27)).toEqual({ name: "Berbers", emblem: "berbers" })
-    expect(civById(7)?.name).toBe("Byzantines")
-  })
-
-  it("uses the current display name, not the legacy internal name", () => {
-    // civ_id 20's internal name is still "Indians"; it should read "Hindustanis".
-    expect(civById(20)?.name).toBe("Hindustanis")
-  })
-
-  it("returns null for ids the map doesn't cover (Gaia 0, or a newer civ)", () => {
-    expect(civById(0)).toBeNull()
-    expect(civById(60)).toBeNull()
-    expect(civById(999)).toBeNull()
-  })
-
-  it("maps every covered civ to an emblem basename", () => {
-    for (const civ of Object.values(CIV_BY_ID)) {
-      expect(civ.name).toBeTruthy()
-      expect(civ.emblem).toMatch(/^[a-z]+$/)
-    }
-  })
-})
+import { civEmblemUrl } from "@/lib/civilizations"
 
 describe("civEmblemUrl", () => {
-  it("points at the public civ-emblems asset", () => {
-    expect(civEmblemUrl("berbers")).toContain("civ-emblems/berbers.webp")
+  it("resolves a civ name to its public emblem asset", () => {
+    expect(civEmblemUrl("Berbers")).toContain("civ-emblems/berbers.webp")
+    expect(civEmblemUrl("Byzantines")).toContain("civ-emblems/byzantines.webp")
+  })
+
+  it("handles the API's legacy ladder names that match the asset filenames", () => {
+    // The API forwards World's Edge names like "Mayans"/"Incas"/"Indians",
+    // which lower-case straight onto the shield basenames.
+    expect(civEmblemUrl("Mayans")).toContain("mayans.webp")
+    expect(civEmblemUrl("Incas")).toContain("incas.webp")
+    expect(civEmblemUrl("Indians")).toContain("indians.webp")
+  })
+
+  it("guards the Hindustanis rename onto the legacy 'indians' asset", () => {
+    // If upstream ever switches to the current in-game name.
+    expect(civEmblemUrl("Hindustanis")).toContain("indians.webp")
+  })
+
+  it("returns null for a civ we have no shield for", () => {
+    expect(civEmblemUrl("Gaia")).toBeNull()
+    expect(civEmblemUrl("Martians")).toBeNull()
   })
 })

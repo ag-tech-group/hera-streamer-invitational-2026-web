@@ -1,7 +1,6 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
-import { civEmblemUrl } from "@/lib/civilizations"
 import type { CivStat, CivStats } from "@/pages/stats/civ-stats"
 
 /** Most-played civs shown in the pick-rate column. */
@@ -72,13 +71,19 @@ function CivColumn({
         <ul className="space-y-1.5">
           {rows.map((c) => (
             <li key={c.civId} className="flex items-center gap-2.5">
-              {/* Decorative — the civ name sits right beside it. */}
-              <img
-                src={civEmblemUrl(c.emblem)}
-                alt=""
-                loading="lazy"
-                className="size-6 shrink-0"
-              />
+              {/* Decorative — the civ name sits right beside it. A civ with no
+                  shield (newer than the install snapshot) keeps the slot so the
+                  rows stay aligned. */}
+              {c.emblemUrl ? (
+                <img
+                  src={c.emblemUrl}
+                  alt=""
+                  loading="lazy"
+                  className="size-6 shrink-0"
+                />
+              ) : (
+                <span className="size-6 shrink-0" aria-hidden />
+              )}
               <span className="w-24 shrink-0 truncate text-sm" title={c.name}>
                 {c.name}
               </span>

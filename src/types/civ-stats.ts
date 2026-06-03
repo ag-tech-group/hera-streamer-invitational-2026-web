@@ -11,8 +11,10 @@
 
 /** One civilization's pick/win counts. */
 export interface CivCount {
-  /** Relic civilization id — resolve to name/emblem via `civById`. */
+  /** World's Edge civ id (the API's id space) — a stable key, not for naming. */
   civId: number
+  /** Civ name from the API; `null` if the API couldn't resolve the id. */
+  name: string | null
   picks: number
   wins: number
 }

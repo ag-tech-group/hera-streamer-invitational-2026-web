@@ -15,23 +15,27 @@ describe("toCivStatsSnapshot", () => {
     const snap = toCivStatsSnapshot(
       responseOf({
         last_polled_at: "2026-06-03T00:00:00Z",
-        overall: [{ civilization_id: 27, picks: 48, wins: 24 }],
+        overall: [
+          { civilization_id: 27, name: "Magyars", picks: 48, wins: 24 },
+        ],
         by_player: [
           {
             tournament_player_id: 12,
             profile_id: 99,
-            civs: [{ civilization_id: 27, picks: 8, wins: 5 }],
+            civs: [{ civilization_id: 27, name: "Magyars", picks: 8, wins: 5 }],
           },
         ],
       })
     )
     expect(snap.lastPolledAt).toBe("2026-06-03T00:00:00Z")
-    expect(snap.overall).toEqual([{ civId: 27, picks: 48, wins: 24 }])
+    expect(snap.overall).toEqual([
+      { civId: 27, name: "Magyars", picks: 48, wins: 24 },
+    ])
     expect(snap.byPlayer).toEqual([
       {
         tournamentPlayerId: 12,
         profileId: 99,
-        civs: [{ civId: 27, picks: 8, wins: 5 }],
+        civs: [{ civId: 27, name: "Magyars", picks: 8, wins: 5 }],
       },
     ])
   })
