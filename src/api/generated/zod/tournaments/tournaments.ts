@@ -207,6 +207,13 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "peak_rating": zod.union([zod.number(),zod.null()]),
   "last_match_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "recent_results": zod.array(zod.enum(['win', 'loss'])),
+  "recent_matchups": zod.array(zod.object({
+  "outcome": zod.enum(['win', 'loss']),
+  "civilization_id": zod.number(),
+  "opponent_civilization_id": zod.union([zod.number(),zod.null()]),
+  "map_name": zod.string(),
+  "completed_at": zod.union([zod.iso.datetime({}),zod.null()])
+}).describe('One recent in-window game with its civ matchup, for a standings tooltip.\n\nThe expand half of the recent-results enrichment (#218): the same\noutcome carried in ``TournamentRecord.recent_results`` plus the\nentrant\'s civ and — on a 1v1 leaderboard — the opposing player\'s civ,\nso the consumer can render a \"<your civ> vs <their civ>\" tooltip on\neach recent-result icon. The consumer maps civ ids to names\/emblems.')),
   "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp) over in-window games; null when none.')
 }).describe('A player\'s stats within a tournament\'s date window.\n\nCounts only completed matches on the tournament\'s leaderboard between\nits ``start_date`` and ``grand_finals_date`` (a null bound is treated as open).\nDistinct from the lifetime-ladder ``wins`` \/ ``losses`` \/ ``streak`` \/\n``max_rating`` \/ ``last_match_at`` \/ ``recent_results`` on ``StandingRow``;\nevery field here is in-window only.'),
   "rank": zod.union([zod.number(),zod.null()]),
@@ -220,6 +227,39 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp), or null when the player has no games.')
 }).describe('One row in a tournament\'s standings list.\n\nA denormalized read model: a left join of ``Player`` and ``PlayerRating``\nplus folded-in derived fields, so a consumer renders a full standings\ntable from one response with no per-player fan-out. ``recent_results``\nis completed-match form; ``tournament_record`` is the player\'s record\nwithin the tournament\'s date window; ``in_match`` \/ ``live_match_id``\nare current live-match status. Sorted by ``current_rating`` desc\n(NULLS LAST), then every unrated row — linked or not — by display\n``name`` (#187 unified the old three-tier sort that special-cased an\nunlinked tail).\n\nAn unlinked row (no ``profile_id`` yet — a streamer whose account\nhasn\'t minted) carries null ``profile_id``, its ``name`` as the display\nlabel (``alias`` falls back to it), its ``presentation`` bag (so\nflag\/streamUrls work identically), and null\/zero for every polled\nfield. ``updated_at`` is null too — no polled refresh signal applies.'))
 })
+
+/**
+ * Civilization pick/win aggregation for the tournament's entrants.
+
+Counts only the tournament players' completed matches on the tournament's
+leaderboard, windowed to ``[start_date, grand_finals_date]`` (a null bound
+is open) — their ladder opponents' civ rows are excluded. ``overall``
+aggregates across all entrants; ``by_player`` breaks the same counts down
+per roster row. ``picks`` is the completed games on a civ, ``wins`` the
+subset won; civs with no entrant picks are absent.
+ * @summary Get Civ Stats
+ */
+export const GetCivStatsV1TournamentsTournamentSlugCivStatsGetParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const GetCivStatsV1TournamentsTournamentSlugCivStatsGetResponse = zod.object({
+  "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
+  "overall": zod.array(zod.object({
+  "civilization_id": zod.number(),
+  "picks": zod.number(),
+  "wins": zod.number()
+}).describe('Pick\/win counts for one civilization.')),
+  "by_player": zod.array(zod.object({
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.number(),
+  "civs": zod.array(zod.object({
+  "civilization_id": zod.number(),
+  "picks": zod.number(),
+  "wins": zod.number()
+}).describe('Pick\/win counts for one civilization.'))
+}).describe('One entrant\'s per-civ pick\/win breakdown.\n\n``tournament_player_id`` is the stable roster key (#187); ``profile_id``\nis its linked polled identity — always set, since an entry only appears\nhere for a rostered player with counted matches, which requires a link.\n``civs`` is ordered by picks desc, then civ id.'))
+}).describe('Civilization pick\/win aggregation for a tournament\'s entrants.\n\n``overall`` sums each civ\'s picks\/wins across all entrants; ``by_player``\nbreaks the same counts down per roster row. Counts cover only the\ntournament players\' completed matches on the tournament\'s leaderboard,\nwindowed to ``[start_date, grand_finals_date]`` (a null bound is open) —\ntheir ladder opponents\' rows are excluded. Civs with no entrant picks\nare absent from both lists. ``overall`` is ordered by picks desc then\nciv id; ``by_player`` by ``tournament_player_id``.')
 
 /**
  * Per-player rating-over-time for the tournament's roster.

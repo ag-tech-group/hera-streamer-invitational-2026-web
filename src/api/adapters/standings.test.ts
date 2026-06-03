@@ -40,6 +40,7 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
       peak_rating: 2180,
       last_match_at: "2026-05-30T12:00:00Z",
       recent_results: ["win", "loss", "win"],
+      recent_matchups: [],
       win_pct: 75.0,
     },
     ...overrides,
@@ -92,6 +93,7 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
           peak_rating: null,
           last_match_at: null,
           recent_results: [],
+          recent_matchups: [],
           win_pct: null,
         },
         // …but the lifetime peak is still present (a player can have a career
