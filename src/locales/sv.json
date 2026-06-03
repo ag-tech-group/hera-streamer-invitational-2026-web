@@ -84,7 +84,13 @@
       "sortLabel": "Sortera",
       "sortBoth": "Båda",
       "sortName": "A–Ö",
-      "civHeader": "Civ"
+      "civHeader": "Civ",
+      "byTeamTitle": "Civs per lag",
+      "topPicks": "Mest valda",
+      "topWins": "Bästa vinst%",
+      "roster": "Trupp",
+      "mostPlayed": "Mest spelade",
+      "noGamesYet": "Inga matcher än"
     },
     "noData": "Inget att visa ännu.",
     "ratingAxis": "Rating",

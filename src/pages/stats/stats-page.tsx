@@ -17,8 +17,10 @@ import { useTournament } from "@/hooks/use-tournament"
 import { teamColorMap, TEAM_HEX } from "@/lib/team-colors"
 import { BumpChart } from "@/pages/stats/bump-chart"
 import { toBumpSeries } from "@/pages/stats/bump-series"
+import { toCivByTeam } from "@/pages/stats/civ-by-team"
 import { CivMeta } from "@/pages/stats/civ-meta"
 import { toCivStats } from "@/pages/stats/civ-stats"
+import { CivByTeam } from "@/pages/stats/civ-team-board"
 import { EloRaceChart } from "@/pages/stats/elo-race-chart"
 import { toPlayerRace, toTeamRace, type EloRace } from "@/pages/stats/elo-race"
 import {
@@ -109,12 +111,10 @@ export function StatsPage() {
     [civStats.data?.overall]
   )
 
-  // Position bump chart (#299): each entrant's leaderboard position over time,
-  // from `/standings/history` (latest bucket = the live table). The payload
-  // carries no names or teams, so join both from the standings + team rosters —
-  // a full `displayName ?? name` label for every entrant, and each team's
-  // palette hue (the same teamColorMap / TEAM_HEX the team boards use, so a
-  // line matches its team's bars).
+  // A full `displayName ?? name` label for every entrant — the
+  // /standings/history, elo-race, and /civ-stats payloads carry no names, so
+  // join them by tournamentPlayerId from the standings rows. Feeds the position
+  // bump chart (#299) and the "Civs by team" section (#302 follow-up).
   const labelByTournamentPlayerId = useMemo(() => {
     const map = new Map<number, string>()
     for (const row of standings.data?.rows ?? []) {
@@ -122,23 +122,25 @@ export function StatsPage() {
     }
     return map
   }, [standings.data?.rows])
-  const { teamIdByTournamentPlayerId, baseHexByTeamId } = useMemo(() => {
-    const rows = teams.data?.rows ?? []
-    const teamIdByPlayer = new Map<number, number>()
-    for (const row of rows) {
-      for (const member of row.members) {
-        teamIdByPlayer.set(member.tournamentPlayerId, row.teamId)
+  const { teamIdByTournamentPlayerId, baseHexByTeamId, slotByTeamId } =
+    useMemo(() => {
+      const rows = teams.data?.rows ?? []
+      const teamIdByPlayer = new Map<number, number>()
+      for (const row of rows) {
+        for (const member of row.members) {
+          teamIdByPlayer.set(member.tournamentPlayerId, row.teamId)
+        }
       }
-    }
-    const slotByTeam = teamColorMap(rows.map((r) => r.teamId))
-    const baseHexByTeam = new Map(
-      rows.map((r) => [r.teamId, TEAM_HEX[slotByTeam.get(r.teamId) ?? "p1"]])
-    )
-    return {
-      teamIdByTournamentPlayerId: teamIdByPlayer,
-      baseHexByTeamId: baseHexByTeam,
-    }
-  }, [teams.data?.rows])
+      const slotByTeam = teamColorMap(rows.map((r) => r.teamId))
+      const baseHexByTeam = new Map(
+        rows.map((r) => [r.teamId, TEAM_HEX[slotByTeam.get(r.teamId) ?? "p1"]])
+      )
+      return {
+        teamIdByTournamentPlayerId: teamIdByPlayer,
+        baseHexByTeamId: baseHexByTeam,
+        slotByTeamId: slotByTeam,
+      }
+    }, [teams.data?.rows])
   const bump = useMemo(
     () =>
       standingsHistory.data
@@ -193,6 +195,22 @@ export function StatsPage() {
       teamIdByTournamentPlayerId,
       baseHexByTeamId,
     ]
+  )
+
+  // Civs by team (#302 follow-up): each team's + member's top picks / win-rate
+  // civs, from the API's per-player breakdown joined to the team rosters. Passes
+  // the team palette *slot* (not hex) so the cards drive the same
+  // `data-team-color` treatment — bloom, stripe, tinted pills — as the Teams tab.
+  const civByTeam = useMemo(
+    () =>
+      civStats.data && teams.data
+        ? toCivByTeam(civStats.data.byPlayer, teams.data.rows, {
+            labelByTournamentPlayerId,
+            slotByTeamId,
+            minTeamWinPicks: MIN_TEAM_WIN_PICKS,
+          })
+        : [],
+    [civStats.data, teams.data, labelByTournamentPlayerId, slotByTeamId]
   )
 
   return (
@@ -292,6 +310,17 @@ export function StatsPage() {
       >
         <CivMeta stats={civViews} />
       </ChartSection>
+
+      {/* Civs by team (#302 follow-up): each team's + member's favourite and
+          best-performing civs, from the API's per-player breakdown. */}
+      <ChartSection
+        title={t("stats.civ.byTeamTitle")}
+        query={civStats}
+        isEmpty={civByTeam.every((g) => g.players.length === 0)}
+        skeletonHeight={320}
+      >
+        <CivByTeam groups={civByTeam} />
+      </ChartSection>
     </TournamentLayout>
   )
 }
@@ -301,6 +330,10 @@ const EMPTY_RACE: EloRace = { buckets: [], entities: [] }
 
 /** A civ needs at least this many games before its win rate is shown (#302). */
 const MIN_CIV_PICKS = 5
+
+// A team's civ needs at least this many roster-wide picks before its win rate
+// can headline the by-team win column (so a 1–0 civ can't). Tunable.
+const MIN_TEAM_WIN_PICKS = 4
 
 /**
  * Teams by combined **peak** elo average (#242, peak-based since API #158). The

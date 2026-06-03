@@ -84,7 +84,13 @@
       "sortLabel": "Ordenar",
       "sortBoth": "Ambos",
       "sortName": "A–Z",
-      "civHeader": "Civ."
+      "civHeader": "Civ.",
+      "byTeamTitle": "Civs por equipo",
+      "topPicks": "Más elegidas",
+      "topWins": "Mejor % victorias",
+      "roster": "Plantilla",
+      "mostPlayed": "Más jugadas",
+      "noGamesYet": "Aún sin partidas"
     },
     "noData": "Nada que mostrar aún.",
     "ratingAxis": "Puntuación",
