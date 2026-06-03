@@ -68,6 +68,10 @@
     "subtitle": "Progreso de puntuación a lo largo del torneo.",
     "chartTitle": "Puntuación a lo largo del tiempo",
     "bumpChartTitle": "Puesto a lo largo del tiempo",
+    "legend": {
+      "all": "Todos",
+      "invert": "Invertir"
+    },
     "teamEloTitle": "Elo máximo combinado por equipo",
     "teamAvgEloTitle": "Elo máximo promedio por equipo",
     "peakRatingTitle": "Puntuación máxima",

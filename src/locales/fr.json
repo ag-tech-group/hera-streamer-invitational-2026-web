@@ -68,6 +68,10 @@
     "subtitle": "Progression du classement au cours du tournoi.",
     "chartTitle": "Classement au fil du temps",
     "bumpChartTitle": "Position au fil du temps",
+    "legend": {
+      "all": "Tous",
+      "invert": "Inverser"
+    },
     "teamEloTitle": "Elo de pointe combiné de l'équipe",
     "teamAvgEloTitle": "Elo de pointe moyen de l'équipe",
     "peakRatingTitle": "Pic de classement",

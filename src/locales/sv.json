@@ -68,6 +68,10 @@
     "subtitle": "Ratingutveckling under turneringen.",
     "chartTitle": "Rating över tid",
     "bumpChartTitle": "Placering över tid",
+    "legend": {
+      "all": "Alla",
+      "invert": "Invertera"
+    },
     "teamEloTitle": "Lagets sammanlagda topp-elo",
     "teamAvgEloTitle": "Lagets genomsnittliga topp-elo",
     "peakRatingTitle": "Topprating",

@@ -10,9 +10,10 @@ import { CanvasRenderer } from "echarts/renderers"
 // ESM build — see rating-progression-chart.tsx for why `esm/core` not
 // `lib/core` (CJS interop hands React an object).
 import ReactEChartsCore from "echarts-for-react/esm/core"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { useStableValue } from "@/hooks/use-stable-value"
+import { ChartLegend, type ChartLegendItem } from "@/pages/stats/chart-legend"
 import type { BumpSeries } from "@/pages/stats/bump-series"
 import {
   useChartColors,
@@ -82,7 +83,8 @@ function utcDayKey(iso: string): string {
 function buildOption(
   buckets: string[],
   series: BumpSeries[],
-  colors: ChartColors
+  colors: ChartColors,
+  selected: Record<string, boolean>
 ): EChartsCoreOption {
   // Deepest position any line reaches — the inverted axis runs 1 (top) to this,
   // so a slider's dive stays on-chart. minInterval keeps ticks integer.
@@ -92,41 +94,14 @@ function buildOption(
   )
   return {
     backgroundColor: "transparent",
-    // Extra bottom room for the wrapped (multi-row) legend + selector buttons.
-    grid: { left: 8, right: 18, top: 12, bottom: 76, containLabel: true },
+    grid: { left: 8, right: 18, top: 12, bottom: 30, containLabel: true },
     legend: {
-      // Plain (wrapping) legend rather than a single scrolling line: the 20
-      // names spread over a couple of rows so the roster is scannable and the
-      // toggle buttons sit out in the open instead of crammed past a pager.
-      type: "plain",
-      bottom: 0,
-      // Pin the box across the chart width and left-align it. The default
-      // `left: "center"` sizes the box to the legend's *natural one-line*
-      // width and centres that block, so a full roster overflows and clips
-      // *both* ends — taking the leading "All" button with it. Bounding
-      // left+right gives the box a finite width to wrap inside, and the
-      // left anchor keeps the buttons at the top-left, fully visible.
-      left: 8,
-      right: 18,
-      textStyle: { color: colors.label },
-      inactiveColor: colors.legendInactive,
-      // "All / Invert" toggle-all buttons, styled as small bordered pills
-      // (echarts only exposes label styling for the selector).
-      selector: [
-        { type: "all", title: "All" },
-        { type: "inverse", title: "Invert" },
-      ],
-      selectorLabel: {
-        color: colors.label,
-        borderColor: colors.axis,
-        borderWidth: 1,
-        borderRadius: 4,
-        padding: [4, 8],
-        fontSize: 11,
-      },
-      // Buttons lead the legend (top-left), ahead of the wrapped names.
-      selectorPosition: "start",
-      selectorButtonGap: 8,
+      // Rendered in HTML below the canvas (ChartLegend) so it can match the
+      // civ-card pills and cap names per row — the canvas legend couldn't
+      // (#326). The legend *model* stays (hidden) and takes `selected` so a
+      // pill toggle filters the series; the HTML is just the control surface.
+      show: false,
+      selected,
     },
     tooltip: {
       // Axis trigger: hovering a bucket lists the whole standings at that
@@ -243,17 +218,43 @@ export function BumpChart({
   const colors = useChartColors()
   const stableBuckets = useStableValue(buckets)
   const stableSeries = useStableValue(series)
+  // Legend pills carry each line's explicit team colour (set in toBumpSeries),
+  // so the dot matches the line exactly.
+  const items = useMemo<ChartLegendItem[]>(
+    () => stableSeries.map((s) => ({ name: s.label, color: s.color })),
+    [stableSeries]
+  )
+  // Which lines are shown. A name absent from the map counts as shown, so the
+  // empty initial state shows everyone; toggling writes explicit booleans.
+  const [selected, setSelected] = useState<Record<string, boolean>>({})
+  const toggle = (name: string) =>
+    setSelected((prev) => ({ ...prev, [name]: prev[name] === false }))
+  const showAll = () =>
+    setSelected(Object.fromEntries(items.map((it) => [it.name, true])))
+  const invert = () =>
+    setSelected((prev) =>
+      Object.fromEntries(items.map((it) => [it.name, prev[it.name] === false]))
+    )
   const option = useMemo(
-    () => buildOption(stableBuckets, stableSeries, colors),
-    [stableBuckets, stableSeries, colors]
+    () => buildOption(stableBuckets, stableSeries, colors, selected),
+    [stableBuckets, stableSeries, colors, selected]
   )
   return (
-    <ReactEChartsCore
-      echarts={echarts}
-      option={option}
-      lazyUpdate
-      style={{ height: 460, width: "100%" }}
-      opts={{ renderer: "canvas" }}
-    />
+    <>
+      <ReactEChartsCore
+        echarts={echarts}
+        option={option}
+        lazyUpdate
+        style={{ height: 420, width: "100%" }}
+        opts={{ renderer: "canvas" }}
+      />
+      <ChartLegend
+        items={items}
+        selected={selected}
+        onToggle={toggle}
+        onAll={showAll}
+        onInvert={invert}
+      />
+    </>
   )
 }
