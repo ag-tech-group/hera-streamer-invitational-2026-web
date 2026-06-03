@@ -70,6 +70,14 @@
     "teamEloTitle": "Gecombineerde piek-elo van team",
     "teamAvgEloTitle": "Gemiddelde piek-elo van team",
     "peakRatingTitle": "Piekrating",
+    "civTitle": "Beschavingen",
+    "civ": {
+      "pickRate": "Kiespercentage",
+      "winRate": "Winstpercentage",
+      "matchSample": "{{count}} potten",
+      "minGames": "Min. {{count}} potten",
+      "notEnough": "Nog niet genoeg potten"
+    },
     "noData": "Nog niets te tonen.",
     "ratingAxis": "Rating",
     "empty": "Nog geen voltooide wedstrijden — het verloop verschijnt zodra spelers ranked games beginnen af te ronden.",

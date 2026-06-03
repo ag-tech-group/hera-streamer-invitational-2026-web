@@ -70,6 +70,14 @@
     "teamEloTitle": "Team combined peak elo",
     "teamAvgEloTitle": "Team average peak elo",
     "peakRatingTitle": "Peak rating",
+    "civTitle": "Civilizations",
+    "civ": {
+      "pickRate": "Pick rate",
+      "winRate": "Win rate",
+      "matchSample": "{{count}} matches",
+      "minGames": "Min {{count}} games",
+      "notEnough": "Not enough games yet"
+    },
     "noData": "Nothing to show yet.",
     "ratingAxis": "Rating",
     "empty": "No completed matches yet — progression appears once players start finishing ranked games.",

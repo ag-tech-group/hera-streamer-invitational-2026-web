@@ -8,11 +8,14 @@ import { TournamentLayout } from "@/components/tournament-layout"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useMatches } from "@/hooks/use-matches"
 import { useProgression } from "@/hooks/use-progression"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
 import { teamColorMap, TEAM_HEX } from "@/lib/team-colors"
+import { CivMeta } from "@/pages/stats/civ-meta"
+import { toCivStats } from "@/pages/stats/civ-stats"
 import {
   HorizontalBarChart,
   type BarDatum,
@@ -40,6 +43,7 @@ export function StatsPage() {
   const progression = useProgression()
   const teams = useTeamStandings(true)
   const standings = useStandings()
+  const matches = useMatches()
 
   // Hide the team charts until the ladder race starts — pre-start the team
   // ratings are all empty, so the bars would read as noise. Same "started"
@@ -90,6 +94,13 @@ export function StatsPage() {
         ? toDepthBars(teams.data.rows, displayNameByTournamentPlayerId)
         : [],
     [teams.data, displayNameByTournamentPlayerId]
+  )
+
+  // Civilization pick + win rates from the tournament's matches (#302). Win rate
+  // needs a minimum sample so a 1–0 civ can't top the board.
+  const civStats = useMemo(
+    () => toCivStats(matches.data?.matches ?? [], MIN_CIV_PICKS),
+    [matches.data?.matches]
   )
 
   return (
@@ -160,12 +171,25 @@ export function StatsPage() {
           height={Math.max(180, peakData.length * 28)}
         />
       </ChartSection>
+
+      {/* Civilization pick + win rates from match data (#302). */}
+      <ChartSection
+        title={t("stats.civTitle")}
+        query={matches}
+        isEmpty={civStats.byPicks.length === 0}
+        skeletonHeight={360}
+      >
+        <CivMeta stats={civStats} />
+      </ChartSection>
     </TournamentLayout>
   )
 }
 
 /** Per-player peak-rating bars share a single brand-blue (no team join). */
 const PEAK_COLOR = "#60a5fa"
+
+/** A civ needs at least this many games before its win rate is shown (#302). */
+const MIN_CIV_PICKS = 5
 
 /**
  * Teams by combined **peak** elo average (#242, peak-based since API #158). The
