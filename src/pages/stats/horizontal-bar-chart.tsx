@@ -43,6 +43,9 @@ function buildOption(data: BarDatum[], colors: ChartColors): EChartsCoreOption {
       // an `axis` trigger doesn't drive — it would show the tooltip but leave
       // every bar at full strength. This replaces the default shadow band too.
       trigger: "item",
+      // Stay inside the card (which is overflow-hidden) so the tooltip isn't
+      // clipped near an edge (#314).
+      confine: true,
       backgroundColor: "rgba(15,23,42,0.95)",
       borderColor: "rgba(148,163,184,0.2)",
       borderWidth: 1,
