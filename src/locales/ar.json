@@ -76,7 +76,11 @@
       "winRate": "نسبة الفوز",
       "matchSample": "{{count}} مباراة",
       "minGames": "{{count}} مباريات على الأقل",
-      "notEnough": "لا توجد مباريات كافية بعد"
+      "notEnough": "لا توجد مباريات كافية بعد",
+      "sortLabel": "ترتيب",
+      "sortBoth": "كلاهما",
+      "sortName": "أ–ي",
+      "civHeader": "الحضارة"
     },
     "noData": "لا شيء لعرضه بعد.",
     "ratingAxis": "التصنيف",

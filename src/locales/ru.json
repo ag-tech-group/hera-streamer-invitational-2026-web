@@ -76,7 +76,11 @@
       "winRate": "Процент побед",
       "matchSample": "{{count}} матчей",
       "minGames": "Минимум {{count}} игр",
-      "notEnough": "Пока недостаточно игр"
+      "notEnough": "Пока недостаточно игр",
+      "sortLabel": "Сортировка",
+      "sortBoth": "Оба",
+      "sortName": "А–Я",
+      "civHeader": "Цив."
     },
     "noData": "Пока нечего показать.",
     "ratingAxis": "Рейтинг",

@@ -76,7 +76,11 @@
       "winRate": "Winstpercentage",
       "matchSample": "{{count}} potten",
       "minGames": "Min. {{count}} potten",
-      "notEnough": "Nog niet genoeg potten"
+      "notEnough": "Nog niet genoeg potten",
+      "sortLabel": "Sorteren",
+      "sortBoth": "Beide",
+      "sortName": "A–Z",
+      "civHeader": "Civ"
     },
     "noData": "Nog niets te tonen.",
     "ratingAxis": "Rating",

@@ -76,7 +76,11 @@
       "winRate": "Siegrate",
       "matchSample": "{{count}} Partien",
       "minGames": "Min. {{count}} Partien",
-      "notEnough": "Noch nicht genug Partien"
+      "notEnough": "Noch nicht genug Partien",
+      "sortLabel": "Sortieren",
+      "sortBoth": "Beide",
+      "sortName": "A–Z",
+      "civHeader": "Volk"
     },
     "noData": "Noch nichts anzuzeigen.",
     "ratingAxis": "Wertung",

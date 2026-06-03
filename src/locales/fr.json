@@ -76,7 +76,11 @@
       "winRate": "Taux de victoire",
       "matchSample": "{{count}} parties",
       "minGames": "Min. {{count}} parties",
-      "notEnough": "Pas encore assez de parties"
+      "notEnough": "Pas encore assez de parties",
+      "sortLabel": "Trier",
+      "sortBoth": "Les deux",
+      "sortName": "A–Z",
+      "civHeader": "Civ."
     },
     "noData": "Rien à afficher pour l'instant.",
     "ratingAxis": "Classement",

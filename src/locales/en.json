@@ -76,7 +76,11 @@
       "winRate": "Win rate",
       "matchSample": "{{count}} matches",
       "minGames": "Min {{count}} games",
-      "notEnough": "Not enough games yet"
+      "notEnough": "Not enough games yet",
+      "sortLabel": "Sort",
+      "sortBoth": "Both",
+      "sortName": "A–Z",
+      "civHeader": "Civ"
     },
     "noData": "Nothing to show yet.",
     "ratingAxis": "Rating",

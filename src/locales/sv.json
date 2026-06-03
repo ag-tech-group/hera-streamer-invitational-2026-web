@@ -76,7 +76,11 @@
       "winRate": "Vinstfrekvens",
       "matchSample": "{{count}} matcher",
       "minGames": "Minst {{count}} matcher",
-      "notEnough": "Inte tillräckligt med matcher än"
+      "notEnough": "Inte tillräckligt med matcher än",
+      "sortLabel": "Sortera",
+      "sortBoth": "Båda",
+      "sortName": "A–Ö",
+      "civHeader": "Civ"
     },
     "noData": "Inget att visa ännu.",
     "ratingAxis": "Rating",
