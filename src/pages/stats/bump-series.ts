@@ -37,8 +37,18 @@ export function toBumpSeries(
     baseHexByTeamId: Map<number, string>
   }
 ): { buckets: string[]; series: BumpSeries[] } {
+  // Chart only entities that are in the live standings — i.e. have a joined
+  // label. The standings table is the canonical roster; `/standings/history`
+  // can transiently surface entities that aren't current entrants (a mid-event
+  // recompute, a swapped-out player), and without this they render as phantom
+  // grey "—" lines/pills that aren't on the table (#326 follow-up). Requiring a
+  // label keeps the chart's roster identical to the standings table's.
   const ordered = [...history.players]
-    .filter((p) => p.points.length > 0)
+    .filter(
+      (p) =>
+        p.points.length > 0 &&
+        opts.labelByTournamentPlayerId.has(p.tournamentPlayerId)
+    )
     .sort((a, b) => latestPosition(a.points) - latestPosition(b.points))
 
   const colorByPlayer = shadeByTeam(

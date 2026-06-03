@@ -43,6 +43,18 @@ const NO_TEAMS = {
   baseHexByTeamId: new Map<number, string>(),
 }
 
+/**
+ * Opts that label the given ids (no teams). A real entrant always carries a
+ * standings label, and the chart now requires one — so a test that expects a
+ * player to appear has to provide it.
+ */
+function labeled(ids: number[]) {
+  return {
+    ...NO_TEAMS,
+    labelByTournamentPlayerId: new Map(ids.map((id) => [id, `P${id}`])),
+  }
+}
+
 describe("toBumpSeries", () => {
   it("passes the shared buckets through; no players → no series", () => {
     const out = toBumpSeries(history([]), NO_TEAMS)
@@ -51,7 +63,7 @@ describe("toBumpSeries", () => {
   })
 
   it("keeps every entity and passes its position points through", () => {
-    const out = toBumpSeries(history([player(1, [2, 2, 1])]), NO_TEAMS)
+    const out = toBumpSeries(history([player(1, [2, 2, 1])]), labeled([1]))
     expect(out.series).toHaveLength(1)
     expect(out.series[0].points.map((p) => p.position)).toEqual([2, 2, 1])
   })
@@ -59,19 +71,21 @@ describe("toBumpSeries", () => {
   it("orders by current (last-bucket) position — leader first", () => {
     const a = player(1, [2, 2, 1]) // climbs to 1st
     const b = player(2, [1, 1, 2]) // slips to 2nd
-    const out = toBumpSeries(history([b, a]), NO_TEAMS) // passed worst-first
+    const out = toBumpSeries(history([b, a]), labeled([1, 2])) // passed worst-first
     expect(out.series.map((s) => s.tournamentPlayerId)).toEqual([1, 2])
   })
 
-  it("labels each series from the label map, falling back to a dash", () => {
+  it("drops history entities missing from the standings roster (no phantom rows)", () => {
+    // Player 2 has position history but no standings label — a transient
+    // non-entrant the history endpoint surfaced. It must not become a series:
+    // the chart's roster has to equal the standings table's, not whatever extra
+    // entities /standings/history momentarily returns (#326 follow-up).
     const out = toBumpSeries(
       history([player(1, [1, 1, 1]), player(2, [2, 2, 2])]),
       { ...NO_TEAMS, labelByTournamentPlayerId: new Map([[1, "Hera"]]) }
     )
-    const byId = (id: number) =>
-      out.series.find((s) => s.tournamentPlayerId === id)!
-    expect(byId(1).label).toBe("Hera")
-    expect(byId(2).label).toBe("—") // no entry → placeholder, never a UUID
+    expect(out.series.map((s) => s.tournamentPlayerId)).toEqual([1])
+    expect(out.series[0].label).toBe("Hera")
   })
 
   it("colours each line by its team, shading teammates apart within the hue", () => {
@@ -99,7 +113,7 @@ describe("toBumpSeries", () => {
   })
 
   it("falls back to a neutral colour when a player has no team", () => {
-    const out = toBumpSeries(history([player(1, [1, 1, 1])]), NO_TEAMS)
+    const out = toBumpSeries(history([player(1, [1, 1, 1])]), labeled([1]))
     expect(out.series[0].color).toBe("#94a3b8")
   })
 })
