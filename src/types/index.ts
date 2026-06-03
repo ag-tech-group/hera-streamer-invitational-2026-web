@@ -23,3 +23,10 @@ export type {
   ProgressionSnapshot,
   RatingObservation,
 } from "./progression"
+export type {
+  Match,
+  MatchesSnapshot,
+  MatchOutcome,
+  MatchPlayer,
+  MatchState,
+} from "./matches"
