@@ -10,6 +10,8 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  * OpenAPI spec version: 0.0.1
  */
 
+export * from './civStat';
+export * from './civStats';
 export * from './getPlayerV1PlayersProfileIdGetParams';
 export * from './getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams';
 export * from './getPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetParams';
@@ -32,6 +34,7 @@ export * from './matchPlayerRead';
 export * from './matchRead';
 export * from './matchState';
 export * from './meRead';
+export * from './playerCivStats';
 export * from './playerDetail';
 export * from './playerDetailPresentation';
 export * from './playerProgression';
@@ -39,6 +42,7 @@ export * from './playerRatingRead';
 export * from './playerRead';
 export * from './playerReadPresentation';
 export * from './ratingPoint';
+export * from './recentMatchup';
 export * from './rosterPlayerCreate';
 export * from './rosterPlayerCreatePresentation';
 export * from './rosterPlayerUpdate';

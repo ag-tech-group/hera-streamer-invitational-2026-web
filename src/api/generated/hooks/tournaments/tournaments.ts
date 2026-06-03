@@ -29,6 +29,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CivStats,
   HTTPValidationError,
   ListEnvelopePlayerProgression,
   ListEnvelopeStandingRow,
@@ -691,6 +692,131 @@ export function useGetStandingsV1TournamentsTournamentSlugStandingsGet<TData = A
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryOptions(tournamentSlug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * Civilization pick/win aggregation for the tournament's entrants.
+
+Counts only the tournament players' completed matches on the tournament's
+leaderboard, windowed to ``[start_date, grand_finals_date]`` (a null bound
+is open) — their ladder opponents' civ rows are excluded. ``overall``
+aggregates across all entrants; ``by_player`` breaks the same counts down
+per roster row. ``picks`` is the completed games on a civ, ``wins`` the
+subset won; civs with no entrant picks are absent.
+ * @summary Get Civ Stats
+ */
+export type getCivStatsV1TournamentsTournamentSlugCivStatsGetResponse200 = {
+  data: CivStats
+  status: 200
+}
+
+export type getCivStatsV1TournamentsTournamentSlugCivStatsGetResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type getCivStatsV1TournamentsTournamentSlugCivStatsGetResponseSuccess = (getCivStatsV1TournamentsTournamentSlugCivStatsGetResponse200) & {
+  headers: Headers;
+};
+export type getCivStatsV1TournamentsTournamentSlugCivStatsGetResponseError = (getCivStatsV1TournamentsTournamentSlugCivStatsGetResponse422) & {
+  headers: Headers;
+};
+
+export type getCivStatsV1TournamentsTournamentSlugCivStatsGetResponse = (getCivStatsV1TournamentsTournamentSlugCivStatsGetResponseSuccess | getCivStatsV1TournamentsTournamentSlugCivStatsGetResponseError)
+
+export const getGetCivStatsV1TournamentsTournamentSlugCivStatsGetUrl = (tournamentSlug: string,) => {
+
+
+  
+
+  return `/v1/tournaments/${tournamentSlug}/civ-stats`
+}
+
+export const getCivStatsV1TournamentsTournamentSlugCivStatsGet = async (tournamentSlug: string, options?: RequestInit): Promise<getCivStatsV1TournamentsTournamentSlugCivStatsGetResponse> => {
+  
+  return orvalClient<getCivStatsV1TournamentsTournamentSlugCivStatsGetResponse>(getGetCivStatsV1TournamentsTournamentSlugCivStatsGetUrl(tournamentSlug),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetCivStatsV1TournamentsTournamentSlugCivStatsGetQueryKey = (tournamentSlug: string,) => {
+    return [
+    `/v1/tournaments/${tournamentSlug}/civ-stats`
+    ] as const;
+    }
+
+    
+export const getGetCivStatsV1TournamentsTournamentSlugCivStatsGetQueryOptions = <TData = Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError = HTTPValidationError>(tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCivStatsV1TournamentsTournamentSlugCivStatsGetQueryKey(tournamentSlug);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>> = ({ signal }) => getCivStatsV1TournamentsTournamentSlugCivStatsGet(tournamentSlug, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(tournamentSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCivStatsV1TournamentsTournamentSlugCivStatsGetQueryResult = NonNullable<Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>>
+export type GetCivStatsV1TournamentsTournamentSlugCivStatsGetQueryError = HTTPValidationError
+
+
+export function useGetCivStatsV1TournamentsTournamentSlugCivStatsGet<TData = Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCivStatsV1TournamentsTournamentSlugCivStatsGet<TData = Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCivStatsV1TournamentsTournamentSlugCivStatsGet<TData = Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Civ Stats
+ */
+
+export function useGetCivStatsV1TournamentsTournamentSlugCivStatsGet<TData = Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCivStatsV1TournamentsTournamentSlugCivStatsGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCivStatsV1TournamentsTournamentSlugCivStatsGetQueryOptions(tournamentSlug,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
