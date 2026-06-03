@@ -116,7 +116,9 @@ function buildOption(
         padding: [4, 8],
         fontSize: 11,
       },
-      selectorPosition: "end",
+      // Lead the legend with the buttons (top-left): "end" floats them to the
+      // right of the first wrapped row, where they clip off the edge.
+      selectorPosition: "start",
       selectorButtonGap: 8,
     },
     tooltip: {
