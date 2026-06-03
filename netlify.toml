@@ -102,6 +102,16 @@
   to = "/textures/:splat"
   status = 200
 
+# `public/civ-emblems/*` is the colored civ shield set for the `/stats` civ
+# board (#302). Same prefix-vs-physical asymmetry as fonts/textures above —
+# without this the `.webp` falls through to the SPA fallback and the `<img>`
+# gets the app shell (HTML) instead of the image, so every emblem renders
+# blank on the prefixed production deploy.
+[[redirects]]
+  from = "/kings-gauntlet/civ-emblems/*"
+  to = "/civ-emblems/:splat"
+  status = 200
+
 # Root-level files in `public/` (favicons, app icon, logo, plain-text
 # files) are referenced from the built HTML under the base prefix but live
 # at the deploy root. Enumerated rather than glob-matched because a broader
