@@ -31,3 +31,10 @@ export type {
   MatchState,
 } from "./matches"
 export type { CivCount, CivStatsSnapshot, PlayerCivCounts } from "./civ-stats"
+export type {
+  PlayerHistory,
+  PositionPoint,
+  StandingsHistorySnapshot,
+  TeamHistory,
+  TeamPositionPoint,
+} from "./standings-history"

@@ -67,6 +67,7 @@
     "title": "Statistik",
     "subtitle": "Ratingutveckling under turneringen.",
     "chartTitle": "Rating över tid",
+    "bumpChartTitle": "Placering över tid",
     "teamEloTitle": "Lagets sammanlagda topp-elo",
     "teamAvgEloTitle": "Lagets genomsnittliga topp-elo",
     "peakRatingTitle": "Topprating",

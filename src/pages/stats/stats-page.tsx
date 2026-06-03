@@ -11,9 +11,12 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCivStats } from "@/hooks/use-civ-stats"
 import { useProgression } from "@/hooks/use-progression"
 import { useStandings } from "@/hooks/use-standings"
+import { useStandingsHistory } from "@/hooks/use-standings-history"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
 import { teamColorMap, TEAM_HEX } from "@/lib/team-colors"
+import { BumpChart } from "@/pages/stats/bump-chart"
+import { toBumpSeries } from "@/pages/stats/bump-series"
 import { CivMeta } from "@/pages/stats/civ-meta"
 import { toCivStats } from "@/pages/stats/civ-stats"
 import {
@@ -44,6 +47,7 @@ export function StatsPage() {
   const teams = useTeamStandings(true)
   const standings = useStandings()
   const civStats = useCivStats()
+  const standingsHistory = useStandingsHistory()
 
   // Hide the team charts until the ladder race starts — pre-start the team
   // ratings are all empty, so the bars would read as noise. Same "started"
@@ -104,6 +108,53 @@ export function StatsPage() {
     [civStats.data?.overall]
   )
 
+  // Position bump chart (#299): each entrant's leaderboard position over time,
+  // from `/standings/history` (latest bucket = the live table). The payload
+  // carries no names or teams, so join both from the standings + team rosters —
+  // a full `displayName ?? name` label for every entrant, and each team's
+  // palette hue (the same teamColorMap / TEAM_HEX the team boards use, so a
+  // line matches its team's bars).
+  const labelByTournamentPlayerId = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const row of standings.data?.rows ?? []) {
+      map.set(row.tournamentPlayerId, row.presentation.displayName ?? row.name)
+    }
+    return map
+  }, [standings.data?.rows])
+  const { teamIdByTournamentPlayerId, baseHexByTeamId } = useMemo(() => {
+    const rows = teams.data?.rows ?? []
+    const teamIdByPlayer = new Map<number, number>()
+    for (const row of rows) {
+      for (const member of row.members) {
+        teamIdByPlayer.set(member.tournamentPlayerId, row.teamId)
+      }
+    }
+    const slotByTeam = teamColorMap(rows.map((r) => r.teamId))
+    const baseHexByTeam = new Map(
+      rows.map((r) => [r.teamId, TEAM_HEX[slotByTeam.get(r.teamId) ?? "p1"]])
+    )
+    return {
+      teamIdByTournamentPlayerId: teamIdByPlayer,
+      baseHexByTeamId: baseHexByTeam,
+    }
+  }, [teams.data?.rows])
+  const bump = useMemo(
+    () =>
+      standingsHistory.data
+        ? toBumpSeries(standingsHistory.data, {
+            labelByTournamentPlayerId,
+            teamIdByTournamentPlayerId,
+            baseHexByTeamId,
+          })
+        : { buckets: [], series: [] },
+    [
+      standingsHistory.data,
+      labelByTournamentPlayerId,
+      teamIdByTournamentPlayerId,
+      baseHexByTeamId,
+    ]
+  )
+
   return (
     <TournamentLayout view="stats">
       {progression.isPending || standings.isPending ? (
@@ -159,6 +210,18 @@ export function StatsPage() {
         {progression.data ? (
           <RatingProgressionChart series={labeledSeries} />
         ) : null}
+      </ChartSection>
+
+      {/* Position over time (#299) — the position counterpart to the rating
+          chart above. Each entrant's standings position from
+          `/standings/history`; the latest bucket equals the live table. */}
+      <ChartSection
+        title={t("stats.bumpChartTitle")}
+        query={standingsHistory}
+        isEmpty={bump.series.length === 0}
+        skeletonHeight={420}
+      >
+        <BumpChart buckets={bump.buckets} series={bump.series} />
       </ChartSection>
 
       <ChartSection

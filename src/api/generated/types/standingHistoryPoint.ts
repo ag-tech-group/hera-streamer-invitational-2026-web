@@ -11,9 +11,9 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
  */
 
 /**
- * A player's leaderboard position + peak rating at one time bucket.
+ * An entity's standings position + peak rating at one time bucket.
  */
 export interface StandingHistoryPoint {
   position: number;
-  peak_rating: number;
+  peak_rating: number | null;
 }

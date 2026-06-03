@@ -13,16 +13,16 @@ import type { PlayerStandingHistory } from './playerStandingHistory';
 import type { TeamStandingHistory } from './teamStandingHistory';
 
 /**
- * Tournament standings reconstructed at past daily buckets (#219).
+ * Tournament standings position over daily buckets (#219, #226).
 
-``buckets`` is the shared daily time axis (midnight-UTC date labels);
-a bucket's values reflect every completed in-window match on or before
-that calendar day, so a past bucket never shifts as new matches arrive
-(peak-so-far over the immutable match log). ``players`` and ``teams``
-carry per-entity series aligned index-for-index to ``buckets``, with
-``null`` points before the entity's first match. Position is by peak
-(``max_rating``), matching the standings table's peak ordering — not by
-the live rating, which would retroactively rewrite earlier positions.
+``buckets`` is the shared daily time axis (midnight-UTC date labels).
+``players`` and ``teams`` carry per-entity series aligned index-for-index
+to ``buckets`` — a bump chart of ``position`` over time. Every roster
+entity (rated or not) holds a position at every bucket, ranked the way the
+live table is: by all-time peak (``max_rating``) **as of each bucket**,
+then current rating, then name (``comparePeakRank``). So the latest bucket
+equals the live ``/standings`` order, and past buckets stay stable
+(peak-so-far over already-completed matches + a fixed baseline).
  */
 export interface StandingsHistory {
   last_polled_at: string | null;

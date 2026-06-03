@@ -67,6 +67,7 @@
     "title": "Stats",
     "subtitle": "Rating progression across the tournament.",
     "chartTitle": "Rating over time",
+    "bumpChartTitle": "Position over time",
     "teamEloTitle": "Team combined peak elo",
     "teamAvgEloTitle": "Team average peak elo",
     "peakRatingTitle": "Peak rating",

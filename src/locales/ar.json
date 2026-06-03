@@ -67,6 +67,7 @@
     "title": "الإحصائيات",
     "subtitle": "تقدّم التصنيف على مدار البطولة.",
     "chartTitle": "التصنيف عبر الزمن",
+    "bumpChartTitle": "المركز عبر الزمن",
     "teamEloTitle": "مجموع ذروة إيلو الفريق",
     "teamAvgEloTitle": "متوسط ذروة إيلو الفريق",
     "peakRatingTitle": "تصنيف الذروة",
