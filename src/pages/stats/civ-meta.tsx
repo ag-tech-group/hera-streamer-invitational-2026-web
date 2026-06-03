@@ -9,13 +9,6 @@ import type { CivStat, CivStats } from "@/pages/stats/civ-stats"
 /** Most-played civs shown in the pick-rate leaderboard (the unsorted default). */
 const TOP_PICKS = 16
 
-/** Bar tones: pick rate is the brand blue, win rate the dedicated win green. */
-const TONE = {
-  brand: { fill: "bg-brand", track: "bg-brand/10" },
-  win: { fill: "bg-win", track: "bg-win/10" },
-} as const
-type Tone = keyof typeof TONE
-
 /** Projects a civ onto the value for the active sort column. */
 function civSortValue(c: CivStat, key: string): SortableValue {
   if (key === "name") return c.name
@@ -65,14 +58,12 @@ export function CivMeta({ stats }: { stats: CivStats }) {
         <div className="grid gap-x-8 gap-y-6 lg:grid-cols-2">
           <CivColumn
             title={t("stats.civ.pickRate")}
-            tone="brand"
             rows={stats.byPicks.slice(0, TOP_PICKS)}
             barPct={(c) => (c.picks / maxPicks) * 100}
             value={(c) => c.picks}
           />
           <CivColumn
             title={t("stats.civ.winRate")}
-            tone="win"
             caption={t("stats.civ.minGames", { count: stats.minPicks })}
             rows={stats.byWinPct}
             barPct={(c) => c.winPct ?? 0}
@@ -99,17 +90,12 @@ function WinValue({ c }: { c: CivStat }) {
   )
 }
 
-/** A single progress bar (track + fill) in the given tone. */
-function Bar({ pct, tone }: { pct: number; tone: Tone }) {
+/** A single progress bar (track + brand-blue fill). */
+function Bar({ pct }: { pct: number }) {
   return (
-    <div
-      className={cn(
-        "relative h-5 flex-1 overflow-hidden rounded",
-        TONE[tone].track
-      )}
-    >
+    <div className="bg-brand/10 relative h-5 flex-1 overflow-hidden rounded">
       <div
-        className={cn("absolute inset-y-0 left-0 rounded", TONE[tone].fill)}
+        className="bg-brand absolute inset-y-0 left-0 rounded"
         style={{ width: `${Math.max(0, Math.min(100, pct))}%` }}
       />
     </div>
@@ -141,7 +127,6 @@ function CivLabel({ c, width }: { c: CivStat; width: string }) {
 function CivColumn({
   title,
   caption,
-  tone,
   rows,
   barPct,
   value,
@@ -149,7 +134,6 @@ function CivColumn({
 }: {
   title: string
   caption?: string
-  tone: Tone
   rows: CivStat[]
   barPct: (c: CivStat) => number
   value: (c: CivStat) => ReactNode
@@ -172,7 +156,7 @@ function CivColumn({
           {rows.map((c) => (
             <li key={c.civId} className="flex items-center gap-2.5">
               <CivLabel c={c} width="w-32" />
-              <Bar pct={barPct(c)} tone={tone} />
+              <Bar pct={barPct(c)} />
               <span className="w-14 shrink-0 text-right text-sm whitespace-nowrap tabular-nums">
                 {value(c)}
               </span>
@@ -207,13 +191,13 @@ function UnifiedTable({
           <li key={c.civId} className="flex items-center gap-3">
             <CivLabel c={c} width="w-32" />
             <div className="flex flex-1 items-center gap-2">
-              <Bar pct={(c.picks / maxPicks) * 100} tone="brand" />
+              <Bar pct={(c.picks / maxPicks) * 100} />
               <span className="w-8 shrink-0 text-right text-sm tabular-nums">
                 {c.picks}
               </span>
             </div>
             <div className="flex flex-1 items-center gap-2">
-              <Bar pct={c.winPct ?? 0} tone="win" />
+              <Bar pct={c.winPct ?? 0} />
               <span className="w-14 shrink-0 text-right text-sm whitespace-nowrap tabular-nums">
                 <WinValue c={c} />
               </span>
@@ -293,7 +277,7 @@ function Chip({
         "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors",
         active
           ? "border-brand/30 bg-brand/10 text-brand"
-          : "text-muted-foreground hover:bg-muted/60 border-transparent"
+          : "border-border text-muted-foreground hover:bg-muted/60"
       )}
     >
       {children}
