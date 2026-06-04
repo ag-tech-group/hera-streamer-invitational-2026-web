@@ -95,6 +95,7 @@
     "cards": {
       "biggestClimber": "Biggest climber",
       "highestPeak": "Highest peak",
+      "longestWinStreak": "Longest win streak",
       "mostMatches": "Most matches",
       "winPct": "Best win rate"
     }

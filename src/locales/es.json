@@ -95,6 +95,7 @@
     "cards": {
       "biggestClimber": "Mayor ascenso",
       "highestPeak": "Punto más alto",
+      "longestWinStreak": "Mayor racha de victorias",
       "mostMatches": "Más partidas",
       "winPct": "Mejor % de victorias"
     }

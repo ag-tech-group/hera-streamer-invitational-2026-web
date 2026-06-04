@@ -26,6 +26,7 @@ export interface TournamentRecord {
   wins: number;
   losses: number;
   streak: number;
+  longest_win_streak: number;
   peak_rating: number | null;
   last_match_at: string | null;
   recent_results: MatchOutcome[];

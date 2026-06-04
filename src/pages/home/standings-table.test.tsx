@@ -27,6 +27,7 @@ function row(
     // fixture carries it directly rather than deriving it.
     winPct: 66.7,
     streak: 0,
+    longestWinStreak: 0,
     recentResults: [],
     gamesPlayed: 0,
     rank: 1,

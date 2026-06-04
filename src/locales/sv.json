@@ -95,6 +95,7 @@
     "cards": {
       "biggestClimber": "Störst klättrare",
       "highestPeak": "Högsta topp",
+      "longestWinStreak": "Längsta segersvit",
       "mostMatches": "Flest matcher",
       "winPct": "Bästa vinstandel"
     }

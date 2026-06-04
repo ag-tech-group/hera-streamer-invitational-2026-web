@@ -95,6 +95,7 @@
     "cards": {
       "biggestClimber": "Grootste stijger",
       "highestPeak": "Hoogste piek",
+      "longestWinStreak": "Langste zegereeks",
       "mostMatches": "Meeste wedstrijden",
       "winPct": "Beste winstpercentage"
     }
