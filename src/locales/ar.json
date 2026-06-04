@@ -134,6 +134,7 @@
       "other": "مشاهدة البث"
     },
     "streamingLive": "يبثّ مباشرةً",
+    "streamingCategory": "يبثّ {{category}}",
     "bioLabel": "نبذة عن {{name}}"
   },
   "teams": {

@@ -37,6 +37,8 @@ function row(
     updatedAt: "2026-05-21T00:00:00Z",
     presentation: {},
     streamLive: false,
+    streamTitle: null,
+    streamCategory: null,
     ...overrides,
   }
 }
@@ -269,6 +271,119 @@ describe("StandingsTable — in-match indicator", () => {
   })
 })
 
+describe("StandingsTable — live stream category & title (#328)", () => {
+  // A live streamer on a single Twitch channel; each test tweaks title/category.
+  function liveRow(overrides: Partial<StandingsRow> = {}): StandingsRow {
+    return row({
+      profileId: 1,
+      alias: "Streamer",
+      streamLive: true,
+      presentation: { streamUrls: ["https://twitch.tv/streamer"] },
+      ...overrides,
+    })
+  }
+
+  it("paints the dot and icon brand-blue when the stream is on AoE2", () => {
+    render(
+      <StandingsTable
+        rows={[liveRow({ streamCategory: "Age of Empires II" })]}
+      />
+    )
+    const dot = screen.getByRole("img", { name: "Streaming Age of Empires II" })
+    expect(dot.querySelector("span")).toHaveClass("bg-brand")
+    expect(screen.getByRole("link", { name: "Watch on Twitch" })).toHaveClass(
+      "text-brand"
+    )
+  })
+
+  it("switches the dot and icon to white for a confirmed off-game category", () => {
+    render(
+      <StandingsTable rows={[liveRow({ streamCategory: "Path of Exile 2" })]} />
+    )
+    const dot = screen.getByRole("img", { name: "Streaming Path of Exile 2" })
+    expect(dot.querySelector("span")).toHaveClass("bg-foreground")
+    expect(dot.querySelector("span")).not.toHaveClass("bg-brand")
+    const link = screen.getByRole("link", { name: "Watch on Twitch" })
+    expect(link).toHaveClass("text-foreground")
+    // Off-game keeps the brand only as a hover affordance, never at rest.
+    expect(link).not.toHaveClass("text-brand")
+  })
+
+  it("keeps brand-blue when live with no category (don't punish YouTube)", () => {
+    render(
+      <StandingsTable
+        rows={[
+          liveRow({
+            streamCategory: null,
+            presentation: { streamUrls: ["https://youtube.com/@streamer"] },
+          }),
+        ]}
+      />
+    )
+    const dot = screen.getByRole("img", { name: "Streaming live" })
+    expect(dot.querySelector("span")).toHaveClass("bg-brand")
+    expect(screen.getByRole("link", { name: "Watch on YouTube" })).toHaveClass(
+      "text-brand"
+    )
+  })
+
+  it("names the watch links by their action, not the churning stream title", () => {
+    // The title/category live in a lazy, portaled hover card (and tests run the
+    // touch path → bare link), so — like the other HoverCard tooltips — we
+    // assert the trigger links are intact and named by their action.
+    render(
+      <StandingsTable
+        rows={[
+          liveRow({
+            streamTitle: "RANKED 1v1 — !sub",
+            streamCategory: "Age of Empires II",
+            presentation: {
+              streamUrls: [
+                "https://twitch.tv/streamer",
+                "https://youtube.com/@streamer",
+              ],
+            },
+          }),
+        ]}
+      />
+    )
+    expect(
+      screen.getByRole("link", { name: "Watch on Twitch" })
+    ).toHaveAttribute("href", "https://twitch.tv/streamer")
+    expect(
+      screen.getByRole("link", { name: "Watch on YouTube" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: /RANKED 1v1/ })
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows no dot and a muted icon when offline", () => {
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Offline",
+            streamLive: false,
+            // Stale title/category are ignored offline — the whole treatment
+            // keys off streamLive.
+            streamTitle: "stale title",
+            streamCategory: "Age of Empires II",
+            presentation: { streamUrls: ["https://twitch.tv/offline"] },
+          }),
+        ]}
+      />
+    )
+    expect(
+      screen.queryByRole("img", { name: /Streaming/ })
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Watch on Twitch" })).toHaveClass(
+      "text-muted-foreground"
+    )
+  })
+})
+
 describe("StandingsTable — games played", () => {
   it("shows each player's tournament games-played count", () => {
     render(
@@ -469,7 +584,7 @@ describe("StandingsTable — analytics (#215)", () => {
         presentation: { streamUrls: ["https://twitch.tv/streamer"] },
       }),
     ])
-    await user.click(screen.getByTitle("Watch on Twitch"))
+    await user.click(screen.getByRole("link", { name: "Watch on Twitch" }))
     expect(track).toHaveBeenCalledWith("watch.click", {
       profileId: 42,
       alias: "Streamer",

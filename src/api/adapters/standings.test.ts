@@ -146,3 +146,25 @@ describe("toStandingsSnapshot — defensive name coercion (#313)", () => {
     expect(row.name).toBe("")
   })
 })
+
+describe("toStandingsSnapshot — live stream fields (#328)", () => {
+  it("maps stream title and category through for a live row", () => {
+    const row = snapshotOf(
+      dto({
+        stream_live: true,
+        stream_title: "🔴 RANKED 1v1 TO 2.5K",
+        stream_category: "Age of Empires II",
+      })
+    )
+    expect(row.streamLive).toBe(true)
+    expect(row.streamTitle).toBe("🔴 RANKED 1v1 TO 2.5K")
+    expect(row.streamCategory).toBe("Age of Empires II")
+  })
+
+  it("passes null title/category through for an offline row", () => {
+    const row = snapshotOf(dto())
+    expect(row.streamLive).toBe(false)
+    expect(row.streamTitle).toBeNull()
+    expect(row.streamCategory).toBeNull()
+  })
+})

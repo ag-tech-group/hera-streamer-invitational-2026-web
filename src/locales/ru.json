@@ -134,6 +134,7 @@
       "other": "Смотреть трансляцию"
     },
     "streamingLive": "Прямой эфир",
+    "streamingCategory": "Стримит {{category}}",
     "bioLabel": "Об игроке {{name}}"
   },
   "teams": {
