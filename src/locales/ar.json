@@ -66,7 +66,7 @@
   "stats": {
     "title": "الإحصائيات",
     "subtitle": "تقدّم التصنيف على مدار البطولة.",
-    "chartTitle": "التصنيف عبر الزمن",
+    "chartTitle": "إيلو الحالي عبر الزمن",
     "bumpChartTitle": "المركز عبر الزمن",
     "legend": {
       "all": "الكل",
@@ -74,7 +74,6 @@
     },
     "teamEloTitle": "مجموع ذروة إيلو الفريق",
     "teamAvgEloTitle": "متوسط ذروة إيلو الفريق",
-    "peakRatingTitle": "تصنيف الذروة",
     "civTitle": "الحضارات",
     "civ": {
       "pickRate": "نسبة الاختيار",
