@@ -79,13 +79,13 @@ export function CivMeta({ stats }: { stats: CivStats }) {
   )
 }
 
-/** Win% + its pick count, or an em dash when below the threshold. */
+/** Win% + its win count, or an em dash when below the threshold. */
 function WinValue({ c }: { c: CivStat }) {
   if (c.winPct === null) return <span className="text-muted-foreground">—</span>
   return (
     <>
       {c.winPct.toFixed(0)}%{" "}
-      <span className="text-muted-foreground/70 text-xs">{c.picks}</span>
+      <span className="text-muted-foreground/70 text-xs">{c.wins}</span>
     </>
   )
 }
