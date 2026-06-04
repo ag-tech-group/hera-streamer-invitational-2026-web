@@ -66,7 +66,7 @@
   "stats": {
     "title": "Statistiken",
     "subtitle": "Wertungsverlauf über das gesamte Turnier.",
-    "chartTitle": "Wertung im Zeitverlauf",
+    "chartTitle": "Aktuelle Elo im Zeitverlauf",
     "bumpChartTitle": "Platzierung im Zeitverlauf",
     "legend": {
       "all": "Alle",
@@ -74,7 +74,6 @@
     },
     "teamEloTitle": "Kombinierte Höchst-Elo des Teams",
     "teamAvgEloTitle": "Durchschnittliche Höchst-Elo des Teams",
-    "peakRatingTitle": "Höchstwertung",
     "civTitle": "Zivilisationen",
     "civ": {
       "pickRate": "Wahlrate",

@@ -66,7 +66,7 @@
   "stats": {
     "title": "Statistieken",
     "subtitle": "Ratingverloop gedurende het toernooi.",
-    "chartTitle": "Rating in de tijd",
+    "chartTitle": "Huidige elo in de tijd",
     "bumpChartTitle": "Positie in de tijd",
     "legend": {
       "all": "Alle",
@@ -74,7 +74,6 @@
     },
     "teamEloTitle": "Gecombineerde piek-elo van team",
     "teamAvgEloTitle": "Gemiddelde piek-elo van team",
-    "peakRatingTitle": "Piekrating",
     "civTitle": "Beschavingen",
     "civ": {
       "pickRate": "Kiespercentage",

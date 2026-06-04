@@ -66,7 +66,7 @@
   "stats": {
     "title": "Stats",
     "subtitle": "Rating progression across the tournament.",
-    "chartTitle": "Rating over time",
+    "chartTitle": "Current elo over time",
     "bumpChartTitle": "Position over time",
     "legend": {
       "all": "All",
@@ -74,7 +74,6 @@
     },
     "teamEloTitle": "Team combined peak elo",
     "teamAvgEloTitle": "Team average peak elo",
-    "peakRatingTitle": "Peak rating",
     "civTitle": "Civilizations",
     "civ": {
       "pickRate": "Pick rate",

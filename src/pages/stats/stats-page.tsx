@@ -63,7 +63,6 @@ export function StatsPage() {
     : false
 
   const teamAvgData = teams.data ? teamAvgBars(teams.data.rows) : []
-  const peakData = standings.data ? peakBars(standings.data.rows) : []
 
   // The /progression series carries only the raw ladder alias, so the chart
   // and the series-derived summary cards would show profile names rather than
@@ -284,18 +283,6 @@ export function StatsPage() {
         <BumpChart buckets={bump.buckets} series={bump.series} />
       </ChartSection>
 
-      <ChartSection
-        title={t("stats.peakRatingTitle")}
-        query={standings}
-        isEmpty={peakData.length === 0}
-        skeletonHeight={400}
-      >
-        <HorizontalBarChart
-          data={peakData}
-          height={Math.max(180, peakData.length * 28)}
-        />
-      </ChartSection>
-
       {/* Civilization pick + win rates, entrants-only from /civ-stats (#302). */}
       <ChartSection
         title={t("stats.civTitle")}
@@ -308,9 +295,6 @@ export function StatsPage() {
     </TournamentLayout>
   )
 }
-
-/** Per-player peak-rating bars share a single brand-blue (no team join). */
-const PEAK_COLOR = "#60a5fa"
 
 /** Stable empty race for the loading/no-data passes (keeps memo deps steady). */
 const EMPTY_RACE: EloRace = { buckets: [], entities: [] }
@@ -331,21 +315,6 @@ function teamAvgBars(rows: TeamStandingsRow[]): BarDatum[] {
     value: Math.round(r.combinedRatingAverage),
     color: TEAM_HEX[colorByTeamId.get(r.teamId) ?? "p1"],
   }))
-}
-
-/** Players ranked by peak rating — the "only peak elos count" figure. */
-function peakBars(rows: StandingsRow[]): BarDatum[] {
-  return rows
-    .filter(
-      (r): r is StandingsRow & { maxRating: number } => r.maxRating !== null
-    )
-    .map((r) => ({
-      // Prefer the host's display-name override (matches the standings table),
-      // else the unified `name` (#187).
-      label: r.presentation.displayName ?? r.name,
-      value: r.maxRating,
-      color: PEAK_COLOR,
-    }))
 }
 
 /**

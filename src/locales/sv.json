@@ -66,7 +66,7 @@
   "stats": {
     "title": "Statistik",
     "subtitle": "Ratingutveckling under turneringen.",
-    "chartTitle": "Rating över tid",
+    "chartTitle": "Aktuell elo över tid",
     "bumpChartTitle": "Placering över tid",
     "legend": {
       "all": "Alla",
@@ -74,7 +74,6 @@
     },
     "teamEloTitle": "Lagets sammanlagda topp-elo",
     "teamAvgEloTitle": "Lagets genomsnittliga topp-elo",
-    "peakRatingTitle": "Topprating",
     "civTitle": "Civilisationer",
     "civ": {
       "pickRate": "Valfrekvens",
