@@ -67,6 +67,12 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     updatedAt: dto.updated_at,
     presentation: toPlayerPresentation(dto.presentation),
     streamLive: dto.stream_live,
+    // Live-stream enrichments (#328): title for the Watch-icon tooltip, category
+    // for the dot's "actually on AoE2?" treatment. Both null when offline; the
+    // category is also null for YouTube (no per-stream category) or when Twitch
+    // omits it. Passed straight through — the trust logic lives in the component.
+    streamTitle: dto.stream_title,
+    streamCategory: dto.stream_category,
   }
 }
 

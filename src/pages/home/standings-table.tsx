@@ -31,6 +31,7 @@ import { teamColorMap, type TeamColorSlot } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
 import { BioHint } from "@/pages/home/bio-hint"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
+import { WatchHint } from "@/pages/home/watch-hint"
 import { WinPctHint } from "@/pages/home/win-pct-hint"
 import type { MatchResult, StandingsRow, StandingsTeam } from "@/types"
 
@@ -39,6 +40,15 @@ const RECENT_WITHIN_MS = 24 * 60 * 60 * 1000
 
 /** Placeholder row count rendered while the standings request is in flight. */
 const SKELETON_ROW_COUNT = 6
+
+/**
+ * The Twitch game-category that marks a live stream as genuinely "playing AoE2"
+ * (#328). The Watch-column live dot stays brand-blue for this exact value — or
+ * for a null/unknown category — and dims to muted only for a *different*
+ * non-null category (a confirmed off-game stream like "Just Chatting"). One
+ * constant so the trust threshold lives in a single place.
+ */
+const AOE2_CATEGORY = "Age of Empires II"
 
 /**
  * Stream-platform classification for `presentation.streamUrls` (#152, #112) —
@@ -263,6 +273,8 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
               <WatchCell
                 streamUrls={row.presentation.streamUrls}
                 streamLive={row.streamLive}
+                streamTitle={row.streamTitle}
+                streamCategory={row.streamCategory}
                 profileId={row.profileId}
                 alias={row.alias}
               />
@@ -994,15 +1006,26 @@ function LastMatchCell({
  * small pulsing dot appears alongside — signalling "they're broadcasting
  * right now, click to go watch." Players with no channels show the same
  * muted em-dash the table's other empty cells use.
+ *
+ * #328 layers on *what* they're streaming: the broadcast `streamTitle` (plus
+ * the Twitch `streamCategory`) rides each icon's hover card, and a third colour
+ * tier turns the live signal trustworthy — brand-blue on AoE2 (or when we can't
+ * tell), white when confirmed off-game, muted when offline.
  */
 function WatchCell({
   streamUrls,
   streamLive,
+  streamTitle,
+  streamCategory,
   profileId,
   alias,
 }: {
   streamUrls: string[] | undefined
   streamLive: boolean
+  /** Live broadcast title (Twitch, or YouTube fallback); null offline/omitted. */
+  streamTitle: string | null
+  /** Live game category — Twitch-only, so null for YouTube or when omitted (#328). */
+  streamCategory: string | null
   profileId: number | null
   alias: string
 }) {
@@ -1011,6 +1034,13 @@ function WatchCell({
   if (!streamUrls || streamUrls.length === 0) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
+  // `offGame` = a *confirmed* off-game live stream: a non-null category that
+  // isn't AoE2 (e.g. "Just Chatting", "Path of Exile 2"). It drops the icons +
+  // dot from brand to a neutral white tier — still visibly live, just not our
+  // game. A null category — YouTube has none, and Twitch can omit it — stays on
+  // brand, so we never demote a channel we simply can't classify (#328).
+  const offGame =
+    streamLive && streamCategory !== null && streamCategory !== AOE2_CATEGORY
   return (
     // `-my-1.5` cancels the link padding's vertical growth so the row height is
     // unchanged while each Watch link gets a ~40px tap target (#214).
@@ -1018,13 +1048,19 @@ function WatchCell({
       {streamUrls.map((url) => {
         const platform = streamPlatform(url)
         const Icon = STREAM_ICON[platform]
-        return (
+        const watchLabel = t(`standings.watchOn.${platform}`)
+        // Category is Twitch-only and only meaningful on the Twitch icon (#328).
+        const tooltipCategory = platform === "twitch" ? streamCategory : null
+        // The accessible name stays the stable "Watch on <platform>" action; the
+        // live title/category live in the hover card, so a screen reader hears
+        // the action, not a churning broadcast title (#328).
+        const link = (
           <a
             key={url}
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            title={t(`standings.watchOn.${platform}`)}
+            aria-label={watchLabel}
             // #215: the headline "go watch" conversion. Fired in the click
             // handler (not an effect) so it logs once per real click.
             onClick={() =>
@@ -1036,30 +1072,66 @@ function WatchCell({
                 source: "standings",
               })
             }
-            // Padding grows the tap target past the visible glyph (#214); the
-            // wrapper's negative margin keeps the cell from getting taller.
+            // Three tiers (#328): brand when live on AoE2, foreground/white when
+            // live but off-game, muted when offline. Padding grows the tap target
+            // past the glyph (#214); the wrapper's negative margin keeps the cell
+            // from getting taller.
             className={cn(
               "hover:text-brand inline-flex p-2 transition-colors",
-              streamLive ? "text-brand" : "text-muted-foreground"
+              !streamLive
+                ? "text-muted-foreground"
+                : offGame
+                  ? "text-foreground"
+                  : "text-brand"
             )}
           >
             <Icon className="size-4" aria-hidden />
           </a>
         )
+        // A live stream with something to say gets the styled hover card; an
+        // offline icon (or a live row missing both title and category) keeps the
+        // bare link — nothing to disclose.
+        return streamLive && (streamTitle || tooltipCategory) ? (
+          <WatchHint
+            key={url}
+            title={streamTitle}
+            category={tooltipCategory}
+            offGame={offGame}
+          >
+            {link}
+          </WatchHint>
+        ) : (
+          link
+        )
       })}
       {streamLive && (
-        // Pulsing dot mirrors the in-match `LiveBadge` ring above — same
-        // "right now" signal vocabulary, smaller because the icons next to
-        // it already carry the click affordance. `role="img"` lets the
-        // wrapper carry the "Streaming live" label for assistive tech — a
-        // bare <span> can't (aria-prohibited-attr, flagged in the #65 audit).
+        // Pulsing dot = "broadcasting right now". Its colour carries the #328
+        // trust signal: brand-blue when the stream is — or plausibly is — on
+        // AoE2, white when we can *confirm* it's off-game. `role="img"` lets the
+        // wrapper own a category-aware label for assistive tech (a bare <span>
+        // can't — aria-prohibited-attr, flagged in the #65 audit), so screen
+        // readers get the same signal the colour conveys.
         <span
           role="img"
           className="relative inline-flex size-1.5"
-          aria-label={t("standings.streamingLive")}
+          aria-label={
+            streamCategory
+              ? t("standings.streamingCategory", { category: streamCategory })
+              : t("standings.streamingLive")
+          }
         >
-          <span className="bg-brand absolute inline-flex size-full animate-ping rounded-full opacity-75" />
-          <span className="bg-brand relative inline-flex size-1.5 rounded-full" />
+          <span
+            className={cn(
+              "absolute inline-flex size-full animate-ping rounded-full opacity-75",
+              offGame ? "bg-foreground" : "bg-brand"
+            )}
+          />
+          <span
+            className={cn(
+              "relative inline-flex size-1.5 rounded-full",
+              offGame ? "bg-foreground" : "bg-brand"
+            )}
+          />
         </span>
       )}
     </span>

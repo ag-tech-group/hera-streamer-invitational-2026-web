@@ -161,6 +161,22 @@ export interface StandingsRow {
    * actionable "watch them right now" affordance.
    */
   streamLive: boolean
+  /**
+   * Title of the player's current live broadcast (#328) — Twitch's, or
+   * YouTube's as a fallback. `null` when offline or when the platform omits it.
+   * Surfaced as the Watch-icon hover tooltip, never inline (titles are long,
+   * emoji-laden free text).
+   */
+  streamTitle: string | null
+  /**
+   * Game category of the current live broadcast (#328), e.g. `"Age of Empires
+   * II"`. **Twitch-only** — YouTube has no per-stream category, so a
+   * YouTube-sourced live row is always `null` here (its `streamTitle` still
+   * populates), as is any offline row or one Twitch omits. Drives the Watch
+   * dot's trust treatment: a *confirmed* non-AoE2 category mutes the dot, while
+   * AoE2 — or `null`, which we decline to punish — keeps it brand-blue.
+   */
+  streamCategory: string | null
 }
 
 /**

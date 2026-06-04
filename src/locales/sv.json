@@ -134,6 +134,7 @@
       "other": "Titta på stream"
     },
     "streamingLive": "Sänder live",
+    "streamingCategory": "Sänder {{category}}",
     "bioLabel": "Om {{name}}"
   },
   "teams": {

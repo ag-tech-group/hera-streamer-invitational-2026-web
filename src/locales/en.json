@@ -134,6 +134,7 @@
       "other": "Watch stream"
     },
     "streamingLive": "Streaming live",
+    "streamingCategory": "Streaming {{category}}",
     "bioLabel": "About {{name}}"
   },
   "teams": {

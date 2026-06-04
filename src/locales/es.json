@@ -134,6 +134,7 @@
       "other": "Ver canal"
     },
     "streamingLive": "Transmitiendo en vivo",
+    "streamingCategory": "Transmitiendo {{category}}",
     "bioLabel": "Sobre {{name}}"
   },
   "teams": {
