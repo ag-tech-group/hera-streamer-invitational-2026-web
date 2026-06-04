@@ -98,6 +98,16 @@
       "longestWinStreak": "Longest win streak",
       "mostMatches": "Most matches",
       "winPct": "Best win rate"
+    },
+    "eloRaceTitle": "Elo race",
+    "race": {
+      "teams": "Teams",
+      "players": "Players",
+      "play": "Play",
+      "pause": "Pause",
+      "replay": "Replay",
+      "seek": "Seek the race",
+      "speed": "Playback speed"
     }
   },
   "standings": {

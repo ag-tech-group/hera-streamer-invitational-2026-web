@@ -98,6 +98,16 @@
       "longestWinStreak": "Plus longue série de victoires",
       "mostMatches": "Plus de matchs",
       "winPct": "Meilleur taux de victoire"
+    },
+    "eloRaceTitle": "Course Elo",
+    "race": {
+      "teams": "Équipes",
+      "players": "Joueurs",
+      "play": "Lecture",
+      "pause": "Pause",
+      "replay": "Revoir",
+      "seek": "Parcourir la course",
+      "speed": "Vitesse de lecture"
     }
   },
   "standings": {

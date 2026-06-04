@@ -98,6 +98,16 @@
       "longestWinStreak": "أطول سلسلة انتصارات",
       "mostMatches": "الأكثر مباريات",
       "winPct": "أفضل نسبة فوز"
+    },
+    "eloRaceTitle": "سباق إيلو",
+    "race": {
+      "teams": "الفرق",
+      "players": "اللاعبون",
+      "play": "تشغيل",
+      "pause": "إيقاف",
+      "replay": "إعادة",
+      "seek": "تصفّح السباق",
+      "speed": "سرعة التشغيل"
     }
   },
   "standings": {

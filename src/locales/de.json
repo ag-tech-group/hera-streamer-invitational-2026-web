@@ -98,6 +98,16 @@
       "longestWinStreak": "Längste Siegesserie",
       "mostMatches": "Meiste Partien",
       "winPct": "Beste Siegquote"
+    },
+    "eloRaceTitle": "Elo-Rennen",
+    "race": {
+      "teams": "Teams",
+      "players": "Spieler",
+      "play": "Abspielen",
+      "pause": "Pause",
+      "replay": "Wiederholen",
+      "seek": "Im Rennen suchen",
+      "speed": "Wiedergabegeschwindigkeit"
     }
   },
   "standings": {
