@@ -305,8 +305,11 @@ describe("StandingsTable — live stream category & title (#328)", () => {
     expect(dot.querySelector("span")).not.toHaveClass("bg-brand")
     const link = screen.getByRole("link", { name: "Watch on Twitch" })
     expect(link).toHaveClass("text-foreground")
-    // Off-game keeps the brand only as a hover affordance, never at rest.
     expect(link).not.toHaveClass("text-brand")
+    // The white icon brightens in place on hover — it must never flash
+    // brand-blue (the old blanket hover:text-brand).
+    expect(link).not.toHaveClass("hover:text-brand")
+    expect(link).toHaveClass("hover:brightness-125")
   })
 
   it("keeps brand-blue when live with no category (don't punish YouTube)", () => {
