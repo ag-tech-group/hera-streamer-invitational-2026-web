@@ -1072,12 +1072,14 @@ function WatchCell({
                 source: "standings",
               })
             }
-            // Three tiers (#328): brand when live on AoE2, foreground/white when
-            // live but off-game, muted when offline. Padding grows the tap target
-            // past the glyph (#214); the wrapper's negative margin keeps the cell
-            // from getting taller.
+            // Three tiers (#328): brand when live on AoE2, white when live but
+            // off-game, muted when offline. Hover brightens each icon in place
+            // (a filter, not a colour swap) so the white off-game icon never
+            // flashes brand-blue. Padding grows the tap target past the glyph
+            // (#214); the wrapper's negative margin keeps the cell from getting
+            // taller.
             className={cn(
-              "hover:text-brand inline-flex p-2 transition-colors",
+              "inline-flex p-2 transition hover:brightness-125",
               !streamLive
                 ? "text-muted-foreground"
                 : offGame
