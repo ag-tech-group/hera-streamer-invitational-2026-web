@@ -19,6 +19,8 @@ import { BumpChart } from "@/pages/stats/bump-chart"
 import { toBumpSeries } from "@/pages/stats/bump-series"
 import { CivMeta } from "@/pages/stats/civ-meta"
 import { toCivStats } from "@/pages/stats/civ-stats"
+import { EloRaceChart } from "@/pages/stats/elo-race-chart"
+import { toPlayerRace, toTeamRace, type EloRace } from "@/pages/stats/elo-race"
 import {
   HorizontalBarChart,
   type BarDatum,
@@ -155,6 +157,45 @@ export function StatsPage() {
     ]
   )
 
+  // Elo bar-chart race (#301): the standings shuffling over time. Teams race
+  // their combined peak elo (the scoring metric, from history.teams[]) and
+  // players their peak rating (from history.players[]) — the same
+  // /standings/history payload the bump chart consumes, reusing the same colour
+  // and display-name joins. The team bars need a teamId → name map; the rest of
+  // the joins (label, teamId, base hue) are already built above for the bump
+  // chart.
+  const teamNameByTeamId = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const row of teams.data?.rows ?? []) map.set(row.teamId, row.name)
+    return map
+  }, [teams.data?.rows])
+  const teamRace = useMemo<EloRace>(
+    () =>
+      standingsHistory.data
+        ? toTeamRace(standingsHistory.data, {
+            teamNameByTeamId,
+            teamHexByTeamId: baseHexByTeamId,
+          })
+        : EMPTY_RACE,
+    [standingsHistory.data, teamNameByTeamId, baseHexByTeamId]
+  )
+  const playerRace = useMemo<EloRace>(
+    () =>
+      standingsHistory.data
+        ? toPlayerRace(standingsHistory.data, {
+            labelByTournamentPlayerId,
+            teamIdByTournamentPlayerId,
+            baseHexByTeamId,
+          })
+        : EMPTY_RACE,
+    [
+      standingsHistory.data,
+      labelByTournamentPlayerId,
+      teamIdByTournamentPlayerId,
+      baseHexByTeamId,
+    ]
+  )
+
   return (
     <TournamentLayout view="stats">
       {progression.isPending || standings.isPending ? (
@@ -187,6 +228,25 @@ export function StatsPage() {
           bars={depthBars}
           height={Math.max(180, depthBars.length * 56)}
         />
+      </ChartSection>
+
+      {/* Elo race (#301) — the animated counterpart to the combined-peak board
+          directly above: the same combined peak elo, raced over the tournament
+          timeline. Teams by default, players' peak rating via the toggle; both
+          from /standings/history. Gated to post-start like the team boards
+          (pre-start the elos are flat and equal, so the race would read as
+          noise) and needs at least two buckets to animate. */}
+      <ChartSection
+        title={t("stats.eloRaceTitle")}
+        query={standingsHistory}
+        isEmpty={
+          !tournamentStarted ||
+          teamRace.entities.length === 0 ||
+          teamRace.buckets.length < 2
+        }
+        skeletonHeight={360}
+      >
+        <EloRaceChart teamRace={teamRace} playerRace={playerRace} />
       </ChartSection>
 
       <ChartSection
@@ -251,6 +311,9 @@ export function StatsPage() {
 
 /** Per-player peak-rating bars share a single brand-blue (no team join). */
 const PEAK_COLOR = "#60a5fa"
+
+/** Stable empty race for the loading/no-data passes (keeps memo deps steady). */
+const EMPTY_RACE: EloRace = { buckets: [], entities: [] }
 
 /** A civ needs at least this many games before its win rate is shown (#302). */
 const MIN_CIV_PICKS = 5

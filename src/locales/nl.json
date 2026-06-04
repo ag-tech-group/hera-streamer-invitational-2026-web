@@ -98,6 +98,16 @@
       "longestWinStreak": "Langste zegereeks",
       "mostMatches": "Meeste wedstrijden",
       "winPct": "Beste winstpercentage"
+    },
+    "eloRaceTitle": "Elo-race",
+    "race": {
+      "teams": "Teams",
+      "players": "Spelers",
+      "play": "Afspelen",
+      "pause": "Pauzeren",
+      "replay": "Opnieuw",
+      "seek": "Door de race scrubben",
+      "speed": "Afspeelsnelheid"
     }
   },
   "standings": {

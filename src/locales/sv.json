@@ -98,6 +98,16 @@
       "longestWinStreak": "Längsta segersvit",
       "mostMatches": "Flest matcher",
       "winPct": "Bästa vinstandel"
+    },
+    "eloRaceTitle": "Elo-race",
+    "race": {
+      "teams": "Lag",
+      "players": "Spelare",
+      "play": "Spela",
+      "pause": "Pausa",
+      "replay": "Spela igen",
+      "seek": "Sök i racet",
+      "speed": "Uppspelningshastighet"
     }
   },
   "standings": {

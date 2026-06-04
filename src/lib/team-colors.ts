@@ -85,3 +85,45 @@ export function lightenHex(hex: string, amount: number): string {
   const to2 = (channel: number) => channel.toString(16).padStart(2, "0")
   return `#${to2(r)}${to2(g)}${to2(b)}`
 }
+
+/** How far a team's last teammate is lightened from the base hue (0 = none). */
+const SHADE_MAX = 0.45
+/** Fallback hue for an entity that isn't on any team roster. */
+export const NEUTRAL_HEX = "#94a3b8"
+
+/**
+ * Maps each id to its team's hue, lightening teammates apart within that hue so
+ * same-team series stay distinguishable while still reading as the team colour.
+ *
+ * `ids` is consumed in priority order (e.g. current rank): the first teammate
+ * keeps the full base hue and each subsequent one is lightened further toward
+ * white, up to `SHADE_MAX`. Shared by the position bump chart (#299) and the elo
+ * race (#301) so a player's shade matches across both surfaces. An id with no
+ * team (or a team with no base hue) falls back to `NEUTRAL_HEX`.
+ */
+export function shadeByTeam(
+  ids: number[],
+  teamIdById: Map<number, number>,
+  baseHexByTeamId: Map<number, string>
+): Map<number, string> {
+  const teammates = new Map<number, number[]>()
+  for (const id of ids) {
+    const teamId = teamIdById.get(id) ?? -1
+    const group = teammates.get(teamId)
+    if (group) group.push(id)
+    else teammates.set(teamId, [id])
+  }
+  const color = new Map<number, string>()
+  for (const [teamId, group] of teammates) {
+    const base = baseHexByTeamId.get(teamId) ?? NEUTRAL_HEX
+    group.forEach((id, k) => {
+      color.set(
+        id,
+        group.length > 1
+          ? lightenHex(base, (k / (group.length - 1)) * SHADE_MAX)
+          : base
+      )
+    })
+  }
+  return color
+}
