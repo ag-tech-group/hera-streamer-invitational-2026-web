@@ -53,6 +53,8 @@ export interface StandingRow {
   in_match: boolean;
   live_match_id: number | null;
   stream_live: boolean;
+  stream_title: string | null;
+  stream_category: string | null;
   last_match_at: string | null;
   updated_at: string | null;
   readonly games: number;

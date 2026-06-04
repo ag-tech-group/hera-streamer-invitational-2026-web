@@ -95,6 +95,7 @@
     "cards": {
       "biggestClimber": "Лучший рост",
       "highestPeak": "Высший пик",
+      "longestWinStreak": "Самая длинная серия побед",
       "mostMatches": "Больше всего матчей",
       "winPct": "Лучший процент побед"
     }

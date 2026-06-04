@@ -95,6 +95,7 @@
     "cards": {
       "biggestClimber": "Größter Aufsteiger",
       "highestPeak": "Höchster Höchstwert",
+      "longestWinStreak": "Längste Siegesserie",
       "mostMatches": "Meiste Partien",
       "winPct": "Beste Siegquote"
     }

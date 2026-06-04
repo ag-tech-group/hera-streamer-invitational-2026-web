@@ -969,7 +969,10 @@ point and every reorder is captured. Every roster entity holds a
 ``position`` at every bucket, ranked the same way the live table is — by
 peak (``max_rating``) desc, then current rating, then name
 (``comparePeakRank``). Unrated members are included and rank at the tail by
-name, so the chart is complete (everyone has a line).
+name, so the chart is complete (everyone has a line). The roster is gated
+identically to ``/standings`` (#232) — a row linked to a not-yet-polled
+``profile_id`` is held back — so the two surfaces always agree on the
+entity set and the chart never carries a phantom the FE can't label.
 
 Peak elo is carried in and only rises on a new all-time high, so an
 entity's ``peak_rating`` as of a bucket is ``max(pre-event baseline,

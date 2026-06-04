@@ -56,6 +56,7 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     wins: dto.tournament_record.wins,
     losses: dto.tournament_record.losses,
     streak: dto.tournament_record.streak,
+    longestWinStreak: dto.tournament_record.longest_win_streak,
     recentResults: dto.tournament_record.recent_results,
     winPct: dto.tournament_record.win_pct,
     gamesPlayed: dto.tournament_record.games_played,

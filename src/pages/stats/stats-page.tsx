@@ -1,4 +1,4 @@
-import { Percent, Swords, TrendingUp, Trophy } from "lucide-react"
+import { Flame, Percent, Swords, TrendingUp, Trophy } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import type { ReactNode } from "react"
@@ -158,8 +158,8 @@ export function StatsPage() {
   return (
     <TournamentLayout view="stats">
       {progression.isPending || standings.isPending ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+          {Array.from({ length: 5 }, (_, i) => (
             <Skeleton key={i} className="h-24 rounded-lg" />
           ))}
         </div>
@@ -415,6 +415,36 @@ function computeWinPctLeader(rows: StandingsRow[]): Leader | null {
   return leader
 }
 
+/**
+ * Longest in-window win streak across the standings (#331). Reads the peak win
+ * run the API now tracks per player (`tournament_record.longest_win_streak`,
+ * surfaced by the adapter as `longestWinStreak`) — the *peak* run over the
+ * whole window, distinct from `streak`, which is the *current* signed run. A
+ * player on `W W W L W` has `streak = 1` but `longestWinStreak = 3`. Rows with
+ * no in-window wins (`longestWinStreak === 0`) are skipped so a 0 can't read as
+ * a leader. Equal streaks break on games played — the more battle-tested
+ * player holds the card — then on first-seen (the standings' rank order).
+ */
+function computeLongestWinStreakLeader(rows: StandingsRow[]): Leader | null {
+  let leader: Leader | null = null
+  let leaderGames = 0
+  for (const r of rows) {
+    if (r.longestWinStreak <= 0) continue
+    if (
+      !leader ||
+      r.longestWinStreak > leader.value ||
+      (r.longestWinStreak === leader.value && r.gamesPlayed > leaderGames)
+    ) {
+      leader = {
+        alias: r.presentation.displayName ?? r.name,
+        value: r.longestWinStreak,
+      }
+      leaderGames = r.gamesPlayed
+    }
+  }
+  return leader
+}
+
 function SummaryCards({
   series,
   standingsRows,
@@ -431,14 +461,19 @@ function SummaryCards({
     () => computeWinPctLeader(standingsRows),
     [standingsRows]
   )
+  const longestWinStreak = useMemo(
+    () => computeLongestWinStreakLeader(standingsRows),
+    [standingsRows]
+  )
   // A climber delta carries a sign (someone may be the "least dropped"); peak
   // and matches are plain counts.
   const signed = (n: number) => (n >= 0 ? `+${n}` : String(n))
   return (
     // Highest peak leads — it's the tournament's headline metric (only peak
-    // elos count toward seeding). Win rate sits beside it, then the
-    // movement / volume stats.
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    // elos count toward seeding). The two win-quality stats (win rate, longest
+    // streak) sit beside it, then the movement / volume stats. Five cards: the
+    // grid steps 2 → 3 → 5 so it never orphans the 5th alone on a second row.
+    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
       <StatCard
         icon={Trophy}
         label={t("stats.cards.highestPeak")}
@@ -450,6 +485,12 @@ function SummaryCards({
         label={t("stats.cards.winPct")}
         value={winPctLeader ? `${winPctLeader.value.toFixed(1)}%` : "—"}
         player={winPctLeader?.alias ?? null}
+      />
+      <StatCard
+        icon={Flame}
+        label={t("stats.cards.longestWinStreak")}
+        value={longestWinStreak ? String(longestWinStreak.value) : "—"}
+        player={longestWinStreak?.alias ?? null}
       />
       <StatCard
         icon={TrendingUp}

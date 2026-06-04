@@ -27,6 +27,8 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
     in_match: false,
     live_match_id: null,
     stream_live: false,
+    stream_title: null,
+    stream_category: null,
     last_match_at: "2020-01-01T00:00:00Z",
     updated_at: "2026-05-30T00:00:00Z",
     games: 8,
@@ -37,6 +39,7 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
       wins: 6,
       losses: 2,
       streak: 3,
+      longest_win_streak: 5,
       peak_rating: 2180,
       last_match_at: "2026-05-30T12:00:00Z",
       recent_results: ["win", "loss", "win"],
@@ -60,7 +63,10 @@ function snapshotOf(row: StandingRow) {
 describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () => {
   it("reads streak / recent / win% / activity from tournament_record, not lifetime", () => {
     const row = snapshotOf(dto())
-    expect(row.streak).toBe(3) // tournament_record.streak, not 50
+    expect(row.streak).toBe(3) // tournament_record.streak (current), not 50
+    // longest_win_streak (#331) is the in-window *peak* run, distinct from the
+    // *current* streak above (3) and the lifetime streak (50).
+    expect(row.longestWinStreak).toBe(5)
     expect(row.recentResults).toEqual(["win", "loss", "win"]) // not the lifetime trio
     expect(row.winPct).toBe(75.0) // tournament_record.win_pct, not 90
     expect(row.wins).toBe(6) // tournament_record.wins, not 999
@@ -90,6 +96,7 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
           wins: 0,
           losses: 0,
           streak: 0,
+          longest_win_streak: 0,
           peak_rating: null,
           last_match_at: null,
           recent_results: [],
@@ -106,6 +113,7 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
     expect(row.lastMatchAt).toBeNull()
     expect(row.recentResults).toEqual([])
     expect(row.streak).toBe(0)
+    expect(row.longestWinStreak).toBe(0) // no in-window wins → 0; the card skips this row
     // …but Peak (lifetime, #246) and the live ladder rating still show.
     expect(row.maxRating).toBe(2400)
     expect(row.currentRating).toBe(2150)

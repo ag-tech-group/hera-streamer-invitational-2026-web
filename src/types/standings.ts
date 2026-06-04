@@ -111,6 +111,14 @@ export interface StandingsRow {
    */
   streak: number
   /**
+   * Longest run of consecutive wins **within the tournament window** (#331 →
+   * `tournament_record.longest_win_streak`): a non-negative count, `0` when the
+   * player has no in-window wins. Distinct from `streak`, which is the *current*
+   * signed run (latest only) — e.g. `W W W L W` gives `streak = 1` but
+   * `longestWinStreak = 3`.
+   */
+  longestWinStreak: number
+  /**
    * Outcomes of the player's most recent **in-window** completed matches,
    * most-recent first (#238 → `tournament_record.recent_results`). Empty when
    * they have no completed tournament match.

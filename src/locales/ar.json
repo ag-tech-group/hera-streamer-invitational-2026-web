@@ -95,6 +95,7 @@
     "cards": {
       "biggestClimber": "أكبر صعود",
       "highestPeak": "أعلى ذروة",
+      "longestWinStreak": "أطول سلسلة انتصارات",
       "mostMatches": "الأكثر مباريات",
       "winPct": "أفضل نسبة فوز"
     }
