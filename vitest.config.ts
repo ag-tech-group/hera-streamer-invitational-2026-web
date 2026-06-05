@@ -4,6 +4,13 @@ import path from "path"
 
 export default defineConfig({
   plugins: [react()],
+  // Mirror vite.config.ts's `define` so the build-time release global resolves
+  // under test instead of throwing ReferenceError when a module reads it at
+  // import time (e.g. version-check.ts). A fixed value is fine — tests inject
+  // their own version where it matters.
+  define: {
+    __APP_RELEASE__: JSON.stringify("test"),
+  },
   test: {
     globals: true,
     environment: "jsdom",

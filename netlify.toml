@@ -67,6 +67,21 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# The version manifest must always revalidate so a parked tab's poll sees a new
+# deploy promptly (src/lib/version-check.ts). Like index.html, never cache it
+# hard. Netlify matches header rules on the request URL (not the rewritten
+# path), so the prefixed URL the browser actually requests needs its own rule
+# alongside the root one (mirrors the /assets/* pair above).
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/kings-gauntlet/version.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 # Cutover prefix-stripping (#167). Vite's `base = "/kings-gauntlet/"` rewrites
 # URLs in the built HTML to include the prefix, but doesn't physically move
 # files under a `/kings-gauntlet/` subdirectory in `dist/`. The domain is
@@ -155,6 +170,17 @@
 [[redirects]]
   from = "/kings-gauntlet/sitemap.xml"
   to = "/sitemap.xml"
+  status = 200
+
+# `version.json` is emitted at the deploy root by the `emit-version-json` Vite
+# plugin and polled by the client version check (src/lib/version-check.ts) to
+# refresh long-lived tabs onto new deploys. Same prefix-vs-physical asymmetry
+# as the root files above — without this the request falls through to the SPA
+# fallback and the poller gets the app shell (HTML) instead of JSON, so it can
+# never detect an update. Must land before the `/kings-gauntlet/*` fallback.
+[[redirects]]
+  from = "/kings-gauntlet/version.json"
+  to = "/version.json"
   status = 200
 
 [[redirects]]
