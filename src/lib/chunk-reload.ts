@@ -17,6 +17,8 @@
  * second failure within the guard window is left to propagate (Vite re-throws
  * it, so it still reaches Sentry) instead of being suppressed.
  */
+import { getSessionStored, setSessionStored } from "@/lib/safe-storage"
+
 declare global {
   interface Window {
     /**
@@ -63,19 +65,13 @@ export function installChunkReloadHandler(
 }
 
 function reloadedRecently(): boolean {
-  try {
-    const last = Number(sessionStorage.getItem(RELOAD_MARK_KEY))
-    return last > 0 && Date.now() - last < RELOAD_GUARD_MS
-  } catch {
-    // Storage blocked (private mode) — fall back to the per-load guard only.
-    return false
-  }
+  // Storage blocked (private mode / WebView) makes this read `null` →
+  // `Number(null)` is 0 → treated as "not reloaded recently". The per-load
+  // `reloadedThisLoad` guard still prevents an immediate reload loop.
+  const last = Number(getSessionStored(RELOAD_MARK_KEY))
+  return last > 0 && Date.now() - last < RELOAD_GUARD_MS
 }
 
 function rememberReload(): void {
-  try {
-    sessionStorage.setItem(RELOAD_MARK_KEY, String(Date.now()))
-  } catch {
-    // Storage blocked; the per-load guard still prevents an immediate loop.
-  }
+  setSessionStored(RELOAD_MARK_KEY, String(Date.now()))
 }
