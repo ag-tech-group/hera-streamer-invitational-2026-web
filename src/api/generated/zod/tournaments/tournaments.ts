@@ -276,14 +276,17 @@ export const GetCivStatsV1TournamentsTournamentSlugCivStatsGetResponse = zod.obj
 
 Five cards mirroring the stats page's headline row — highest peak rating,
 best win rate, longest win streak, biggest climber, most games played —
-each naming the leading linked entrant and their value, all computed
-in-window (the same ``[start_date, grand_finals_date]`` bounds as
-``tournament_record``) over the tournament players' matches on its
+each naming the leading linked entrant and their value. ``highest_peak_rating``
+is the **one lifetime read**: it ranks by all-time ``PlayerRating.max_rating``
+(the host's all-time-peak decision, same as ``StandingRow.max_rating``). The
+other four are computed in-window (the same ``[start_date, grand_finals_date]``
+bounds as ``tournament_record``) over the tournament players' matches on its
 leaderboard. ``biggest_climber`` is the greatest **signed** in-window net
 rating change (last − first rated point), so it can be negative when the
 field declined. A card is ``null`` when no entrant qualifies (empty roster,
-a metric nobody has earned, fewer than two in-window rated points for the
-climber, or — for ``best_win_rate`` — nobody past the minimum-games guard).
+a metric nobody has earned, no rating on this leaderboard for the peak card,
+fewer than two in-window rated points for the climber, or — for
+``best_win_rate`` — nobody past the minimum-games guard).
 The longest-win-streak card additionally carries the peak run's date range,
 which the capped per-row recent-matchups can't surface. Each card's
 ``name`` is the resolved display label (``presentation.displayName``
@@ -313,13 +316,13 @@ export const GetSummaryV1TournamentsTournamentSlugSummaryGetResponse = zod.objec
   "profile_id": zod.number(),
   "name": zod.string(),
   "value": zod.union([zod.number(),zod.number()])
-}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one in-window metric (longest win streak,\npeak rating, games played, net rating change, win rate) on the\ntournament\'s leaderboard. ``tournament_player_id`` is the stable roster\nkey (#187); ``profile_id`` is its linked polled identity (always set —\nonly linked entrants have match data to rank). ``name`` is the display\nlabel, the same source\/meaning as ``StandingRow.name`` (``displayName``\noverride resolved server-side, #243).'),zod.null()]),
+}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()]),
   "best_win_rate": zod.union([zod.object({
   "tournament_player_id": zod.number(),
   "profile_id": zod.number(),
   "name": zod.string(),
   "value": zod.union([zod.number(),zod.number()])
-}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one in-window metric (longest win streak,\npeak rating, games played, net rating change, win rate) on the\ntournament\'s leaderboard. ``tournament_player_id`` is the stable roster\nkey (#187); ``profile_id`` is its linked polled identity (always set —\nonly linked entrants have match data to rank). ``name`` is the display\nlabel, the same source\/meaning as ``StandingRow.name`` (``displayName``\noverride resolved server-side, #243).'),zod.null()]),
+}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()]),
   "longest_win_streak": zod.union([zod.object({
   "tournament_player_id": zod.number(),
   "profile_id": zod.number(),
@@ -333,13 +336,13 @@ export const GetSummaryV1TournamentsTournamentSlugSummaryGetResponse = zod.objec
   "profile_id": zod.number(),
   "name": zod.string(),
   "value": zod.union([zod.number(),zod.number()])
-}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one in-window metric (longest win streak,\npeak rating, games played, net rating change, win rate) on the\ntournament\'s leaderboard. ``tournament_player_id`` is the stable roster\nkey (#187); ``profile_id`` is its linked polled identity (always set —\nonly linked entrants have match data to rank). ``name`` is the display\nlabel, the same source\/meaning as ``StandingRow.name`` (``displayName``\noverride resolved server-side, #243).'),zod.null()]),
+}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()]),
   "most_games_played": zod.union([zod.object({
   "tournament_player_id": zod.number(),
   "profile_id": zod.number(),
   "name": zod.string(),
   "value": zod.union([zod.number(),zod.number()])
-}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one in-window metric (longest win streak,\npeak rating, games played, net rating change, win rate) on the\ntournament\'s leaderboard. ``tournament_player_id`` is the stable roster\nkey (#187); ``profile_id`` is its linked polled identity (always set —\nonly linked entrants have match data to rank). ``name`` is the display\nlabel, the same source\/meaning as ``StandingRow.name`` (``displayName``\noverride resolved server-side, #243).'),zod.null()])
+}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()])
 }).describe('Headline \"leader\" stat cards for a tournament (#238, #243).\n\nThe five cards mirror the stats page\'s headline row exactly (#243):\n``highest_peak_rating``, ``best_win_rate``, ``longest_win_streak``,\n``biggest_climber``, ``most_games_played``. Each names the leading roster\nentrant for one metric, computed in-window (the same\n``[start_date, grand_finals_date]`` bounds as ``tournament_record``) over\nlinked entrants only — their ladder opponents\' rows are excluded. (Peak\nrating is the one lifetime read; everything else, ``biggest_climber``\nincluded, is window-scoped.)\n\nA card is ``null`` when no entrant qualifies: an empty roster, a metric no\none has earned (zero in-window wins → no ``longest_win_streak`` leader),\nnothing rankable in-window (``biggest_climber`` needs ≥2 in-window rated\npoints), or — for ``best_win_rate`` — nobody past the minimum-games guard.\nLeaders are tie-broken deterministically (higher ``games_played``, then\nlower ``tournament_player_id``) so each card is stable across polls.\n``last_polled_at`` is the latest in-window match across the roster,\nmirroring the other aggregate endpoints.')
 
 /**

@@ -13,13 +13,13 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
 /**
  * One headline "leader" card: the leading roster player + their value.
 
-Names the entrant who tops one in-window metric (longest win streak,
-peak rating, games played, net rating change, win rate) on the
-tournament's leaderboard. ``tournament_player_id`` is the stable roster
-key (#187); ``profile_id`` is its linked polled identity (always set —
-only linked entrants have match data to rank). ``name`` is the display
-label, the same source/meaning as ``StandingRow.name`` (``displayName``
-override resolved server-side, #243).
+Names the entrant who tops one metric — all-time peak rating, or one of the
+in-window metrics (longest win streak, games played, net rating change, win
+rate) — on the tournament's leaderboard. ``tournament_player_id`` is the
+stable roster key (#187); ``profile_id`` is its linked polled identity
+(always set — only linked entrants have match data to rank). ``name`` is the
+display label, the same source/meaning as ``StandingRow.name``
+(``displayName`` override resolved server-side, #243).
  */
 export interface SummaryCard {
   tournament_player_id: number;

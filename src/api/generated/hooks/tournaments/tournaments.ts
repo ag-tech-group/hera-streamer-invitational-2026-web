@@ -838,14 +838,17 @@ export function useGetCivStatsV1TournamentsTournamentSlugCivStatsGet<TData = Awa
 
 Five cards mirroring the stats page's headline row — highest peak rating,
 best win rate, longest win streak, biggest climber, most games played —
-each naming the leading linked entrant and their value, all computed
-in-window (the same ``[start_date, grand_finals_date]`` bounds as
-``tournament_record``) over the tournament players' matches on its
+each naming the leading linked entrant and their value. ``highest_peak_rating``
+is the **one lifetime read**: it ranks by all-time ``PlayerRating.max_rating``
+(the host's all-time-peak decision, same as ``StandingRow.max_rating``). The
+other four are computed in-window (the same ``[start_date, grand_finals_date]``
+bounds as ``tournament_record``) over the tournament players' matches on its
 leaderboard. ``biggest_climber`` is the greatest **signed** in-window net
 rating change (last − first rated point), so it can be negative when the
 field declined. A card is ``null`` when no entrant qualifies (empty roster,
-a metric nobody has earned, fewer than two in-window rated points for the
-climber, or — for ``best_win_rate`` — nobody past the minimum-games guard).
+a metric nobody has earned, no rating on this leaderboard for the peak card,
+fewer than two in-window rated points for the climber, or — for
+``best_win_rate`` — nobody past the minimum-games guard).
 The longest-win-streak card additionally carries the peak run's date range,
 which the capped per-row recent-matchups can't surface. Each card's
 ``name`` is the resolved display label (``presentation.displayName``
