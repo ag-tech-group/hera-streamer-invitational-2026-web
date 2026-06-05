@@ -50,6 +50,48 @@ export interface StandingsTeam {
 }
 
 /**
+ * One of a player's recent in-window games, with the civ matchup behind it
+ * (#339 → API #222 / `tournament_record.recent_matchups`). Backs the hover/tap
+ * tooltip on each recent-form icon: the same win/loss `outcome` the row reads at
+ * a glance, plus the player's civ and — on a 1v1 leaderboard — the opponent's,
+ * each resolved to a name + heraldic emblem at the adapter (the same
+ * `civEmblemUrl` the civ board uses). Any civ field can be null when the API
+ * couldn't resolve it — a civ newer than our emblem snapshot, or an unnamed
+ * opponent — and the tooltip degrades gracefully.
+ */
+export interface RecentMatchup {
+  /** Win or loss — drives the crown/skull pip the recent-form row shows. */
+  outcome: MatchResult
+  /** The player's civ name, or null when the API couldn't resolve it. */
+  civName: string | null
+  /**
+   * Public URL of the player's civ emblem, or null — the civ is newer than our
+   * committed shield set, or its name didn't resolve. The card shows the name
+   * (or a placeholder) with a held slot in that case, never a broken image.
+   */
+  civEmblemUrl: string | null
+  /**
+   * The opponent's civ name, or null: a non-1v1 leaderboard has no single
+   * opponent, and a resolvable id can still lack a name. The tooltip then shows
+   * the player's civ alone.
+   */
+  opponentCivName: string | null
+  /** Public URL of the opponent's civ emblem, or null (same cases as above). */
+  opponentCivEmblemUrl: string | null
+  /**
+   * Map the game was played on, with the replay's file extension stripped
+   * (`Arabia.rms` → `Arabia`, see `cleanMapName`). Empty string when the API
+   * sent no map — the tooltip omits the context line then.
+   */
+  mapName: string
+  /**
+   * ISO-8601 completion time, or null. Backs the tooltip's relative "3h ago"
+   * context; null (or an empty map) drops that line rather than dangling.
+   */
+  completedAt: string | null
+}
+
+/**
  * One player's row in the standings, ready for display.
  *
  * UI-facing counterpart of the generated `StandingRow` DTO: camelCased and
@@ -119,11 +161,17 @@ export interface StandingsRow {
    */
   longestWinStreak: number
   /**
-   * Outcomes of the player's most recent **in-window** completed matches,
-   * most-recent first (#238 → `tournament_record.recent_results`). Empty when
-   * they have no completed tournament match.
+   * The player's most recent **in-window** completed games, most-recent first
+   * (#339 → `tournament_record.recent_matchups`). Each carries its win/loss
+   * outcome *and* the civ matchup behind it, so the recent-form row renders the
+   * W/L pips and a per-game civ tooltip from one field. Empty when they have no
+   * completed tournament match.
+   *
+   * Supersedes the old outcome-only `recentResults` (#238): the API's
+   * `recent_results` still ships, but the frontend no longer reads it — its
+   * removal is the API #222 follow-up.
    */
-  recentResults: MatchResult[]
+  recentMatchups: RecentMatchup[]
   /**
    * Win percentage (0–100, 1dp) over in-window games (#238 →
    * `tournament_record.win_pct`), or `null` when they have no decided games.

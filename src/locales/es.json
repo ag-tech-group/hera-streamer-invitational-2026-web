@@ -139,9 +139,16 @@
     },
     "live": "En vivo",
     "liveAriaLabel": "En partida en vivo",
-    "recentAriaLabel": "Resultados recientes, más recientes primero: {{results}}",
-    "win": "Victoria",
-    "loss": "Derrota",
+    "recentMatchup": {
+      "vs": "vs",
+      "player": "Jugador",
+      "opponent": "Rival",
+      "won": "Victoria",
+      "lost": "Derrota",
+      "unknownCiv": "una civilización desconocida",
+      "labelVs": "{{outcome}} con {{civ}} contra {{opponent}}",
+      "labelSolo": "{{outcome}} con {{civ}}"
+    },
     "viewProfile": "Ver el perfil de {{name}}",
     "watchOn": {
       "twitch": "Ver en Twitch",

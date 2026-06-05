@@ -139,9 +139,16 @@
     },
     "live": "مباشر",
     "liveAriaLabel": "في مباراة مباشرة",
-    "recentAriaLabel": "النتائج الأخيرة، الأحدث أولاً: {{results}}",
-    "win": "فوز",
-    "loss": "خسارة",
+    "recentMatchup": {
+      "vs": "ضد",
+      "player": "اللاعب",
+      "opponent": "الخصم",
+      "won": "فوز",
+      "lost": "خسارة",
+      "unknownCiv": "حضارة غير معروفة",
+      "labelVs": "{{outcome}} بـ{{civ}} ضد {{opponent}}",
+      "labelSolo": "{{outcome}} بـ{{civ}}"
+    },
     "viewProfile": "عرض الملف الشخصي لـ {{name}}",
     "watchOn": {
       "twitch": "المشاهدة على Twitch",

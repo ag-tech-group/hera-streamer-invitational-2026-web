@@ -43,7 +43,29 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
       peak_rating: 2180,
       last_match_at: "2026-05-30T12:00:00Z",
       recent_results: ["win", "loss", "win"],
-      recent_matchups: [],
+      // recent_matchups (#339) is the civ-matchup form the frontend now reads.
+      // 1st: a normal 1v1 with both civs; 2nd: a null opponent civ (the graceful
+      // fallback case). Map names carry the replay extension on purpose.
+      recent_matchups: [
+        {
+          outcome: "win",
+          civilization_id: 17,
+          civilization_name: "Franks",
+          opponent_civilization_id: 21,
+          opponent_civilization_name: "Mayans",
+          map_name: "Arabia.rms",
+          completed_at: "2026-05-30T12:00:00Z",
+        },
+        {
+          outcome: "loss",
+          civilization_id: 11,
+          civilization_name: "Goths",
+          opponent_civilization_id: null,
+          opponent_civilization_name: null,
+          map_name: "Arena.rms2",
+          completed_at: "2026-05-30T11:00:00Z",
+        },
+      ],
       win_pct: 75.0,
     },
     ...overrides,
@@ -67,7 +89,9 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
     // longest_win_streak (#331) is the in-window *peak* run, distinct from the
     // *current* streak above (3) and the lifetime streak (50).
     expect(row.longestWinStreak).toBe(5)
-    expect(row.recentResults).toEqual(["win", "loss", "win"]) // not the lifetime trio
+    // recent_matchups (#339) is sourced from tournament_record — there's no
+    // lifetime counterpart, so this just proves the in-window form is mapped.
+    expect(row.recentMatchups.map((m) => m.outcome)).toEqual(["win", "loss"])
     expect(row.winPct).toBe(75.0) // tournament_record.win_pct, not 90
     expect(row.wins).toBe(6) // tournament_record.wins, not 999
     expect(row.losses).toBe(2) // tournament_record.losses, not 100
@@ -111,7 +135,7 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
     // Tournament-scoped stats read empty (→ "—" in the table)…
     expect(row.winPct).toBeNull()
     expect(row.lastMatchAt).toBeNull()
-    expect(row.recentResults).toEqual([])
+    expect(row.recentMatchups).toEqual([])
     expect(row.streak).toBe(0)
     expect(row.longestWinStreak).toBe(0) // no in-window wins → 0; the card skips this row
     // …but Peak (lifetime, #246) and the live ladder rating still show.
@@ -121,6 +145,91 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
 
   it("renders Peak as null only for a brand-new account (null max_rating)", () => {
     expect(snapshotOf(dto({ max_rating: null })).maxRating).toBeNull()
+  })
+})
+
+describe("toStandingsSnapshot — recent matchups (#339)", () => {
+  /** Overrides only `recent_matchups` on the default fixture's record. */
+  function withMatchups(
+    matchups: StandingRow["tournament_record"]["recent_matchups"]
+  ): StandingRow {
+    return dto({
+      tournament_record: {
+        ...dto().tournament_record,
+        recent_matchups: matchups,
+      },
+    })
+  }
+
+  it("maps each matchup with its civ names and resolves emblems by name", () => {
+    const row = snapshotOf(dto())
+    expect(row.recentMatchups).toHaveLength(2)
+    const [first] = row.recentMatchups
+    expect(first).toMatchObject({
+      outcome: "win",
+      civName: "Franks",
+      opponentCivName: "Mayans",
+    })
+    // Emblems resolve through the same `civEmblemUrl` the civ board uses — a
+    // non-null URL whose basename is the lowercased civ name.
+    expect(first.civEmblemUrl).toMatch(/franks\.webp$/)
+    expect(first.opponentCivEmblemUrl).toMatch(/mayans\.webp$/)
+  })
+
+  it("cleans the replay map name (strips the .rms / .rms2 extension)", () => {
+    const [first, second] = snapshotOf(dto()).recentMatchups
+    expect(first.mapName).toBe("Arabia")
+    expect(second.mapName).toBe("Arena")
+  })
+
+  it("handles a null opponent civ (non-1v1 or unnamed) gracefully", () => {
+    // The default fixture's 2nd matchup carries a null opponent civ.
+    const second = snapshotOf(dto()).recentMatchups[1]
+    expect(second.opponentCivName).toBeNull()
+    expect(second.opponentCivEmblemUrl).toBeNull()
+    // The player's own civ still resolves independently.
+    expect(second.civName).toBe("Goths")
+    expect(second.civEmblemUrl).toMatch(/goths\.webp$/)
+  })
+
+  it("yields a null emblem (but keeps the name) when the player civ is unnamed", () => {
+    const m = snapshotOf(
+      withMatchups([
+        {
+          outcome: "win",
+          civilization_id: 999,
+          civilization_name: null, // API couldn't name it
+          opponent_civilization_id: 1,
+          opponent_civilization_name: "Aztecs",
+          map_name: "Hideout.rms",
+          completed_at: null,
+        },
+      ])
+    ).recentMatchups[0]
+    expect(m.civName).toBeNull()
+    expect(m.civEmblemUrl).toBeNull()
+    // The opponent still resolves on its own.
+    expect(m.opponentCivName).toBe("Aztecs")
+    expect(m.opponentCivEmblemUrl).toMatch(/aztecs\.webp$/)
+    expect(m.completedAt).toBeNull()
+  })
+
+  it("yields a null emblem for a named civ we have no committed shield for", () => {
+    const m = snapshotOf(
+      withMatchups([
+        {
+          outcome: "loss",
+          civilization_id: 12345,
+          civilization_name: "Atlanteans", // not in our emblem set
+          opponent_civilization_id: 1,
+          opponent_civilization_name: "Aztecs",
+          map_name: "Nomad.rms",
+          completed_at: "2026-06-01T00:00:00Z",
+        },
+      ])
+    ).recentMatchups[0]
+    expect(m.civName).toBe("Atlanteans") // name still shown…
+    expect(m.civEmblemUrl).toBeNull() // …but no emblem to render
   })
 })
 

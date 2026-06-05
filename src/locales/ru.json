@@ -139,9 +139,16 @@
     },
     "live": "В эфире",
     "liveAriaLabel": "В прямом матче",
-    "recentAriaLabel": "Недавние результаты, сначала самые свежие: {{results}}",
-    "win": "Победа",
-    "loss": "Поражение",
+    "recentMatchup": {
+      "vs": "vs",
+      "player": "Игрок",
+      "opponent": "Соперник",
+      "won": "Победа",
+      "lost": "Поражение",
+      "unknownCiv": "неизвестная цивилизация",
+      "labelVs": "{{outcome}}: {{civ}} против {{opponent}}",
+      "labelSolo": "{{outcome}}: {{civ}}"
+    },
     "viewProfile": "Открыть профиль игрока {{name}}",
     "watchOn": {
       "twitch": "Смотреть на Twitch",

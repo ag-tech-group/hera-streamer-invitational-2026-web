@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { AnalyticsProvider, type AnalyticsBackend } from "@/lib/analytics"
 import { StandingsTable } from "@/pages/home/standings-table"
-import type { StandingsRow } from "@/types"
+import type { RecentMatchup, StandingsRow } from "@/types"
 
 /** Builds a `StandingsRow`, requiring only the fields a test cares about. */
 function row(
@@ -28,7 +28,7 @@ function row(
     winPct: 66.7,
     streak: 0,
     longestWinStreak: 0,
-    recentResults: [],
+    recentMatchups: [],
     gamesPlayed: 0,
     rank: 1,
     rankTotal: 50000,
@@ -39,6 +39,20 @@ function row(
     streamLive: false,
     streamTitle: null,
     streamCategory: null,
+    ...overrides,
+  }
+}
+
+/** Builds a UI `RecentMatchup`, requiring only the fields a test asserts. */
+function matchup(overrides: Partial<RecentMatchup> = {}): RecentMatchup {
+  return {
+    outcome: "win",
+    civName: "Franks",
+    civEmblemUrl: "/civ-emblems/franks.webp",
+    opponentCivName: "Mayans",
+    opponentCivEmblemUrl: "/civ-emblems/mayans.webp",
+    mapName: "Arabia",
+    completedAt: "2026-05-30T12:00:00Z",
     ...overrides,
   }
 }
@@ -223,31 +237,104 @@ describe("StandingsTable — team column", () => {
   })
 })
 
-describe("StandingsTable — recent results", () => {
-  it("renders a pip per recent match, titled by win or loss", () => {
+describe("StandingsTable — recent matchups (#339)", () => {
+  it("labels each recent-game pip with its W/L + civ matchup", () => {
     render(
       <StandingsTable
         rows={[
           row({
             profileId: 1,
             alias: "Alpha",
-            recentResults: ["win", "loss", "win"],
+            recentMatchups: [
+              matchup({
+                outcome: "win",
+                civName: "Franks",
+                opponentCivName: "Mayans",
+              }),
+              matchup({
+                outcome: "loss",
+                civName: "Goths",
+                opponentCivName: "Huns",
+              }),
+            ],
           }),
         ]}
       />
     )
-    expect(screen.getAllByTitle("Win")).toHaveLength(2)
-    expect(screen.getAllByTitle("Loss")).toHaveLength(1)
+    // jsdom reports no hover capability, so the touch (Popover) branch renders
+    // each pip as a labelled button — the accessible name carries the matchup.
+    expect(
+      screen.getByRole("button", { name: "Won as Franks vs Mayans" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Lost as Goths vs Huns" })
+    ).toBeInTheDocument()
   })
 
-  it("shows a placeholder when a player has no recent matches", () => {
+  it("falls back to the player civ alone when the opponent civ is unknown", () => {
     render(
       <StandingsTable
-        rows={[row({ profileId: 1, alias: "Alpha", recentResults: [] })]}
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            recentMatchups: [
+              matchup({
+                outcome: "win",
+                civName: "Franks",
+                opponentCivName: null,
+                opponentCivEmblemUrl: null,
+              }),
+            ],
+          }),
+        ]}
       />
     )
-    expect(screen.queryByTitle("Win")).not.toBeInTheDocument()
-    expect(screen.queryByTitle("Loss")).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Won as Franks" })
+    ).toBeInTheDocument()
+  })
+
+  it("shows a placeholder when a player has no recent games", () => {
+    render(
+      <StandingsTable
+        rows={[row({ profileId: 1, alias: "Alpha", recentMatchups: [] })]}
+      />
+    )
+    expect(screen.queryByRole("button", { name: /Won|Lost/ })).toBeNull()
+  })
+
+  it("opens the civ-matchup card on tap, showing both civs and the map", async () => {
+    const user = userEvent.setup()
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            recentMatchups: [
+              matchup({
+                civName: "Franks",
+                opponentCivName: "Mayans",
+                mapName: "Arabia",
+              }),
+            ],
+          }),
+        ]}
+      />
+    )
+    await user.click(
+      screen.getByRole("button", { name: "Won as Franks vs Mayans" })
+    )
+    // The portaled popover surfaces both civ names and the map context line
+    // (the at-a-glance row only shows the pip glyph).
+    expect(await screen.findByText("Mayans")).toBeInTheDocument()
+    expect(screen.getByText("Franks")).toBeInTheDocument()
+    expect(screen.getByText(/Arabia/)).toBeInTheDocument()
+    // The "Player" / "Opponent" captions disambiguate the two civs. Assert the
+    // unambiguous one — "Player" also names a column header, but nothing else
+    // says "Opponent".
+    expect(screen.getByText("Opponent")).toBeInTheDocument()
   })
 })
 

@@ -9,6 +9,7 @@ export type { TournamentInfo } from "./tournament-info"
 export type {
   MatchResult,
   PlayerPresentation,
+  RecentMatchup,
   StandingsRow,
   StandingsSnapshot,
   StandingsTeam,
