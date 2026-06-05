@@ -12,6 +12,7 @@ import { setOnUnauthorized } from "@/api/api"
 import { getMeV1MeGet } from "@/api/generated/hooks/me/me"
 import { activeTournament } from "@/config/tournaments"
 import { AUTH_URL, getAuthMe, logoutFromAuthApi } from "@/lib/auth-config"
+import { getStored, removeStored, setStored } from "@/lib/safe-storage"
 
 /**
  * localStorage flag set the first time `/v1/me` + `/auth/me` succeed,
@@ -223,20 +224,15 @@ export function useAuth(): AuthContextValue {
 }
 
 function hasAuthHint(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.localStorage.getItem(AUTH_HINT_KEY) !== null
-  )
+  return getStored(AUTH_HINT_KEY) !== null
 }
 
 function setAuthHint(): void {
-  if (typeof window === "undefined") return
-  window.localStorage.setItem(AUTH_HINT_KEY, "1")
+  setStored(AUTH_HINT_KEY, "1")
 }
 
 function clearAuthHint(): void {
-  if (typeof window === "undefined") return
-  window.localStorage.removeItem(AUTH_HINT_KEY)
+  removeStored(AUTH_HINT_KEY)
 }
 
 /**
