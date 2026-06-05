@@ -1,11 +1,15 @@
 import type { getStandingsV1TournamentsTournamentSlugStandingsGetResponse } from "@/api/generated/hooks/tournaments/tournaments"
 import type {
+  RecentMatchup as RecentMatchupDto,
   StandingRow,
   StandingRowPresentation,
 } from "@/api/generated/types"
+import { civEmblemUrl } from "@/lib/civilizations"
+import { cleanMapName } from "@/lib/format"
 import { isHttpUrl } from "@/lib/url"
 import type {
   PlayerPresentation,
+  RecentMatchup,
   StandingsRow,
   StandingsSnapshot,
 } from "@/types"
@@ -57,7 +61,7 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     losses: dto.tournament_record.losses,
     streak: dto.tournament_record.streak,
     longestWinStreak: dto.tournament_record.longest_win_streak,
-    recentResults: dto.tournament_record.recent_results,
+    recentMatchups: dto.tournament_record.recent_matchups.map(toRecentMatchup),
     winPct: dto.tournament_record.win_pct,
     gamesPlayed: dto.tournament_record.games_played,
     rank: dto.rank,
@@ -73,6 +77,31 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     // omits it. Passed straight through — the trust logic lives in the component.
     streamTitle: dto.stream_title,
     streamCategory: dto.stream_category,
+  }
+}
+
+/**
+ * Resolves a generated `RecentMatchup` DTO to its UI form (#339): each civ's
+ * name → a heraldic emblem via the same `civEmblemUrl` the civ board uses (keyed
+ * on the API's civ *name*, the id space being unstable — see `civilizations.ts`),
+ * and the raw replay map name → a clean label. Either civ name can be null — a
+ * civ newer than our emblem snapshot, or an opponent the API couldn't name (or a
+ * non-1v1 board with none) — in which case its emblem is null too and the
+ * tooltip falls back to a placeholder.
+ */
+function toRecentMatchup(m: RecentMatchupDto): RecentMatchup {
+  return {
+    outcome: m.outcome,
+    civName: m.civilization_name,
+    civEmblemUrl: m.civilization_name
+      ? civEmblemUrl(m.civilization_name)
+      : null,
+    opponentCivName: m.opponent_civilization_name,
+    opponentCivEmblemUrl: m.opponent_civilization_name
+      ? civEmblemUrl(m.opponent_civilization_name)
+      : null,
+    mapName: cleanMapName(m.map_name),
+    completedAt: m.completed_at,
   }
 }
 

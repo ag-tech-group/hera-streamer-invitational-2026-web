@@ -15,6 +15,7 @@ import { SortableTh } from "@/components/sortable-th"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCountUp } from "@/hooks/use-count-up"
 import { useFlashOnChange } from "@/hooks/use-flash-on-change"
+import { useHoverCapable } from "@/hooks/use-hover-capable"
 import {
   useTableSort,
   type SortableValue,
@@ -30,10 +31,11 @@ import { useAnalytics } from "@/lib/analytics"
 import { teamColorMap, type TeamColorSlot } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
 import { BioHint } from "@/pages/home/bio-hint"
+import { RecentMatchupHint } from "@/pages/home/recent-matchup-hint"
 import { useFlipRows } from "@/pages/home/use-flip-rows"
 import { WatchHint } from "@/pages/home/watch-hint"
 import { WinPctHint } from "@/pages/home/win-pct-hint"
-import type { MatchResult, StandingsRow, StandingsTeam } from "@/types"
+import type { RecentMatchup, StandingsRow, StandingsTeam } from "@/types"
 
 /** A player's last match shows as recent (green) if it landed within this window. */
 const RECENT_WITHIN_MS = 24 * 60 * 60 * 1000
@@ -264,7 +266,7 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
               <StreakCell streak={row.streak} />
             </FlashCell>
             <td className="px-4 py-3">
-              <RecentResultsCell results={row.recentResults} />
+              <RecentMatchupsCell matchups={row.recentMatchups} now={now} />
             </td>
             <td className="px-4 py-3">
               <LastMatchCell lastMatchAt={row.lastMatchAt} now={now} />
@@ -877,50 +879,71 @@ function StreakCell({ streak }: { streak: number }) {
 /**
  * Recent form: a compact row of win/loss pips, most-recent first. Greens are
  * wins and reds losses — the same colour language as the streak badge. A
- * player with no completed match shows a neutral placeholder.
+ * player with no completed game shows a neutral placeholder.
+ *
+ * Each pip is also a hover/tap disclosure (#339): the row reads as W/L at a
+ * glance, but hovering (desktop) or tapping (mobile) any pip floats a card with
+ * that game's civ matchup — player civ `vs` opponent civ, plus the map and how
+ * long ago — driven by the richer `recentMatchups` field. See
+ * `RecentMatchupHint`.
  */
 /** How many of the most-recent games the Recent column shows. */
-const RECENT_RESULTS_LIMIT = 6
+const RECENT_MATCHUPS_LIMIT = 6
 
-function RecentResultsCell({ results }: { results: MatchResult[] }) {
-  const { t } = useTranslation()
-  if (results.length === 0) {
+function RecentMatchupsCell({
+  matchups,
+  now,
+}: {
+  matchups: RecentMatchup[]
+  now: Date
+}) {
+  // One read per cell, shared by every pip so the spacing and the per-pip
+  // disclosure primitive can't disagree: a mouse keeps the pips tight (`gap-1`,
+  // no per-pip padding — the original W/L row's look); a finger spreads them for
+  // tappable targets, the `-my-1` cancelling the padding's vertical growth.
+  const hoverCapable = useHoverCapable()
+  if (matchups.length === 0) {
     return <span className="text-muted-foreground text-xs">—</span>
   }
-  // Cap to the last N games. `results` is most-recent-first, so the first N
+  // Cap to the last N games. `matchups` is most-recent-first, so the first N
   // are the latest; the visible slice stays newest → oldest, left → right.
-  const visible = results.slice(0, RECENT_RESULTS_LIMIT)
-  const labeled = visible
-    .map((r) => (r === "win" ? t("standings.win") : t("standings.loss")))
-    .join(", ")
+  const visible = matchups.slice(0, RECENT_MATCHUPS_LIMIT)
   return (
     <span
-      className="flex items-center gap-1"
-      aria-label={t("standings.recentAriaLabel", { results: labeled })}
+      className={cn(
+        "flex items-center",
+        hoverCapable ? "gap-1" : "-my-1 gap-0.5"
+      )}
     >
-      {visible.map((result, index) => {
-        // Crown for a win, skull for a loss (#: broadcast vocabulary over the
-        // old neutral squares). Coloured with the same win/loss tokens the
-        // streak badge uses so the form language stays consistent across cells.
-        const Icon = result === "win" ? Crown : Skull
+      {visible.map((matchup, index) => {
+        // Crown for a win, skull for a loss: the broadcast vocabulary, coloured
+        // with the same win/loss tokens the streak badge uses so the form
+        // language stays consistent across cells.
+        const Icon = matchup.outcome === "win" ? Crown : Skull
         // Direction cue without extra chrome: the newest game (index 0, left)
         // is full-strength and each older one fades a step, so "bright = now"
         // reads at a glance. Floored at 0.4 so the oldest still stays legible.
         const opacity = Math.max(0.4, 1 - index * 0.12)
         return (
-          <Icon
+          // Index key: matchups are positional (newest-first) and append at the
+          // front, matching how the pips have always been keyed.
+          <RecentMatchupHint
             key={index}
-            aria-hidden
-            style={{ opacity }}
-            className={cn(
-              "size-3.5",
-              result === "win" ? "text-chart-2-deep" : "text-destructive-deep"
-            )}
+            matchup={matchup}
+            now={now}
+            hoverCapable={hoverCapable}
           >
-            <title>
-              {result === "win" ? t("standings.win") : t("standings.loss")}
-            </title>
-          </Icon>
+            <Icon
+              aria-hidden
+              style={{ opacity }}
+              className={cn(
+                "size-3.5",
+                matchup.outcome === "win"
+                  ? "text-chart-2-deep"
+                  : "text-destructive-deep"
+              )}
+            />
+          </RecentMatchupHint>
         )
       })}
     </span>

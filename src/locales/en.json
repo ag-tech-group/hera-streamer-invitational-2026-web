@@ -139,9 +139,16 @@
     },
     "live": "Live",
     "liveAriaLabel": "In a live match",
-    "recentAriaLabel": "Recent results, most recent first: {{results}}",
-    "win": "Win",
-    "loss": "Loss",
+    "recentMatchup": {
+      "vs": "vs",
+      "player": "Player",
+      "opponent": "Opponent",
+      "won": "Won",
+      "lost": "Lost",
+      "unknownCiv": "an unknown civ",
+      "labelVs": "{{outcome}} as {{civ}} vs {{opponent}}",
+      "labelSolo": "{{outcome}} as {{civ}}"
+    },
     "viewProfile": "View {{name}}'s profile",
     "watchOn": {
       "twitch": "Watch on Twitch",

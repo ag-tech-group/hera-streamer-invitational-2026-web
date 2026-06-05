@@ -106,3 +106,21 @@ export function formatTimeAgo(iso: string, now: Date = new Date()): string {
   if (hours < 24) return `${hours}h ago`
   return `${Math.floor(hours / 24)}d ago`
 }
+
+/**
+ * Strips an AoE2 replay's map-file extension (and surrounding whitespace) from a
+ * raw map name, so a tooltip reads `Arabia` rather than `Arabia.rms`, or
+ * `megarandom` rather than `megarandom.rms2`.
+ *
+ * The poller forwards the map exactly as the recorded game names it —
+ * `<name>.rms` / `.rms2` for random maps, `.scx` / `.scx2` / `.aoe2scenario`
+ * for scenarios — so this trims that one trailing extension while leaving the
+ * (possibly multi-word) name's own spacing and casing untouched: `EM
+ * Runestones.rms` → `EM Runestones`. Returns `""` only for an empty input.
+ */
+export function cleanMapName(raw: string): string {
+  return raw
+    .trim()
+    .replace(/\.(rms\d*|scx\d*|aoe2scenario)$/i, "")
+    .trim()
+}

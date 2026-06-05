@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  cleanMapName,
   countryCodeToFlagEmoji,
   flagEmojiToCountryCode,
   formatTimeAgo,
@@ -86,5 +87,41 @@ describe("formatTimeAgo", () => {
 
   it("treats future timestamps as 'just now'", () => {
     expect(formatTimeAgo(isoAgo(-5_000), now)).toBe("just now")
+  })
+})
+
+describe("cleanMapName", () => {
+  it("strips a plain .rms extension", () => {
+    expect(cleanMapName("Arabia.rms")).toBe("Arabia")
+  })
+
+  it("strips a numbered .rms2 extension", () => {
+    expect(cleanMapName("megarandom.rms2")).toBe("megarandom")
+  })
+
+  it("strips scenario extensions", () => {
+    expect(cleanMapName("Foo.scx")).toBe("Foo")
+    expect(cleanMapName("Bar.aoe2scenario")).toBe("Bar")
+  })
+
+  it("keeps a multi-word name's spacing and casing", () => {
+    expect(cleanMapName("Border Dispute.rms")).toBe("Border Dispute")
+    expect(cleanMapName("EM Runestones.rms")).toBe("EM Runestones")
+  })
+
+  it("leaves a name with no known extension untouched", () => {
+    expect(cleanMapName("Arabia")).toBe("Arabia")
+  })
+
+  it("only strips a trailing extension, not one mid-name", () => {
+    expect(cleanMapName("Black.rms Forest.rms")).toBe("Black.rms Forest")
+  })
+
+  it("trims surrounding whitespace", () => {
+    expect(cleanMapName("  Arabia.rms  ")).toBe("Arabia")
+  })
+
+  it("returns an empty string for empty input", () => {
+    expect(cleanMapName("")).toBe("")
   })
 })

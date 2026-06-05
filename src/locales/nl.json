@@ -139,9 +139,16 @@
     },
     "live": "Live",
     "liveAriaLabel": "In een live wedstrijd",
-    "recentAriaLabel": "Recente resultaten, meest recente eerst: {{results}}",
-    "win": "Winst",
-    "loss": "Verlies",
+    "recentMatchup": {
+      "vs": "vs",
+      "player": "Speler",
+      "opponent": "Tegenstander",
+      "won": "Gewonnen",
+      "lost": "Verloren",
+      "unknownCiv": "een onbekende beschaving",
+      "labelVs": "{{outcome}} als {{civ}} tegen {{opponent}}",
+      "labelSolo": "{{outcome}} als {{civ}}"
+    },
     "viewProfile": "Bekijk het profiel van {{name}}",
     "watchOn": {
       "twitch": "Kijk op Twitch",

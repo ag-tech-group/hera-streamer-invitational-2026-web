@@ -139,9 +139,16 @@
     },
     "live": "Live",
     "liveAriaLabel": "I en livematch",
-    "recentAriaLabel": "Senaste resultaten, nyaste först: {{results}}",
-    "win": "Vinst",
-    "loss": "Förlust",
+    "recentMatchup": {
+      "vs": "vs",
+      "player": "Spelare",
+      "opponent": "Motståndare",
+      "won": "Vinst",
+      "lost": "Förlust",
+      "unknownCiv": "en okänd civilisation",
+      "labelVs": "{{outcome}} som {{civ}} mot {{opponent}}",
+      "labelSolo": "{{outcome}} som {{civ}}"
+    },
     "viewProfile": "Visa {{name}}s profil",
     "watchOn": {
       "twitch": "Titta på Twitch",
