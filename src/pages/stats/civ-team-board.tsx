@@ -127,10 +127,11 @@ function MemberRow({ player }: { player: PlayerCivSummary }) {
       >
         {player.label}
       </span>
-      {/* All of a member's mains share one wrap row: the #1 enlarged, the rest
-          compact, each with its pick count. Wrapping (not truncating) keeps the
-          civ names whole on phones. */}
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+      {/* A member's mains: the #1 enlarged, the rest compact, each with its
+          pick count. Stacked vertically on phones — long civ names otherwise
+          leave a ragged, half-wrapped row — then a single wrapping row once the
+          card goes horizontal at sm. */}
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-1">
         {main ? (
           <span className="flex items-center gap-1.5">
             <Emblem civ={main} className="size-7" />
