@@ -211,7 +211,6 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "longest_win_streak": zod.number(),
   "peak_rating": zod.union([zod.number(),zod.null()]),
   "last_match_at": zod.union([zod.iso.datetime({}),zod.null()]),
-  "recent_results": zod.array(zod.enum(['win', 'loss'])),
   "recent_matchups": zod.array(zod.object({
   "outcome": zod.enum(['win', 'loss']),
   "civilization_id": zod.number(),
@@ -220,7 +219,7 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "opponent_civilization_name": zod.union([zod.string(),zod.null()]),
   "map_name": zod.string(),
   "completed_at": zod.union([zod.iso.datetime({}),zod.null()])
-}).describe('One recent in-window game with its civ matchup, for a standings tooltip.\n\nThe expand half of the recent-results enrichment (#218): the same\noutcome carried in ``TournamentRecord.recent_results`` plus the\nentrant\'s civ and — on a 1v1 leaderboard — the opposing player\'s civ,\nso the consumer can render a \"<your civ> vs <their civ>\" tooltip on\neach recent-result icon. The consumer maps civ ids to names\/emblems.')),
+}).describe('One recent in-window game with its civ matchup, for a standings tooltip.\n\nCarried newest-first in ``TournamentRecord.recent_matchups`` (#218): the\ngame\'s ``outcome`` plus the entrant\'s civ and — on a 1v1 leaderboard —\nthe opposing player\'s civ, so the consumer can render a \"<your civ> vs\n<their civ>\" tooltip on each recent-result icon. The consumer maps civ\nids to names\/emblems.')),
   "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp) over in-window games; null when none.')
 }).describe('A player\'s stats within a tournament\'s date window.\n\nCounts only completed matches on the tournament\'s leaderboard between\nits ``start_date`` and ``grand_finals_date`` (a null bound is treated as open).\nDistinct from the lifetime-ladder ``wins`` \/ ``losses`` \/ ``streak`` \/\n``max_rating`` \/ ``last_match_at`` \/ ``recent_results`` on ``StandingRow``;\nevery field here is in-window only.'),
   "rank": zod.union([zod.number(),zod.null()]),
@@ -340,18 +339,21 @@ export const GetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetRe
   "players": zod.array(zod.object({
   "tournament_player_id": zod.number(),
   "profile_id": zod.union([zod.number(),zod.null()]),
+  "name": zod.string(),
   "points": zod.array(zod.object({
   "position": zod.number(),
   "peak_rating": zod.union([zod.number(),zod.null()])
 }).describe('An entity\'s standings position + peak rating at one time bucket.'))
-}).describe('One entrant\'s position-over-time series, aligned to the shared buckets.\n\n``points[i]`` is the entrant\'s standing at ``buckets[i]`` (see\n``StandingsHistory``). Every entrant holds a position at every bucket\n(#226) — there are no null points; an unrated entrant simply sits at the\nname-sorted tail with a null ``peak_rating``.')),
+}).describe('One entrant\'s position-over-time series, aligned to the shared buckets.\n\n``points[i]`` is the entrant\'s standing at ``buckets[i]`` (see\n``StandingsHistory``). Every entrant holds a position at every bucket\n(#226) — there are no null points; an unrated entrant simply sits at the\nname-sorted tail with a null ``peak_rating``. ``name`` is the display\nlabel, so the chart legend is self-describing without a join back to\n``\/standings`` — the same ``TournamentPlayer.name`` source and meaning as\n``StandingRow.name``.')),
   "teams": zod.array(zod.object({
   "team_id": zod.number(),
+  "name": zod.string(),
+  "initials": zod.string(),
   "points": zod.array(zod.object({
   "position": zod.number(),
   "combined_peak_elo": zod.number()
 }).describe('A team\'s position + combined peak elo at one time bucket.'))
-}).describe('One team\'s combined-peak-elo-over-time series, aligned to the buckets.\n\n``points[i]`` is the team\'s standing at ``buckets[i]``. Every team holds a\nposition at every bucket (#226) — no null points.'))
+}).describe('One team\'s combined-peak-elo-over-time series, aligned to the buckets.\n\n``points[i]`` is the team\'s standing at ``buckets[i]``. Every team holds a\nposition at every bucket (#226) — no null points. ``name`` and ``initials``\nare the team\'s current display strings — the same compact reference shape\nas ``StandingTeam`` — so the chart legend is self-describing without a join\nback to ``\/teams\/standings``.'))
 }).describe('Tournament standings position over daily buckets (#219, #226).\n\n``buckets`` is the shared daily time axis (midnight-UTC date labels).\n``players`` and ``teams`` carry per-entity series aligned index-for-index\nto ``buckets`` — a bump chart of ``position`` over time. Every roster\nentity (rated or not) holds a position at every bucket, ranked the way the\nlive table is: by all-time peak (``max_rating``) \*\*as of each bucket\*\*,\nthen current rating, then name (``comparePeakRank``). So the latest bucket\nequals the live ``\/standings`` order, and past buckets stay stable\n(peak-so-far over already-completed matches + a fixed baseline).')
 
 /**

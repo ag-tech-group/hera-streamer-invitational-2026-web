@@ -42,7 +42,6 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
       longest_win_streak: 5,
       peak_rating: 2180,
       last_match_at: "2026-05-30T12:00:00Z",
-      recent_results: ["win", "loss", "win"],
       // recent_matchups (#339) is the civ-matchup form the frontend now reads.
       // 1st: a normal 1v1 with both civs; 2nd: a null opponent civ (the graceful
       // fallback case). Map names carry the replay extension on purpose.
@@ -123,7 +122,6 @@ describe("toStandingsSnapshot — tournament-window stat sourcing (#238)", () =>
           longest_win_streak: 0,
           peak_rating: null,
           last_match_at: null,
-          recent_results: [],
           recent_matchups: [],
           win_pct: null,
         },

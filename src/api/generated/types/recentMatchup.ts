@@ -14,11 +14,11 @@ import type { MatchOutcome } from './matchOutcome';
 /**
  * One recent in-window game with its civ matchup, for a standings tooltip.
 
-The expand half of the recent-results enrichment (#218): the same
-outcome carried in ``TournamentRecord.recent_results`` plus the
-entrant's civ and — on a 1v1 leaderboard — the opposing player's civ,
-so the consumer can render a "<your civ> vs <their civ>" tooltip on
-each recent-result icon. The consumer maps civ ids to names/emblems.
+Carried newest-first in ``TournamentRecord.recent_matchups`` (#218): the
+game's ``outcome`` plus the entrant's civ and — on a 1v1 leaderboard —
+the opposing player's civ, so the consumer can render a "<your civ> vs
+<their civ>" tooltip on each recent-result icon. The consumer maps civ
+ids to names/emblems.
  */
 export interface RecentMatchup {
   outcome: MatchOutcome;
