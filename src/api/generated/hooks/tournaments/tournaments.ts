@@ -30,6 +30,7 @@ import type {
 
 import type {
   CivStats,
+  GetSummaryV1TournamentsTournamentSlugSummaryGetParams,
   HTTPValidationError,
   ListEnvelopePlayerProgression,
   ListEnvelopeStandingRow,
@@ -37,6 +38,7 @@ import type {
   StandingsHistory,
   TournamentCreate,
   TournamentRead,
+  TournamentSummary,
   TournamentUpdate
 } from '../../types';
 
@@ -822,6 +824,161 @@ export function useGetCivStatsV1TournamentsTournamentSlugCivStatsGet<TData = Awa
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetCivStatsV1TournamentsTournamentSlugCivStatsGetQueryOptions(tournamentSlug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * Headline "leader" stat cards for the tournament's roster (#238, #243).
+
+Five cards mirroring the stats page's headline row — highest peak rating,
+best win rate, longest win streak, biggest climber, most games played —
+each naming the leading linked entrant and their value. ``highest_peak_rating``
+is the **one lifetime read**: it ranks by all-time ``PlayerRating.max_rating``
+(the host's all-time-peak decision, same as ``StandingRow.max_rating``). The
+other four are computed in-window (the same ``[start_date, grand_finals_date]``
+bounds as ``tournament_record``) over the tournament players' matches on its
+leaderboard. ``biggest_climber`` is the greatest **signed** in-window net
+rating change (last − first rated point), so it can be negative when the
+field declined. A card is ``null`` when no entrant qualifies (empty roster,
+a metric nobody has earned, no rating on this leaderboard for the peak card,
+fewer than two in-window rated points for the climber, or — for
+``best_win_rate`` — nobody past the minimum-games guard).
+The longest-win-streak card additionally carries the peak run's date range,
+which the capped per-row recent-matchups can't surface. Each card's
+``name`` is the resolved display label (``presentation.displayName``
+override, #243). Lets the stats page hit one compact endpoint instead of
+scanning the full standings.
+
+``win_rate_min_games`` overrides the best-win-rate sample-size guard
+(default ``_DEFAULT_WIN_RATE_MIN_GAMES``); it only gates that one card.
+ * @summary Get Summary
+ */
+export type getSummaryV1TournamentsTournamentSlugSummaryGetResponse200 = {
+  data: TournamentSummary
+  status: 200
+}
+
+export type getSummaryV1TournamentsTournamentSlugSummaryGetResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type getSummaryV1TournamentsTournamentSlugSummaryGetResponseSuccess = (getSummaryV1TournamentsTournamentSlugSummaryGetResponse200) & {
+  headers: Headers;
+};
+export type getSummaryV1TournamentsTournamentSlugSummaryGetResponseError = (getSummaryV1TournamentsTournamentSlugSummaryGetResponse422) & {
+  headers: Headers;
+};
+
+export type getSummaryV1TournamentsTournamentSlugSummaryGetResponse = (getSummaryV1TournamentsTournamentSlugSummaryGetResponseSuccess | getSummaryV1TournamentsTournamentSlugSummaryGetResponseError)
+
+export const getGetSummaryV1TournamentsTournamentSlugSummaryGetUrl = (tournamentSlug: string,
+    params?: GetSummaryV1TournamentsTournamentSlugSummaryGetParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/tournaments/${tournamentSlug}/summary?${stringifiedParams}` : `/v1/tournaments/${tournamentSlug}/summary`
+}
+
+export const getSummaryV1TournamentsTournamentSlugSummaryGet = async (tournamentSlug: string,
+    params?: GetSummaryV1TournamentsTournamentSlugSummaryGetParams, options?: RequestInit): Promise<getSummaryV1TournamentsTournamentSlugSummaryGetResponse> => {
+  
+  return orvalClient<getSummaryV1TournamentsTournamentSlugSummaryGetResponse>(getGetSummaryV1TournamentsTournamentSlugSummaryGetUrl(tournamentSlug,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryKey = (tournamentSlug: string,
+    params?: GetSummaryV1TournamentsTournamentSlugSummaryGetParams,) => {
+    return [
+    `/v1/tournaments/${tournamentSlug}/summary`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryOptions = <TData = Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError = HTTPValidationError>(tournamentSlug: string,
+    params?: GetSummaryV1TournamentsTournamentSlugSummaryGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryKey(tournamentSlug,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>> = ({ signal }) => getSummaryV1TournamentsTournamentSlugSummaryGet(tournamentSlug,params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(tournamentSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSummaryV1TournamentsTournamentSlugSummaryGetQueryResult = NonNullable<Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>>
+export type GetSummaryV1TournamentsTournamentSlugSummaryGetQueryError = HTTPValidationError
+
+
+export function useGetSummaryV1TournamentsTournamentSlugSummaryGet<TData = Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params: undefined |  GetSummaryV1TournamentsTournamentSlugSummaryGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>,
+          TError,
+          Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSummaryV1TournamentsTournamentSlugSummaryGet<TData = Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: GetSummaryV1TournamentsTournamentSlugSummaryGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>,
+          TError,
+          Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSummaryV1TournamentsTournamentSlugSummaryGet<TData = Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: GetSummaryV1TournamentsTournamentSlugSummaryGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Summary
+ */
+
+export function useGetSummaryV1TournamentsTournamentSlugSummaryGet<TData = Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: GetSummaryV1TournamentsTournamentSlugSummaryGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSummaryV1TournamentsTournamentSlugSummaryGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryOptions(tournamentSlug,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

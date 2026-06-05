@@ -233,7 +233,7 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "updated_at": zod.union([zod.iso.datetime({}),zod.null()]),
   "games": zod.number(),
   "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp), or null when the player has no games.')
-}).describe('One row in a tournament\'s standings list.\n\nA denormalized read model: a left join of ``Player`` and ``PlayerRating``\nplus folded-in derived fields, so a consumer renders a full standings\ntable from one response with no per-player fan-out. ``recent_results``\nis completed-match form; ``tournament_record`` is the player\'s record\nwithin the tournament\'s date window; ``in_match`` \/ ``live_match_id``\nare current live-match status. Sorted by ``current_rating`` desc\n(NULLS LAST), then every unrated row — linked or not — by display\n``name`` (#187 unified the old three-tier sort that special-cased an\nunlinked tail).\n\nAn unlinked row (no ``profile_id`` yet — a streamer whose account\nhasn\'t minted) carries null ``profile_id``, its ``name`` as the display\nlabel (``alias`` falls back to it), its ``presentation`` bag (so\nflag\/streamUrls work identically), and null\/zero for every polled\nfield. ``updated_at`` is null too — no polled refresh signal applies.'))
+}).describe('One row in a tournament\'s standings list.\n\nA denormalized read model: a left join of ``Player`` and ``PlayerRating``\nplus folded-in derived fields, so a consumer renders a full standings\ntable from one response with no per-player fan-out. ``recent_results``\nis completed-match form; ``tournament_record`` is the player\'s record\nwithin the tournament\'s date window; ``in_match`` \/ ``live_match_id``\nare current live-match status. Sorted by ``current_rating`` desc\n(NULLS LAST), then every unrated row — linked or not — by the base roster\nname (#187 unified the old three-tier sort that special-cased an unlinked\ntail). The returned ``name`` is the resolved display label (the\n``presentation.displayName`` override when set, #243), but the sort keys on\nthe base name, so ordering is independent of any override.\n\nAn unlinked row (no ``profile_id`` yet — a streamer whose account\nhasn\'t minted) carries null ``profile_id``, its resolved ``name`` as the\ndisplay label (``alias`` falls back to the base roster name), its\n``presentation`` bag (so flag\/streamUrls work identically), and null\/zero\nfor every polled field. ``updated_at`` is null too — no polled refresh\nsignal applies.'))
 })
 
 /**
@@ -270,6 +270,80 @@ export const GetCivStatsV1TournamentsTournamentSlugCivStatsGetResponse = zod.obj
 }).describe('Pick\/win counts for one civilization.'))
 }).describe('One entrant\'s per-civ pick\/win breakdown.\n\n``tournament_player_id`` is the stable roster key (#187); ``profile_id``\nis its linked polled identity — always set, since an entry only appears\nhere for a rostered player with counted matches, which requires a link.\n``civs`` is ordered by picks desc, then civ id.'))
 }).describe('Civilization pick\/win aggregation for a tournament\'s entrants.\n\n``overall`` sums each civ\'s picks\/wins across all entrants; ``by_player``\nbreaks the same counts down per roster row. Counts cover only the\ntournament players\' completed matches on the tournament\'s leaderboard,\nwindowed to ``[start_date, grand_finals_date]`` (a null bound is open) —\ntheir ladder opponents\' rows are excluded. Civs with no entrant picks\nare absent from both lists. ``overall`` is ordered by picks desc then\nciv id; ``by_player`` by ``tournament_player_id``.')
+
+/**
+ * Headline "leader" stat cards for the tournament's roster (#238, #243).
+
+Five cards mirroring the stats page's headline row — highest peak rating,
+best win rate, longest win streak, biggest climber, most games played —
+each naming the leading linked entrant and their value. ``highest_peak_rating``
+is the **one lifetime read**: it ranks by all-time ``PlayerRating.max_rating``
+(the host's all-time-peak decision, same as ``StandingRow.max_rating``). The
+other four are computed in-window (the same ``[start_date, grand_finals_date]``
+bounds as ``tournament_record``) over the tournament players' matches on its
+leaderboard. ``biggest_climber`` is the greatest **signed** in-window net
+rating change (last − first rated point), so it can be negative when the
+field declined. A card is ``null`` when no entrant qualifies (empty roster,
+a metric nobody has earned, no rating on this leaderboard for the peak card,
+fewer than two in-window rated points for the climber, or — for
+``best_win_rate`` — nobody past the minimum-games guard).
+The longest-win-streak card additionally carries the peak run's date range,
+which the capped per-row recent-matchups can't surface. Each card's
+``name`` is the resolved display label (``presentation.displayName``
+override, #243). Lets the stats page hit one compact endpoint instead of
+scanning the full standings.
+
+``win_rate_min_games`` overrides the best-win-rate sample-size guard
+(default ``_DEFAULT_WIN_RATE_MIN_GAMES``); it only gates that one card.
+ * @summary Get Summary
+ */
+export const GetSummaryV1TournamentsTournamentSlugSummaryGetParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const getSummaryV1TournamentsTournamentSlugSummaryGetQueryWinRateMinGamesDefault = 5;
+
+
+
+export const GetSummaryV1TournamentsTournamentSlugSummaryGetQueryParams = zod.object({
+  "win_rate_min_games": zod.number().min(1).default(getSummaryV1TournamentsTournamentSlugSummaryGetQueryWinRateMinGamesDefault).describe('Minimum in-window games an entrant must have played to be eligible for the best_win_rate card — guards against a tiny-sample 100%. Affects only best_win_rate; the other cards ignore it.')
+})
+
+export const GetSummaryV1TournamentsTournamentSlugSummaryGetResponse = zod.object({
+  "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
+  "highest_peak_rating": zod.union([zod.object({
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.number(),
+  "name": zod.string(),
+  "value": zod.union([zod.number(),zod.number()])
+}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()]),
+  "best_win_rate": zod.union([zod.object({
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.number(),
+  "name": zod.string(),
+  "value": zod.union([zod.number(),zod.number()])
+}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()]),
+  "longest_win_streak": zod.union([zod.object({
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.number(),
+  "name": zod.string(),
+  "value": zod.union([zod.number(),zod.number()]),
+  "streak_start": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "streak_end": zod.union([zod.iso.datetime({}),zod.null()]).optional()
+}).describe('The longest-win-streak card, plus the peak run\'s date range (#238).\n\n``streak_start`` \/ ``streak_end`` are the ``completed_at`` of the first\n(chronologically oldest) and last (newest) win in the peak run — backing\na \"when did this happen\" tooltip the capped ``recent_matchups`` can\'t\nanswer (a long run often predates the last 10 games). Either is null only\nif that match settled without a completion time; the ``value`` (count) is\nalways present.'),zod.null()]),
+  "biggest_climber": zod.union([zod.object({
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.number(),
+  "name": zod.string(),
+  "value": zod.union([zod.number(),zod.number()])
+}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()]),
+  "most_games_played": zod.union([zod.object({
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.number(),
+  "name": zod.string(),
+  "value": zod.union([zod.number(),zod.number()])
+}).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()])
+}).describe('Headline \"leader\" stat cards for a tournament (#238, #243).\n\nThe five cards mirror the stats page\'s headline row exactly (#243):\n``highest_peak_rating``, ``best_win_rate``, ``longest_win_streak``,\n``biggest_climber``, ``most_games_played``. Each names the leading roster\nentrant for one metric, computed in-window (the same\n``[start_date, grand_finals_date]`` bounds as ``tournament_record``) over\nlinked entrants only — their ladder opponents\' rows are excluded. (Peak\nrating is the one lifetime read; everything else, ``biggest_climber``\nincluded, is window-scoped.)\n\nA card is ``null`` when no entrant qualifies: an empty roster, a metric no\none has earned (zero in-window wins → no ``longest_win_streak`` leader),\nnothing rankable in-window (``biggest_climber`` needs ≥2 in-window rated\npoints), or — for ``best_win_rate`` — nobody past the minimum-games guard.\nLeaders are tie-broken deterministically (higher ``games_played``, then\nlower ``tournament_player_id``) so each card is stable across polls.\n``last_polled_at`` is the latest in-window match across the roster,\nmirroring the other aggregate endpoints.')
 
 /**
  * Per-player rating-over-time for the tournament's roster.
@@ -344,7 +418,7 @@ export const GetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetRe
   "position": zod.number(),
   "peak_rating": zod.union([zod.number(),zod.null()])
 }).describe('An entity\'s standings position + peak rating at one time bucket.'))
-}).describe('One entrant\'s position-over-time series, aligned to the shared buckets.\n\n``points[i]`` is the entrant\'s standing at ``buckets[i]`` (see\n``StandingsHistory``). Every entrant holds a position at every bucket\n(#226) — there are no null points; an unrated entrant simply sits at the\nname-sorted tail with a null ``peak_rating``. ``name`` is the display\nlabel, so the chart legend is self-describing without a join back to\n``\/standings`` — the same ``TournamentPlayer.name`` source and meaning as\n``StandingRow.name``.')),
+}).describe('One entrant\'s position-over-time series, aligned to the shared buckets.\n\n``points[i]`` is the entrant\'s standing at ``buckets[i]`` (see\n``StandingsHistory``). Every entrant holds a position at every bucket\n(#226) — there are no null points; an unrated entrant simply sits at the\nname-sorted tail with a null ``peak_rating``. ``name`` is the resolved\ndisplay label, so the chart legend is self-describing without a join back to\n``\/standings`` — the same source and meaning as ``StandingRow.name``,\nincluding its ``presentation.displayName`` override (#243). The tail\'s order\nstill tie-breaks on the base roster name, matching the live table.')),
   "teams": zod.array(zod.object({
   "team_id": zod.number(),
   "name": zod.string(),

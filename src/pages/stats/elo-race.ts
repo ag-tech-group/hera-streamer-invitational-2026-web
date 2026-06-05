@@ -40,20 +40,20 @@ function latest(values: number[]): number {
  * series — the half the position bump chart (#299) leaves unused. Each team's
  * `combinedPeakElo` per bucket becomes one bar's timeline. The API already
  * aggregates per bucket and shares the axis, so this is pure shaping: no
- * client-side bucketing. Bars are team-coloured via the same `teamId → hex` map
- * the boards use, ordered current-leader-first.
+ * client-side bucketing. Bars are labelled from the history payload's `name`
+ * (#243) and team-coloured via the `teamId → hex` map the boards use, ordered
+ * current-leader-first.
  */
 export function toTeamRace(
   history: StandingsHistorySnapshot,
   opts: {
-    teamNameByTeamId: Map<number, string>
     teamHexByTeamId: Map<number, string>
   }
 ): EloRace {
   const entities = history.teams
     .map((team) => ({
       id: team.teamId,
-      label: opts.teamNameByTeamId.get(team.teamId) ?? `#${team.teamId}`,
+      label: team.name,
       color: opts.teamHexByTeamId.get(team.teamId) ?? NEUTRAL_HEX,
       values: team.points.map((p) => p.combinedPeakElo),
     }))
@@ -70,17 +70,20 @@ function latestPeak(points: { peakRating: number | null }[]): number | null {
  * Per-player peak-rating race (#301), built from `/standings/history`'s
  * `players` series. Only rated entrants race — a roster member with no recorded
  * peak (the bench) would otherwise sit as a permanent zero bar — mirroring the
- * rating chart's rated-only field. Requiring a standings label also keeps the
- * roster identical to the table's, dropping any transient non-entrant the
- * history endpoint surfaces (the #326 phantom-row guard). A null peak before a
- * player's first rated match maps to 0, so their bar animates in from the
- * baseline when they enter. Team-coloured with teammates shaded apart (the
- * helper shared with the bump chart), ordered current-leader-first.
+ * rating chart's rated-only field. Roster membership also keeps the field
+ * identical to the table's, dropping any transient non-entrant the history
+ * endpoint surfaces (the #326 phantom-row guard) — the resolved `name` can't do
+ * that filtering, since phantoms carry one too. Labels come straight from the
+ * history payload's `name` (#243). A null peak before a player's first rated
+ * match maps to 0, so their bar animates in from the baseline when they enter.
+ * Team-coloured with teammates shaded apart (the helper shared with the bump
+ * chart), ordered current-leader-first.
  */
 export function toPlayerRace(
   history: StandingsHistorySnapshot,
   opts: {
-    labelByTournamentPlayerId: Map<number, string>
+    /** Current-roster ids — the #326 phantom guard, not a label source. */
+    rosterIds: Set<number>
     teamIdByTournamentPlayerId: Map<number, number>
     baseHexByTeamId: Map<number, string>
   }
@@ -88,8 +91,7 @@ export function toPlayerRace(
   const ordered = history.players
     .filter(
       (p) =>
-        opts.labelByTournamentPlayerId.has(p.tournamentPlayerId) &&
-        latestPeak(p.points) != null
+        opts.rosterIds.has(p.tournamentPlayerId) && latestPeak(p.points) != null
     )
     .sort((a, b) => (latestPeak(b.points) ?? 0) - (latestPeak(a.points) ?? 0))
 
@@ -101,7 +103,7 @@ export function toPlayerRace(
 
   const entities = ordered.map((p) => ({
     id: p.tournamentPlayerId,
-    label: opts.labelByTournamentPlayerId.get(p.tournamentPlayerId)!,
+    label: p.name,
     color: colorByPlayer.get(p.tournamentPlayerId)!,
     values: p.points.map((pt) => pt.peakRating ?? 0),
   }))

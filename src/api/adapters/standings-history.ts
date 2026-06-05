@@ -30,6 +30,7 @@ function toPlayerHistory(dto: PlayerStandingHistory): PlayerHistory {
   return {
     tournamentPlayerId: dto.tournament_player_id,
     profileId: dto.profile_id,
+    name: dto.name,
     points: dto.points.map(toPositionPoint),
   }
 }
@@ -39,7 +40,11 @@ function toTeamPositionPoint(p: TeamStandingHistoryPoint): TeamPositionPoint {
 }
 
 function toTeamHistory(dto: TeamStandingHistory): TeamHistory {
-  return { teamId: dto.team_id, points: dto.points.map(toTeamPositionPoint) }
+  return {
+    teamId: dto.team_id,
+    name: dto.name,
+    points: dto.points.map(toTeamPositionPoint),
+  }
 }
 
 /**

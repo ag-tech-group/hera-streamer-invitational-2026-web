@@ -10,26 +10,39 @@ import type {
 
 // A shared three-bucket axis. The API aligns every entity to it and ranks them
 // server-side (#226), so these tests exercise the thin shaping — value mapping,
-// order, colour, the rated/labelled filter — not any ranking math.
+// order, colour, the rated/roster filter — not any ranking math.
 const BUCKETS = [
   "2026-06-01T00:00:00Z",
   "2026-06-02T00:00:00Z",
   "2026-06-03T00:00:00Z",
 ]
 
-/** A team whose combined peak elo at each bucket is given (position irrelevant here). */
-function team(teamId: number, elos: number[]): TeamHistory {
+/**
+ * A team whose combined peak elo at each bucket is given (position irrelevant
+ * here). `name` is the label the history payload now carries (#243).
+ */
+function team(
+  teamId: number,
+  elos: number[],
+  name = `T${teamId}`
+): TeamHistory {
   return {
     teamId,
+    name,
     points: elos.map((combinedPeakElo) => ({ position: 1, combinedPeakElo })),
   }
 }
 
 /** A player whose peak rating at each bucket is given (null = unrated that bucket). */
-function player(id: number, peaks: (number | null)[]): PlayerHistory {
+function player(
+  id: number,
+  peaks: (number | null)[],
+  name = `P${id}`
+): PlayerHistory {
   return {
     tournamentPlayerId: id,
     profileId: id,
+    name,
     points: peaks.map((peakRating) => ({ position: 1, peakRating })),
   }
 }
@@ -47,15 +60,11 @@ function history(parts: {
 }
 
 describe("toTeamRace", () => {
-  const teamNameByTeamId = new Map([
-    [10, "Knights"],
-    [20, "Vikings"],
-  ])
   const teamHexByTeamId = new Map([
     [10, "#3b82f6"],
     [20, "#ef4444"],
   ])
-  const opts = { teamNameByTeamId, teamHexByTeamId }
+  const opts = { teamHexByTeamId }
 
   it("passes the shared buckets through; no teams → no entities", () => {
     const out = toTeamRace(history({}), opts)
@@ -65,7 +74,7 @@ describe("toTeamRace", () => {
 
   it("maps each team's combinedPeakElo to per-bucket values, labelled + coloured", () => {
     const out = toTeamRace(
-      history({ teams: [team(10, [5900, 5950, 6000])] }),
+      history({ teams: [team(10, [5900, 5950, 6000], "Knights")] }),
       opts
     )
     expect(out.entities).toHaveLength(1)
@@ -88,9 +97,11 @@ describe("toTeamRace", () => {
     expect(out.entities.map((e) => e.id)).toEqual([20, 10])
   })
 
-  it("falls back to a #id label and the neutral colour for an unmapped team", () => {
-    const out = toTeamRace(history({ teams: [team(99, [100])] }), opts)
-    expect(out.entities[0].label).toBe("#99")
+  it("labels from the history name; neutral colour for a team absent from the hue map", () => {
+    // Team 99 has no entry in the colour map → neutral hue; its label still
+    // comes straight from the history payload's name (#243).
+    const out = toTeamRace(history({ teams: [team(99, [100], "Lone")] }), opts)
+    expect(out.entities[0].label).toBe("Lone")
     expect(out.entities[0].color).toBe("#94a3b8")
   })
 })
@@ -98,11 +109,7 @@ describe("toTeamRace", () => {
 describe("toPlayerRace", () => {
   const base = "#3b82f6"
   const opts = {
-    labelByTournamentPlayerId: new Map([
-      [1, "Hera"],
-      [2, "Liereyy"],
-      [3, "TheViper"],
-    ]),
+    rosterIds: new Set([1, 2, 3]),
     teamIdByTournamentPlayerId: new Map([
       [1, 10],
       [2, 10],
@@ -122,12 +129,12 @@ describe("toPlayerRace", () => {
     expect(out.entities[0].values).toEqual([0, 1500, 1600])
   })
 
-  it("drops never-rated and unlabelled (phantom) entities", () => {
+  it("drops never-rated and off-roster (phantom) entities", () => {
     const out = toPlayerRace(
       history({
         players: [
           player(1, [1500, 1500, 1500]), // rated + on the roster → in
-          player(2, [null, null, null]), // labelled but never rated → out
+          player(2, [null, null, null]), // on roster but never rated → out
           player(404, [1700, 1700, 1700]), // not on the standings roster → out
         ],
       }),

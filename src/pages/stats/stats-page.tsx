@@ -12,6 +12,7 @@ import { useCivStats } from "@/hooks/use-civ-stats"
 import { useProgression } from "@/hooks/use-progression"
 import { useStandings } from "@/hooks/use-standings"
 import { useStandingsHistory } from "@/hooks/use-standings-history"
+import { useSummary } from "@/hooks/use-summary"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
 import { teamColorMap, TEAM_HEX } from "@/lib/team-colors"
@@ -30,8 +31,8 @@ import {
 import { toDepthBars } from "@/pages/stats/team-depth"
 import { TeamDepthChart } from "@/pages/stats/team-depth-chart"
 import { RatingProgressionChart } from "@/pages/stats/rating-progression-chart"
-import { labelSeries, type LabeledSeries } from "@/pages/stats/series-labels"
-import type { StandingsRow, TeamStandingsRow } from "@/types"
+import { labelSeries } from "@/pages/stats/series-labels"
+import type { StreakLeader, TeamStandingsRow, TournamentSummary } from "@/types"
 
 /**
  * Tournament-wide stats (#164), mounted at `/stats` as the third top-level
@@ -52,6 +53,7 @@ export function StatsPage() {
   const standings = useStandings()
   const civStats = useCivStats()
   const standingsHistory = useStandingsHistory()
+  const summary = useSummary()
 
   // Hide the team charts until the ladder race starts — pre-start the team
   // ratings are all empty, so the bars would read as noise. Same "started"
@@ -111,10 +113,11 @@ export function StatsPage() {
     [civStats.data?.overall]
   )
 
-  // A full `displayName ?? name` label for every entrant — the
-  // /standings/history, elo-race, and /civ-stats payloads carry no names, so
-  // join them by tournamentPlayerId from the standings rows. Feeds the position
-  // bump chart (#299) and the "Civs by team" section (#302 follow-up).
+  // A `displayName ?? name` label for every entrant, joined by
+  // tournamentPlayerId from the standings rows. The /civ-stats payload carries
+  // no names, so this labels the "Civs by team" section (#302 follow-up). The
+  // /standings/history charts now read labels from that payload's resolved
+  // `name` (#243) and only need the roster *membership* set below.
   const labelByTournamentPlayerId = useMemo(() => {
     const map = new Map<number, string>()
     for (const row of standings.data?.rows ?? []) {
@@ -122,6 +125,15 @@ export function StatsPage() {
     }
     return map
   }, [standings.data?.rows])
+
+  // Current-roster ids — the #326 phantom guard for the /standings/history
+  // charts (bump, elo race): the history endpoint can transiently surface
+  // entities that aren't current entrants, and they carry a resolved `name`
+  // too, so roster membership (not the label) is what filters them out.
+  const rosterIds = useMemo(
+    () => new Set(labelByTournamentPlayerId.keys()),
+    [labelByTournamentPlayerId]
+  )
   const { teamIdByTournamentPlayerId, baseHexByTeamId, slotByTeamId } =
     useMemo(() => {
       const rows = teams.data?.rows ?? []
@@ -145,14 +157,14 @@ export function StatsPage() {
     () =>
       standingsHistory.data
         ? toBumpSeries(standingsHistory.data, {
-            labelByTournamentPlayerId,
+            rosterIds,
             teamIdByTournamentPlayerId,
             baseHexByTeamId,
           })
         : { buckets: [], series: [] },
     [
       standingsHistory.data,
-      labelByTournamentPlayerId,
+      rosterIds,
       teamIdByTournamentPlayerId,
       baseHexByTeamId,
     ]
@@ -161,37 +173,30 @@ export function StatsPage() {
   // Elo bar-chart race (#301): the standings shuffling over time. Teams race
   // their combined peak elo (the scoring metric, from history.teams[]) and
   // players their peak rating (from history.players[]) — the same
-  // /standings/history payload the bump chart consumes, reusing the same colour
-  // and display-name joins. The team bars need a teamId → name map; the rest of
-  // the joins (label, teamId, base hue) are already built above for the bump
-  // chart.
-  const teamNameByTeamId = useMemo(() => {
-    const map = new Map<number, string>()
-    for (const row of teams.data?.rows ?? []) map.set(row.teamId, row.name)
-    return map
-  }, [teams.data?.rows])
+  // /standings/history payload the bump chart consumes, labelled from that
+  // payload's resolved names (#243) and coloured by the same team-hue joins
+  // built above for the bump chart.
   const teamRace = useMemo<EloRace>(
     () =>
       standingsHistory.data
         ? toTeamRace(standingsHistory.data, {
-            teamNameByTeamId,
             teamHexByTeamId: baseHexByTeamId,
           })
         : EMPTY_RACE,
-    [standingsHistory.data, teamNameByTeamId, baseHexByTeamId]
+    [standingsHistory.data, baseHexByTeamId]
   )
   const playerRace = useMemo<EloRace>(
     () =>
       standingsHistory.data
         ? toPlayerRace(standingsHistory.data, {
-            labelByTournamentPlayerId,
+            rosterIds,
             teamIdByTournamentPlayerId,
             baseHexByTeamId,
           })
         : EMPTY_RACE,
     [
       standingsHistory.data,
-      labelByTournamentPlayerId,
+      rosterIds,
       teamIdByTournamentPlayerId,
       baseHexByTeamId,
     ]
@@ -215,17 +220,14 @@ export function StatsPage() {
 
   return (
     <TournamentLayout view="stats">
-      {progression.isPending || standings.isPending ? (
+      {summary.isPending ? (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {Array.from({ length: 5 }, (_, i) => (
             <Skeleton key={i} className="h-24 rounded-lg" />
           ))}
         </div>
       ) : (
-        <SummaryCards
-          series={labeledSeries}
-          standingsRows={standings.data?.rows ?? []}
-        />
+        <SummaryCards summary={summary.data ?? null} />
       )}
 
       {/* The combined-peak board (#300): a stacked bar per team whose segments
@@ -400,138 +402,34 @@ function ChartSection({
   )
 }
 
-interface Leader {
-  alias: string
-  value: number
+/**
+ * Formats a streak's date range for the longest-win-streak card's "when did
+ * this happen" tooltip (#243) — e.g. `Jun 3 – Jun 4`. Returns `undefined` when
+ * either endpoint is missing (a win that settled without a completion time), so
+ * the card simply gets no tooltip. Dates render in the active UI language.
+ */
+function streakRange(
+  card: StreakLeader | null,
+  lang: string
+): string | undefined {
+  if (!card?.streakStart || !card.streakEnd) return undefined
+  const fmt = new Intl.DateTimeFormat(lang, { month: "short", day: "numeric" })
+  return `${fmt.format(new Date(card.streakStart))} – ${fmt.format(
+    new Date(card.streakEnd)
+  )}`
 }
 
 /**
- * The three headline numbers. Peak rating and match volume come from the
- * tournament-scoped standings — the same source as the standings table and
- * the PEAK RATING board — so the cards agree with the rest of the page. The
- * climber is rating movement across the progression series (a player's
- * tracked rating-over-time), which has no standings equivalent.
- *
- * These used to be derived entirely from the progression series, which spans
- * a player's full tracked match history rather than the tournament window —
- * so "highest peak" surfaced a lifetime peak and "most matches" counted every
- * tracked match, neither matching the in-tournament figures the table shows.
+ * The five headline cards, read straight from the API's `/summary` endpoint
+ * (#243): the server selects each leader, tie-breaks deterministically, applies
+ * the win-rate minimum-games guard, and resolves each `name` to the display
+ * label — so the page just renders. A `null` card (no qualifying entrant in
+ * that metric) shows an em dash.
  */
-function computeStats(
-  series: LabeledSeries[],
-  rows: StandingsRow[]
-): {
-  biggestClimber: Leader | null
-  highestPeak: Leader | null
-  mostMatches: Leader | null
-} {
-  let biggestClimber: Leader | null = null
-  for (const s of series) {
-    if (s.points.length === 0) continue
-    const delta = s.points[s.points.length - 1].rating - s.points[0].rating
-    if (!biggestClimber || delta > biggestClimber.value) {
-      biggestClimber = { alias: s.label, value: delta }
-    }
-  }
-
-  let highestPeak: Leader | null = null
-  let mostMatches: Leader | null = null
-  for (const r of rows) {
-    // Mirror the standings table + peak board: peak is the tournament
-    // leaderboard's max_rating, volume is in-window games. Label prefers the
-    // host display-name override, like those surfaces.
-    const alias = r.presentation.displayName ?? r.name
-    if (
-      r.maxRating !== null &&
-      (!highestPeak || r.maxRating > highestPeak.value)
-    ) {
-      highestPeak = { alias, value: r.maxRating }
-    }
-    if (
-      r.gamesPlayed > 0 &&
-      (!mostMatches || r.gamesPlayed > mostMatches.value)
-    ) {
-      mostMatches = { alias, value: r.gamesPlayed }
-    }
-  }
-
-  return { biggestClimber, highestPeak, mostMatches }
-}
-
-/**
- * Best win rate across the standings (#225 follow-up). Win% comes from the
- * standings rows (wins / decided games), not the progression series — the
- * series only carries rating points. Players with no decided games are
- * skipped so a 0-game row can't read as 0%. The DTO also exposes a computed
- * `win_pct`, but the adapter doesn't surface it, so we derive from the
- * already-mapped wins / losses. Tiny samples (e.g. 1–0 = 100%) can lead; a
- * minimum-games threshold can be layered on later if the leaderboard warrants.
- */
-function computeWinPctLeader(rows: StandingsRow[]): Leader | null {
-  let leader: Leader | null = null
-  for (const r of rows) {
-    const decided = r.wins + r.losses
-    if (decided === 0) continue
-    const pct = (r.wins / decided) * 100
-    if (!leader || pct > leader.value) {
-      leader = { alias: r.presentation.displayName ?? r.name, value: pct }
-    }
-  }
-  return leader
-}
-
-/**
- * Longest in-window win streak across the standings (#331). Reads the peak win
- * run the API now tracks per player (`tournament_record.longest_win_streak`,
- * surfaced by the adapter as `longestWinStreak`) — the *peak* run over the
- * whole window, distinct from `streak`, which is the *current* signed run. A
- * player on `W W W L W` has `streak = 1` but `longestWinStreak = 3`. Rows with
- * no in-window wins (`longestWinStreak === 0`) are skipped so a 0 can't read as
- * a leader. Equal streaks break on games played — the more battle-tested
- * player holds the card — then on first-seen (the standings' rank order).
- */
-function computeLongestWinStreakLeader(rows: StandingsRow[]): Leader | null {
-  let leader: Leader | null = null
-  let leaderGames = 0
-  for (const r of rows) {
-    if (r.longestWinStreak <= 0) continue
-    if (
-      !leader ||
-      r.longestWinStreak > leader.value ||
-      (r.longestWinStreak === leader.value && r.gamesPlayed > leaderGames)
-    ) {
-      leader = {
-        alias: r.presentation.displayName ?? r.name,
-        value: r.longestWinStreak,
-      }
-      leaderGames = r.gamesPlayed
-    }
-  }
-  return leader
-}
-
-function SummaryCards({
-  series,
-  standingsRows,
-}: {
-  series: LabeledSeries[]
-  standingsRows: StandingsRow[]
-}) {
-  const { t } = useTranslation()
-  const { biggestClimber, highestPeak, mostMatches } = useMemo(
-    () => computeStats(series, standingsRows),
-    [series, standingsRows]
-  )
-  const winPctLeader = useMemo(
-    () => computeWinPctLeader(standingsRows),
-    [standingsRows]
-  )
-  const longestWinStreak = useMemo(
-    () => computeLongestWinStreakLeader(standingsRows),
-    [standingsRows]
-  )
-  // A climber delta carries a sign (someone may be the "least dropped"); peak
-  // and matches are plain counts.
+function SummaryCards({ summary }: { summary: TournamentSummary | null }) {
+  const { t, i18n } = useTranslation()
+  // The climber value carries a sign (someone may be the "least dropped");
+  // peak, streak, and matches are plain counts.
   const signed = (n: number) => (n >= 0 ? `+${n}` : String(n))
   return (
     // Highest peak leads — it's the tournament's headline metric (only peak
@@ -542,32 +440,49 @@ function SummaryCards({
       <StatCard
         icon={Trophy}
         label={t("stats.cards.highestPeak")}
-        value={highestPeak ? String(highestPeak.value) : "—"}
-        player={highestPeak?.alias ?? null}
+        value={
+          summary?.highestPeakRating
+            ? String(summary.highestPeakRating.value)
+            : "—"
+        }
+        player={summary?.highestPeakRating?.name ?? null}
       />
       <StatCard
         icon={Percent}
         label={t("stats.cards.winPct")}
-        value={winPctLeader ? `${winPctLeader.value.toFixed(1)}%` : "—"}
-        player={winPctLeader?.alias ?? null}
+        value={
+          summary?.bestWinRate
+            ? `${summary.bestWinRate.value.toFixed(1)}%`
+            : "—"
+        }
+        player={summary?.bestWinRate?.name ?? null}
       />
       <StatCard
         icon={Flame}
         label={t("stats.cards.longestWinStreak")}
-        value={longestWinStreak ? String(longestWinStreak.value) : "—"}
-        player={longestWinStreak?.alias ?? null}
+        value={
+          summary?.longestWinStreak
+            ? String(summary.longestWinStreak.value)
+            : "—"
+        }
+        player={summary?.longestWinStreak?.name ?? null}
+        tooltip={streakRange(summary?.longestWinStreak ?? null, i18n.language)}
       />
       <StatCard
         icon={TrendingUp}
         label={t("stats.cards.biggestClimber")}
-        value={biggestClimber ? signed(biggestClimber.value) : "—"}
-        player={biggestClimber?.alias ?? null}
+        value={
+          summary?.biggestClimber ? signed(summary.biggestClimber.value) : "—"
+        }
+        player={summary?.biggestClimber?.name ?? null}
       />
       <StatCard
         icon={Swords}
         label={t("stats.cards.mostMatches")}
-        value={mostMatches ? String(mostMatches.value) : "—"}
-        player={mostMatches?.alias ?? null}
+        value={
+          summary?.mostGamesPlayed ? String(summary.mostGamesPlayed.value) : "—"
+        }
+        player={summary?.mostGamesPlayed?.name ?? null}
       />
     </div>
   )
@@ -578,14 +493,19 @@ function StatCard({
   label,
   value,
   player,
+  tooltip,
 }: {
   icon: LucideIcon
   label: string
   value: string
   player: string | null
+  tooltip?: string
 }) {
   return (
-    <div className="bg-card shadow-card relative flex items-center gap-3.5 overflow-hidden rounded-lg border p-4">
+    <div
+      title={tooltip}
+      className="bg-card shadow-card relative flex items-center gap-3.5 overflow-hidden rounded-lg border p-4"
+    >
       {/* Brand accent rail down the left edge — mirrors the chart frame's top
           stripe so the cards read as part of the same furniture. */}
       <span

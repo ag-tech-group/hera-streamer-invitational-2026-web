@@ -28,6 +28,11 @@ export interface PlayerHistory {
   tournamentPlayerId: number
   /** AoE2 profile id, or `null` for an unlinked/unrated roster member. */
   profileId: number | null
+  /**
+   * Resolved display label (host `displayName` override applied server-side,
+   * #243) — the legend reads from this, no `/standings` join needed.
+   */
+  name: string
   /** `points[i]` is the standing at `buckets[i]` — one per bucket, never null. */
   points: PositionPoint[]
 }
@@ -41,6 +46,8 @@ export interface TeamPositionPoint {
 /** One team's combined-elo-over-time, aligned to the shared buckets. */
 export interface TeamHistory {
   teamId: number
+  /** Team display name — the legend reads from this, no `/teams/standings` join. */
+  name: string
   points: TeamPositionPoint[]
 }
 
