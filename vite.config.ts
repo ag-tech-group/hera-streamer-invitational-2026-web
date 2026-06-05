@@ -3,7 +3,7 @@ import { sentryVitePlugin } from "@sentry/vite-plugin"
 import tailwindcss from "@tailwindcss/vite"
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite"
 import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
+import { defineConfig, type Plugin } from "vite"
 
 /**
  * Release identifier baked into the bundle for Sentry's `release` field.
@@ -12,6 +12,28 @@ import { defineConfig } from "vite"
  */
 const releaseSha =
   process.env.COMMIT_REF || process.env.VITE_RELEASE_SHA || "dev"
+
+/**
+ * Emits `version.json` ({ "version": <releaseSha> }) at the deploy root so a
+ * long-lived tab can poll it and refresh itself when a newer build ships (see
+ * src/lib/version-check.ts). It carries the same SHA baked into the bundle as
+ * `__APP_RELEASE__`, so a tab's own version and the deployed version compare
+ * cleanly. Build-only: dev/preview serve `base = "/"` with a "dev" version, so
+ * the runtime check no-ops there and no manifest is needed.
+ */
+function emitVersionJson(version: string): Plugin {
+  return {
+    name: "emit-version-json",
+    apply: "build",
+    generateBundle() {
+      this.emitFile({
+        type: "asset",
+        fileName: "version.json",
+        source: JSON.stringify({ version }) + "\n",
+      })
+    },
+  }
+}
 
 /**
  * Sentry source-map upload — only runs when all three env vars are present
@@ -50,6 +72,7 @@ const basePath = process.env.VITE_BASE_PATH || "/"
 export default defineConfig({
   base: basePath,
   plugins: [
+    emitVersionJson(releaseSha),
     TanStackRouterVite({
       target: "react",
       autoCodeSplitting: true,

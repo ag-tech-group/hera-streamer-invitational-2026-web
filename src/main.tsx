@@ -23,6 +23,7 @@ import { FeatureFlagProvider } from "./lib/feature-flags"
 import "./lib/i18n"
 import { initPostHog, posthogBackend } from "./lib/posthog"
 import { initSentry } from "./lib/sentry"
+import { installVersionCheck } from "./lib/version-check"
 import { routeTree } from "./routeTree.gen"
 
 // Initialize Sentry as early as possible so init-time errors flow through.
@@ -33,6 +34,15 @@ initSentry()
 // build that navigates to a lazy route (e.g. /stats) fails to fetch the now-
 // rotated chunk. Reload once to pick up the current build (see chunk-reload.ts).
 installChunkReloadHandler()
+
+// Refresh a long-lived tab onto new deploys. chunk-reload only catches a tab
+// that *navigates* to a rotated lazy chunk; a tab parked on an already-loaded
+// page never requests one, so it drifts on stale code until a breaking API
+// change detonates it (the standings crash on the removed
+// `tournament_record.recent_results` field). This polls a build-stamped
+// version.json and refreshes — silently for a backgrounded tab, or via a toast
+// + on next blur for a foreground one (see version-check.ts). No-op in dev.
+installVersionCheck()
 
 // Defer PostHog init until the browser is idle (#65 perf) so its ~60 KB gzip
 // SDK doesn't compete with first paint. Events captured before the SDK
