@@ -21,6 +21,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--
+      Preload the Bebas Neue display face. It drives every rating, the countdown
+      digits, the prize number, and the view tabs, so when it loads *after* first
+      paint (the @font-face is `font-display: swap`) those elements reflow and
+      shove the tall standings table down — a measured contributor to the home
+      page's poor CLS (p90 ~0.35). Preloading fetches it in parallel with the
+      HTML so it's ready before first paint on most loads, making the swap happen
+      before content renders instead of after.
+
+      `crossorigin` is required even though the font is same-origin: fonts always
+      fetch in CORS-anonymous mode, so without it the preload wouldn't match the
+      @font-face request and the file would download twice. Vite rewrites this
+      leading-slash href to include the `/kings-gauntlet/` base at build (same as
+      the favicons), and netlify.toml already maps `/kings-gauntlet/fonts/*` back
+      to the physical `/fonts/*`, so no new redirect is needed.
+    -->
+    <link
+      rel="preload"
+      href="/fonts/bebas-neue-regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!--
       SEO / social metadata (#179). This block is the source of truth for
       crawlers and link-preview scrapers: the app is a client-rendered SPA,
       so anything set later from JS (e.g. the per-route document.title in

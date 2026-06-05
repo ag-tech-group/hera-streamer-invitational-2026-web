@@ -58,6 +58,10 @@
       "title": "Teams konnten nicht geladen werden",
       "body": "Beim Abrufen der Team-Tabelle ist etwas schiefgelaufen."
     },
+    "loadErrorTournament": {
+      "title": "Turnierdetails konnten nicht geladen werden",
+      "body": "Beim Abrufen der Turnierinformationen ist etwas schiefgelaufen."
+    },
     "prizePool": {
       "label": "Preispool",
       "sponsoredBy": "Gesponsert von "

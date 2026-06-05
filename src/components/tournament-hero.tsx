@@ -37,15 +37,22 @@ export function TournamentHero() {
           background: "color-mix(in oklch, var(--brand) 16%, transparent)",
         }}
       />
-      <h1 className="relative m-0">
-        {/* width/height match the asset so the row reserves space before the
-            image loads (no layout shift); max-width caps the display size. */}
+      {/* `w-full` is load-bearing for CLS: the header is a shrink-to-fit flex
+          column (`items-center`), so without an explicit width the <h1> collapses
+          to its content. A `w-full` image contributes 0 to a shrink-to-fit
+          parent's intrinsic width, so the box can't be sized until the bytes
+          arrive — and the logo dropping in then shoves the whole page (cards +
+          standings table) down ~295px, the dominant source of the home page's
+          CLS. Giving the <h1> a real width lets the image resolve to 480px (its
+          `max-w`) up front, and the pinned `aspect-[1000/614]` reserves the
+          matching height before load, so the logo paints into a held slot. */}
+      <h1 className="relative m-0 w-full">
         <img
           src="/logo-full.png"
           alt={activeTournament.name}
           width={1000}
           height={614}
-          className="h-auto w-full max-w-[30rem]"
+          className="mx-auto block aspect-[1000/614] h-auto w-full max-w-[30rem]"
         />
       </h1>
       <p className="text-muted-foreground relative max-w-2xl text-sm">

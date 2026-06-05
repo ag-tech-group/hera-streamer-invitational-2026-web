@@ -58,6 +58,10 @@
       "title": "Kunde inte ladda lag",
       "body": "Något gick fel vid anslutning till lagställningarna."
     },
+    "loadErrorTournament": {
+      "title": "Kunde inte ladda turneringsinformation",
+      "body": "Något gick fel vid hämtning av turneringsinformationen."
+    },
     "prizePool": {
       "label": "Prispott",
       "sponsoredBy": "Sponsras av "
