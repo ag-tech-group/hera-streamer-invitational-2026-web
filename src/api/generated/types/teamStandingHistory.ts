@@ -15,9 +15,14 @@ import type { TeamStandingHistoryPoint } from './teamStandingHistoryPoint';
  * One team's combined-peak-elo-over-time series, aligned to the buckets.
 
 ``points[i]`` is the team's standing at ``buckets[i]``. Every team holds a
-position at every bucket (#226) — no null points.
+position at every bucket (#226) — no null points. ``name`` and ``initials``
+are the team's current display strings — the same compact reference shape
+as ``StandingTeam`` — so the chart legend is self-describing without a join
+back to ``/teams/standings``.
  */
 export interface TeamStandingHistory {
   team_id: number;
+  name: string;
+  initials: string;
   points: TeamStandingHistoryPoint[];
 }

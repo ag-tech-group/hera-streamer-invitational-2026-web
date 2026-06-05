@@ -9,7 +9,6 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
-import type { MatchOutcome } from './matchOutcome';
 import type { RecentMatchup } from './recentMatchup';
 
 /**
@@ -29,7 +28,6 @@ export interface TournamentRecord {
   longest_win_streak: number;
   peak_rating: number | null;
   last_match_at: string | null;
-  recent_results: MatchOutcome[];
   recent_matchups: RecentMatchup[];
   /** Win percentage (0–100, 1 dp) over in-window games; null when none. */
   readonly win_pct: number | null;
