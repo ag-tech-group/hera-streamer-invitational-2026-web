@@ -58,6 +58,10 @@
       "title": "Impossible de charger les équipes",
       "body": "Un problème est survenu lors de l'accès au classement des équipes."
     },
+    "loadErrorTournament": {
+      "title": "Impossible de charger les détails du tournoi",
+      "body": "Un problème est survenu lors de l'accès aux informations du tournoi."
+    },
     "prizePool": {
       "label": "Cagnotte",
       "sponsoredBy": "Sponsorisé par "

@@ -58,6 +58,10 @@
       "title": "Couldn't load teams",
       "body": "Something went wrong reaching the team standings."
     },
+    "loadErrorTournament": {
+      "title": "Couldn't load tournament details",
+      "body": "Something went wrong reaching the tournament info."
+    },
     "prizePool": {
       "label": "Prize pool",
       "sponsoredBy": "Sponsored by "

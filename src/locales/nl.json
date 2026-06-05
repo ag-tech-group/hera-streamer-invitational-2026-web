@@ -58,6 +58,10 @@
       "title": "Teams laden mislukt",
       "body": "Er ging iets mis bij het ophalen van het teamklassement."
     },
+    "loadErrorTournament": {
+      "title": "Toernooigegevens laden mislukt",
+      "body": "Er ging iets mis bij het ophalen van de toernooigegevens."
+    },
     "prizePool": {
       "label": "Prijzenpot",
       "sponsoredBy": "Gesponsord door "

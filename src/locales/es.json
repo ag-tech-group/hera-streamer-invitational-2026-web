@@ -58,6 +58,10 @@
       "title": "No se pudieron cargar los equipos",
       "body": "Algo salió mal al consultar la clasificación de equipos."
     },
+    "loadErrorTournament": {
+      "title": "No se pudieron cargar los detalles del torneo",
+      "body": "Algo salió mal al consultar la información del torneo."
+    },
     "prizePool": {
       "label": "Premio total",
       "sponsoredBy": "Patrocinado por "
