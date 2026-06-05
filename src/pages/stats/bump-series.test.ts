@@ -21,14 +21,20 @@ function pt(position: number, peakRating: number | null = null): PositionPoint {
   return { position, peakRating }
 }
 
-/** A player whose position at each bucket is given (peak rating irrelevant here). */
+/**
+ * A player whose position at each bucket is given (peak rating irrelevant here).
+ * `name` is the resolved label the history payload now carries (#243) — the
+ * chart reads its legend straight from it.
+ */
 function player(
   tournamentPlayerId: number,
-  positions: number[]
+  positions: number[],
+  name = `P${tournamentPlayerId}`
 ): PlayerHistory {
   return {
     tournamentPlayerId,
     profileId: tournamentPlayerId,
+    name,
     points: positions.map((p) => pt(p)),
   }
 }
@@ -38,21 +44,18 @@ function history(players: PlayerHistory[]): StandingsHistorySnapshot {
 }
 
 const NO_TEAMS = {
-  labelByTournamentPlayerId: new Map<number, string>(),
+  rosterIds: new Set<number>(),
   teamIdByTournamentPlayerId: new Map<number, number>(),
   baseHexByTeamId: new Map<number, string>(),
 }
 
 /**
- * Opts that label the given ids (no teams). A real entrant always carries a
- * standings label, and the chart now requires one — so a test that expects a
- * player to appear has to provide it.
+ * Opts marking the given ids as current standings entrants (no teams). The
+ * chart filters to the roster — the #326 phantom guard — so a test that expects
+ * a player to appear has to list it here.
  */
-function labeled(ids: number[]) {
-  return {
-    ...NO_TEAMS,
-    labelByTournamentPlayerId: new Map(ids.map((id) => [id, `P${id}`])),
-  }
+function onRoster(ids: number[]) {
+  return { ...NO_TEAMS, rosterIds: new Set(ids) }
 }
 
 describe("toBumpSeries", () => {
@@ -63,26 +66,34 @@ describe("toBumpSeries", () => {
   })
 
   it("keeps every entity and passes its position points through", () => {
-    const out = toBumpSeries(history([player(1, [2, 2, 1])]), labeled([1]))
+    const out = toBumpSeries(history([player(1, [2, 2, 1])]), onRoster([1]))
     expect(out.series).toHaveLength(1)
     expect(out.series[0].points.map((p) => p.position)).toEqual([2, 2, 1])
+  })
+
+  it("labels each line from the history payload's name (#243)", () => {
+    const out = toBumpSeries(
+      history([player(1, [1, 1, 1], "Hera")]),
+      onRoster([1])
+    )
+    expect(out.series[0].label).toBe("Hera")
   })
 
   it("orders by current (last-bucket) position — leader first", () => {
     const a = player(1, [2, 2, 1]) // climbs to 1st
     const b = player(2, [1, 1, 2]) // slips to 2nd
-    const out = toBumpSeries(history([b, a]), labeled([1, 2])) // passed worst-first
+    const out = toBumpSeries(history([b, a]), onRoster([1, 2])) // passed worst-first
     expect(out.series.map((s) => s.tournamentPlayerId)).toEqual([1, 2])
   })
 
   it("drops history entities missing from the standings roster (no phantom rows)", () => {
-    // Player 2 has position history but no standings label — a transient
-    // non-entrant the history endpoint surfaced. It must not become a series:
-    // the chart's roster has to equal the standings table's, not whatever extra
-    // entities /standings/history momentarily returns (#326 follow-up).
+    // Player 2 has position history but isn't a current standings entrant — a
+    // transient non-entrant the history endpoint surfaced. It carries a resolved
+    // name too, so roster membership (not the label) is what filters it: the
+    // chart's roster has to equal the standings table's (#326 follow-up).
     const out = toBumpSeries(
-      history([player(1, [1, 1, 1]), player(2, [2, 2, 2])]),
-      { ...NO_TEAMS, labelByTournamentPlayerId: new Map([[1, "Hera"]]) }
+      history([player(1, [1, 1, 1], "Hera"), player(2, [2, 2, 2])]),
+      onRoster([1])
     )
     expect(out.series.map((s) => s.tournamentPlayerId)).toEqual([1])
     expect(out.series[0].label).toBe("Hera")
@@ -92,12 +103,9 @@ describe("toBumpSeries", () => {
     // Players 4 and 5 are teammates (team 10); 4 currently outranks 5.
     const base = "#3b82f6"
     const out = toBumpSeries(
-      history([player(4, [1, 1, 1]), player(5, [2, 2, 2])]),
+      history([player(4, [1, 1, 1], "D"), player(5, [2, 2, 2], "P")]),
       {
-        labelByTournamentPlayerId: new Map([
-          [4, "D"],
-          [5, "P"],
-        ]),
+        rosterIds: new Set([4, 5]),
         teamIdByTournamentPlayerId: new Map([
           [4, 10],
           [5, 10],
@@ -113,7 +121,7 @@ describe("toBumpSeries", () => {
   })
 
   it("falls back to a neutral colour when a player has no team", () => {
-    const out = toBumpSeries(history([player(1, [1, 1, 1])]), labeled([1]))
+    const out = toBumpSeries(history([player(1, [1, 1, 1])]), onRoster([1]))
     expect(out.series[0].color).toBe("#94a3b8")
   })
 })

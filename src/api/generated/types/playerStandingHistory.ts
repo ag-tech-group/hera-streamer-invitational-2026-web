@@ -17,10 +17,11 @@ import type { StandingHistoryPoint } from './standingHistoryPoint';
 ``points[i]`` is the entrant's standing at ``buckets[i]`` (see
 ``StandingsHistory``). Every entrant holds a position at every bucket
 (#226) — there are no null points; an unrated entrant simply sits at the
-name-sorted tail with a null ``peak_rating``. ``name`` is the display
-label, so the chart legend is self-describing without a join back to
-``/standings`` — the same ``TournamentPlayer.name`` source and meaning as
-``StandingRow.name``.
+name-sorted tail with a null ``peak_rating``. ``name`` is the resolved
+display label, so the chart legend is self-describing without a join back to
+``/standings`` — the same source and meaning as ``StandingRow.name``,
+including its ``presentation.displayName`` override (#243). The tail's order
+still tie-breaks on the base roster name, matching the live table.
  */
 export interface PlayerStandingHistory {
   tournament_player_id: number;

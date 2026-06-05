@@ -23,15 +23,18 @@ table from one response with no per-player fan-out. ``recent_results``
 is completed-match form; ``tournament_record`` is the player's record
 within the tournament's date window; ``in_match`` / ``live_match_id``
 are current live-match status. Sorted by ``current_rating`` desc
-(NULLS LAST), then every unrated row — linked or not — by display
-``name`` (#187 unified the old three-tier sort that special-cased an
-unlinked tail).
+(NULLS LAST), then every unrated row — linked or not — by the base roster
+name (#187 unified the old three-tier sort that special-cased an unlinked
+tail). The returned ``name`` is the resolved display label (the
+``presentation.displayName`` override when set, #243), but the sort keys on
+the base name, so ordering is independent of any override.
 
 An unlinked row (no ``profile_id`` yet — a streamer whose account
-hasn't minted) carries null ``profile_id``, its ``name`` as the display
-label (``alias`` falls back to it), its ``presentation`` bag (so
-flag/streamUrls work identically), and null/zero for every polled
-field. ``updated_at`` is null too — no polled refresh signal applies.
+hasn't minted) carries null ``profile_id``, its resolved ``name`` as the
+display label (``alias`` falls back to the base roster name), its
+``presentation`` bag (so flag/streamUrls work identically), and null/zero
+for every polled field. ``updated_at`` is null too — no polled refresh
+signal applies.
  */
 export interface StandingRow {
   tournament_player_id: number;

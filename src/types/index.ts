@@ -39,3 +39,4 @@ export type {
   TeamHistory,
   TeamPositionPoint,
 } from "./standings-history"
+export type { StreakLeader, SummaryLeader, TournamentSummary } from "./summary"

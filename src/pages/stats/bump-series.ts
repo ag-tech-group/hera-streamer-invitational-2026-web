@@ -21,28 +21,29 @@ export interface BumpSeries {
  * buckets — position-by-peak, straight from the API (the latest bucket equals
  * the live table). Lines are team-coloured, teammates shaded apart within the
  * hue, and ordered by current position so the legend reads like the standings.
- * Names join from the standings since the history payload carries no label.
- * The API ranks every entity at every bucket, so every line is continuous.
+ * Labels come straight from the history payload's resolved `name` (#243), so
+ * the legend matches the live table with no `/standings` join. The API ranks
+ * every entity at every bucket, so every line is continuous.
  */
 export function toBumpSeries(
   history: StandingsHistorySnapshot,
   opts: {
-    labelByTournamentPlayerId: Map<number, string>
+    /** Current-roster ids — the #326 phantom guard, not a label source. */
+    rosterIds: Set<number>
     teamIdByTournamentPlayerId: Map<number, number>
     baseHexByTeamId: Map<number, string>
   }
 ): { buckets: string[]; series: BumpSeries[] } {
-  // Chart only entities that are in the live standings — i.e. have a joined
-  // label. The standings table is the canonical roster; `/standings/history`
-  // can transiently surface entities that aren't current entrants (a mid-event
-  // recompute, a swapped-out player), and without this they render as phantom
-  // grey "—" lines/pills that aren't on the table (#326 follow-up). Requiring a
-  // label keeps the chart's roster identical to the standings table's.
+  // Chart only entities that are current standings entrants. The standings
+  // table is the canonical roster; `/standings/history` can transiently surface
+  // entities that aren't current entrants (a mid-event recompute, a swapped-out
+  // player) — and they carry a resolved `name` too, so the label can't filter
+  // them. Without this they render as phantom lines/pills that aren't on the
+  // table (#326). Gating on roster membership keeps the chart's roster identical
+  // to the standings table's.
   const ordered = [...history.players]
     .filter(
-      (p) =>
-        p.points.length > 0 &&
-        opts.labelByTournamentPlayerId.has(p.tournamentPlayerId)
+      (p) => p.points.length > 0 && opts.rosterIds.has(p.tournamentPlayerId)
     )
     .sort((a, b) => latestPosition(a.points) - latestPosition(b.points))
 
@@ -54,7 +55,7 @@ export function toBumpSeries(
 
   const series = ordered.map((p) => ({
     tournamentPlayerId: p.tournamentPlayerId,
-    label: opts.labelByTournamentPlayerId.get(p.tournamentPlayerId) ?? "—",
+    label: p.name,
     color: colorByPlayer.get(p.tournamentPlayerId)!,
     points: p.points,
   }))

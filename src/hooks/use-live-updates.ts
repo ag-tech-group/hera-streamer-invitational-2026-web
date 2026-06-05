@@ -7,6 +7,7 @@ import { getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey } from "@/a
 import { getStreamV1StreamGetUrl } from "@/api/generated/hooks/stream/stream"
 import {
   getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey,
+  getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryKey,
   getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey,
   getGetTournamentDetailV1TournamentsTournamentSlugGetQueryKey,
 } from "@/api/generated/hooks/tournaments/tournaments"
@@ -82,18 +83,21 @@ export function useLiveUpdates(): void {
       getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey(
         tournamentSlug
       )
+    const summaryKey =
+      getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryKey(tournamentSlug)
 
     // The query keys invalidated for each nudge type. A `standings` nudge is
-    // the standings poll — it refreshes both the player standings and the
-    // team standings, whose combined ratings derive from player ratings. A
-    // `live` nudge changes a player's `in_match` (folded into each standings
-    // row) and the host's `host_stream_live` (a derived flag on the
-    // tournament record, #149), so it invalidates both the standings and the
+    // the standings poll — it refreshes the player standings, the team
+    // standings (whose combined ratings derive from player ratings), and the
+    // headline summary cards (#243, leaders derived from the same match data).
+    // A `live` nudge changes a player's `in_match` (folded into each standings
+    // row) and the host's `host_stream_live` (a derived flag on the tournament
+    // record, #149), so it invalidates both the standings and the
     // tournament-detail query. `matches` has no consumer yet, so that
     // invalidation is a no-op; it is wired anyway to keep the stream layer
     // complete for when a matches view lands.
     const queryKeysFor: Record<NudgeEvent, QueryKey[]> = {
-      standings: [standingsKey, teamStandingsKey],
+      standings: [standingsKey, teamStandingsKey, summaryKey],
       live: [standingsKey, tournamentKey],
       matches: [matchesKey],
     }
@@ -107,6 +111,7 @@ export function useLiveUpdates(): void {
       teamStandingsKey,
       tournamentKey,
       matchesKey,
+      summaryKey,
     ]
 
     // Fire-and-forget invalidate, but catch the returned promise: a burst of
