@@ -84,7 +84,13 @@
       "sortLabel": "Сортировка",
       "sortBoth": "Оба",
       "sortName": "А–Я",
-      "civHeader": "Цив."
+      "civHeader": "Цив.",
+      "byTeamTitle": "Цивилизации по командам",
+      "topPicks": "Топ выборов",
+      "topWins": "Топ побед %",
+      "roster": "Состав",
+      "mostPlayed": "Чаще всего",
+      "noGamesYet": "Пока нет игр"
     },
     "noData": "Пока нечего показать.",
     "ratingAxis": "Рейтинг",

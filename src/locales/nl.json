@@ -84,7 +84,13 @@
       "sortLabel": "Sorteren",
       "sortBoth": "Beide",
       "sortName": "A–Z",
-      "civHeader": "Civ"
+      "civHeader": "Civ",
+      "byTeamTitle": "Civs per team",
+      "topPicks": "Meest gekozen",
+      "topWins": "Beste win%",
+      "roster": "Selectie",
+      "mostPlayed": "Meest gespeeld",
+      "noGamesYet": "Nog geen potten"
     },
     "noData": "Nog niets te tonen.",
     "ratingAxis": "Rating",

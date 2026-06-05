@@ -84,7 +84,13 @@
       "sortLabel": "Sortieren",
       "sortBoth": "Beide",
       "sortName": "A–Z",
-      "civHeader": "Volk"
+      "civHeader": "Volk",
+      "byTeamTitle": "Völker pro Team",
+      "topPicks": "Top-Picks",
+      "topWins": "Top-Siegrate",
+      "roster": "Kader",
+      "mostPlayed": "Meistgespielt",
+      "noGamesYet": "Noch keine Partien"
     },
     "noData": "Noch nichts anzuzeigen.",
     "ratingAxis": "Wertung",

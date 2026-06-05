@@ -84,7 +84,13 @@
       "sortLabel": "ترتيب",
       "sortBoth": "كلاهما",
       "sortName": "أ–ي",
-      "civHeader": "الحضارة"
+      "civHeader": "الحضارة",
+      "byTeamTitle": "الحضارات حسب الفريق",
+      "topPicks": "الأكثر اختيارًا",
+      "topWins": "أعلى نسبة فوز",
+      "roster": "التشكيلة",
+      "mostPlayed": "الأكثر لعبًا",
+      "noGamesYet": "لا مباريات بعد"
     },
     "noData": "لا شيء لعرضه بعد.",
     "ratingAxis": "التصنيف",
