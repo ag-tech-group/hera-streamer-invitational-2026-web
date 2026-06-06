@@ -580,6 +580,39 @@
   }
 
   /*
+   * Standings mobile row expand/collapse (#348): tween the Radix Collapsible
+   * panel between height 0 and its measured content height (exposed by Radix as
+   * `--radix-collapsible-content-height`). Gated on
+   * `prefers-reduced-motion: no-preference` like the rest, so reduced-motion
+   * users get an instant open/close with no height animation. The content
+   * element carries `overflow-hidden` so the clipped panel reveals smoothly.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes standings-collapsible-down {
+      from {
+        height: 0;
+      }
+      to {
+        height: var(--radix-collapsible-content-height);
+      }
+    }
+    @keyframes standings-collapsible-up {
+      from {
+        height: var(--radix-collapsible-content-height);
+      }
+      to {
+        height: 0;
+      }
+    }
+    .standings-collapsible-content[data-state="open"] {
+      animation: standings-collapsible-down 250ms ease-out;
+    }
+    .standings-collapsible-content[data-state="closed"] {
+      animation: standings-collapsible-up 200ms ease-out;
+    }
+  }
+
+  /*
    * Atmospheric depth (#37, #43): both themes get the same broadcast
    * treatment — a soft top-of-viewport radial highlight fades into the
    * base palette, layered over a stone-grain noise tile (white-on-dark

@@ -120,6 +120,13 @@
     }
   },
   "standings": {
+    "sort": {
+      "title": "Sorteren",
+      "ascending": "Oplopend",
+      "descending": "Aflopend",
+      "directionLabel": "Sorteerrichting"
+    },
+    "streamOffline": "Stream offline",
     "caption": "Live toernooiklassement",
     "captionLoading": "Klassement laden",
     "headers": {

@@ -120,6 +120,13 @@
     }
   },
   "standings": {
+    "sort": {
+      "title": "Sortieren",
+      "ascending": "Aufsteigend",
+      "descending": "Absteigend",
+      "directionLabel": "Sortierrichtung"
+    },
+    "streamOffline": "Stream offline",
     "caption": "Live-Turniertabelle",
     "captionLoading": "Tabelle wird geladen",
     "headers": {

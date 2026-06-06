@@ -117,4 +117,40 @@ describe("useTableSort", () => {
     act(() => result.current.sortBy("score", "asc")) // flip to desc
     expect(result.current.sortedRows.at(-1)?.name).toBe("Bob")
   })
+
+  it("setSort applies an exact key + direction in one call", () => {
+    const { result } = renderHook(() => useTableSort(ROWS, getValue))
+    act(() => result.current.setSort("score", "asc"))
+    expect(result.current.sortState).toEqual({ key: "score", direction: "asc" })
+    expect(result.current.sortedRows.map((r) => r.name)).toEqual([
+      "Charlie", // 30
+      "Dave", // 40
+      "Alice", // 50
+      "Bob", // null — pinned last
+    ])
+  })
+
+  it("setSort sets a direction directly, never cycling to unsorted", () => {
+    const { result } = renderHook(() => useTableSort(ROWS, getValue))
+    // The mobile bar relies on this: tapping a field always sorts and never
+    // toggles off, unlike sortBy's third-click-clears cycle.
+    act(() => result.current.setSort("score", "desc"))
+    act(() => result.current.setSort("score", "desc"))
+    act(() => result.current.setSort("score", "desc"))
+    expect(result.current.sortState).toEqual({
+      key: "score",
+      direction: "desc",
+    })
+  })
+
+  it("setSort and sortBy write the one shared state", () => {
+    const { result } = renderHook(() => useTableSort(ROWS, getValue))
+    act(() => result.current.setSort("name", "asc"))
+    expect(result.current.sortState).toEqual({ key: "name", direction: "asc" })
+    // A header click (sortBy) on the same column at its default flips direction,
+    // proving sortBy reads the state setSort just wrote — the desktop table and
+    // the mobile bar share one source of truth.
+    act(() => result.current.sortBy("name", "asc"))
+    expect(result.current.sortState).toEqual({ key: "name", direction: "desc" })
+  })
 })

@@ -120,6 +120,13 @@
     }
   },
   "standings": {
+    "sort": {
+      "title": "Sort",
+      "ascending": "Ascending",
+      "descending": "Descending",
+      "directionLabel": "Sort direction"
+    },
+    "streamOffline": "Stream offline",
     "caption": "Live tournament standings",
     "captionLoading": "Loading standings",
     "headers": {

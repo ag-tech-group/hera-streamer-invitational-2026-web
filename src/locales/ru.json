@@ -120,6 +120,13 @@
     }
   },
   "standings": {
+    "sort": {
+      "title": "Сортировка",
+      "ascending": "По возрастанию",
+      "descending": "По убыванию",
+      "directionLabel": "Направление сортировки"
+    },
+    "streamOffline": "Трансляция офлайн",
     "caption": "Турнирная таблица в реальном времени",
     "captionLoading": "Загрузка таблицы",
     "headers": {
