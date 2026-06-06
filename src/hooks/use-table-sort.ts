@@ -40,9 +40,10 @@ export function useTableSort<T>(
   sortedRows: T[]
   sortState: SortState | null
   sortBy: (key: string, defaultDirection?: SortDirection) => void
+  setSort: (key: string, direction: SortDirection) => void
   clearSort: () => void
 } {
-  const [sort, setSort] = useState<SortState | null>(null)
+  const [sort, setSortState] = useState<SortState | null>(null)
 
   const sortedRows = useMemo(() => {
     if (!sort) return rows
@@ -63,7 +64,7 @@ export function useTableSort<T>(
 
   const sortBy = useCallback(
     (key: string, defaultDirection: SortDirection = "asc") => {
-      setSort((prev) => {
+      setSortState((prev) => {
         // Switching to a new column → start at its declared default.
         if (!prev || prev.key !== key) {
           return { key, direction: defaultDirection }
@@ -86,9 +87,19 @@ export function useTableSort<T>(
   // also reaches it (third click on a column), but some UIs want an explicit
   // "reset" affordance — e.g. the civ board's "Both" chip, which returns to its
   // dual-leaderboard default rather than making the user cycle a column.
-  const clearSort = useCallback(() => setSort(null), [])
+  const clearSort = useCallback(() => setSortState(null), [])
 
-  return { sortedRows, sortState: sort, sortBy, clearSort }
+  // Set the sort to an exact { key, direction } in one call, bypassing the
+  // three-state cycle `sortBy` runs. The mobile sort bar drives sorting this
+  // way — a field picker selects the key and an explicit asc/desc toggle sets
+  // the direction — whereas the desktop headers keep cycling via `sortBy`.
+  // Both write the same `sort` state, so the two views never disagree.
+  const setSort = useCallback(
+    (key: string, direction: SortDirection) => setSortState({ key, direction }),
+    []
+  )
+
+  return { sortedRows, sortState: sort, sortBy, setSort, clearSort }
 }
 
 /**

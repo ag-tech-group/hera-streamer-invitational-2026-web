@@ -120,6 +120,13 @@
     }
   },
   "standings": {
+    "sort": {
+      "title": "Sortera",
+      "ascending": "Stigande",
+      "descending": "Fallande",
+      "directionLabel": "Sorteringsriktning"
+    },
+    "streamOffline": "Sändning offline",
     "caption": "Liveställning för turneringen",
     "captionLoading": "Laddar ställningar",
     "headers": {

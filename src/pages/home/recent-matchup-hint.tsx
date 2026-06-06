@@ -220,7 +220,10 @@ export function RecentMatchupHint({
           aria-label={label}
           // `p-1` grows the tap target past the 14px glyph for touch; the cell's
           // `-my-1` cancels the vertical growth so the row height is unchanged.
-          className="inline-flex rounded-sm p-1"
+          // `group` makes this the open-state detector for the pip's scale/glow
+          // (`group-data-[state=open]:` on the glyph) — on touch there's no
+          // hover, so the open popover is what lights the tapped pip up (#348).
+          className="group inline-flex rounded-sm p-1"
         >
           {children}
         </button>

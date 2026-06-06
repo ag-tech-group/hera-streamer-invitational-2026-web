@@ -120,6 +120,13 @@
     }
   },
   "standings": {
+    "sort": {
+      "title": "Trier",
+      "ascending": "Croissant",
+      "descending": "Décroissant",
+      "directionLabel": "Sens du tri"
+    },
+    "streamOffline": "Hors ligne",
     "caption": "Classement du tournoi en direct",
     "captionLoading": "Chargement du classement",
     "headers": {

@@ -120,6 +120,13 @@
     }
   },
   "standings": {
+    "sort": {
+      "title": "ترتيب",
+      "ascending": "تصاعدي",
+      "descending": "تنازلي",
+      "directionLabel": "اتجاه الترتيب"
+    },
+    "streamOffline": "البث غير متصل",
     "caption": "ترتيب البطولة المباشر",
     "captionLoading": "جارٍ تحميل الترتيب",
     "headers": {

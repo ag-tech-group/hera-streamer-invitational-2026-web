@@ -120,6 +120,13 @@
     }
   },
   "standings": {
+    "sort": {
+      "title": "Ordenar",
+      "ascending": "Ascendente",
+      "descending": "Descendente",
+      "directionLabel": "Dirección de orden"
+    },
+    "streamOffline": "Transmisión desconectada",
     "caption": "Clasificación del torneo en vivo",
     "captionLoading": "Cargando clasificación",
     "headers": {
