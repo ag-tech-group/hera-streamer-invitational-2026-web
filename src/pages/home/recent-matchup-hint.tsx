@@ -195,8 +195,12 @@ export function RecentMatchupHint({
             aria-label={label}
             // `cursor-default` (not pointer): it's an informational disclosure,
             // not a link. No padding — the hover target is the glyph itself, so
-            // the pips sit as close as the original W/L row did.
-            className="inline-flex cursor-default rounded-sm"
+            // the pips sit as close as the original W/L row did. `group` makes
+            // this never-transformed button the hover *detector* for the pip's
+            // scale/glow (applied via `group-hover:` on the glyph in
+            // `RecentMatchupsCell`): letting the glyph scale off its own `:hover`
+            // perturbs its hit-region and makes the hover flicker.
+            className="group inline-flex cursor-default rounded-sm"
           >
             {children}
           </button>
