@@ -478,9 +478,10 @@ function PlayerRoster({
  * the team-standings payload, so they're all passed down from the players
  * standings by tournamentPlayerId.
  *
- * Layout is two rows: the captain badge (when present) on its own row above a
- * name row of flag · name · live · rating. Keeping the fixed-width badge off the
- * name row stops it crowding the name + bio button on a narrow pill (#350).
+ * On mobile the captain badge (when present) breaks to its own row above the
+ * name, so the fixed-width badge can't crowd the name + bio button on a narrow
+ * pill; at `sm`+ it collapses inline — flag · name · captain · live · rating —
+ * for the roomier desktop layout (#350).
  */
 function PlayerPill({
   member,
@@ -512,53 +513,51 @@ function PlayerPill({
   // only backstops a member somehow absent from standings.
   const visibleName = displayName ?? member.alias ?? "—"
   return (
-    // `h-full` + centred column so a captain pill (two rows) and the plain pills
-    // beside it in the grid match heights instead of going ragged.
-    <div className="team-pill flex h-full flex-col justify-center gap-1 rounded-md border px-3 py-2.5">
+    // One flex row that wraps on mobile so the captain badge can take its own
+    // full-width line above the name (`basis-full`, below); `sm:flex-nowrap`
+    // keeps the desktop row on a single line (the name truncates to fit instead
+    // of wrapping). `h-full` keeps pills height-matched in the grid. `text-sm`
+    // sets the row's type scale, which the shared `PlayerName` inherits.
+    <div className="team-pill flex h-full flex-wrap content-center items-center gap-x-3 gap-y-1 rounded-md border px-3 py-2.5 text-sm sm:flex-nowrap">
+      {effectiveFlagCode ? (
+        <span
+          className={`fi fi-${effectiveFlagCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
+          title={effectiveFlagCode.toUpperCase()}
+          aria-hidden
+        />
+      ) : renderOverrideAsText ? (
+        <span
+          className="shrink-0 text-base leading-none"
+          aria-label={visibleName}
+        >
+          {flagOverride}
+        </span>
+      ) : (
+        <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      )}
+      <PlayerName
+        name={visibleName}
+        alias={member.alias}
+        profileId={member.profileId}
+        bio={bio}
+        profileUrl={profileUrl}
+        source="teams"
+        truncate
+      />
       {member.isCaptain && (
-        // Captain badge on its own row above the name (#350). `flex` keeps the
-        // badge content-sized at the start rather than stretching across the
-        // column (a flex-column child would otherwise fill the width).
-        <div className="flex">
+        // Captain badge: its own full-width line above the name on mobile
+        // (`basis-full` forces the wrap; the `flex` wrapper keeps the chip
+        // content-sized at the start rather than stretching). At `sm`+
+        // `sm:contents` dissolves this wrapper so the badge flows inline in DOM
+        // order — flag · name · captain · live · rating — for desktop (#350).
+        <div className="order-first flex basis-full sm:contents">
           <CaptainBadge />
         </div>
       )}
-      {/* Name row: flag · name (+ bio) · live · rating. `text-sm` sets the row's
-          type scale, which the shared `PlayerName` inherits. */}
-      <div className="flex items-center gap-3 text-sm">
-        {effectiveFlagCode ? (
-          <span
-            className={`fi fi-${effectiveFlagCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
-            title={effectiveFlagCode.toUpperCase()}
-            aria-hidden
-          />
-        ) : renderOverrideAsText ? (
-          <span
-            className="shrink-0 text-base leading-none"
-            aria-label={visibleName}
-          >
-            {flagOverride}
-          </span>
-        ) : (
-          <Globe
-            className="text-muted-foreground size-4 shrink-0"
-            aria-hidden
-          />
-        )}
-        <PlayerName
-          name={visibleName}
-          alias={member.alias}
-          profileId={member.profileId}
-          bio={bio}
-          profileUrl={profileUrl}
-          source="teams"
-          truncate
-        />
-        {member.inMatch && <LiveDot />}
-        <span className="text-muted-foreground shrink-0 text-sm font-semibold tabular-nums">
-          {member.peakRating ?? "—"}
-        </span>
-      </div>
+      {member.inMatch && <LiveDot />}
+      <span className="text-muted-foreground shrink-0 text-sm font-semibold tabular-nums">
+        {member.peakRating ?? "—"}
+      </span>
     </div>
   )
 }

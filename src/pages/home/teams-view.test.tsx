@@ -403,7 +403,7 @@ describe("TeamsView", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders a Captain badge on its own row above the name, and none otherwise (#235, #350)", () => {
+  it("renders a single Captain badge for the captain, and none otherwise (#235, #350)", () => {
     render(
       <TeamsView
         displayNameByTournamentPlayerId={new Map()}
@@ -432,17 +432,19 @@ describe("TeamsView", () => {
         ]}
       />
     )
-    // Exactly one Captain badge across both teams — the captain's.
+    // Exactly one Captain badge across both teams — the captain's (a single
+    // element, repositioned by CSS rather than rendered per breakpoint).
     const badges = screen.getAllByText("Captain")
     expect(badges).toHaveLength(1)
-    // It lives in the captain's pill...
+    // It lives in the captain's pill.
     const capPill = screen.getByText("Cap").closest<HTMLElement>(".team-pill")
     expect(capPill).not.toBeNull()
     expect(within(capPill!).getByText("Captain")).toBeInTheDocument()
-    // ...but on its own row, NOT the flag · name · live · rating row (#350): the
-    // badge moved off the name row so it can't crowd the name + bio button.
-    const nameRow = screen.getByText("Cap").closest("div")
-    expect(within(nameRow!).queryByText("Captain")).not.toBeInTheDocument()
+    // Its wrapper carries the responsive layout (#350): `basis-full` breaks the
+    // badge to its own row on mobile, `sm:contents` dissolves the wrapper so it
+    // flows inline on desktop.
+    const wrapper = within(capPill!).getByText("Captain").closest("div")
+    expect(wrapper).toHaveClass("basis-full", "sm:contents")
   })
 })
 
