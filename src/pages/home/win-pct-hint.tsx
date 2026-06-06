@@ -90,7 +90,10 @@ export function WinPctHint({
           <button
             type="button"
             aria-label={label}
-            className="cursor-default tabular-nums underline decoration-dotted decoration-1 underline-offset-4"
+            // `hover:brightness-125` echoes the Watch icon's hover glow, shared
+            // across the table's tooltip triggers so each hint reacts the same
+            // way; `transition` eases the filter (near-white text glows faintly).
+            className="cursor-default tabular-nums underline decoration-dotted decoration-1 underline-offset-4 transition hover:brightness-125"
           >
             {children}
           </button>

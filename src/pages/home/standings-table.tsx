@@ -756,7 +756,11 @@ function PlayerCell({
           source: "standings",
         })
       }
-      className="text-brand font-medium whitespace-nowrap underline-offset-2 transition-colors hover:underline"
+      // Hover glow via a brightness filter (not a colour swap) — the same
+      // affordance the Watch icon and the other tooltip triggers (win%,
+      // recent-form pips) use, so every hint reacts alike. `transition` (all),
+      // not `transition-colors`, so the `filter` change eases like the rest.
+      className="text-brand font-medium whitespace-nowrap underline-offset-2 transition hover:underline hover:brightness-125"
     >
       {visibleName}
     </a>
@@ -936,8 +940,19 @@ function RecentMatchupsCell({
             <Icon
               aria-hidden
               style={{ opacity }}
+              // Hover lights the pip up: a slight scale plus a colour-matched
+              // glow (`drop-shadow` of `currentColor`, so a win glows green and a
+              // loss red). A stronger cue than the brightness filter the name and
+              // win% triggers use — the pips are small and the older ones are
+              // dimmed by `opacity`, so a brightness bump barely shows; the scale
+              // (immune to that opacity) keeps every pip reacting, recent or old.
+              // Driven by `group-hover` from the wrapping button (its `.group`),
+              // not the glyph's own `:hover` — scaling the hovered element
+              // perturbs its hit-region and flickers. `pointer-events-none` keeps
+              // the growing glyph out of hit-testing entirely, so the button's
+              // fixed box stays the one stable hover region.
               className={cn(
-                "size-3.5",
+                "pointer-events-none size-3.5 transition group-hover:scale-125 group-hover:drop-shadow-[0_0_5px_currentColor]",
                 matchup.outcome === "win"
                   ? "text-chart-2-deep"
                   : "text-destructive-deep"
