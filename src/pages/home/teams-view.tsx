@@ -11,6 +11,7 @@ import {
   type TeamColorSlot,
 } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
+import { PlayerName } from "@/pages/home/player-name"
 import type { TeamMember, TeamStandingsRow } from "@/types"
 
 /**
@@ -54,14 +55,30 @@ type DisplayNameMap = Map<number, string>
  *  `country`. */
 type FlagMap = Map<number, string>
 
+/** tournamentPlayerId → host profile link (presentation.profileUrl, #131),
+ *  threaded down so the pill's name links through exactly like the table's —
+ *  the team-standings payload carries no profile URL (#350). */
+type ProfileUrlMap = Map<number, string>
+
+/** tournamentPlayerId → host bio (presentation.bio), threaded down so the pill
+ *  shows the same bio disclosure the players table does (#350). */
+type BioMap = Map<number, string>
+
 export function TeamsView({
   rows,
   displayNameByTournamentPlayerId,
   flagByTournamentPlayerId,
+  // Profile-URL + bio enrich the pill's name (#350); they default to empty so a
+  // caller (or test) that only cares about names/flags can omit them and the
+  // pill simply renders plain, bio-less names.
+  profileUrlByTournamentPlayerId = new Map(),
+  bioByTournamentPlayerId = new Map(),
 }: {
   rows: TeamStandingsRow[]
   displayNameByTournamentPlayerId: DisplayNameMap
   flagByTournamentPlayerId: FlagMap
+  profileUrlByTournamentPlayerId?: ProfileUrlMap
+  bioByTournamentPlayerId?: BioMap
 }) {
   // Panels display in rank order — the API returns `rows` ranked by combined
   // rating, desc, so the incoming order IS the ranking (#230). Position is
@@ -88,6 +105,8 @@ export function TeamsView({
           revealOffset={i * team.members.length}
           displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
           flagByTournamentPlayerId={flagByTournamentPlayerId}
+          profileUrlByTournamentPlayerId={profileUrlByTournamentPlayerId}
+          bioByTournamentPlayerId={bioByTournamentPlayerId}
           className={
             isPair ? (i === 0 ? "xl:col-start-1" : "xl:col-start-3") : undefined
           }
@@ -164,6 +183,8 @@ function TeamPanel({
   revealOffset,
   displayNameByTournamentPlayerId,
   flagByTournamentPlayerId,
+  profileUrlByTournamentPlayerId,
+  bioByTournamentPlayerId,
   className,
 }: {
   team: TeamStandingsRow
@@ -178,6 +199,8 @@ function TeamPanel({
   revealOffset: number
   displayNameByTournamentPlayerId: DisplayNameMap
   flagByTournamentPlayerId: FlagMap
+  profileUrlByTournamentPlayerId: ProfileUrlMap
+  bioByTournamentPlayerId: BioMap
   className?: string
 }) {
   // A team is "live" if any roster member is currently in a match. Drives
@@ -221,6 +244,8 @@ function TeamPanel({
         revealOffset={revealOffset}
         displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
         flagByTournamentPlayerId={flagByTournamentPlayerId}
+        profileUrlByTournamentPlayerId={profileUrlByTournamentPlayerId}
+        bioByTournamentPlayerId={bioByTournamentPlayerId}
       />
     </section>
   )
@@ -383,11 +408,15 @@ function PlayerRoster({
   revealOffset,
   displayNameByTournamentPlayerId,
   flagByTournamentPlayerId,
+  profileUrlByTournamentPlayerId,
+  bioByTournamentPlayerId,
 }: {
   members: TeamMember[]
   revealOffset: number
   displayNameByTournamentPlayerId: DisplayNameMap
   flagByTournamentPlayerId: FlagMap
+  profileUrlByTournamentPlayerId: ProfileUrlMap
+  bioByTournamentPlayerId: BioMap
 }) {
   const { t } = useTranslation()
   if (members.length === 0) {
@@ -404,8 +433,9 @@ function PlayerRoster({
     >
       {members.map((member, i) => {
         // Join the host overrides by tournamentPlayerId — present even for an
-        // unlinked entrant (profileId is null there) — so the flag and name show
-        // on the team pill just like on the standings table.
+        // unlinked entrant (profileId is null there) — so the flag, name,
+        // profile link, and bio show on the team pill just like on the standings
+        // table.
         const id = member.tournamentPlayerId
         return (
           <li
@@ -419,6 +449,8 @@ function PlayerRoster({
               member={member}
               displayName={displayNameByTournamentPlayerId.get(id)}
               flagOverride={flagByTournamentPlayerId.get(id)}
+              profileUrl={profileUrlByTournamentPlayerId.get(id)}
+              bio={bioByTournamentPlayerId.get(id)}
             />
           </li>
         )
@@ -428,30 +460,40 @@ function PlayerRoster({
 }
 
 /**
- * One player on a team — a horizontal pill carrying their identity,
- * peak rating, and (when applicable) a pulsing "in a live match"
- * indicator. The peak (not current) rating is shown because it's what the
- * team's combined headline sums (API #158), so the pills add up to the
- * number above them. Pulls colour from the panel-level `--team-color` vars via
- * inline styles, so the pill never hard-codes blue or red.
+ * One player on a team — a pill carrying their identity, peak rating, and (when
+ * applicable) a pulsing "in a live match" indicator. The peak (not current)
+ * rating is shown because it's what the team's combined headline sums (API
+ * #158), so the pills add up to the number above them. Pulls colour from the
+ * panel-level `--team-color` vars via inline styles, so the pill never
+ * hard-codes blue or red.
  *
- * Country flag falls back to a globe icon when the country is missing
- * or malformed — same treatment the standings table uses, so the two
- * surfaces stay visually consistent for a given player.
+ * Country flag falls back to a globe icon when the country is missing or
+ * malformed — same treatment the standings table uses, so the two surfaces stay
+ * visually consistent for a given player.
  *
- * Shows the resolved display label (#242, #187) — the same friendly name
- * viewers see on the standings table (e.g. "Day9TV"): the host's display-name
- * override when set, else the unified `name`. The label isn't on the
- * team-standings payload, so it's passed down from the players standings.
+ * The name itself is the shared `PlayerName` (#350) — the same profile link
+ * (#131) and bio disclosure the players table renders, so the two can't drift.
+ * It shows the resolved display label (#242, #187: the host's display-name
+ * override else the unified `name`); the label, profile URL, and bio aren't on
+ * the team-standings payload, so they're all passed down from the players
+ * standings by tournamentPlayerId.
+ *
+ * Layout is two rows: the captain badge (when present) on its own row above a
+ * name row of flag · name · live · rating. Keeping the fixed-width badge off the
+ * name row stops it crowding the name + bio button on a narrow pill (#350).
  */
 function PlayerPill({
   member,
   displayName,
   flagOverride,
+  profileUrl,
+  bio,
 }: {
   member: TeamMember
   displayName: string | undefined
   flagOverride: string | undefined
+  profileUrl: string | undefined
+  bio: string | undefined
 }) {
   const countryCode = normalizeCountryCode(member.country)
   // Host flag override (presentation.flag), passed down from the players
@@ -470,31 +512,53 @@ function PlayerPill({
   // only backstops a member somehow absent from standings.
   const visibleName = displayName ?? member.alias ?? "—"
   return (
-    <div className="team-pill flex items-center gap-3 rounded-md border px-3 py-2.5">
-      {effectiveFlagCode ? (
-        <span
-          className={`fi fi-${effectiveFlagCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
-          title={effectiveFlagCode.toUpperCase()}
-          aria-hidden
-        />
-      ) : renderOverrideAsText ? (
-        <span
-          className="shrink-0 text-base leading-none"
-          aria-label={visibleName}
-        >
-          {flagOverride}
-        </span>
-      ) : (
-        <Globe className="text-muted-foreground size-4 shrink-0" aria-hidden />
+    // `h-full` + centred column so a captain pill (two rows) and the plain pills
+    // beside it in the grid match heights instead of going ragged.
+    <div className="team-pill flex h-full flex-col justify-center gap-1 rounded-md border px-3 py-2.5">
+      {member.isCaptain && (
+        // Captain badge on its own row above the name (#350). `flex` keeps the
+        // badge content-sized at the start rather than stretching across the
+        // column (a flex-column child would otherwise fill the width).
+        <div className="flex">
+          <CaptainBadge />
+        </div>
       )}
-      <span className="min-w-0 flex-1 truncate text-sm font-medium">
-        {visibleName}
-      </span>
-      {member.isCaptain && <CaptainBadge />}
-      {member.inMatch && <LiveDot />}
-      <span className="text-muted-foreground shrink-0 text-sm font-semibold tabular-nums">
-        {member.peakRating ?? "—"}
-      </span>
+      {/* Name row: flag · name (+ bio) · live · rating. `text-sm` sets the row's
+          type scale, which the shared `PlayerName` inherits. */}
+      <div className="flex items-center gap-3 text-sm">
+        {effectiveFlagCode ? (
+          <span
+            className={`fi fi-${effectiveFlagCode} ring-border shrink-0 rounded-[2px] text-base ring-1 ring-inset`}
+            title={effectiveFlagCode.toUpperCase()}
+            aria-hidden
+          />
+        ) : renderOverrideAsText ? (
+          <span
+            className="shrink-0 text-base leading-none"
+            aria-label={visibleName}
+          >
+            {flagOverride}
+          </span>
+        ) : (
+          <Globe
+            className="text-muted-foreground size-4 shrink-0"
+            aria-hidden
+          />
+        )}
+        <PlayerName
+          name={visibleName}
+          alias={member.alias}
+          profileId={member.profileId}
+          bio={bio}
+          profileUrl={profileUrl}
+          source="teams"
+          truncate
+        />
+        {member.inMatch && <LiveDot />}
+        <span className="text-muted-foreground shrink-0 text-sm font-semibold tabular-nums">
+          {member.peakRating ?? "—"}
+        </span>
+      </div>
     </div>
   )
 }

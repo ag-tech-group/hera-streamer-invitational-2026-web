@@ -1,6 +1,8 @@
 import { render, screen, within } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import userEvent from "@testing-library/user-event"
+import { describe, expect, it, vi } from "vitest"
 
+import { AnalyticsProvider, type AnalyticsBackend } from "@/lib/analytics"
 import { TeamsView } from "@/pages/home/teams-view"
 import type { TeamMember, TeamStandingsRow } from "@/types"
 
@@ -401,7 +403,7 @@ describe("TeamsView", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders a Captain badge next to the captain, and none otherwise (#235)", () => {
+  it("renders a Captain badge on its own row above the name, and none otherwise (#235, #350)", () => {
     render(
       <TeamsView
         displayNameByTournamentPlayerId={new Map()}
@@ -433,8 +435,90 @@ describe("TeamsView", () => {
     // Exactly one Captain badge across both teams — the captain's.
     const badges = screen.getAllByText("Captain")
     expect(badges).toHaveLength(1)
-    // It sits in the captain's pill (same row as their alias).
-    const capPill = screen.getByText("Cap").closest("div")
+    // It lives in the captain's pill...
+    const capPill = screen.getByText("Cap").closest<HTMLElement>(".team-pill")
+    expect(capPill).not.toBeNull()
     expect(within(capPill!).getByText("Captain")).toBeInTheDocument()
+    // ...but on its own row, NOT the flag · name · live · rating row (#350): the
+    // badge moved off the name row so it can't crowd the name + bio button.
+    const nameRow = screen.getByText("Cap").closest("div")
+    expect(within(nameRow!).queryByText("Captain")).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * The teams pill reuses the shared `PlayerName` (#350), so the profile link and
+ * bio disclosure are wired through the same `tournamentPlayerId` maps as the
+ * display name and flag. PlayerX's member id defaults to its profileId (10) in
+ * the `member()` helper, so the maps below are keyed on 10.
+ */
+describe("TeamsView — shared player name wiring (#350)", () => {
+  it("links a pill name to the profile URL threaded down by tournamentPlayerId", () => {
+    render(
+      <TeamsView
+        rows={rows}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
+        profileUrlByTournamentPlayerId={
+          new Map([[10, "https://www.aoe2insights.com/user/123/"]])
+        }
+        bioByTournamentPlayerId={new Map()}
+      />
+    )
+    const link = screen.getByRole("link", { name: "PlayerX" })
+    expect(link).toHaveAttribute(
+      "href",
+      "https://www.aoe2insights.com/user/123/"
+    )
+    // A member with no threaded URL stays plain text (no link).
+    expect(screen.queryByRole("link", { name: "PlayerY" })).toBeNull()
+  })
+
+  it("shows the bio disclosure on a pill when a bio is threaded down", () => {
+    render(
+      <TeamsView
+        rows={rows}
+        displayNameByTournamentPlayerId={new Map()}
+        flagByTournamentPlayerId={new Map()}
+        profileUrlByTournamentPlayerId={new Map()}
+        bioByTournamentPlayerId={new Map([[10, "Two-time champion."]])}
+      />
+    )
+    // jsdom reports no fine-hover pointer, so BioHint renders its touch button.
+    expect(
+      screen.getByRole("button", { name: "About PlayerX" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "About PlayerY" })
+    ).not.toBeInTheDocument()
+  })
+
+  it('tags a pill profile click with source "teams"', async () => {
+    const user = userEvent.setup()
+    const track = vi.fn()
+    const backend: AnalyticsBackend = {
+      track,
+      identify: vi.fn(),
+      page: vi.fn(),
+    }
+    render(
+      <AnalyticsProvider backend={backend}>
+        <TeamsView
+          rows={rows}
+          displayNameByTournamentPlayerId={new Map()}
+          flagByTournamentPlayerId={new Map()}
+          profileUrlByTournamentPlayerId={
+            new Map([[10, "https://example.com"]])
+          }
+          bioByTournamentPlayerId={new Map()}
+        />
+      </AnalyticsProvider>
+    )
+    await user.click(screen.getByRole("link", { name: "PlayerX" }))
+    expect(track).toHaveBeenCalledWith("player.profile.click", {
+      profileId: 10,
+      alias: "PlayerX",
+      source: "teams",
+    })
   })
 })

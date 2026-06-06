@@ -30,9 +30,12 @@ import { logger } from "@/lib/logger"
  *                          — the AoE2:DE store link in the hero tagline
  *                          (learn-about-the-game, distinct from the tournament
  *                          resource pills above). `product` is "aoe2_de".
- * - `player.profile.click` `{ profileId, alias, source: "standings" }`
- *                          — player name → `presentation.profileUrl`.
- * - `player.bio.open`      `{ profileId, alias }` — bio hover/tap reveal.
+ * - `player.profile.click` `{ profileId, alias, source: "standings" | "teams" }`
+ *                          — player name → `presentation.profileUrl`. The
+ *                          shared `PlayerName` renders on both surfaces (#350),
+ *                          so `source` marks which one the click came from.
+ * - `player.bio.open`      `{ profileId, alias, source: "standings" | "teams" }`
+ *                          — bio hover/tap reveal, from either surface (#350).
  * - `prize.sponsor.click`  `{ sponsor }` — sponsor link on the prize-pool card.
  *
  * `profileId` is null for an unlinked entrant (announced but not yet joined).

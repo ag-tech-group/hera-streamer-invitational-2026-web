@@ -34,7 +34,13 @@ describe("BioHint — touch affordance detection (#214)", () => {
     // shows and the bio stays reachable.
     mockPointer({ desktop: false })
     render(
-      <BioHint bio="Two-time champion." name="Hera" profileId={1} alias="Hera">
+      <BioHint
+        bio="Two-time champion."
+        name="Hera"
+        profileId={1}
+        alias="Hera"
+        source="standings"
+      >
         <span>Hera</span>
       </BioHint>
     )
@@ -46,7 +52,13 @@ describe("BioHint — touch affordance detection (#214)", () => {
   it("hides the info icon on a true mouse pointer (desktop hovers the name)", () => {
     mockPointer({ desktop: true })
     render(
-      <BioHint bio="Two-time champion." name="Hera" profileId={1} alias="Hera">
+      <BioHint
+        bio="Two-time champion."
+        name="Hera"
+        profileId={1}
+        alias="Hera"
+        source="standings"
+      >
         <span>Hera</span>
       </BioHint>
     )
