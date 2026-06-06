@@ -19,7 +19,7 @@ import {
 import { useAnalytics } from "@/lib/analytics"
 import { type TeamColorSlot } from "@/lib/team-colors"
 import { cn } from "@/lib/utils"
-import { BioHint } from "@/pages/home/bio-hint"
+import { PlayerName } from "@/pages/home/player-name"
 import { RecentMatchupHint } from "@/pages/home/recent-matchup-hint"
 import { isOffGameStream } from "@/pages/home/standings-stream"
 import { WatchHint } from "@/pages/home/watch-hint"
@@ -190,11 +190,11 @@ export function PlayerFlag({
 
 /**
  * Player identity: flag (or globe fallback) and visible name, plus a pulsing
- * "Live" badge when the player is in a match right now. The visible name
- * comes from `displayName` when the host has set a presentation override
- * (#152); otherwise it falls back to the unified `name` (#187). The aoe2insights
- * link always uses the raw `alias` so the search lands on the actual ladder
- * profile, even when the host is displaying a friendlier name.
+ * "Live" badge when the player is in a match right now. The visible name comes
+ * from `displayName` when the host has set a presentation override (#152);
+ * otherwise it falls back to the unified `name` (#187). The name itself — its
+ * profile link (#131), bio disclosure, and analytics — is the shared
+ * `PlayerName` (#350); the raw `alias` rides along for analytics.
  */
 export function PlayerCell({
   profileId,
@@ -227,43 +227,7 @@ export function PlayerCell({
   profileUrl?: string
   inMatch: boolean
 }) {
-  const { t } = useTranslation()
-  const analytics = useAnalytics()
   const visibleName = displayName ?? name
-
-  // The visible name links to the host-curated profile URL when set, otherwise
-  // it's plain text — a link always means a real profile (#131). On
-  // hover-capable devices this element doubles as the bio hover trigger, so
-  // it's built once and handed to `BioHint`.
-  const nameNode = profileUrl ? (
-    <a
-      href={profileUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={t("standings.viewProfile", { name: visibleName })}
-      // #215: profile click-through. In the click handler so it fires once per
-      // real click, not on every render of the (also hover-trigger) name node.
-      onClick={() =>
-        analytics.track("player.profile.click", {
-          profileId,
-          alias,
-          source: "standings",
-        })
-      }
-      // Hover glow via a brightness filter (not a colour swap) — the same
-      // affordance the Watch icon and the other tooltip triggers (win%,
-      // recent-form pips) use, so every hint reacts alike. `transition` (all),
-      // not `transition-colors`, so the `filter` change eases like the rest.
-      className="text-brand font-medium whitespace-nowrap underline-offset-2 transition hover:underline hover:brightness-125"
-    >
-      {visibleName}
-    </a>
-  ) : (
-    // No profile URL set: keep the same weight + nowrap so the column rhythm
-    // doesn't shift, but drop the brand colour so the name reads as plain text.
-    <span className="font-medium whitespace-nowrap">{visibleName}</span>
-  )
-
   return (
     <span className="flex items-center gap-2">
       <PlayerFlag
@@ -272,22 +236,19 @@ export function PlayerCell({
         name={visibleName}
       />
       {/*
-       * With a bio set, the name becomes the disclosure: hover it on desktop,
-       * or tap the info icon `BioHint` adds beside it on touch. No bio → the
-       * name renders bare.
+       * Name + profile link + bio disclosure are the shared `PlayerName` (#350),
+       * the same component the teams pill uses so the two surfaces can't drift.
+       * `source` tags this surface's analytics; the table keeps the name on one
+       * line (no `truncate`).
        */}
-      {bio ? (
-        <BioHint
-          bio={bio}
-          name={visibleName}
-          profileId={profileId}
-          alias={alias}
-        >
-          {nameNode}
-        </BioHint>
-      ) : (
-        nameNode
-      )}
+      <PlayerName
+        name={visibleName}
+        alias={alias}
+        profileId={profileId}
+        bio={bio}
+        profileUrl={profileUrl}
+        source="standings"
+      />
       {inMatch && <LiveBadge />}
     </span>
   )

@@ -714,6 +714,10 @@ describe("StandingsTable — analytics (#215)", () => {
     await user.click(screen.getByRole("button", { name: "About Storied" }))
     const bioOpens = track.mock.calls.filter((c) => c[0] === "player.bio.open")
     expect(bioOpens).toHaveLength(1)
-    expect(bioOpens[0][1]).toEqual({ profileId: 9, alias: "Storied" })
+    expect(bioOpens[0][1]).toEqual({
+      profileId: 9,
+      alias: "Storied",
+      source: "standings",
+    })
   })
 })

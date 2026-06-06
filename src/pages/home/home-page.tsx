@@ -60,6 +60,31 @@ export function HomePage({ view }: { view: StandingsView }) {
     return map
   }, [standings.data?.rows])
 
+  // Same passthrough for the host's `presentation.profileUrl` (#131) and `bio`:
+  // the team-standings payload carries neither, so they're threaded down from
+  // the players standings by tournamentPlayerId. This is what lets the teams
+  // pill render the exact same profile link + bio disclosure the table does
+  // (#350), instead of plain-text names.
+  const profileUrlByTournamentPlayerId = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const row of standings.data?.rows ?? []) {
+      if (row.presentation.profileUrl) {
+        map.set(row.tournamentPlayerId, row.presentation.profileUrl)
+      }
+    }
+    return map
+  }, [standings.data?.rows])
+
+  const bioByTournamentPlayerId = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const row of standings.data?.rows ?? []) {
+      if (row.presentation.bio) {
+        map.set(row.tournamentPlayerId, row.presentation.bio)
+      }
+    }
+    return map
+  }, [standings.data?.rows])
+
   // Subscribe to the SSE nudge stream: each nudge invalidates the matching
   // query so the visible table refetches without a manual reload.
   useLiveUpdates()
@@ -113,6 +138,8 @@ export function HomePage({ view }: { view: StandingsView }) {
           onRetry={handleRetryTeams}
           displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
           flagByTournamentPlayerId={flagByTournamentPlayerId}
+          profileUrlByTournamentPlayerId={profileUrlByTournamentPlayerId}
+          bioByTournamentPlayerId={bioByTournamentPlayerId}
         />
       )}
     </TournamentLayout>
@@ -161,6 +188,8 @@ function TeamsSection({
   onRetry,
   displayNameByTournamentPlayerId,
   flagByTournamentPlayerId,
+  profileUrlByTournamentPlayerId,
+  bioByTournamentPlayerId,
 }: {
   snapshot: TeamStandingsSnapshot | undefined
   isPending: boolean
@@ -172,6 +201,10 @@ function TeamsSection({
   displayNameByTournamentPlayerId: Map<number, string>
   /** tournamentPlayerId → host flag override, from the players standings. */
   flagByTournamentPlayerId: Map<number, string>
+  /** tournamentPlayerId → host profile link (#131), from the players standings. */
+  profileUrlByTournamentPlayerId: Map<number, string>
+  /** tournamentPlayerId → host bio, from the players standings. */
+  bioByTournamentPlayerId: Map<number, string>
 }) {
   if (isPending) {
     return <TeamsViewSkeleton />
@@ -190,6 +223,8 @@ function TeamsSection({
       rows={snapshot.rows}
       displayNameByTournamentPlayerId={displayNameByTournamentPlayerId}
       flagByTournamentPlayerId={flagByTournamentPlayerId}
+      profileUrlByTournamentPlayerId={profileUrlByTournamentPlayerId}
+      bioByTournamentPlayerId={bioByTournamentPlayerId}
     />
   )
 }

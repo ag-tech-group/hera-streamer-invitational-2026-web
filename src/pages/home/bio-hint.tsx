@@ -74,6 +74,8 @@ export function BioHint({
   name,
   profileId,
   alias,
+  source,
+  triggerClassName,
   children,
 }: {
   bio: string
@@ -82,6 +84,19 @@ export function BioHint({
   profileId: number | null
   /** Raw ladder alias — carried for analytics alongside the display name. */
   alias: string
+  /**
+   * Originating surface for the `player.bio.open` analytics (#350) — the bio is
+   * now reachable from both the players table and the teams pill, so the event
+   * carries which view it fired from rather than merging them.
+   */
+  source: "standings" | "teams"
+  /**
+   * Classes for the touch-affordance wrapper (name + info button). Defaults to
+   * an inline flow box; a space-constrained caller (the teams pill) passes a
+   * shrinking flex box so the name can ellipsise while the button keeps its
+   * size. Unused on desktop, where the name itself is the trigger (no wrapper).
+   */
+  triggerClassName?: string
   /** The player-name node that acts as the hover trigger on the desktop. */
   children: ReactNode
 }) {
@@ -92,7 +107,7 @@ export function BioHint({
   // #215: fire `player.bio.open` once, on the open transition only (the
   // primitive calls `onOpenChange` for both open and close).
   const onOpenChange = (open: boolean) => {
-    if (open) analytics.track("player.bio.open", { profileId, alias })
+    if (open) analytics.track("player.bio.open", { profileId, alias, source })
   }
 
   if (hoverCapable) {
@@ -107,7 +122,7 @@ export function BioHint({
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className={triggerClassName ?? "inline-flex items-center gap-1.5"}>
       {children}
       <Popover onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
