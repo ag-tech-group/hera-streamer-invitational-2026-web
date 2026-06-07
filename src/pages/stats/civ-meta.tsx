@@ -6,9 +6,6 @@ import { useTableSort, type SortableValue } from "@/hooks/use-table-sort"
 import { cn } from "@/lib/utils"
 import type { CivStat, CivStats } from "@/pages/stats/civ-stats"
 
-/** Most-played civs shown in the pick-rate leaderboard (the unsorted default). */
-const TOP_PICKS = 16
-
 /** Projects a civ onto the value for the active sort column. */
 function civSortValue(c: CivStat, key: string): SortableValue {
   if (key === "name") return c.name
@@ -54,11 +51,15 @@ export function CivMeta({ stats }: { stats: CivStats }) {
       </div>
 
       {sortState === null ? (
-        // Dual leaderboards — the showcase default.
+        // Dual leaderboards — the showcase default. Neither column is capped
+        // (#356): the pick column lists every picked civ and the win column
+        // every civ over the min-picks threshold, so the win column can't read
+        // as "longer than" the pick column — each picked civ is always present
+        // in the pick side.
         <div className="grid gap-x-8 gap-y-6 lg:grid-cols-2">
           <CivColumn
             title={t("stats.civ.pickRate")}
-            rows={stats.byPicks.slice(0, TOP_PICKS)}
+            rows={stats.byPicks}
             barPct={(c) => (c.picks / maxPicks) * 100}
             value={(c) => c.picks}
           />
