@@ -70,6 +70,13 @@
   "stats": {
     "title": "Stats",
     "subtitle": "Rating progression across the tournament.",
+    "nav": {
+      "label": "On this page",
+      "overview": "Overview",
+      "jumpTo": "Jump to section",
+      "jumpToShort": "Jump to",
+      "backToTop": "Back to top"
+    },
     "chartTitle": "Current elo over time",
     "bumpChartTitle": "Position over time",
     "legend": {

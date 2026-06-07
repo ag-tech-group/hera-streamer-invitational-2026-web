@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
+import { BackToTop } from "@/components/back-to-top"
 import { TournamentLayout } from "@/components/tournament-layout"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -33,6 +34,9 @@ import { toDepthBars } from "@/pages/stats/team-depth"
 import { TeamDepthChart } from "@/pages/stats/team-depth-chart"
 import { RatingProgressionChart } from "@/pages/stats/rating-progression-chart"
 import { labelSeries } from "@/pages/stats/series-labels"
+import { StatsJumpSelect, StatsRail } from "@/pages/stats/stats-nav"
+import { SECTION_IDS } from "@/pages/stats/stats-sections"
+import { useStatsNav } from "@/pages/stats/use-stats-nav"
 import type { StreakLeader, TeamStandingsRow, TournamentSummary } from "@/types"
 
 /**
@@ -55,6 +59,10 @@ export function StatsPage() {
   const civStats = useCivStats()
   const standingsHistory = useStandingsHistory()
   const summary = useSummary()
+
+  // In-page section nav (#354): the scroll-spy's active section + a jump handler,
+  // shared by the desktop rail and the mobile select so they stay in lockstep.
+  const { activeId, onJump, clearFragment } = useStatsNav()
 
   // Hide the team charts until the ladder race starts — pre-start the team
   // ratings are all empty, so the bars would read as noise. Same "started"
@@ -221,115 +229,142 @@ export function StatsPage() {
 
   return (
     <TournamentLayout view="stats">
-      {summary.isPending ? (
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-          {Array.from({ length: 5 }, (_, i) => (
-            <Skeleton key={i} className="h-24 rounded-lg" />
-          ))}
+      {/* Two-column on desktop: the stack of boards on the left, a sticky
+          table-of-contents rail on the right; single-column below lg, where the
+          rail collapses into the sticky select at the top of the column (#354). */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-start lg:gap-8">
+        <div className="flex min-w-0 flex-col gap-6">
+          {/* Mobile/tablet jump control — sticky to the top of the column. */}
+          <StatsJumpSelect activeId={activeId} onJump={onJump} />
+
+          {/* "Overview" anchor (the nav's back-to-top target): the headline
+              cards, read straight from /summary. */}
+          <div id={SECTION_IDS.overview} className="scroll-mt-20">
+            {summary.isPending ? (
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-lg" />
+                ))}
+              </div>
+            ) : (
+              <SummaryCards summary={summary.data ?? null} />
+            )}
+          </div>
+
+          {/* The combined-peak board (#300): a stacked bar per team whose segments
+              are the members' peak contributions, so the bar total is the team's
+              combined peak elo (the scoring metric) while its shape shows roster
+              balance — one carry vs. even depth. Stays visible but shows its empty
+              state until the ladder race starts (#242); pre-start the team ratings
+              carry no signal, so the section renders its placeholder rather than
+              bars. */}
+          <ChartSection
+            id={SECTION_IDS.teamCombined}
+            title={t("stats.teamEloTitle")}
+            query={teams}
+            isEmpty={!tournamentStarted || depthBars.length === 0}
+            skeletonHeight={260}
+          >
+            <TeamDepthChart
+              bars={depthBars}
+              height={Math.max(180, depthBars.length * 56)}
+            />
+          </ChartSection>
+
+          {/* Elo race (#301) — the animated counterpart to the combined-peak board
+              directly above: the same combined peak elo, raced over the tournament
+              timeline. Teams by default, players' peak rating via the toggle; both
+              from /standings/history. Gated to post-start like the team boards
+              (pre-start the elos are flat and equal, so the race would read as
+              noise) and needs at least two buckets to animate. */}
+          <ChartSection
+            id={SECTION_IDS.eloRace}
+            title={t("stats.eloRaceTitle")}
+            query={standingsHistory}
+            isEmpty={
+              !tournamentStarted ||
+              teamRace.entities.length === 0 ||
+              teamRace.buckets.length < 2
+            }
+            skeletonHeight={360}
+          >
+            <EloRaceChart teamRace={teamRace} playerRace={playerRace} />
+          </ChartSection>
+
+          <ChartSection
+            id={SECTION_IDS.teamAverage}
+            title={t("stats.teamAvgEloTitle")}
+            query={teams}
+            isEmpty={!tournamentStarted || teamAvgData.length === 0}
+            skeletonHeight={260}
+          >
+            <HorizontalBarChart
+              data={teamAvgData}
+              height={Math.max(180, teamAvgData.length * 56)}
+            />
+          </ChartSection>
+
+          <ChartSection
+            id={SECTION_IDS.eloOverTime}
+            title={t("stats.chartTitle")}
+            query={progression}
+            isEmpty={!progression.data || progression.data.series.length === 0}
+            skeletonHeight={560}
+          >
+            {progression.data ? (
+              <RatingProgressionChart series={labeledSeries} />
+            ) : null}
+          </ChartSection>
+
+          {/* Position over time (#299) — the position counterpart to the rating
+              chart above. Each entrant's standings position from
+              `/standings/history`; the latest bucket equals the live table. */}
+          <ChartSection
+            id={SECTION_IDS.positions}
+            title={t("stats.bumpChartTitle")}
+            query={standingsHistory}
+            isEmpty={bump.series.length === 0}
+            skeletonHeight={520}
+          >
+            <BumpChart buckets={bump.buckets} series={bump.series} />
+          </ChartSection>
+
+          {/* Civilization pick + win rates, entrants-only from /civ-stats (#302). */}
+          <ChartSection
+            id={SECTION_IDS.civilizations}
+            title={t("stats.civTitle")}
+            query={civStats}
+            isEmpty={civViews.byPicks.length === 0}
+            skeletonHeight={360}
+          >
+            <CivMeta stats={civViews} />
+          </ChartSection>
+
+          {/* Civs by team (#302 follow-up): each team's + member's favourite and
+              best-performing civs, from the API's per-player breakdown. */}
+          <ChartSection
+            id={SECTION_IDS.civsByTeam}
+            title={t("stats.civ.byTeamTitle")}
+            query={civStats}
+            isEmpty={civByTeam.every((g) => g.players.length === 0)}
+            skeletonHeight={320}
+          >
+            <CivByTeam groups={civByTeam} />
+          </ChartSection>
+
+          {/* Head-to-head feed (#349): the tournament's streamer-vs-streamer games,
+              newest first. Sits at the foot of the stack as a human-interest feed
+              after the analytical charts; owns its own query + states, and shows a
+              friendly empty state until the first clash lands. */}
+          <HeadToHeadCard id={SECTION_IDS.headToHead} />
         </div>
-      ) : (
-        <SummaryCards summary={summary.data ?? null} />
-      )}
 
-      {/* The combined-peak board (#300): a stacked bar per team whose segments
-          are the members' peak contributions, so the bar total is the team's
-          combined peak elo (the scoring metric) while its shape shows roster
-          balance — one carry vs. even depth. Stays visible but shows its empty
-          state until the ladder race starts (#242); pre-start the team ratings
-          carry no signal, so the section renders its placeholder rather than
-          bars. */}
-      <ChartSection
-        title={t("stats.teamEloTitle")}
-        query={teams}
-        isEmpty={!tournamentStarted || depthBars.length === 0}
-        skeletonHeight={260}
-      >
-        <TeamDepthChart
-          bars={depthBars}
-          height={Math.max(180, depthBars.length * 56)}
-        />
-      </ChartSection>
+        {/* Table-of-contents rail (right column on desktop); hidden below lg,
+            where the sticky select at the top of the column takes over (#354). */}
+        <StatsRail activeId={activeId} onJump={onJump} />
+      </div>
 
-      {/* Elo race (#301) — the animated counterpart to the combined-peak board
-          directly above: the same combined peak elo, raced over the tournament
-          timeline. Teams by default, players' peak rating via the toggle; both
-          from /standings/history. Gated to post-start like the team boards
-          (pre-start the elos are flat and equal, so the race would read as
-          noise) and needs at least two buckets to animate. */}
-      <ChartSection
-        title={t("stats.eloRaceTitle")}
-        query={standingsHistory}
-        isEmpty={
-          !tournamentStarted ||
-          teamRace.entities.length === 0 ||
-          teamRace.buckets.length < 2
-        }
-        skeletonHeight={360}
-      >
-        <EloRaceChart teamRace={teamRace} playerRace={playerRace} />
-      </ChartSection>
-
-      <ChartSection
-        title={t("stats.teamAvgEloTitle")}
-        query={teams}
-        isEmpty={!tournamentStarted || teamAvgData.length === 0}
-        skeletonHeight={260}
-      >
-        <HorizontalBarChart
-          data={teamAvgData}
-          height={Math.max(180, teamAvgData.length * 56)}
-        />
-      </ChartSection>
-
-      <ChartSection
-        title={t("stats.chartTitle")}
-        query={progression}
-        isEmpty={!progression.data || progression.data.series.length === 0}
-        skeletonHeight={560}
-      >
-        {progression.data ? (
-          <RatingProgressionChart series={labeledSeries} />
-        ) : null}
-      </ChartSection>
-
-      {/* Position over time (#299) — the position counterpart to the rating
-          chart above. Each entrant's standings position from
-          `/standings/history`; the latest bucket equals the live table. */}
-      <ChartSection
-        title={t("stats.bumpChartTitle")}
-        query={standingsHistory}
-        isEmpty={bump.series.length === 0}
-        skeletonHeight={520}
-      >
-        <BumpChart buckets={bump.buckets} series={bump.series} />
-      </ChartSection>
-
-      {/* Civilization pick + win rates, entrants-only from /civ-stats (#302). */}
-      <ChartSection
-        title={t("stats.civTitle")}
-        query={civStats}
-        isEmpty={civViews.byPicks.length === 0}
-        skeletonHeight={360}
-      >
-        <CivMeta stats={civViews} />
-      </ChartSection>
-
-      {/* Civs by team (#302 follow-up): each team's + member's favourite and
-          best-performing civs, from the API's per-player breakdown. */}
-      <ChartSection
-        title={t("stats.civ.byTeamTitle")}
-        query={civStats}
-        isEmpty={civByTeam.every((g) => g.players.length === 0)}
-        skeletonHeight={320}
-      >
-        <CivByTeam groups={civByTeam} />
-      </ChartSection>
-
-      {/* Head-to-head feed (#349): the tournament's streamer-vs-streamer games,
-          newest first. Sits at the foot of the stack as a human-interest feed
-          after the analytical charts; owns its own query + states, and shows a
-          friendly empty state until the first clash lands. */}
-      <HeadToHeadCard />
+      <BackToTop onActivate={clearFragment} />
     </TournamentLayout>
   )
 }
@@ -365,12 +400,14 @@ function teamAvgBars(rows: TeamStandingsRow[]): BarDatum[] {
  * loading / empty / error states so each board resolves on its own.
  */
 function ChartSection({
+  id,
   title,
   query,
   isEmpty,
   skeletonHeight,
   children,
 }: {
+  id?: string
   title: string
   query: { isPending: boolean; isError: boolean; refetch: () => void }
   isEmpty: boolean
@@ -379,7 +416,10 @@ function ChartSection({
 }) {
   const { t } = useTranslation()
   return (
-    <section className="bg-card shadow-card relative overflow-hidden rounded-lg p-4 pt-5">
+    <section
+      id={id}
+      className="bg-card shadow-card relative scroll-mt-20 overflow-hidden rounded-lg p-4 pt-5"
+    >
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <h2 className="text-muted-foreground font-display mb-3 px-1 text-sm tracking-widest uppercase">
         {title}
