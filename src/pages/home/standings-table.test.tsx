@@ -43,7 +43,8 @@ function row(
   }
 }
 
-/** Builds a UI `RecentMatchup`, requiring only the fields a test asserts. */
+/** Builds a UI `RecentMatchup`, requiring only the fields a test asserts.
+ *  Defaults the #349 opponent fields to a named, non-streamer ladder opponent. */
 function matchup(overrides: Partial<RecentMatchup> = {}): RecentMatchup {
   return {
     outcome: "win",
@@ -51,6 +52,9 @@ function matchup(overrides: Partial<RecentMatchup> = {}): RecentMatchup {
     civEmblemUrl: "/civ-emblems/franks.webp",
     opponentCivName: "Mayans",
     opponentCivEmblemUrl: "/civ-emblems/mayans.webp",
+    opponentName: null,
+    opponentIsStreamer: false,
+    opponentProfileUrl: null,
     mapName: "Arabia",
     completedAt: "2026-05-30T12:00:00Z",
     ...overrides,
@@ -331,10 +335,114 @@ describe("StandingsTable — recent matchups (#339)", () => {
     expect(await screen.findByText("Mayans")).toBeInTheDocument()
     expect(screen.getByText("Franks")).toBeInTheDocument()
     expect(screen.getByText(/Arabia/)).toBeInTheDocument()
-    // The "Player" / "Opponent" captions disambiguate the two civs. Assert the
-    // unambiguous one — "Player" also names a column header, but nothing else
-    // says "Opponent".
-    expect(screen.getByText("Opponent")).toBeInTheDocument()
+    // No "Player"/"Opponent" captions now — the names stand on their own. The
+    // player's name shows both in the table row and the opened card.
+    expect(screen.getAllByText("Alpha")).toHaveLength(2)
+  })
+})
+
+describe("StandingsTable — recent matchup opponent name + streamer highlight (#349)", () => {
+  it("shows the player's own name and the opponent's name in the card", async () => {
+    const user = userEvent.setup()
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            recentMatchups: [matchup({ opponentName: "Hera" })],
+          }),
+        ]}
+      />
+    )
+    await user.click(
+      screen.getByRole("button", { name: "Won as Franks vs Mayans" })
+    )
+    // Opponent name lives only in the card; the player name appears both in the
+    // table row and the card (one per side of the matchup).
+    expect(await screen.findByText("Hera")).toBeInTheDocument()
+    expect(screen.getAllByText("Alpha")).toHaveLength(2)
+  })
+
+  it("links a fellow-streamer opponent's name to their profile in a new tab", async () => {
+    const user = userEvent.setup()
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            recentMatchups: [
+              matchup({
+                opponentName: "Hera",
+                opponentIsStreamer: true,
+                opponentProfileUrl: "https://www.aoe2insights.com/user/777/",
+              }),
+            ],
+          }),
+        ]}
+      />
+    )
+    await user.click(
+      screen.getByRole("button", { name: "Won as Franks vs Mayans" })
+    )
+    const link = await screen.findByRole("link", { name: "Hera" })
+    expect(link).toHaveAttribute(
+      "href",
+      "https://www.aoe2insights.com/user/777/"
+    )
+    expect(link).toHaveAttribute("target", "_blank")
+    expect(link).toHaveClass("text-brand")
+  })
+
+  it("highlights a fellow streamer with no profile URL but renders no link", async () => {
+    const user = userEvent.setup()
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            recentMatchups: [
+              matchup({
+                opponentName: "Hera",
+                opponentIsStreamer: true,
+                opponentProfileUrl: null,
+              }),
+            ],
+          }),
+        ]}
+      />
+    )
+    await user.click(
+      screen.getByRole("button", { name: "Won as Franks vs Mayans" })
+    )
+    const name = await screen.findByText("Hera")
+    expect(name).toHaveClass("text-brand")
+    expect(screen.queryByRole("link", { name: "Hera" })).toBeNull()
+  })
+
+  it("renders a regular ladder opponent's name as plain (non-brand) text", async () => {
+    const user = userEvent.setup()
+    render(
+      <StandingsTable
+        rows={[
+          row({
+            profileId: 1,
+            alias: "Alpha",
+            recentMatchups: [
+              matchup({ opponentName: "LadderFoe", opponentIsStreamer: false }),
+            ],
+          }),
+        ]}
+      />
+    )
+    await user.click(
+      screen.getByRole("button", { name: "Won as Franks vs Mayans" })
+    )
+    const name = await screen.findByText("LadderFoe")
+    expect(name).not.toHaveClass("text-brand")
+    expect(screen.queryByRole("link", { name: "LadderFoe" })).toBeNull()
   })
 })
 

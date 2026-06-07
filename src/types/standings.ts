@@ -79,6 +79,30 @@ export interface RecentMatchup {
   /** Public URL of the opponent's civ emblem, or null (same cases as above). */
   opponentCivEmblemUrl: string | null
   /**
+   * The opponent player's display name (#349), or null when the API couldn't
+   * name them. Shown in the matchup tooltip whether the opponent is a fellow
+   * streamer or a regular ladder opponent — `opponentIsStreamer` decides the
+   * highlight, not whether the name renders.
+   */
+  opponentName: string | null
+  /**
+   * Whether the opponent is one of the tournament's own streamers (#349) —
+   * true when the API resolved an `opponent_tournament_player_id`. Drives the
+   * brand-accent highlight on the opponent's name, independent of whether a
+   * profile link is available (`opponentProfileUrl`): a fellow streamer with no
+   * host-curated profile is still highlighted, just not linked.
+   */
+  opponentIsStreamer: boolean
+  /**
+   * Host-curated profile URL for a fellow-streamer opponent (#349), resolved at
+   * the adapter from that streamer's own standings row by their stable
+   * `tournament_player_id`. Null for a regular ladder opponent, or a streamer
+   * whose row carries no `presentation.profileUrl` — the highlighted name then
+   * renders as plain (brand-coloured) text rather than a link, matching how the
+   * standings never synthesise a profile link from the relic id (#131).
+   */
+  opponentProfileUrl: string | null
+  /**
    * Map the game was played on, with the replay's file extension stripped
    * (`Arabia.rms` → `Arabia`, see `cleanMapName`). Empty string when the API
    * sent no map — the tooltip omits the context line then.

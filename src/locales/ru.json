@@ -108,6 +108,24 @@
       "mostMatches": "Больше всего матчей",
       "winPct": "Лучший процент побед"
     },
+    "headToHead": {
+      "title": "Личные встречи",
+      "empty": "Личных встреч пока нет",
+      "emptyHint": "Поединки между стримерами появятся здесь по мере их проведения.",
+      "winner": "Победитель",
+      "loser": "Проигравший",
+      "map": "Карта",
+      "length": "Длительность",
+      "when": "Когда",
+      "link": "Ссылка",
+      "caption": "Личные встречи",
+      "matchLink": "Открыть матч на aoe2insights",
+      "topWinner": "Больше всего личных побед",
+      "winCount_one": "{{count}} победа",
+      "winCount_few": "{{count}} победы",
+      "winCount_many": "{{count}} побед",
+      "winCount_other": "{{count}} победы"
+    },
     "eloRaceTitle": "Гонка пикового Эло",
     "race": {
       "teams": "Команды",
@@ -152,13 +170,12 @@
     "liveAriaLabel": "В прямом матче",
     "recentMatchup": {
       "vs": "vs",
-      "player": "Игрок",
-      "opponent": "Соперник",
       "won": "Победа",
       "lost": "Поражение",
       "unknownCiv": "неизвестная цивилизация",
       "labelVs": "{{outcome}}: {{civ}} против {{opponent}}",
-      "labelSolo": "{{outcome}}: {{civ}}"
+      "labelSolo": "{{outcome}}: {{civ}}",
+      "streamerHint": "Стример турнира"
     },
     "viewProfile": "Открыть профиль игрока {{name}}",
     "watchOn": {

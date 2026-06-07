@@ -31,6 +31,11 @@ export type {
   MatchPlayer,
   MatchState,
 } from "./matches"
+export type {
+  HeadToHeadEntrant,
+  HeadToHeadGame,
+  HeadToHeadSnapshot,
+} from "./head-to-head"
 export type { CivCount, CivStatsSnapshot, PlayerCivCounts } from "./civ-stats"
 export type {
   PlayerHistory,

@@ -373,9 +373,12 @@ const RECENT_MATCHUPS_LIMIT = 6
  */
 export function RecentMatchupsCell({
   matchups,
+  playerName,
   now,
 }: {
   matchups: RecentMatchup[]
+  /** The row player's display name — shown as the "Player" side of each card (#349). */
+  playerName: string
   now: Date
 }) {
   // One read per cell, shared by every pip so the spacing and the per-pip
@@ -411,6 +414,7 @@ export function RecentMatchupsCell({
           <RecentMatchupHint
             key={index}
             matchup={matchup}
+            playerName={playerName}
             now={now}
             hoverCapable={hoverCapable}
           >

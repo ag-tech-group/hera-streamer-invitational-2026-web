@@ -526,6 +526,47 @@
   }
 
   /*
+   * Head-to-head winner sheen (#349): the winning player's name in the
+   * head-to-head feed stays the normal text colour, with a brand-coloured
+   * highlight that sweeps through the characters on a ~3s loop — a small "this
+   * one won" flourish. Keeping the base colour as the foreground (not brand) is
+   * deliberate: a brand-coloured name would read as a link. The base rule
+   * (outside the media query) gives reduced-motion users a static medium-weight
+   * emphasis without the moving sheen.
+   */
+  .head-to-head-winner {
+    font-weight: 500;
+    color: var(--foreground);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes head-to-head-winner-sheen {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
+    }
+    .head-to-head-winner {
+      /* A brand-coloured band sliding across normal-coloured text, clipped to
+         the glyphs so the colour animates through the characters — the name
+         stays foreground, so it never reads as a link. */
+      background-image: linear-gradient(
+        110deg,
+        var(--foreground) 42%,
+        var(--brand) 50%,
+        var(--foreground) 58%
+      );
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      animation: head-to-head-winner-sheen 3s linear infinite;
+    }
+  }
+
+  /*
    * Live-team heartbeat (#114): when any member of a team is in a live
    * match, the team-coloured accent stripe at the top of the panel
    * carries a soft team-coloured glow that breathes on a ~1.5s cycle.

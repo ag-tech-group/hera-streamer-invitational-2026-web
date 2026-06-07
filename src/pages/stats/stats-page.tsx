@@ -23,6 +23,7 @@ import { CivMeta } from "@/pages/stats/civ-meta"
 import { toCivStats } from "@/pages/stats/civ-stats"
 import { CivByTeam } from "@/pages/stats/civ-team-board"
 import { EloRaceChart } from "@/pages/stats/elo-race-chart"
+import { HeadToHeadCard } from "@/pages/stats/head-to-head-card"
 import { toPlayerRace, toTeamRace, type EloRace } from "@/pages/stats/elo-race"
 import {
   HorizontalBarChart,
@@ -323,6 +324,12 @@ export function StatsPage() {
       >
         <CivByTeam groups={civByTeam} />
       </ChartSection>
+
+      {/* Head-to-head feed (#349): the tournament's streamer-vs-streamer games,
+          newest first. Sits at the foot of the stack as a human-interest feed
+          after the analytical charts; owns its own query + states, and shows a
+          friendly empty state until the first clash lands. */}
+      <HeadToHeadCard />
     </TournamentLayout>
   )
 }

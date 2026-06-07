@@ -6,6 +6,7 @@ import { baseUrl } from "@/api/api"
 import { getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey } from "@/api/generated/hooks/matches/matches"
 import { getStreamV1StreamGetUrl } from "@/api/generated/hooks/stream/stream"
 import {
+  getGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryKey,
   getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey,
   getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryKey,
   getGetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetQueryKey,
@@ -83,6 +84,10 @@ export function useLiveUpdates(): void {
       getListMatchesV1TournamentsTournamentSlugMatchesGetQueryKey(
         tournamentSlug
       )
+    const headToHeadKey =
+      getGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryKey(
+        tournamentSlug
+      )
     const summaryKey =
       getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryKey(tournamentSlug)
 
@@ -93,13 +98,14 @@ export function useLiveUpdates(): void {
     // A `live` nudge changes a player's `in_match` (folded into each standings
     // row) and the host's `host_stream_live` (a derived flag on the tournament
     // record, #149), so it invalidates both the standings and the
-    // tournament-detail query. `matches` has no consumer yet, so that
-    // invalidation is a no-op; it is wired anyway to keep the stream layer
-    // complete for when a matches view lands.
+    // tournament-detail query. A `matches` nudge fires when match data changes,
+    // which is exactly when the head-to-head feed (#349) gains a new
+    // streamer-vs-streamer game — so it refreshes that alongside the (still
+    // consumer-less) matches query.
     const queryKeysFor: Record<NudgeEvent, QueryKey[]> = {
       standings: [standingsKey, teamStandingsKey, summaryKey],
       live: [standingsKey, tournamentKey],
-      matches: [matchesKey],
+      matches: [matchesKey, headToHeadKey],
     }
 
     // Every key the stream can refresh, invalidated together when a tab
@@ -111,6 +117,7 @@ export function useLiveUpdates(): void {
       teamStandingsKey,
       tournamentKey,
       matchesKey,
+      headToHeadKey,
       summaryKey,
     ]
 

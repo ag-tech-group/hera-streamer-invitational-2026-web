@@ -4,6 +4,7 @@ import {
   cleanMapName,
   countryCodeToFlagEmoji,
   flagEmojiToCountryCode,
+  formatDuration,
   formatTimeAgo,
   normalizeCountryCode,
 } from "@/lib/format"
@@ -87,6 +88,29 @@ describe("formatTimeAgo", () => {
 
   it("treats future timestamps as 'just now'", () => {
     expect(formatTimeAgo(isoAgo(-5_000), now)).toBe("just now")
+  })
+})
+
+describe("formatDuration", () => {
+  it("formats sub-hour durations as M:SS with a zero-padded seconds field", () => {
+    expect(formatDuration(0)).toBe("0:00")
+    expect(formatDuration(9)).toBe("0:09")
+    expect(formatDuration(59)).toBe("0:59")
+    expect(formatDuration(90)).toBe("1:30")
+    expect(formatDuration(1394)).toBe("23:14")
+  })
+
+  it("formats hour-plus durations as H:MM:SS", () => {
+    expect(formatDuration(3600)).toBe("1:00:00")
+    expect(formatDuration(3725)).toBe("1:02:05")
+  })
+
+  it("floors fractional seconds", () => {
+    expect(formatDuration(90.9)).toBe("1:30")
+  })
+
+  it("clamps negative input (clock skew) to zero", () => {
+    expect(formatDuration(-5)).toBe("0:00")
   })
 })
 

@@ -217,6 +217,9 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "civilization_name": zod.union([zod.string(),zod.null()]),
   "opponent_civilization_id": zod.union([zod.number(),zod.null()]),
   "opponent_civilization_name": zod.union([zod.string(),zod.null()]),
+  "opponent_profile_id": zod.union([zod.number(),zod.null()]),
+  "opponent_name": zod.union([zod.string(),zod.null()]),
+  "opponent_tournament_player_id": zod.union([zod.number(),zod.null()]),
   "map_name": zod.string(),
   "completed_at": zod.union([zod.iso.datetime({}),zod.null()])
 }).describe('One recent in-window game with its civ matchup, for a standings tooltip.\n\nCarried newest-first in ``TournamentRecord.recent_matchups`` (#218): the\ngame\'s ``outcome`` plus the entrant\'s civ and — on a 1v1 leaderboard —\nthe opposing player\'s civ, so the consumer can render a \"<your civ> vs\n<their civ>\" tooltip on each recent-result icon. The consumer maps civ\nids to names\/emblems.')),
@@ -344,6 +347,55 @@ export const GetSummaryV1TournamentsTournamentSlugSummaryGetResponse = zod.objec
   "value": zod.union([zod.number(),zod.number()])
 }).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()])
 }).describe('Headline \"leader\" stat cards for a tournament (#238, #243).\n\nThe five cards mirror the stats page\'s headline row exactly (#243):\n``highest_peak_rating``, ``best_win_rate``, ``longest_win_streak``,\n``biggest_climber``, ``most_games_played``. Each names the leading roster\nentrant for one metric, computed in-window (the same\n``[start_date, grand_finals_date]`` bounds as ``tournament_record``) over\nlinked entrants only — their ladder opponents\' rows are excluded. (Peak\nrating is the one lifetime read; everything else, ``biggest_climber``\nincluded, is window-scoped.)\n\nA card is ``null`` when no entrant qualifies: an empty roster, a metric no\none has earned (zero in-window wins → no ``longest_win_streak`` leader),\nnothing rankable in-window (``biggest_climber`` needs ≥2 in-window rated\npoints), or — for ``best_win_rate`` — nobody past the minimum-games guard.\nLeaders are tie-broken deterministically (higher ``games_played``, then\nlower ``tournament_player_id``) so each card is stable across polls.\n``last_polled_at`` is the latest in-window match across the roster,\nmirroring the other aggregate endpoints.')
+
+/**
+ * Completed games where two of the tournament's entrants faced each other (#349).
+
+The streamer-vs-streamer feed: every in-window completed match on the
+tournament's leaderboard that has two or more linked entrants in it. The
+"two or more entrants" test is one query's ``HAVING COUNT(DISTINCT …) >= 2``,
+so — unlike filtering the most-recent-N ``/matches`` list client-side — it
+can't miss an old head-to-head game buried behind a wall of ladder games.
+
+Each entry carries the matchup, map, each entrant's civ + elo-going-in +
+result, and the game's duration; the consumer builds the external match
+link from ``match_id``. Window is the same ``[start_date, grand_finals_date]``
+bounds as ``tournament_record`` (a null bound is open). Newest game first.
+ * @summary Get Head To Head
+ */
+export const GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams = zod.object({
+  "tournament_slug": zod.string()
+})
+
+export const getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryLimitDefault = 50;
+export const getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryLimitMax = 200;
+
+
+
+export const GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryParams = zod.object({
+  "limit": zod.number().min(1).max(getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryLimitMax).default(getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryLimitDefault).describe('Max head-to-head games to return, newest first (1-200, default 50).')
+})
+
+export const GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponse = zod.object({
+  "last_polled_at": zod.union([zod.iso.datetime({}),zod.null()]),
+  "items": zod.array(zod.object({
+  "match_id": zod.number(),
+  "map_name": zod.string(),
+  "started_at": zod.iso.datetime({}),
+  "completed_at": zod.union([zod.iso.datetime({}),zod.null()]),
+  "duration_seconds": zod.union([zod.number(),zod.null()]),
+  "entrants": zod.array(zod.object({
+  "tournament_player_id": zod.number(),
+  "profile_id": zod.number(),
+  "name": zod.string(),
+  "civilization_id": zod.number(),
+  "civilization_name": zod.union([zod.string(),zod.null()]),
+  "old_rating": zod.union([zod.number(),zod.null()]),
+  "new_rating": zod.union([zod.number(),zod.null()]),
+  "outcome": zod.union([zod.enum(['win', 'loss']),zod.null()])
+}).describe('One entrant\'s side of a head-to-head game (#349).\n\n``tournament_player_id`` is the stable roster key; ``profile_id`` its\nlinked polled identity. ``name`` is the resolved display label (the same\nsource\/meaning as ``StandingRow.name``). ``old_rating`` \/ ``new_rating``\nare this player\'s rating going into and coming out of the game — the\n\"elo at the time\" the card shows — null on an unranked game or before the\nupstream settled the delta. ``civilization_name`` is folded from the\ncivilizations reference; null when the id isn\'t in it yet.'))
+}).describe('A completed game where two of the tournament\'s entrants faced each other.\n\nBacks the head-to-head stat card (#349): the matchup, map, each entrant\'s\nciv + elo-at-the-time + result, and the game\'s duration. ``entrants`` carries\nonly the tournament\'s own roster players in the match (two on a 1v1\nleaderboard), winner first then by pre-game rating. ``match_id`` is the\nupstream Relic match id — the consumer builds the external link from it\n(e.g. ``https:\/\/www.aoe2insights.com\/match\/{match_id}\/``). Carried\nnewest-game-first in the list envelope.'))
+})
 
 /**
  * Per-player rating-over-time for the tournament's roster.

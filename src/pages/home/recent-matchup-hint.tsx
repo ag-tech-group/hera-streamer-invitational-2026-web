@@ -66,38 +66,90 @@ function CivChip({
 }
 
 /**
- * One side of the matchup: a muted "Player" / "Opponent" caption over the civ
- * chip, so it's unambiguous which shield is whose (the outcome heading already
- * speaks for the player, but the two civs sit side by side). The caption mirrors
- * the small uppercase section labels used across /stats.
+ * One side of the matchup: the player's name (#349) over their civ chip, so the
+ * card reads "who, as which civ" top to bottom. The `name` node is passed in so
+ * the caller controls its treatment (plain for the player, a brand-highlighted
+ * link for a fellow-streamer opponent); the outcome heading and the
+ * left-is-player layout already say which side is which, so the names stand on
+ * their own without a "Player" / "Opponent" caption.
  */
-function CivSide({
-  label,
+function MatchSide({
   name,
-  emblemUrl,
+  civName,
+  civEmblemUrl,
 }: {
-  label: string
-  name: string | null
-  emblemUrl: string | null
+  name: ReactNode
+  civName: string | null
+  civEmblemUrl: string | null
 }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">
-        {label}
-      </span>
-      <CivChip name={name} emblemUrl={emblemUrl} />
+    <div className="flex min-w-0 flex-col gap-0.5">
+      {name}
+      <CivChip name={civName} emblemUrl={civEmblemUrl} />
     </div>
   )
 }
 
 /**
- * The civ-matchup card body (#339): an outcome-coloured heading (Won/Lost) over
- * the player's civ `vs` the opponent's — each a labelled heraldic emblem + name
- * — then a muted "map · time ago" context line. Mirrors the dotted-heading
- * structure of the sibling standings tooltips (`BioCard`, `WinLossBreakdown`,
- * `WatchCard`) so the family reads as one.
+ * The opponent's name in the matchup card (#349). Always shown; a fellow
+ * tournament streamer (`opponentIsStreamer`) is highlighted brand and, when
+ * their row carries a host profile URL, linked to it — the same treatment a
+ * player name gets in the standings, so a clash with another streamer reads as
+ * one. A regular ladder opponent is plain text, and a missing name degrades to
+ * an em dash.
  */
-function MatchupCard({ matchup, now }: { matchup: RecentMatchup; now: Date }) {
+function OpponentName({ matchup }: { matchup: RecentMatchup }) {
+  const { t } = useTranslation()
+  const name = matchup.opponentName
+  if (!name) {
+    return <span className="text-muted-foreground text-sm">—</span>
+  }
+  if (!matchup.opponentIsStreamer) {
+    return <span className="truncate text-sm font-medium">{name}</span>
+  }
+  if (matchup.opponentProfileUrl) {
+    return (
+      <a
+        href={matchup.opponentProfileUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={t("standings.viewProfile", { name })}
+        className="text-brand truncate text-sm font-medium underline-offset-2 transition hover:underline"
+      >
+        {name}
+      </a>
+    )
+  }
+  // A fellow streamer we have no profile link for: highlight without a link, and
+  // name the highlight for assistive tech (brand colour alone isn't a signal).
+  return (
+    <span
+      className="text-brand truncate text-sm font-medium"
+      title={t("standings.recentMatchup.streamerHint")}
+    >
+      {name}
+    </span>
+  )
+}
+
+/**
+ * The civ-matchup card body (#339): an outcome-coloured heading (Won/Lost) over
+ * the player `vs` the opponent — each side a name (#349) above its labelled
+ * heraldic emblem + civ name — then a muted "map · time ago" context line. The
+ * opponent's name is highlighted + linked when they're a fellow streamer. Mirrors
+ * the dotted-heading structure of the sibling standings tooltips (`BioCard`,
+ * `WinLossBreakdown`, `WatchCard`) so the family reads as one.
+ */
+function MatchupCard({
+  matchup,
+  playerName,
+  now,
+}: {
+  matchup: RecentMatchup
+  /** The row player's display name — shown on the left side of the matchup. */
+  playerName: string
+  now: Date
+}) {
   const { t } = useTranslation()
   const won = matchup.outcome === "win"
   const heading = won
@@ -130,20 +182,22 @@ function MatchupCard({ matchup, now }: { matchup: RecentMatchup; now: Date }) {
           {heading}
         </p>
       </div>
-      {/* Bottom-aligned so the "vs" sits on the civ row, clear of the captions. */}
+      {/* Bottom-aligned so the "vs" sits on the civ row, level with both chips. */}
       <div className="flex items-end gap-2 text-sm">
-        <CivSide
-          label={t("standings.recentMatchup.player")}
-          name={matchup.civName}
-          emblemUrl={matchup.civEmblemUrl}
+        <MatchSide
+          name={
+            <span className="truncate text-sm font-medium">{playerName}</span>
+          }
+          civName={matchup.civName}
+          civEmblemUrl={matchup.civEmblemUrl}
         />
         <span className="text-muted-foreground shrink-0 pb-0.5 text-xs tracking-wide uppercase">
           {t("standings.recentMatchup.vs")}
         </span>
-        <CivSide
-          label={t("standings.recentMatchup.opponent")}
-          name={matchup.opponentCivName}
-          emblemUrl={matchup.opponentCivEmblemUrl}
+        <MatchSide
+          name={<OpponentName matchup={matchup} />}
+          civName={matchup.opponentCivName}
+          civEmblemUrl={matchup.opponentCivEmblemUrl}
         />
       </div>
       {context ? (
@@ -165,11 +219,14 @@ function MatchupCard({ matchup, now }: { matchup: RecentMatchup; now: Date }) {
  */
 export function RecentMatchupHint({
   matchup,
+  playerName,
   now,
   hoverCapable,
   children,
 }: {
   matchup: RecentMatchup
+  /** The row player's display name — shown as the "Player" side of the card (#349). */
+  playerName: string
   /** One reference instant from the table, so every "time ago" agrees. */
   now: Date
   /**
@@ -206,7 +263,7 @@ export function RecentMatchupHint({
           </button>
         </HoverCardTrigger>
         <HoverCardContent className="tooltip-surface w-auto">
-          <MatchupCard matchup={matchup} now={now} />
+          <MatchupCard matchup={matchup} playerName={playerName} now={now} />
         </HoverCardContent>
       </HoverCard>
     )
@@ -229,7 +286,7 @@ export function RecentMatchupHint({
         </button>
       </PopoverTrigger>
       <PopoverContent className="tooltip-surface w-auto">
-        <MatchupCard matchup={matchup} now={now} />
+        <MatchupCard matchup={matchup} playerName={playerName} now={now} />
       </PopoverContent>
     </Popover>
   )

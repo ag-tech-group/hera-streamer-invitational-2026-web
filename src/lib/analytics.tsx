@@ -37,6 +37,10 @@ import { logger } from "@/lib/logger"
  * - `player.bio.open`      `{ profileId, alias, source: "standings" | "teams" }`
  *                          — bio hover/tap reveal, from either surface (#350).
  * - `prize.sponsor.click`  `{ sponsor }` — sponsor link on the prize-pool card.
+ * - `headtohead.match.click` `{ matchId, source: "stats" }`
+ *                          — the aoe2insights link on a head-to-head feed game
+ *                          (#349); the only path to exploring a clashed game,
+ *                          so it's tracked even though profiles have other ones.
  *
  * `profileId` is null for an unlinked entrant (announced but not yet joined).
  */

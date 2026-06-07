@@ -30,8 +30,10 @@ import type {
 
 import type {
   CivStats,
+  GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams,
   GetSummaryV1TournamentsTournamentSlugSummaryGetParams,
   HTTPValidationError,
+  ListEnvelopeHeadToHeadMatch,
   ListEnvelopePlayerProgression,
   ListEnvelopeStandingRow,
   ListEnvelopeTeamStandingRow,
@@ -979,6 +981,150 @@ export function useGetSummaryV1TournamentsTournamentSlugSummaryGet<TData = Await
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetSummaryV1TournamentsTournamentSlugSummaryGetQueryOptions(tournamentSlug,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * Completed games where two of the tournament's entrants faced each other (#349).
+
+The streamer-vs-streamer feed: every in-window completed match on the
+tournament's leaderboard that has two or more linked entrants in it. The
+"two or more entrants" test is one query's ``HAVING COUNT(DISTINCT …) >= 2``,
+so — unlike filtering the most-recent-N ``/matches`` list client-side — it
+can't miss an old head-to-head game buried behind a wall of ladder games.
+
+Each entry carries the matchup, map, each entrant's civ + elo-going-in +
+result, and the game's duration; the consumer builds the external match
+link from ``match_id``. Window is the same ``[start_date, grand_finals_date]``
+bounds as ``tournament_record`` (a null bound is open). Newest game first.
+ * @summary Get Head To Head
+ */
+export type getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponse200 = {
+  data: ListEnvelopeHeadToHeadMatch
+  status: 200
+}
+
+export type getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponseSuccess = (getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponse200) & {
+  headers: Headers;
+};
+export type getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponseError = (getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponse422) & {
+  headers: Headers;
+};
+
+export type getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponse = (getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponseSuccess | getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponseError)
+
+export const getGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetUrl = (tournamentSlug: string,
+    params?: GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/tournaments/${tournamentSlug}/head-to-head?${stringifiedParams}` : `/v1/tournaments/${tournamentSlug}/head-to-head`
+}
+
+export const getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet = async (tournamentSlug: string,
+    params?: GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams, options?: RequestInit): Promise<getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponse> => {
+  
+  return orvalClient<getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetResponse>(getGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetUrl(tournamentSlug,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryKey = (tournamentSlug: string,
+    params?: GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams,) => {
+    return [
+    `/v1/tournaments/${tournamentSlug}/head-to-head`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryOptions = <TData = Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError = HTTPValidationError>(tournamentSlug: string,
+    params?: GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryKey(tournamentSlug,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>> = ({ signal }) => getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet(tournamentSlug,params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(tournamentSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryResult = NonNullable<Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>>
+export type GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryError = HTTPValidationError
+
+
+export function useGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet<TData = Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params: undefined |  GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>,
+          TError,
+          Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet<TData = Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>,
+          TError,
+          Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet<TData = Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Head To Head
+ */
+
+export function useGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet<TData = Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError = HTTPValidationError>(
+ tournamentSlug: string,
+    params?: GetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGet>>, TError, TData>>, request?: SecondParameter<typeof orvalClient>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetQueryOptions(tournamentSlug,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
