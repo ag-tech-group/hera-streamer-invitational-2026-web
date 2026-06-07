@@ -69,7 +69,7 @@ function headToHeadSortValue(game: HeadToHeadGame, key: string): SortableValue {
  * client-side filtering; the feed stays empty (with a friendly placeholder)
  * until the first clash, which is the normal early-tournament state.
  */
-export function HeadToHeadCard() {
+export function HeadToHeadCard({ id }: { id?: string }) {
   const { t } = useTranslation()
   const headToHead = useHeadToHead()
   const games = headToHead.data?.games ?? []
@@ -91,7 +91,10 @@ export function HeadToHeadCard() {
   const now = new Date()
 
   return (
-    <section className="bg-card shadow-card relative overflow-hidden rounded-lg p-4 pt-5">
+    <section
+      id={id}
+      className="bg-card shadow-card relative scroll-mt-20 overflow-hidden rounded-lg p-4 pt-5"
+    >
       <span aria-hidden className="bg-brand absolute inset-x-0 top-0 h-[3px]" />
       <h2 className="text-muted-foreground font-display mb-3 flex items-center gap-2 px-1 text-sm tracking-widest uppercase">
         <Swords className="size-4" aria-hidden />

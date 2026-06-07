@@ -41,6 +41,11 @@ import { logger } from "@/lib/logger"
  *                          — the aoe2insights link on a head-to-head feed game
  *                          (#349); the only path to exploring a clashed game,
  *                          so it's tracked even though profiles have other ones.
+ * - `stats.nav.jump`       `{ to, via: "rail" | "select" }`
+ *                          — the stats-page section nav (#354): a jump to a
+ *                          section anchor, from the desktop table-of-contents
+ *                          rail or the mobile "jump to" select. `to` is the
+ *                          target section's DOM id.
  *
  * `profileId` is null for an unlinked entrant (announced but not yet joined).
  */
