@@ -41,6 +41,7 @@ export function SortableTh({
   defaultDirection = "asc",
   sortState,
   onSort,
+  className,
 }: {
   label: string
   align?: Align
@@ -48,10 +49,17 @@ export function SortableTh({
   defaultDirection?: SortDirection
   sortState?: SortState | null
   onSort?: (key: string, defaultDirection: SortDirection) => void
+  /**
+   * Overrides the default `px-4 py-3` cell chrome — a compact table (e.g. the
+   * head-to-head feed) passes its own padding plus any sticky/background, while
+   * the standings header keeps the default by omitting it.
+   */
+  className?: string
 }) {
+  const cellClassName = cn(className ?? "px-4 py-3", TH_ALIGN[align])
   // Plain header: skeleton case, or columns explicitly not sortable.
   if (!sortKey || !onSort) {
-    return <th className={cn("px-4 py-3", TH_ALIGN[align])}>{label}</th>
+    return <th className={cellClassName}>{label}</th>
   }
 
   const active = sortState?.key === sortKey
@@ -70,7 +78,7 @@ export function SortableTh({
         : "none"
 
   return (
-    <th className={cn("px-4 py-3", TH_ALIGN[align])} aria-sort={ariaSort}>
+    <th className={cellClassName} aria-sort={ariaSort}>
       <button
         type="button"
         onClick={() => onSort(sortKey, defaultDirection)}

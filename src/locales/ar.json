@@ -108,6 +108,26 @@
       "mostMatches": "الأكثر مباريات",
       "winPct": "أفضل نسبة فوز"
     },
+    "headToHead": {
+      "title": "المواجهات المباشرة",
+      "empty": "لا توجد مواجهات مباشرة بعد",
+      "emptyHint": "ستظهر مواجهات اللاعبين هنا فور حدوثها.",
+      "winner": "الفائز",
+      "loser": "الخاسر",
+      "map": "الخريطة",
+      "length": "المدة",
+      "when": "متى",
+      "link": "رابط",
+      "caption": "مباريات المواجهة المباشرة",
+      "matchLink": "عرض المباراة على aoe2insights",
+      "topWinner": "الأكثر فوزًا في المواجهات",
+      "winCount_zero": "بدون انتصارات",
+      "winCount_one": "انتصار واحد",
+      "winCount_two": "انتصاران",
+      "winCount_few": "{{count}} انتصارات",
+      "winCount_many": "{{count}} انتصارًا",
+      "winCount_other": "{{count}} انتصار"
+    },
     "eloRaceTitle": "سباق ذروة إيلو",
     "race": {
       "teams": "الفرق",
@@ -152,13 +172,12 @@
     "liveAriaLabel": "في مباراة مباشرة",
     "recentMatchup": {
       "vs": "ضد",
-      "player": "اللاعب",
-      "opponent": "الخصم",
       "won": "فوز",
       "lost": "خسارة",
       "unknownCiv": "حضارة غير معروفة",
       "labelVs": "{{outcome}} بـ{{civ}} ضد {{opponent}}",
-      "labelSolo": "{{outcome}} بـ{{civ}}"
+      "labelSolo": "{{outcome}} بـ{{civ}}",
+      "streamerHint": "بثّاث في البطولة"
     },
     "viewProfile": "عرض الملف الشخصي لـ {{name}}",
     "watchOn": {

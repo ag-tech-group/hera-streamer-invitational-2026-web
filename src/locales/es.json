@@ -108,6 +108,22 @@
       "mostMatches": "Más partidas",
       "winPct": "Mejor % de victorias"
     },
+    "headToHead": {
+      "title": "Enfrentamientos directos",
+      "empty": "Aún no hay enfrentamientos directos",
+      "emptyHint": "Los duelos entre streamers aparecerán aquí cuando ocurran.",
+      "winner": "Ganador",
+      "loser": "Perdedor",
+      "map": "Mapa",
+      "length": "Duración",
+      "when": "Cuándo",
+      "link": "Enlace",
+      "caption": "Enfrentamientos directos",
+      "matchLink": "Ver partida en aoe2insights",
+      "topWinner": "Más victorias directas",
+      "winCount_one": "{{count}} victoria",
+      "winCount_other": "{{count}} victorias"
+    },
     "eloRaceTitle": "Carrera de Elo máximo",
     "race": {
       "teams": "Equipos",
@@ -152,13 +168,12 @@
     "liveAriaLabel": "En partida en vivo",
     "recentMatchup": {
       "vs": "vs",
-      "player": "Jugador",
-      "opponent": "Rival",
       "won": "Victoria",
       "lost": "Derrota",
       "unknownCiv": "una civilización desconocida",
       "labelVs": "{{outcome}} con {{civ}} contra {{opponent}}",
-      "labelSolo": "{{outcome}} con {{civ}}"
+      "labelSolo": "{{outcome}} con {{civ}}",
+      "streamerHint": "Streamer del torneo"
     },
     "viewProfile": "Ver el perfil de {{name}}",
     "watchOn": {

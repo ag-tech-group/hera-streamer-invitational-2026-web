@@ -13,13 +13,17 @@ Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created 
 export * from './civilizationRead';
 export * from './civStat';
 export * from './civStats';
+export * from './getHeadToHeadV1TournamentsTournamentSlugHeadToHeadGetParams';
 export * from './getPlayerV1PlayersProfileIdGetParams';
 export * from './getPlayerV1TournamentsTournamentSlugPlayersProfileIdGetParams';
 export * from './getPlayerV1TournamentsTournamentSlugPlayersTournamentPlayerIdGetParams';
 export * from './getSummaryV1TournamentsTournamentSlugSummaryGetParams';
+export * from './headToHeadMatch';
+export * from './headToHeadPlayer';
 export * from './hTTPValidationError';
 export * from './leaderboardRead';
 export * from './listEnvelopeCivilizationRead';
+export * from './listEnvelopeHeadToHeadMatch';
 export * from './listEnvelopeLeaderboardRead';
 export * from './listEnvelopeMatchRead';
 export * from './listEnvelopePlayerProgression';

@@ -108,6 +108,22 @@
       "mostMatches": "Flest matcher",
       "winPct": "Bästa vinstandel"
     },
+    "headToHead": {
+      "title": "Inbördes möten",
+      "empty": "Inga inbördes möten ännu",
+      "emptyHint": "Möten mellan streamare dyker upp här när de spelas.",
+      "winner": "Vinnare",
+      "loser": "Förlorare",
+      "map": "Karta",
+      "length": "Längd",
+      "when": "När",
+      "link": "Länk",
+      "caption": "Inbördes matcher",
+      "matchLink": "Visa matchen på aoe2insights",
+      "topWinner": "Flest inbördes vinster",
+      "winCount_one": "{{count}} vinst",
+      "winCount_other": "{{count}} vinster"
+    },
     "eloRaceTitle": "Topp-elo-race",
     "race": {
       "teams": "Lag",
@@ -152,13 +168,12 @@
     "liveAriaLabel": "I en livematch",
     "recentMatchup": {
       "vs": "vs",
-      "player": "Spelare",
-      "opponent": "Motståndare",
       "won": "Vinst",
       "lost": "Förlust",
       "unknownCiv": "en okänd civilisation",
       "labelVs": "{{outcome}} som {{civ}} mot {{opponent}}",
-      "labelSolo": "{{outcome}} som {{civ}}"
+      "labelSolo": "{{outcome}} som {{civ}}",
+      "streamerHint": "Turneringsstreamer"
     },
     "viewProfile": "Visa {{name}}s profil",
     "watchOn": {

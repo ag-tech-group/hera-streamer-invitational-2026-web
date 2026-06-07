@@ -42,8 +42,9 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
       longest_win_streak: 5,
       peak_rating: 2180,
       last_match_at: "2026-05-30T12:00:00Z",
-      // recent_matchups (#339) is the civ-matchup form the frontend now reads.
-      // 1st: a normal 1v1 with both civs; 2nd: a null opponent civ (the graceful
+      // recent_matchups (#339, #349) is the civ-matchup form the frontend reads.
+      // 1st: a normal 1v1 with both civs + a named regular ladder opponent (not a
+      // streamer); 2nd: a null opponent civ AND null opponent name (the graceful
       // fallback case). Map names carry the replay extension on purpose.
       recent_matchups: [
         {
@@ -52,6 +53,9 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
           civilization_name: "Franks",
           opponent_civilization_id: 21,
           opponent_civilization_name: "Mayans",
+          opponent_profile_id: 555,
+          opponent_name: "LadderFoe",
+          opponent_tournament_player_id: null,
           map_name: "Arabia.rms",
           completed_at: "2026-05-30T12:00:00Z",
         },
@@ -61,6 +65,9 @@ function dto(overrides: Partial<StandingRow> = {}): StandingRow {
           civilization_name: "Goths",
           opponent_civilization_id: null,
           opponent_civilization_name: null,
+          opponent_profile_id: null,
+          opponent_name: null,
+          opponent_tournament_player_id: null,
           map_name: "Arena.rms2",
           completed_at: "2026-05-30T11:00:00Z",
         },
@@ -199,6 +206,9 @@ describe("toStandingsSnapshot — recent matchups (#339)", () => {
           civilization_name: null, // API couldn't name it
           opponent_civilization_id: 1,
           opponent_civilization_name: "Aztecs",
+          opponent_profile_id: 555,
+          opponent_name: "Aztecs main",
+          opponent_tournament_player_id: null,
           map_name: "Hideout.rms",
           completed_at: null,
         },
@@ -221,6 +231,9 @@ describe("toStandingsSnapshot — recent matchups (#339)", () => {
           civilization_name: "Atlanteans", // not in our emblem set
           opponent_civilization_id: 1,
           opponent_civilization_name: "Aztecs",
+          opponent_profile_id: 555,
+          opponent_name: "Aztecs main",
+          opponent_tournament_player_id: null,
           map_name: "Nomad.rms",
           completed_at: "2026-06-01T00:00:00Z",
         },
@@ -228,6 +241,103 @@ describe("toStandingsSnapshot — recent matchups (#339)", () => {
     ).recentMatchups[0]
     expect(m.civName).toBe("Atlanteans") // name still shown…
     expect(m.civEmblemUrl).toBeNull() // …but no emblem to render
+  })
+})
+
+describe("toStandingsSnapshot — recent matchup opponents (#349)", () => {
+  /** Builds the full snapshot rows from several DTO rows — needed for the
+   *  cross-row resolution of a fellow streamer's profile URL. */
+  function rowsOf(...items: StandingRow[]) {
+    const response: getStandingsV1TournamentsTournamentSlugStandingsGetResponse =
+      {
+        status: 200,
+        data: { last_polled_at: "2026-05-30T00:00:00Z", items },
+        headers: new Headers(),
+      }
+    return toStandingsSnapshot(response).rows
+  }
+
+  /** A recent-matchup DTO carrying the #349 opponent fields, defaulted to a
+   *  regular (non-streamer) ladder opponent. */
+  function matchupDto(
+    overrides: Partial<
+      StandingRow["tournament_record"]["recent_matchups"][number]
+    > = {}
+  ): StandingRow["tournament_record"]["recent_matchups"][number] {
+    return {
+      outcome: "win",
+      civilization_id: 17,
+      civilization_name: "Franks",
+      opponent_civilization_id: 21,
+      opponent_civilization_name: "Mayans",
+      opponent_profile_id: 555,
+      opponent_name: "LadderFoe",
+      opponent_tournament_player_id: null,
+      map_name: "Arabia.rms",
+      completed_at: "2026-05-30T12:00:00Z",
+      ...overrides,
+    }
+  }
+
+  /** Replaces a row's recent matchups with a single given matchup. */
+  function withMatchup(
+    row: StandingRow,
+    m: StandingRow["tournament_record"]["recent_matchups"][number]
+  ): StandingRow {
+    return {
+      ...row,
+      tournament_record: { ...row.tournament_record, recent_matchups: [m] },
+    }
+  }
+
+  it("shows the opponent name and marks a regular ladder opponent as not a streamer", () => {
+    // The default fixture's 1st matchup is a named, non-streamer opponent.
+    const m = rowsOf(dto())[0].recentMatchups[0]
+    expect(m.opponentName).toBe("LadderFoe")
+    expect(m.opponentIsStreamer).toBe(false)
+    expect(m.opponentProfileUrl).toBeNull()
+  })
+
+  it("marks a fellow streamer and links to that streamer's own row profile URL", () => {
+    const viewer = withMatchup(
+      dto({ tournament_player_id: 1, profile_id: 1 }),
+      matchupDto({ opponent_name: "Hera", opponent_tournament_player_id: 2 })
+    )
+    const opponent = dto({
+      tournament_player_id: 2,
+      profile_id: 2,
+      // The link is resolved from the OPPONENT's row presentation, not the matchup.
+      presentation: { profileUrl: "https://www.aoe2insights.com/user/777/" },
+    })
+    const m = rowsOf(viewer, opponent)[0].recentMatchups[0]
+    expect(m.opponentIsStreamer).toBe(true)
+    expect(m.opponentName).toBe("Hera")
+    expect(m.opponentProfileUrl).toBe("https://www.aoe2insights.com/user/777/")
+  })
+
+  it("highlights a fellow streamer with no profile URL but gives no link", () => {
+    const viewer = withMatchup(
+      dto({ tournament_player_id: 1, profile_id: 1 }),
+      matchupDto({ opponent_name: "Hera", opponent_tournament_player_id: 2 })
+    )
+    const opponent = dto({
+      tournament_player_id: 2,
+      profile_id: 2,
+      presentation: {},
+    })
+    const m = rowsOf(viewer, opponent)[0].recentMatchups[0]
+    expect(m.opponentIsStreamer).toBe(true)
+    expect(m.opponentProfileUrl).toBeNull()
+  })
+
+  it("leaves the link null when the fellow streamer isn't in this snapshot", () => {
+    const viewer = withMatchup(
+      dto({ tournament_player_id: 1, profile_id: 1 }),
+      matchupDto({ opponent_name: "Ghost", opponent_tournament_player_id: 999 })
+    )
+    const m = rowsOf(viewer)[0].recentMatchups[0]
+    expect(m.opponentIsStreamer).toBe(true)
+    expect(m.opponentProfileUrl).toBeNull()
   })
 })
 

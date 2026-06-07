@@ -32,10 +32,16 @@ export type SortableValue = string | number | null
  * `getValue` projects a row + sort key onto a comparable value. Component
  * code owns the mapping from `key` (a string identifier) to which row field
  * to sort on, so the hook stays generic.
+ *
+ * `initialSort` seeds the starting sort (default unsorted, i.e. the rows'
+ * original order). A table whose data already arrives in a meaningful order can
+ * pass that column so its header shows as the active default — the head-to-head
+ * feed seeds `when` descending, matching its newest-first payload.
  */
 export function useTableSort<T>(
   rows: T[],
-  getValue: (row: T, key: string) => SortableValue
+  getValue: (row: T, key: string) => SortableValue,
+  initialSort: SortState | null = null
 ): {
   sortedRows: T[]
   sortState: SortState | null
@@ -43,7 +49,7 @@ export function useTableSort<T>(
   setSort: (key: string, direction: SortDirection) => void
   clearSort: () => void
 } {
-  const [sort, setSortState] = useState<SortState | null>(null)
+  const [sort, setSortState] = useState<SortState | null>(initialSort)
 
   const sortedRows = useMemo(() => {
     if (!sort) return rows

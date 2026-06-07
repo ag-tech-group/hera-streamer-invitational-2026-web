@@ -108,6 +108,22 @@
       "mostMatches": "Plus de matchs",
       "winPct": "Meilleur taux de victoire"
     },
+    "headToHead": {
+      "title": "Face-à-face",
+      "empty": "Aucun face-à-face pour l'instant",
+      "emptyHint": "Les affrontements entre streameurs apparaîtront ici au fil des parties.",
+      "winner": "Vainqueur",
+      "loser": "Perdant",
+      "map": "Carte",
+      "length": "Durée",
+      "when": "Quand",
+      "link": "Lien",
+      "caption": "Matchs en face-à-face",
+      "matchLink": "Voir le match sur aoe2insights",
+      "topWinner": "Plus de victoires en face-à-face",
+      "winCount_one": "{{count}} victoire",
+      "winCount_other": "{{count}} victoires"
+    },
     "eloRaceTitle": "Course Elo de pointe",
     "race": {
       "teams": "Équipes",
@@ -152,13 +168,12 @@
     "liveAriaLabel": "Dans un match en direct",
     "recentMatchup": {
       "vs": "vs",
-      "player": "Joueur",
-      "opponent": "Adversaire",
       "won": "Victoire",
       "lost": "Défaite",
       "unknownCiv": "une civilisation inconnue",
       "labelVs": "{{outcome}} avec {{civ}} contre {{opponent}}",
-      "labelSolo": "{{outcome}} avec {{civ}}"
+      "labelSolo": "{{outcome}} avec {{civ}}",
+      "streamerHint": "Streameur du tournoi"
     },
     "viewProfile": "Voir le profil de {{name}}",
     "watchOn": {

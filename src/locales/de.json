@@ -108,6 +108,22 @@
       "mostMatches": "Meiste Partien",
       "winPct": "Beste Siegquote"
     },
+    "headToHead": {
+      "title": "Direkte Duelle",
+      "empty": "Noch keine direkten Duelle",
+      "emptyHint": "Duelle zwischen Streamern erscheinen hier, sobald sie stattfinden.",
+      "winner": "Sieger",
+      "loser": "Verlierer",
+      "map": "Karte",
+      "length": "Dauer",
+      "when": "Wann",
+      "link": "Link",
+      "caption": "Direkte Duelle",
+      "matchLink": "Partie auf aoe2insights ansehen",
+      "topWinner": "Meiste direkte Siege",
+      "winCount_one": "{{count}} Sieg",
+      "winCount_other": "{{count}} Siege"
+    },
     "eloRaceTitle": "Höchst-Elo-Rennen",
     "race": {
       "teams": "Teams",
@@ -152,13 +168,12 @@
     "liveAriaLabel": "In einer Live-Partie",
     "recentMatchup": {
       "vs": "vs.",
-      "player": "Spieler",
-      "opponent": "Gegner",
       "won": "Gewonnen",
       "lost": "Verloren",
       "unknownCiv": "eine unbekannte Zivilisation",
       "labelVs": "{{outcome}} als {{civ}} gegen {{opponent}}",
-      "labelSolo": "{{outcome}} als {{civ}}"
+      "labelSolo": "{{outcome}} als {{civ}}",
+      "streamerHint": "Turnier-Streamer"
     },
     "viewProfile": "Profil von {{name}} ansehen",
     "watchOn": {

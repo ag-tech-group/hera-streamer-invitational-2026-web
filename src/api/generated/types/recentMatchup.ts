@@ -26,6 +26,9 @@ export interface RecentMatchup {
   civilization_name: string | null;
   opponent_civilization_id: number | null;
   opponent_civilization_name: string | null;
+  opponent_profile_id: number | null;
+  opponent_name: string | null;
+  opponent_tournament_player_id: number | null;
   map_name: string;
   completed_at: string | null;
 }

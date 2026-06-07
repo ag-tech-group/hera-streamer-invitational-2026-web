@@ -253,7 +253,11 @@ export function StandingsTable({ rows }: { rows: StandingsRow[] }) {
               <StreakCell streak={row.streak} />
             </FlashCell>
             <td className="px-4 py-3">
-              <RecentMatchupsCell matchups={row.recentMatchups} now={now} />
+              <RecentMatchupsCell
+                matchups={row.recentMatchups}
+                playerName={row.presentation.displayName ?? row.name}
+                now={now}
+              />
             </td>
             <td className="px-4 py-3">
               <LastMatchCell lastMatchAt={row.lastMatchAt} now={now} />

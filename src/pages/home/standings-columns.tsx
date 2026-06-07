@@ -301,7 +301,11 @@ export const DETAIL_ITEMS: DetailItem[] = [
     headerKey: "standings.headers.recent",
     wide: true,
     render: (r, ctx) => (
-      <RecentMatchupsCell matchups={r.recentMatchups} now={ctx.now} />
+      <RecentMatchupsCell
+        matchups={r.recentMatchups}
+        playerName={r.presentation.displayName ?? r.name}
+        now={ctx.now}
+      />
     ),
   },
 ]

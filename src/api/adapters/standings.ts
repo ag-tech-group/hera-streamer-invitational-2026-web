@@ -24,7 +24,11 @@ import type {
 type StandingsResponse =
   getStandingsV1TournamentsTournamentSlugStandingsGetResponse
 
-function toStandingsRow(dto: StandingRow): StandingsRow {
+function toStandingsRow(
+  dto: StandingRow,
+  /** tournament_player_id → host profile URL, for fellow-streamer matchup links (#349). */
+  profileUrlByPlayerId: ReadonlyMap<number, string>
+): StandingsRow {
   return {
     tournamentPlayerId: dto.tournament_player_id,
     profileId: dto.profile_id,
@@ -61,7 +65,9 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
     losses: dto.tournament_record.losses,
     streak: dto.tournament_record.streak,
     longestWinStreak: dto.tournament_record.longest_win_streak,
-    recentMatchups: dto.tournament_record.recent_matchups.map(toRecentMatchup),
+    recentMatchups: dto.tournament_record.recent_matchups.map((m) =>
+      toRecentMatchup(m, profileUrlByPlayerId)
+    ),
     winPct: dto.tournament_record.win_pct,
     gamesPlayed: dto.tournament_record.games_played,
     rank: dto.rank,
@@ -88,8 +94,20 @@ function toStandingsRow(dto: StandingRow): StandingsRow {
  * civ newer than our emblem snapshot, or an opponent the API couldn't name (or a
  * non-1v1 board with none) — in which case its emblem is null too and the
  * tooltip falls back to a placeholder.
+ *
+ * #349 folds in the opponent player: their `opponentName` (always shown), a
+ * `opponentIsStreamer` flag (a non-null `opponent_tournament_player_id` ⇒ a
+ * fellow streamer → highlight), and the streamer's `opponentProfileUrl` resolved
+ * from the snapshot's own rows via `profileUrlByPlayerId` (null ⇒ highlight
+ * without a link).
  */
-function toRecentMatchup(m: RecentMatchupDto): RecentMatchup {
+function toRecentMatchup(
+  m: RecentMatchupDto,
+  profileUrlByPlayerId: ReadonlyMap<number, string>
+): RecentMatchup {
+  // A non-null opponent_tournament_player_id means the opponent is one of the
+  // tournament's own roster streamers; a null id is a regular ladder opponent.
+  const opponentPlayerId = m.opponent_tournament_player_id
   return {
     outcome: m.outcome,
     civName: m.civilization_name,
@@ -100,6 +118,15 @@ function toRecentMatchup(m: RecentMatchupDto): RecentMatchup {
     opponentCivEmblemUrl: m.opponent_civilization_name
       ? civEmblemUrl(m.opponent_civilization_name)
       : null,
+    opponentName: m.opponent_name,
+    opponentIsStreamer: opponentPlayerId !== null,
+    // Link a fellow streamer to their host-curated profile when their row
+    // carries one; null (not a streamer, or a streamer without a profile URL)
+    // leaves the highlighted name as plain text — we never synthesise a link.
+    opponentProfileUrl:
+      opponentPlayerId !== null
+        ? (profileUrlByPlayerId.get(opponentPlayerId) ?? null)
+        : null,
     mapName: cleanMapName(m.map_name),
     completedAt: m.completed_at,
   }
@@ -153,8 +180,19 @@ export function toStandingsSnapshot(
     throw new Error(`Unexpected standings response status: ${response.status}`)
   }
 
+  const items = response.data.items
+  // A directory of every entrant's host profile URL, keyed by the stable
+  // tournament_player_id (#349). Built once for the whole snapshot so a recent
+  // matchup against a fellow streamer can link to that streamer's profile —
+  // the URL lives on their own row's presentation bag, not on the matchup.
+  const profileUrlByPlayerId = new Map<number, string>()
+  for (const item of items) {
+    const url = toPlayerPresentation(item.presentation).profileUrl
+    if (url) profileUrlByPlayerId.set(item.tournament_player_id, url)
+  }
+
   return {
     lastPolledAt: response.data.last_polled_at,
-    rows: response.data.items.map(toStandingsRow),
+    rows: items.map((item) => toStandingsRow(item, profileUrlByPlayerId)),
   }
 }

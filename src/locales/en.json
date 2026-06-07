@@ -108,6 +108,22 @@
       "mostMatches": "Most matches",
       "winPct": "Best win rate"
     },
+    "headToHead": {
+      "title": "Head-to-head",
+      "empty": "No head-to-head games yet",
+      "emptyHint": "Streamer-vs-streamer clashes show up here as they happen.",
+      "winner": "Winner",
+      "loser": "Loser",
+      "map": "Map",
+      "length": "Length",
+      "when": "When",
+      "link": "Link",
+      "caption": "Head-to-head games",
+      "matchLink": "View match on aoe2insights",
+      "topWinner": "Most head-to-head wins",
+      "winCount_one": "{{count}} win",
+      "winCount_other": "{{count}} wins"
+    },
     "eloRaceTitle": "Peak elo race",
     "race": {
       "teams": "Teams",
@@ -152,13 +168,12 @@
     "liveAriaLabel": "In a live match",
     "recentMatchup": {
       "vs": "vs",
-      "player": "Player",
-      "opponent": "Opponent",
       "won": "Won",
       "lost": "Lost",
       "unknownCiv": "an unknown civ",
       "labelVs": "{{outcome}} as {{civ}} vs {{opponent}}",
-      "labelSolo": "{{outcome}} as {{civ}}"
+      "labelSolo": "{{outcome}} as {{civ}}",
+      "streamerHint": "Fellow streamer"
     },
     "viewProfile": "View {{name}}'s profile",
     "watchOn": {

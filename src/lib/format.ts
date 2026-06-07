@@ -108,6 +108,24 @@ export function formatTimeAgo(iso: string, now: Date = new Date()): string {
 }
 
 /**
+ * Formats a match duration in seconds as a clock string — `M:SS` under an hour
+ * (`23:14`), `H:MM:SS` beyond it (`1:02:05`). Backs the head-to-head card's
+ * "how long was the game" column (#349); the caller drops the field when the
+ * API sent no duration rather than rendering `0:00`. Negative input (clock
+ * skew) clamps to zero.
+ */
+export function formatDuration(seconds: number): string {
+  const total = Math.max(0, Math.floor(seconds))
+  const hours = Math.floor(total / 3600)
+  const minutes = Math.floor((total % 3600) / 60)
+  const secs = total % 60
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return hours > 0
+    ? `${hours}:${pad(minutes)}:${pad(secs)}`
+    : `${minutes}:${pad(secs)}`
+}
+
+/**
  * Strips an AoE2 replay's map-file extension (and surrounding whitespace) from a
  * raw map name, so a tooltip reads `Arabia` rather than `Arabia.rms`, or
  * `megarandom` rather than `megarandom.rms2`.
