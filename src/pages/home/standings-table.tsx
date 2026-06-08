@@ -26,7 +26,7 @@ import {
   WatchCell,
   WinPctCell,
 } from "@/pages/home/standings-cells"
-import { rowKey } from "@/pages/home/standings-columns"
+import { rowKey, SKELETON_ROW_COUNT } from "@/pages/home/standings-columns"
 import {
   StandingsMobileList,
   StandingsMobileSkeleton,
@@ -47,9 +47,6 @@ import type { StandingsRow } from "@/types"
  * duplicate rows in the accessibility tree.
  */
 const MOBILE_MEDIA_QUERY = "(max-width: 879px)"
-
-/** Placeholder row count rendered while the standings request is in flight. */
-const SKELETON_ROW_COUNT = 6
 
 /**
  * The polished standings table. A pure presentation component: it renders the

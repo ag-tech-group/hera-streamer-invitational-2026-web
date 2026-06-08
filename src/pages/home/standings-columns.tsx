@@ -34,6 +34,20 @@ export function rowKey(row: StandingsRow): string {
   return String(row.tournamentPlayerId)
 }
 
+/**
+ * Row count for the standings loading skeletons — the desktop table and the
+ * mobile list both render this many placeholder rows. Sized to the tournament's
+ * entrant count so the skeleton reserves the *populated* table's height: a short
+ * skeleton (this was 6) is far shorter than the ~20-row field, so on a cold load
+ * the table grows when data lands and shoves the page footer down. That was a
+ * measured CLS source (~0.17 at p90) on tall desktop viewports, where the footer
+ * sits in the gap a short skeleton leaves. (Mobile stacks taller above the
+ * table, so its footer stays below the fold during loading and never shifted —
+ * but both skeletons share this count so the two stay in step.) Keep roughly in
+ * step with the live field size; an exact match makes the swap zero-growth.
+ */
+export const SKELETON_ROW_COUNT = 20
+
 /** Context every cell renderer here needs but can't read off a single row. */
 export interface CellContext {
   /** One reference instant for the whole render, so every "time ago" agrees. */
