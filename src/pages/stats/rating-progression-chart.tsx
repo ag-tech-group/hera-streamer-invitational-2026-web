@@ -123,6 +123,12 @@ function buildOption(
   return {
     color: LINE_PALETTE,
     backgroundColor: "transparent",
+    // Snap series toggles instead of animating them. With `scale: true` on the
+    // y-axis, hiding/showing a line rescales the axis and re-interpolates all
+    // ~20 lines to new positions over the update animation — the work the next
+    // frame waited on, which made a legend toggle a ~250ms presentation-bound
+    // interaction on a mid-tier phone. The initial draw still animates.
+    animationDurationUpdate: 0,
     grid: { left: 8, right: 18, top: 28, bottom: 50, containLabel: true },
     legend: {
       // The legend itself is rendered in HTML below the canvas (ChartLegend) so
