@@ -12,14 +12,12 @@ import {
   DETAIL_ITEMS,
   metricForSort,
   rowKey,
+  SKELETON_ROW_COUNT,
   type CellContext,
   type MetricColumn,
 } from "@/pages/home/standings-columns"
 import { isOffGameStream } from "@/pages/home/standings-stream"
 import type { StandingsRow } from "@/types"
-
-/** Placeholder row count rendered while the standings request is in flight. */
-const SKELETON_ROW_COUNT = 8
 
 /**
  * Mobile standings: a vertical list of slim, tap-to-expand rows shown below
