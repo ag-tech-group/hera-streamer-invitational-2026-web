@@ -16,8 +16,14 @@ import { useStandingsHistory } from "@/hooks/use-standings-history"
 import { useSummary } from "@/hooks/use-summary"
 import { useTeamStandings } from "@/hooks/use-team-standings"
 import { useTournament } from "@/hooks/use-tournament"
-import { teamColorMap, TEAM_HEX } from "@/lib/team-colors"
+import {
+  teamColorMap,
+  TEAM_HEX,
+  TEAM_COLOR_SLOTS,
+  shadeByTeam,
+} from "@/lib/team-colors"
 import { BumpChart } from "@/pages/stats/bump-chart"
+import type { ChartTeam } from "@/pages/stats/chart-legend"
 import { toBumpSeries } from "@/pages/stats/bump-series"
 import { toCivByTeam } from "@/pages/stats/civ-by-team"
 import { CivMeta } from "@/pages/stats/civ-meta"
@@ -162,6 +168,33 @@ export function StatsPage() {
         slotByTeamId: slotByTeam,
       }
     }, [teams.data?.rows])
+  // Team metadata for the charts' bulk-toggle pills (rating + position): one
+  // pill per team, in palette-slot order so the row stays put as ranks shift.
+  // Each chart joins its lines to a team via `teamIdByTournamentPlayerId`.
+  const chartTeams = useMemo<ChartTeam[]>(() => {
+    const slotRank = (teamId: number) =>
+      TEAM_COLOR_SLOTS.indexOf(slotByTeamId.get(teamId) ?? TEAM_COLOR_SLOTS[0])
+    return [...(teams.data?.rows ?? [])]
+      .sort((a, b) => slotRank(a.teamId) - slotRank(b.teamId))
+      .map((r) => ({
+        teamId: r.teamId,
+        name: r.name,
+        color: baseHexByTeamId.get(r.teamId) ?? TEAM_HEX[TEAM_COLOR_SLOTS[0]],
+      }))
+  }, [teams.data?.rows, baseHexByTeamId, slotByTeamId])
+  // Per-player team-shaded line colour, computed over the full standings roster
+  // ranked by peak — the same hue + per-teammate shade the position chart and
+  // the rest of the site use (keyed by tournamentPlayerId). The rating chart
+  // looks up each of its lines here instead of an unrelated palette, so a player
+  // paints the same colour on every chart. Ranked over the whole roster (an
+  // unrated entrant included) so the shading order matches the position chart,
+  // which ranks the same way.
+  const colorByTournamentPlayerId = useMemo(() => {
+    const rankedIds = [...(standings.data?.rows ?? [])]
+      .sort((a, b) => (b.maxRating ?? -Infinity) - (a.maxRating ?? -Infinity))
+      .map((r) => r.tournamentPlayerId)
+    return shadeByTeam(rankedIds, teamIdByTournamentPlayerId, baseHexByTeamId)
+  }, [standings.data?.rows, teamIdByTournamentPlayerId, baseHexByTeamId])
   const bump = useMemo(
     () =>
       standingsHistory.data
@@ -312,7 +345,12 @@ export function StatsPage() {
             skeletonHeight={560}
           >
             {progression.data ? (
-              <RatingProgressionChart series={labeledSeries} />
+              <RatingProgressionChart
+                series={labeledSeries}
+                teams={chartTeams}
+                teamIdByTournamentPlayerId={teamIdByTournamentPlayerId}
+                colorByTournamentPlayerId={colorByTournamentPlayerId}
+              />
             ) : null}
           </ChartSection>
 
@@ -326,7 +364,12 @@ export function StatsPage() {
             isEmpty={bump.series.length === 0}
             skeletonHeight={520}
           >
-            <BumpChart buckets={bump.buckets} series={bump.series} />
+            <BumpChart
+              buckets={bump.buckets}
+              series={bump.series}
+              teams={chartTeams}
+              teamIdByTournamentPlayerId={teamIdByTournamentPlayerId}
+            />
           </ChartSection>
 
           {/* Civilization pick + win rates, entrants-only from /civ-stats (#302). */}

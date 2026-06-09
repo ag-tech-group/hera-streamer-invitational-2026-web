@@ -13,7 +13,12 @@ import ReactEChartsCore from "echarts-for-react/esm/core"
 import { useMemo, useState } from "react"
 
 import { useStableValue } from "@/hooks/use-stable-value"
-import { ChartLegend, type ChartLegendItem } from "@/pages/stats/chart-legend"
+import {
+  ChartLegend,
+  type ChartLegendItem,
+  type ChartLegendTeam,
+  type ChartTeam,
+} from "@/pages/stats/chart-legend"
 import type { BumpSeries } from "@/pages/stats/bump-series"
 import {
   useChartColors,
@@ -211,9 +216,15 @@ function buildOption(
 export function BumpChart({
   buckets,
   series,
+  teams = [],
+  teamIdByTournamentPlayerId,
 }: {
   buckets: string[]
   series: BumpSeries[]
+  /** Teams for the bulk-toggle pills (omit to hide them). */
+  teams?: ChartTeam[]
+  /** tournamentPlayerId → teamId, to group each line under its team. */
+  teamIdByTournamentPlayerId?: Map<number, number>
 }) {
   const colors = useChartColors()
   const stableBuckets = useStableValue(buckets)
@@ -235,6 +246,30 @@ export function BumpChart({
     setSelected((prev) =>
       Object.fromEntries(items.map((it) => [it.name, prev[it.name] === false]))
     )
+  // Group the chart's lines under their team for the bulk-toggle pills — each
+  // pill carries the labels of the team's players that appear in this chart.
+  const legendTeams = useMemo<ChartLegendTeam[]>(
+    () =>
+      teams.flatMap((team) => {
+        const memberNames = stableSeries
+          .filter(
+            (s) =>
+              teamIdByTournamentPlayerId?.get(s.tournamentPlayerId) ===
+              team.teamId
+          )
+          .map((s) => s.label)
+        return memberNames.length > 0 ? [{ ...team, memberNames }] : []
+      }),
+    [teams, stableSeries, teamIdByTournamentPlayerId]
+  )
+  const toggleTeam = (team: ChartLegendTeam) =>
+    setSelected((prev) => {
+      // Fully shown → hide the whole team; otherwise (any player off) show all.
+      const show = !team.memberNames.every((n) => prev[n] !== false)
+      const next = { ...prev }
+      for (const n of team.memberNames) next[n] = show
+      return next
+    })
   const option = useMemo(
     () => buildOption(stableBuckets, stableSeries, colors, selected),
     [stableBuckets, stableSeries, colors, selected]
@@ -254,6 +289,8 @@ export function BumpChart({
         onToggle={toggle}
         onAll={showAll}
         onInvert={invert}
+        teams={legendTeams}
+        onToggleTeam={toggleTeam}
       />
     </>
   )
