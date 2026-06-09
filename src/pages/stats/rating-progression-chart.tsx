@@ -15,7 +15,13 @@ import ReactEChartsCore from "echarts-for-react/esm/core"
 import { useMemo, useState } from "react"
 
 import { useStableValue } from "@/hooks/use-stable-value"
-import { ChartLegend, type ChartLegendItem } from "@/pages/stats/chart-legend"
+import { NEUTRAL_HEX } from "@/lib/team-colors"
+import {
+  ChartLegend,
+  type ChartLegendItem,
+  type ChartLegendTeam,
+  type ChartTeam,
+} from "@/pages/stats/chart-legend"
 import {
   toForwardFilledSeries,
   type ChartSeries,
@@ -37,25 +43,6 @@ echarts.use([
   DataZoomComponent,
   CanvasRenderer,
 ])
-
-/**
- * Vivid line palette, cycled across players. Distinguishability beats
- * brand-matching here — with a full roster the eye needs to separate adjacent
- * lines. The saturated hues read on both themes; the axis / legend text
- * colours adapt to the active theme via `useChartColors` (#207).
- */
-const LINE_PALETTE = [
-  "#60a5fa",
-  "#f472b6",
-  "#34d399",
-  "#fbbf24",
-  "#a78bfa",
-  "#22d3ee",
-  "#fb7185",
-  "#a3e635",
-  "#facc15",
-  "#f97316",
-]
 
 /** The subset of an echarts axis-tooltip param the formatter reads. */
 interface LineTooltipParam {
@@ -118,10 +105,10 @@ function formatTooltip(params: LineTooltipParam | LineTooltipParam[]): string {
 function buildOption(
   series: ChartSeries[],
   colors: ChartColors,
-  selected: Record<string, boolean>
+  selected: Record<string, boolean>,
+  colorByPlayer: Map<number, string>
 ): EChartsCoreOption {
   return {
-    color: LINE_PALETTE,
     backgroundColor: "transparent",
     grid: { left: 8, right: 18, top: 28, bottom: 50, containLabel: true },
     legend: {
@@ -202,7 +189,14 @@ function buildOption(
       // false, so the line itself carries no per-point markers.
       symbol: "circle",
       showSymbol: false,
+      // The player's team hue (shaded per teammate), so the line matches their
+      // colour on the position chart, the team pills, and the rest of the site —
+      // looked up by tournamentPlayerId, neutral if somehow absent.
+      itemStyle: {
+        color: colorByPlayer.get(s.tournamentPlayerId) ?? NEUTRAL_HEX,
+      },
       lineStyle: {
+        color: colorByPlayer.get(s.tournamentPlayerId) ?? NEUTRAL_HEX,
         width: 2,
         shadowBlur: 6,
         shadowColor: "rgba(2,6,23,0.5)",
@@ -232,8 +226,17 @@ function buildOption(
  */
 export function RatingProgressionChart({
   series,
+  teams = [],
+  teamIdByTournamentPlayerId,
+  colorByTournamentPlayerId = new Map(),
 }: {
   series: LabeledSeries[]
+  /** Teams for the bulk-toggle pills (omit to hide them). */
+  teams?: ChartTeam[]
+  /** tournamentPlayerId → teamId, to group each line under its team. */
+  teamIdByTournamentPlayerId?: Map<number, number>
+  /** tournamentPlayerId → team-shaded line colour (matches the position chart). */
+  colorByTournamentPlayerId?: Map<number, string>
 }) {
   const colors = useChartColors()
   // Hold the series reference steady across value-identical SSE refetches so a
@@ -248,15 +251,16 @@ export function RatingProgressionChart({
     () => toForwardFilledSeries(stableSeries),
     [stableSeries]
   )
-  // Legend pills mirror echarts' own colour assignment: it cycles LINE_PALETTE
-  // across the series in order, so index i → LINE_PALETTE[i % len].
+  // Legend pills carry each line's team-shaded colour (the same map the lines
+  // use in buildOption), so the dot matches the line and the rest of the site.
   const items = useMemo<ChartLegendItem[]>(
     () =>
-      chartSeries.map((s, i) => ({
+      chartSeries.map((s) => ({
         name: s.label,
-        color: LINE_PALETTE[i % LINE_PALETTE.length],
+        color:
+          colorByTournamentPlayerId.get(s.tournamentPlayerId) ?? NEUTRAL_HEX,
       })),
-    [chartSeries]
+    [chartSeries, colorByTournamentPlayerId]
   )
   // Which series are shown. A name absent from the map counts as shown, so the
   // empty initial state shows everyone; toggling writes explicit booleans.
@@ -269,9 +273,33 @@ export function RatingProgressionChart({
     setSelected((prev) =>
       Object.fromEntries(items.map((it) => [it.name, prev[it.name] === false]))
     )
+  // Group the chart's lines under their team for the bulk-toggle pills — each
+  // pill carries the labels of the team's players that appear in this chart.
+  const legendTeams = useMemo<ChartLegendTeam[]>(
+    () =>
+      teams.flatMap((team) => {
+        const memberNames = chartSeries
+          .filter(
+            (s) =>
+              teamIdByTournamentPlayerId?.get(s.tournamentPlayerId) ===
+              team.teamId
+          )
+          .map((s) => s.label)
+        return memberNames.length > 0 ? [{ ...team, memberNames }] : []
+      }),
+    [teams, chartSeries, teamIdByTournamentPlayerId]
+  )
+  const toggleTeam = (team: ChartLegendTeam) =>
+    setSelected((prev) => {
+      // Fully shown → hide the whole team; otherwise (any player off) show all.
+      const show = !team.memberNames.every((n) => prev[n] !== false)
+      const next = { ...prev }
+      for (const n of team.memberNames) next[n] = show
+      return next
+    })
   const option = useMemo(
-    () => buildOption(chartSeries, colors, selected),
-    [chartSeries, colors, selected]
+    () => buildOption(chartSeries, colors, selected, colorByTournamentPlayerId),
+    [chartSeries, colors, selected, colorByTournamentPlayerId]
   )
   return (
     <>
@@ -297,6 +325,8 @@ export function RatingProgressionChart({
         onToggle={toggle}
         onAll={showAll}
         onInvert={invert}
+        teams={legendTeams}
+        onToggleTeam={toggleTeam}
       />
     </>
   )
