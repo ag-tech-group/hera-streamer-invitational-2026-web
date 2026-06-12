@@ -135,10 +135,10 @@ function TournamentDetailsForm({
         />
         <Field
           id="tournament-finals"
-          label={t("admin.tournament.grandFinalsDate")}
+          label={t("admin.tournament.endDate")}
           type="datetime-local"
-          value={form.grandFinalsDate}
-          onChange={(v) => setForm({ ...form, grandFinalsDate: v })}
+          value={form.endDate}
+          onChange={(v) => setForm({ ...form, endDate: v })}
         />
         {/*
          * Label is the i18n key plus the build's display currency, so the
@@ -188,7 +188,7 @@ interface FormState {
   name: string
   /** `datetime-local` value: `"YYYY-MM-DDTHH:mm"` in the viewer's local clock. */
   startDate: string
-  grandFinalsDate: string
+  endDate: string
   /**
    * Decimal display of the prize-pool amount in the build's currency (e.g.
    * `"5000.00"`). Empty string maps to a `null` `prize_pool_cents` on
@@ -207,7 +207,7 @@ function toFormState(tournament: TournamentInfo): FormState {
   return {
     name: tournament.name,
     startDate: toDatetimeLocal(tournament.startDate),
-    grandFinalsDate: toDatetimeLocal(tournament.grandFinalsDate),
+    endDate: toDatetimeLocal(tournament.endDate),
     prizePool: toPrizePoolInput(tournament.prizePoolCents),
     hostStreamUrls: tournament.hostStreamUrls,
   }
@@ -218,7 +218,7 @@ function toUpdateBody(form: FormState): TournamentUpdate {
   return {
     name: form.name,
     start_date: fromDatetimeLocal(form.startDate),
-    grand_finals_date: fromDatetimeLocal(form.grandFinalsDate),
+    end_date: fromDatetimeLocal(form.endDate),
     prize_pool_cents: fromPrizePoolInput(form.prizePool),
     // Trim each row and drop blanks so a stray empty row doesn't block save
     // and clearing every row sends `[]` (the API treats that as "none").

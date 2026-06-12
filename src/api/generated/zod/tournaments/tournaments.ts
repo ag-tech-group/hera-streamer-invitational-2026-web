@@ -29,9 +29,11 @@ export const ListTournamentsV1TournamentsGetResponseItem = zod.object({
   "name": zod.string(),
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "host_stream_urls": zod.array(zod.string()),
+  "presentation": zod.record(zod.string(), zod.unknown()).optional(),
   "host_stream_live": zod.boolean().default(listTournamentsV1TournamentsGetResponseHostStreamLiveDefault),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.\nThe one exception is ``host_stream_live`` (#149) — a derived flag the\nrouter computes from the broadcast-live snapshot before serializing,\nso a host channel going live transitions the card within one poll\ncycle. The standings ``live`` SSE nudge already invalidates this query.')
@@ -66,9 +68,11 @@ export const CreateTournamentV1TournamentsPostBody = zod.object({
   "name": zod.string().min(1).max(createTournamentV1TournamentsPostBodyNameMax),
   "leaderboard_id": zod.number().gt(createTournamentV1TournamentsPostBodyLeaderboardIdExclusiveMin),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "prize_pool_cents": zod.union([zod.number().min(createTournamentV1TournamentsPostBodyPrizePoolCentsOneMin),zod.null()]).optional(),
-  "host_stream_urls": zod.array(zod.string()).max(createTournamentV1TournamentsPostBodyHostStreamUrlsMax).optional()
+  "host_stream_urls": zod.array(zod.string()).max(createTournamentV1TournamentsPostBodyHostStreamUrlsMax).optional(),
+  "presentation": zod.record(zod.string(), zod.unknown()).optional()
 }).describe('Body for ``POST \/v1\/tournaments`` — create a new tournament.\n\nRequired fields back non-nullable columns; the optional date fields\nbehave the same way as on ``TournamentUpdate`` (omit to leave unset,\nexplicit ``null`` is just an unset). ``slug`` is the routing key\nconsumers\' URLs are built from — restricted to lowercase alphanumeric\n+ internal hyphens so the value drops into a path segment unchanged.')
 
 /**
@@ -87,9 +91,11 @@ export const GetTournamentDetailV1TournamentsTournamentSlugGetResponse = zod.obj
   "name": zod.string(),
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "host_stream_urls": zod.array(zod.string()),
+  "presentation": zod.record(zod.string(), zod.unknown()).optional(),
   "host_stream_live": zod.boolean().default(getTournamentDetailV1TournamentsTournamentSlugGetResponseHostStreamLiveDefault),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.\nThe one exception is ``host_stream_live`` (#149) — a derived flag the\nrouter computes from the broadcast-live snapshot before serializing,\nso a host channel going live transitions the card within one poll\ncycle. The standings ``live`` SSE nudge already invalidates this query.')
@@ -100,8 +106,9 @@ export const GetTournamentDetailV1TournamentsTournamentSlugGetResponse = zod.obj
 PATCH semantics: only the fields present in the request body change.
 ``start_date`` / ``grand_finals_date`` accept ``null`` to clear a
 bound; a competition window whose start falls after its grand finals
-is rejected with 422. ``slug`` is immutable — it is the key consumer
-URLs are built on.
+is rejected with 422. ``presentation`` replaces the whole bag
+(read-modify-write, mirroring the roster rows' bag). ``slug`` is
+immutable — it is the key consumer URLs are built on.
  * @summary Update Tournament
  */
 export const UpdateTournamentV1TournamentsTournamentSlugPatchParams = zod.object({
@@ -122,10 +129,12 @@ export const UpdateTournamentV1TournamentsTournamentSlugPatchBody = zod.object({
   "name": zod.union([zod.string().min(1).max(updateTournamentV1TournamentsTournamentSlugPatchBodyNameOneMax),zod.null()]).optional(),
   "leaderboard_id": zod.union([zod.number().gt(updateTournamentV1TournamentsTournamentSlugPatchBodyLeaderboardIdOneExclusiveMin),zod.null()]).optional(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "prize_pool_cents": zod.union([zod.number().min(updateTournamentV1TournamentsTournamentSlugPatchBodyPrizePoolCentsOneMin),zod.null()]).optional(),
-  "host_stream_urls": zod.union([zod.array(zod.string()).max(updateTournamentV1TournamentsTournamentSlugPatchBodyHostStreamUrlsOneMax),zod.null()]).optional()
-}).describe('Partial update for a tournament\'s metadata (``PATCH``).\n\nEvery field is optional; only the fields present in the request body\nare applied. ``start_date`` \/ ``grand_finals_date`` may be set to\n``null`` to clear them. ``name`` and ``leaderboard_id`` back non-\nnullable columns, so an explicit ``null`` for either is rejected\nwith 422.\n\n``slug`` is intentionally not updatable — it is the routing key\nconsumers\' URLs are built from.')
+  "host_stream_urls": zod.union([zod.array(zod.string()).max(updateTournamentV1TournamentsTournamentSlugPatchBodyHostStreamUrlsOneMax),zod.null()]).optional(),
+  "presentation": zod.union([zod.record(zod.string(), zod.unknown()),zod.null()]).optional()
+}).describe('Partial update for a tournament\'s metadata (``PATCH``).\n\nEvery field is optional; only the fields present in the request body\nare applied. ``start_date`` \/ ``end_date`` may be set to ``null`` to\nclear them (``grand_finals_date`` is ``end_date``\'s deprecated alias —\nsetting either sets both). ``name``, ``leaderboard_id``, and\n``presentation`` back non-nullable columns, so an explicit ``null``\nfor any of them is rejected with 422.\n\n``presentation`` replaces the whole bag (read-modify-write, like the\nroster rows\' bag) — send ``{}`` to clear it.\n\n``slug`` is intentionally not updatable — it is the routing key\nconsumers\' URLs are built from.')
 
 export const updateTournamentV1TournamentsTournamentSlugPatchResponseHostStreamLiveDefault = false;
 
@@ -135,9 +144,11 @@ export const UpdateTournamentV1TournamentsTournamentSlugPatchResponse = zod.obje
   "name": zod.string(),
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "host_stream_urls": zod.array(zod.string()),
+  "presentation": zod.record(zod.string(), zod.unknown()).optional(),
   "host_stream_live": zod.boolean().default(updateTournamentV1TournamentsTournamentSlugPatchResponseHostStreamLiveDefault),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.\nThe one exception is ``host_stream_live`` (#149) — a derived flag the\nrouter computes from the broadcast-live snapshot before serializing,\nso a host channel going live transitions the card within one poll\ncycle. The standings ``live`` SSE nudge already invalidates this query.')
@@ -171,6 +182,12 @@ Position is by peak so it matches the table's ``comparePeakRank`` and
 on a new all-time high. Both ``current_rating`` and ``max_rating`` are
 returned, so a tournament can rank on either. (#187 unified the old
 three-tier sort; #226 switched the rank key from current_rating to peak.)
+
+Once ``grand_finals_date`` passes, the table is **final**: rank and the
+surfaced ``max_rating`` switch to the as-of-window-end peak
+(``_frozen_peak_by_profile``), so post-window ladder grinding — the
+roster keeps playing — can't reorder a result the playoff seeding came
+from. ``current_rating`` stays live; it's labelled current.
 
 The leaderboard filter lives in the join condition, not the WHERE
 clause — putting it in WHERE would re-filter the outer-join right
@@ -281,7 +298,8 @@ Five cards mirroring the stats page's headline row — highest peak rating,
 best win rate, longest win streak, biggest climber, most games played —
 each naming the leading linked entrant and their value. ``highest_peak_rating``
 is the **one lifetime read**: it ranks by all-time ``PlayerRating.max_rating``
-(the host's all-time-peak decision, same as ``StandingRow.max_rating``). The
+(the host's all-time-peak decision, same as ``StandingRow.max_rating``),
+frozen at the as-of-window-end value once ``grand_finals_date`` passes. The
 other four are computed in-window (the same ``[start_date, grand_finals_date]``
 bounds as ``tournament_record``) over the tournament players' matches on its
 leaderboard. ``biggest_climber`` is the greatest **signed** in-window net
@@ -444,15 +462,31 @@ identically to ``/standings`` (#232) — a row linked to a not-yet-polled
 entity set and the chart never carries a phantom the FE can't label.
 
 Peak elo is carried in and only rises on a new all-time high, so an
-entity's ``peak_rating`` as of a bucket is ``max(pre-event baseline,
-in-window peak-so-far)`` — flat at their lifetime peak unless they set a
-new high mid-event. The baseline is the current ``max_rating`` when it tops
-every in-window rating (the common case, exact); the in-window series comes
-from the immutable match log (same source as ``/progression``), windowed to
-the tournament dates. So the latest bucket equals the live ``/standings``
-order and past buckets stay stable. Teams (``teams[].points``) rank by
-combined peak (sum of members' as-of-bucket ``max_rating``), matching the
-Teams page.
+entity's ``peak_rating`` as of a bucket is the max of three sources
+(#226, #357, #271), clamped to the live ``max_rating``:
+
+- **Recorded metric observations** (``player_rating_snapshots``) — the
+  poller's append-only history of upstream's reported peak. Wherever
+  these exist they beat reconstruction: the latest pre-start observation
+  is the exact carried-in baseline (earliest in-window observation
+  carried back when there's no pre-start one), and in-window
+  observations ratchet the peak at their observed times.
+- **The carried-in log baseline** (fallback, no observations): the live
+  ``max_rating`` when it tops every in-window rating (peak set
+  pre-event — exact), else the rebase-aware pre-event peak from the
+  match log so the line climbs into an in-event all-time high rather
+  than teleporting to it (#357). The rating held entering the window
+  floors the baseline in all cases.
+- **The in-window log peak-so-far** (same source as ``/progression``),
+  windowed to the tournament dates.
+
+The clamp exists because the match log is not the metric (#271):
+upstream rebases ``highestrating`` and ignores placement games, so log
+rows can outscore today's reported peak — those are rebased-away noise.
+The latest bucket therefore always equals the live ``/standings`` order
+and past buckets stay stable. Teams (``teams[].points``) rank by
+combined peak (sum of members' as-of-bucket ``max_rating``), matching
+the Teams page.
  * @summary Get Standings History
  */
 export const GetStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetParams = zod.object({
@@ -500,6 +534,12 @@ Each row also carries the team's combined in-window win/loss (sum of the
 members' ``tournament_record`` W/L, plus a server-computed ``win_pct``)
 and a per-team civ pick/win aggregate, with the same per-member figures on
 each ``TeamMemberRead`` (#220).
+
+Once ``grand_finals_date`` passes, member peaks — and therefore the
+combined sums, the member order, and the team order — freeze at the
+as-of-window-end metric (``_frozen_peak_by_profile``), mirroring
+``/standings``: the playoff seeding derives from this table, so
+post-window ladder play must not reorder it.
  * @summary Get Team Standings
  */
 export const GetTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetParams = zod.object({

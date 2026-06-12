@@ -19,10 +19,14 @@ export interface TournamentInfo {
   /** ISO-8601 start timestamp, or null if not yet set in the DB. */
   startDate: string | null
   /**
-   * ISO-8601 grand-finals timestamp (#17). Also the tournament-window
-   * upper bound now that `end_date` is gone (aoe2-live-standings-api#76).
+   * ISO-8601 end of the rated window — for this event, the ladder-race
+   * end, NOT the grand finals (renamed from `grand_finals_date`;
+   * aoe2-live-standings-api#277/#279 reversed #76 once the playoffs
+   * proved the two diverge). The countdown target while the race runs;
+   * the playoffs/grand-finals schedule is display data and comes from
+   * the tournament `presentation` bag instead.
    */
-  grandFinalsDate: string | null
+  endDate: string | null
   /**
    * Total prize pool, in integer minor units of the build's display
    * currency (cents for USD/EUR/etc.) — `5000.00` is stored as `500000`.

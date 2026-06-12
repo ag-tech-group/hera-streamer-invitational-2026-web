@@ -212,7 +212,7 @@
     "tournament": {
       "nameLabel": "Название",
       "startDate": "Дата начала",
-      "grandFinalsDate": "Дата гранд-финала",
+      "endDate": "Окончание ладдерной гонки",
       "save": "Сохранить изменения",
       "saving": "Сохранение…",
       "successToast": "Турнир обновлён.",

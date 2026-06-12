@@ -215,7 +215,7 @@
     "tournament": {
       "nameLabel": "Name",
       "startDate": "Start date",
-      "grandFinalsDate": "Grand finals date",
+      "endDate": "Ladder race end",
       "save": "Save changes",
       "saving": "Saving…",
       "successToast": "Tournament updated.",

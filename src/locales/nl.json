@@ -208,7 +208,7 @@
     "tournament": {
       "nameLabel": "Naam",
       "startDate": "Startdatum",
-      "grandFinalsDate": "Datum grote finale",
+      "endDate": "Einde van de ladderrace",
       "save": "Wijzigingen opslaan",
       "saving": "Opslaan…",
       "successToast": "Toernooi bijgewerkt.",

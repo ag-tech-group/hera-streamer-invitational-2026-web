@@ -33,7 +33,7 @@ export function toTournamentInfo(response: TournamentResponse): TournamentInfo {
     name: dto.name,
     leaderboardId: dto.leaderboard_id,
     startDate: dto.start_date,
-    grandFinalsDate: dto.grand_finals_date,
+    endDate: dto.end_date,
     prizePoolCents: dto.prize_pool_cents,
     // `host_stream_live` is optional on the DTO (#149) — default to false so
     // the UI always has a definite boolean and the host card stays dark when

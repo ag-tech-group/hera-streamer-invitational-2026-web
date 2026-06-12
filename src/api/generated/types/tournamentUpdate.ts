@@ -9,15 +9,20 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
+import type { TournamentUpdatePresentation } from './tournamentUpdatePresentation';
 
 /**
  * Partial update for a tournament's metadata (``PATCH``).
 
 Every field is optional; only the fields present in the request body
-are applied. ``start_date`` / ``grand_finals_date`` may be set to
-``null`` to clear them. ``name`` and ``leaderboard_id`` back non-
-nullable columns, so an explicit ``null`` for either is rejected
-with 422.
+are applied. ``start_date`` / ``end_date`` may be set to ``null`` to
+clear them (``grand_finals_date`` is ``end_date``'s deprecated alias —
+setting either sets both). ``name``, ``leaderboard_id``, and
+``presentation`` back non-nullable columns, so an explicit ``null``
+for any of them is rejected with 422.
+
+``presentation`` replaces the whole bag (read-modify-write, like the
+roster rows' bag) — send ``{}`` to clear it.
 
 ``slug`` is intentionally not updatable — it is the routing key
 consumers' URLs are built from.
@@ -26,7 +31,10 @@ export interface TournamentUpdate {
   name?: string | null;
   leaderboard_id?: number | null;
   start_date?: string | null;
+  end_date?: string | null;
+  /** @deprecated */
   grand_finals_date?: string | null;
   prize_pool_cents?: number | null;
   host_stream_urls?: string[] | null;
+  presentation?: TournamentUpdatePresentation;
 }

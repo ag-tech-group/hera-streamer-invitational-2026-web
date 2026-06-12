@@ -152,6 +152,10 @@ const tournament: TournamentRead = {
   name: "Test Tournament",
   leaderboard_id: 3,
   start_date: null,
+  end_date: null,
+  // Transition-state alias of end_date: still required by the generated
+  // type until the API's contract phase drops it (then regen removes it
+  // here too). Nothing reads it.
   grand_finals_date: null,
   prize_pool_cents: null,
   host_stream_urls: [],
@@ -295,7 +299,7 @@ describe("HomePage", () => {
       tournamentHandler({
         ...tournament,
         start_date: startDate,
-        grand_finals_date: grandFinals,
+        end_date: grandFinals,
       })
     )
 
@@ -311,12 +315,12 @@ describe("HomePage", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("shows the 'Ladder Race Ends' countdown when grand_finals_date is set", async () => {
+  it("shows the 'Ladder Race Ends' countdown when end_date is set", async () => {
     // 30 days ahead — clearly in the future so the countdown stays rendered.
     const grandFinals = new Date(Date.now() + 30 * 86_400_000).toISOString()
     server.use(
       standingsHandler(standings),
-      tournamentHandler({ ...tournament, grand_finals_date: grandFinals })
+      tournamentHandler({ ...tournament, end_date: grandFinals })
     )
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })
@@ -326,7 +330,7 @@ describe("HomePage", () => {
     ).toBeInTheDocument()
   })
 
-  it("hides the end countdown when grand_finals_date is null", async () => {
+  it("hides the end countdown when end_date is null", async () => {
     server.use(standingsHandler(standings), tournamentHandler(tournament))
 
     await renderWithFileRoutes(<div />, { initialLocation: "/" })

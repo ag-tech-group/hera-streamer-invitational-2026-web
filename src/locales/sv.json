@@ -208,7 +208,7 @@
     "tournament": {
       "nameLabel": "Namn",
       "startDate": "Startdatum",
-      "grandFinalsDate": "Datum för grand final",
+      "endDate": "Slut på ladder-racet",
       "save": "Spara ändringar",
       "saving": "Sparar…",
       "successToast": "Turneringen uppdaterad.",

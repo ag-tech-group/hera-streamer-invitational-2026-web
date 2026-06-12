@@ -387,8 +387,9 @@ export function useGetTournamentDetailV1TournamentsTournamentSlugGet<TData = Awa
 PATCH semantics: only the fields present in the request body change.
 ``start_date`` / ``grand_finals_date`` accept ``null`` to clear a
 bound; a competition window whose start falls after its grand finals
-is rejected with 422. ``slug`` is immutable — it is the key consumer
-URLs are built on.
+is rejected with 422. ``presentation`` replaces the whole bag
+(read-modify-write, mirroring the roster rows' bag). ``slug`` is
+immutable — it is the key consumer URLs are built on.
  * @summary Update Tournament
  */
 export type updateTournamentV1TournamentsTournamentSlugPatchResponse200 = {
@@ -588,6 +589,12 @@ Position is by peak so it matches the table's ``comparePeakRank`` and
 on a new all-time high. Both ``current_rating`` and ``max_rating`` are
 returned, so a tournament can rank on either. (#187 unified the old
 three-tier sort; #226 switched the rank key from current_rating to peak.)
+
+Once ``grand_finals_date`` passes, the table is **final**: rank and the
+surfaced ``max_rating`` switch to the as-of-window-end peak
+(``_frozen_peak_by_profile``), so post-window ladder grinding — the
+roster keeps playing — can't reorder a result the playoff seeding came
+from. ``current_rating`` stays live; it's labelled current.
 
 The leaderboard filter lives in the join condition, not the WHERE
 clause — putting it in WHERE would re-filter the outer-join right
@@ -842,7 +849,8 @@ Five cards mirroring the stats page's headline row — highest peak rating,
 best win rate, longest win streak, biggest climber, most games played —
 each naming the leading linked entrant and their value. ``highest_peak_rating``
 is the **one lifetime read**: it ranks by all-time ``PlayerRating.max_rating``
-(the host's all-time-peak decision, same as ``StandingRow.max_rating``). The
+(the host's all-time-peak decision, same as ``StandingRow.max_rating``),
+frozen at the as-of-window-end value once ``grand_finals_date`` passes. The
 other four are computed in-window (the same ``[start_date, grand_finals_date]``
 bounds as ``tournament_record``) over the tournament players' matches on its
 leaderboard. ``biggest_climber`` is the greatest **signed** in-window net
@@ -1278,15 +1286,31 @@ identically to ``/standings`` (#232) — a row linked to a not-yet-polled
 entity set and the chart never carries a phantom the FE can't label.
 
 Peak elo is carried in and only rises on a new all-time high, so an
-entity's ``peak_rating`` as of a bucket is ``max(pre-event baseline,
-in-window peak-so-far)`` — flat at their lifetime peak unless they set a
-new high mid-event. The baseline is the current ``max_rating`` when it tops
-every in-window rating (the common case, exact); the in-window series comes
-from the immutable match log (same source as ``/progression``), windowed to
-the tournament dates. So the latest bucket equals the live ``/standings``
-order and past buckets stay stable. Teams (``teams[].points``) rank by
-combined peak (sum of members' as-of-bucket ``max_rating``), matching the
-Teams page.
+entity's ``peak_rating`` as of a bucket is the max of three sources
+(#226, #357, #271), clamped to the live ``max_rating``:
+
+- **Recorded metric observations** (``player_rating_snapshots``) — the
+  poller's append-only history of upstream's reported peak. Wherever
+  these exist they beat reconstruction: the latest pre-start observation
+  is the exact carried-in baseline (earliest in-window observation
+  carried back when there's no pre-start one), and in-window
+  observations ratchet the peak at their observed times.
+- **The carried-in log baseline** (fallback, no observations): the live
+  ``max_rating`` when it tops every in-window rating (peak set
+  pre-event — exact), else the rebase-aware pre-event peak from the
+  match log so the line climbs into an in-event all-time high rather
+  than teleporting to it (#357). The rating held entering the window
+  floors the baseline in all cases.
+- **The in-window log peak-so-far** (same source as ``/progression``),
+  windowed to the tournament dates.
+
+The clamp exists because the match log is not the metric (#271):
+upstream rebases ``highestrating`` and ignores placement games, so log
+rows can outscore today's reported peak — those are rebased-away noise.
+The latest bucket therefore always equals the live ``/standings`` order
+and past buckets stay stable. Teams (``teams[].points``) rank by
+combined peak (sum of members' as-of-bucket ``max_rating``), matching
+the Teams page.
  * @summary Get Standings History
  */
 export type getStandingsHistoryV1TournamentsTournamentSlugStandingsHistoryGetResponse200 = {
@@ -1421,6 +1445,12 @@ Each row also carries the team's combined in-window win/loss (sum of the
 members' ``tournament_record`` W/L, plus a server-computed ``win_pct``)
 and a per-team civ pick/win aggregate, with the same per-member figures on
 each ``TeamMemberRead`` (#220).
+
+Once ``grand_finals_date`` passes, member peaks — and therefore the
+combined sums, the member order, and the team order — freeze at the
+as-of-window-end metric (``_frozen_peak_by_profile``), mirroring
+``/standings``: the playoff seeding derives from this table, so
+post-window ladder play must not reorder it.
  * @summary Get Team Standings
  */
 export type getTeamStandingsV1TournamentsTournamentSlugTeamsStandingsGetResponse200 = {
