@@ -18,7 +18,7 @@ import type { PlayerCivStats } from './playerCivStats';
 ``overall`` sums each civ's picks/wins across all entrants; ``by_player``
 breaks the same counts down per roster row. Counts cover only the
 tournament players' completed matches on the tournament's leaderboard,
-windowed to ``[start_date, end_date]`` (a null bound is open) —
+windowed to ``[start_date, grand_finals_date]`` (a null bound is open) —
 their ladder opponents' rows are excluded. Civs with no entrant picks
 are absent from both lists. ``overall`` is ordered by picks desc then
 civ id; ``by_player`` by ``tournament_player_id``.

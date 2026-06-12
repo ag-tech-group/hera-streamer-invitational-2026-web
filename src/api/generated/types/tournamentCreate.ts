@@ -36,6 +36,8 @@ export interface TournamentCreate {
   leaderboard_id: number;
   start_date?: string | null;
   end_date?: string | null;
+  /** @deprecated */
+  grand_finals_date?: string | null;
   prize_pool_cents?: number | null;
   /** @maxItems 5 */
   host_stream_urls?: string[];

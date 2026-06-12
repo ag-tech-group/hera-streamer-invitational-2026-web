@@ -30,6 +30,7 @@ export const ListTournamentsV1TournamentsGetResponseItem = zod.object({
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "host_stream_urls": zod.array(zod.string()),
   "presentation": zod.record(zod.string(), zod.unknown()).optional(),
@@ -45,7 +46,7 @@ The caller is recorded as the first owner, immediately able to ``PATCH``
 metadata, manage the roster + teams, and ``DELETE`` the tournament.
 409 if the slug is taken (it is unique across the deployment and how
 consumer URLs route to the right tournament). A competition window
-whose start falls after its end is rejected with 422.
+whose start falls after its grand finals is rejected with 422.
  * @summary Create Tournament
  */
 export const createTournamentV1TournamentsPostBodySlugMax = 64;
@@ -68,6 +69,7 @@ export const CreateTournamentV1TournamentsPostBody = zod.object({
   "leaderboard_id": zod.number().gt(createTournamentV1TournamentsPostBodyLeaderboardIdExclusiveMin),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "end_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "prize_pool_cents": zod.union([zod.number().min(createTournamentV1TournamentsPostBodyPrizePoolCentsOneMin),zod.null()]).optional(),
   "host_stream_urls": zod.array(zod.string()).max(createTournamentV1TournamentsPostBodyHostStreamUrlsMax).optional(),
   "presentation": zod.record(zod.string(), zod.unknown()).optional()
@@ -90,6 +92,7 @@ export const GetTournamentDetailV1TournamentsTournamentSlugGetResponse = zod.obj
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "host_stream_urls": zod.array(zod.string()),
   "presentation": zod.record(zod.string(), zod.unknown()).optional(),
@@ -101,11 +104,11 @@ export const GetTournamentDetailV1TournamentsTournamentSlugGetResponse = zod.obj
  * Edit a tournament's metadata — owner-gated.
 
 PATCH semantics: only the fields present in the request body change.
-``start_date`` / ``end_date`` accept ``null`` to clear a bound; a
-competition window whose start falls after its end is rejected with
-422. ``presentation`` replaces the whole bag (read-modify-write,
-mirroring the roster rows' bag). ``slug`` is immutable — it is the
-key consumer URLs are built on.
+``start_date`` / ``grand_finals_date`` accept ``null`` to clear a
+bound; a competition window whose start falls after its grand finals
+is rejected with 422. ``presentation`` replaces the whole bag
+(read-modify-write, mirroring the roster rows' bag). ``slug`` is
+immutable — it is the key consumer URLs are built on.
  * @summary Update Tournament
  */
 export const UpdateTournamentV1TournamentsTournamentSlugPatchParams = zod.object({
@@ -127,10 +130,11 @@ export const UpdateTournamentV1TournamentsTournamentSlugPatchBody = zod.object({
   "leaderboard_id": zod.union([zod.number().gt(updateTournamentV1TournamentsTournamentSlugPatchBodyLeaderboardIdOneExclusiveMin),zod.null()]).optional(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "end_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]).optional(),
   "prize_pool_cents": zod.union([zod.number().min(updateTournamentV1TournamentsTournamentSlugPatchBodyPrizePoolCentsOneMin),zod.null()]).optional(),
   "host_stream_urls": zod.union([zod.array(zod.string()).max(updateTournamentV1TournamentsTournamentSlugPatchBodyHostStreamUrlsOneMax),zod.null()]).optional(),
   "presentation": zod.union([zod.record(zod.string(), zod.unknown()),zod.null()]).optional()
-}).describe('Partial update for a tournament\'s metadata (``PATCH``).\n\nEvery field is optional; only the fields present in the request body\nare applied. ``start_date`` \/ ``end_date`` may be set to ``null`` to\nclear them. ``name``, ``leaderboard_id``, and ``presentation`` back\nnon-nullable columns, so an explicit ``null`` for any of them is\nrejected with 422.\n\n``presentation`` replaces the whole bag (read-modify-write, like the\nroster rows\' bag) — send ``{}`` to clear it.\n\n``slug`` is intentionally not updatable — it is the routing key\nconsumers\' URLs are built from.')
+}).describe('Partial update for a tournament\'s metadata (``PATCH``).\n\nEvery field is optional; only the fields present in the request body\nare applied. ``start_date`` \/ ``end_date`` may be set to ``null`` to\nclear them (``grand_finals_date`` is ``end_date``\'s deprecated alias —\nsetting either sets both). ``name``, ``leaderboard_id``, and\n``presentation`` back non-nullable columns, so an explicit ``null``\nfor any of them is rejected with 422.\n\n``presentation`` replaces the whole bag (read-modify-write, like the\nroster rows\' bag) — send ``{}`` to clear it.\n\n``slug`` is intentionally not updatable — it is the routing key\nconsumers\' URLs are built from.')
 
 export const updateTournamentV1TournamentsTournamentSlugPatchResponseHostStreamLiveDefault = false;
 
@@ -141,6 +145,7 @@ export const UpdateTournamentV1TournamentsTournamentSlugPatchResponse = zod.obje
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "host_stream_urls": zod.array(zod.string()),
   "presentation": zod.record(zod.string(), zod.unknown()).optional(),
@@ -178,7 +183,7 @@ on a new all-time high. Both ``current_rating`` and ``max_rating`` are
 returned, so a tournament can rank on either. (#187 unified the old
 three-tier sort; #226 switched the rank key from current_rating to peak.)
 
-Once ``end_date`` passes, the table is **final**: rank and the
+Once ``grand_finals_date`` passes, the table is **final**: rank and the
 surfaced ``max_rating`` switch to the as-of-window-end peak
 (``_frozen_peak_by_profile``), so post-window ladder grinding — the
 roster keeps playing — can't reorder a result the playoff seeding came
@@ -236,7 +241,7 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
   "completed_at": zod.union([zod.iso.datetime({}),zod.null()])
 }).describe('One recent in-window game with its civ matchup, for a standings tooltip.\n\nCarried newest-first in ``TournamentRecord.recent_matchups`` (#218): the\ngame\'s ``outcome`` plus the entrant\'s civ and — on a 1v1 leaderboard —\nthe opposing player\'s civ, so the consumer can render a \"<your civ> vs\n<their civ>\" tooltip on each recent-result icon. The consumer maps civ\nids to names\/emblems.')),
   "win_pct": zod.union([zod.number(),zod.null()]).describe('Win percentage (0–100, 1 dp) over in-window games; null when none.')
-}).describe('A player\'s stats within a tournament\'s date window.\n\nCounts only completed matches on the tournament\'s leaderboard between\nits ``start_date`` and ``end_date`` (a null bound is treated as open).\nDistinct from the lifetime-ladder ``wins`` \/ ``losses`` \/ ``streak`` \/\n``max_rating`` \/ ``last_match_at`` \/ ``recent_results`` on ``StandingRow``;\nevery field here is in-window only.'),
+}).describe('A player\'s stats within a tournament\'s date window.\n\nCounts only completed matches on the tournament\'s leaderboard between\nits ``start_date`` and ``grand_finals_date`` (a null bound is treated as open).\nDistinct from the lifetime-ladder ``wins`` \/ ``losses`` \/ ``streak`` \/\n``max_rating`` \/ ``last_match_at`` \/ ``recent_results`` on ``StandingRow``;\nevery field here is in-window only.'),
   "rank": zod.union([zod.number(),zod.null()]),
   "rank_total": zod.union([zod.number(),zod.null()]),
   "in_match": zod.boolean(),
@@ -255,7 +260,7 @@ export const GetStandingsV1TournamentsTournamentSlugStandingsGetResponse = zod.o
  * Civilization pick/win aggregation for the tournament's entrants.
 
 Counts only the tournament players' completed matches on the tournament's
-leaderboard, windowed to ``[start_date, end_date]`` (a null bound
+leaderboard, windowed to ``[start_date, grand_finals_date]`` (a null bound
 is open) — their ladder opponents' civ rows are excluded. ``overall``
 aggregates across all entrants; ``by_player`` breaks the same counts down
 per roster row. ``picks`` is the completed games on a civ, ``wins`` the
@@ -284,7 +289,7 @@ export const GetCivStatsV1TournamentsTournamentSlugCivStatsGetResponse = zod.obj
   "wins": zod.number()
 }).describe('Pick\/win counts for one civilization.'))
 }).describe('One entrant\'s per-civ pick\/win breakdown.\n\n``tournament_player_id`` is the stable roster key (#187); ``profile_id``\nis its linked polled identity — always set, since an entry only appears\nhere for a rostered player with counted matches, which requires a link.\n``civs`` is ordered by picks desc, then civ id.'))
-}).describe('Civilization pick\/win aggregation for a tournament\'s entrants.\n\n``overall`` sums each civ\'s picks\/wins across all entrants; ``by_player``\nbreaks the same counts down per roster row. Counts cover only the\ntournament players\' completed matches on the tournament\'s leaderboard,\nwindowed to ``[start_date, end_date]`` (a null bound is open) —\ntheir ladder opponents\' rows are excluded. Civs with no entrant picks\nare absent from both lists. ``overall`` is ordered by picks desc then\nciv id; ``by_player`` by ``tournament_player_id``.')
+}).describe('Civilization pick\/win aggregation for a tournament\'s entrants.\n\n``overall`` sums each civ\'s picks\/wins across all entrants; ``by_player``\nbreaks the same counts down per roster row. Counts cover only the\ntournament players\' completed matches on the tournament\'s leaderboard,\nwindowed to ``[start_date, grand_finals_date]`` (a null bound is open) —\ntheir ladder opponents\' rows are excluded. Civs with no entrant picks\nare absent from both lists. ``overall`` is ordered by picks desc then\nciv id; ``by_player`` by ``tournament_player_id``.')
 
 /**
  * Headline "leader" stat cards for the tournament's roster (#238, #243).
@@ -294,8 +299,8 @@ best win rate, longest win streak, biggest climber, most games played —
 each naming the leading linked entrant and their value. ``highest_peak_rating``
 is the **one lifetime read**: it ranks by all-time ``PlayerRating.max_rating``
 (the host's all-time-peak decision, same as ``StandingRow.max_rating``),
-frozen at the as-of-window-end value once ``end_date`` passes. The
-other four are computed in-window (the same ``[start_date, end_date]``
+frozen at the as-of-window-end value once ``grand_finals_date`` passes. The
+other four are computed in-window (the same ``[start_date, grand_finals_date]``
 bounds as ``tournament_record``) over the tournament players' matches on its
 leaderboard. ``biggest_climber`` is the greatest **signed** in-window net
 rating change (last − first rated point), so it can be negative when the
@@ -359,7 +364,7 @@ export const GetSummaryV1TournamentsTournamentSlugSummaryGetResponse = zod.objec
   "name": zod.string(),
   "value": zod.union([zod.number(),zod.number()])
 }).describe('One headline \"leader\" card: the leading roster player + their value.\n\nNames the entrant who tops one metric — all-time peak rating, or one of the\nin-window metrics (longest win streak, games played, net rating change, win\nrate) — on the tournament\'s leaderboard. ``tournament_player_id`` is the\nstable roster key (#187); ``profile_id`` is its linked polled identity\n(always set — only linked entrants have match data to rank). ``name`` is the\ndisplay label, the same source\/meaning as ``StandingRow.name``\n(``displayName`` override resolved server-side, #243).'),zod.null()])
-}).describe('Headline \"leader\" stat cards for a tournament (#238, #243).\n\nThe five cards mirror the stats page\'s headline row exactly (#243):\n``highest_peak_rating``, ``best_win_rate``, ``longest_win_streak``,\n``biggest_climber``, ``most_games_played``. Each names the leading roster\nentrant for one metric, computed in-window (the same\n``[start_date, end_date]`` bounds as ``tournament_record``) over\nlinked entrants only — their ladder opponents\' rows are excluded. (Peak\nrating is the one lifetime read; everything else, ``biggest_climber``\nincluded, is window-scoped.)\n\nA card is ``null`` when no entrant qualifies: an empty roster, a metric no\none has earned (zero in-window wins → no ``longest_win_streak`` leader),\nnothing rankable in-window (``biggest_climber`` needs ≥2 in-window rated\npoints), or — for ``best_win_rate`` — nobody past the minimum-games guard.\nLeaders are tie-broken deterministically (higher ``games_played``, then\nlower ``tournament_player_id``) so each card is stable across polls.\n``last_polled_at`` is the latest in-window match across the roster,\nmirroring the other aggregate endpoints.')
+}).describe('Headline \"leader\" stat cards for a tournament (#238, #243).\n\nThe five cards mirror the stats page\'s headline row exactly (#243):\n``highest_peak_rating``, ``best_win_rate``, ``longest_win_streak``,\n``biggest_climber``, ``most_games_played``. Each names the leading roster\nentrant for one metric, computed in-window (the same\n``[start_date, grand_finals_date]`` bounds as ``tournament_record``) over\nlinked entrants only — their ladder opponents\' rows are excluded. (Peak\nrating is the one lifetime read; everything else, ``biggest_climber``\nincluded, is window-scoped.)\n\nA card is ``null`` when no entrant qualifies: an empty roster, a metric no\none has earned (zero in-window wins → no ``longest_win_streak`` leader),\nnothing rankable in-window (``biggest_climber`` needs ≥2 in-window rated\npoints), or — for ``best_win_rate`` — nobody past the minimum-games guard.\nLeaders are tie-broken deterministically (higher ``games_played``, then\nlower ``tournament_player_id``) so each card is stable across polls.\n``last_polled_at`` is the latest in-window match across the roster,\nmirroring the other aggregate endpoints.')
 
 /**
  * Completed games where two of the tournament's entrants faced each other (#349).
@@ -372,7 +377,7 @@ can't miss an old head-to-head game buried behind a wall of ladder games.
 
 Each entry carries the matchup, map, each entrant's civ + elo-going-in +
 result, and the game's duration; the consumer builds the external match
-link from ``match_id``. Window is the same ``[start_date, end_date]``
+link from ``match_id``. Window is the same ``[start_date, grand_finals_date]``
 bounds as ``tournament_record`` (a null bound is open). Newest game first.
  * @summary Get Head To Head
  */
@@ -419,7 +424,7 @@ oldest-first, where ``rating`` is the post-match value. The consumer
 plots rating against ``completed_at`` for a by-date view, or against
 point index for a by-games-played view. Players with no such history
 are omitted. Points are bounded by the tournament's date window
-(``[start_date, end_date]``; a null bound is open), mirroring
+(``[start_date, grand_finals_date]``; a null bound is open), mirroring
 ``tournament_record`` — so the chart reflects in-event rating movement,
 not a player's whole tracked history.
  * @summary Get Progression
@@ -530,7 +535,7 @@ members' ``tournament_record`` W/L, plus a server-computed ``win_pct``)
 and a per-team civ pick/win aggregate, with the same per-member figures on
 each ``TeamMemberRead`` (#220).
 
-Once ``end_date`` passes, member peaks — and therefore the
+Once ``grand_finals_date`` passes, member peaks — and therefore the
 combined sums, the member order, and the team order — freeze at the
 as-of-window-end metric (``_frozen_peak_by_profile``), mirroring
 ``/standings``: the playoff seeding derives from this table, so

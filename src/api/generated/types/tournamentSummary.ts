@@ -19,7 +19,7 @@ The five cards mirror the stats page's headline row exactly (#243):
 ``highest_peak_rating``, ``best_win_rate``, ``longest_win_streak``,
 ``biggest_climber``, ``most_games_played``. Each names the leading roster
 entrant for one metric, computed in-window (the same
-``[start_date, end_date]`` bounds as ``tournament_record``) over
+``[start_date, grand_finals_date]`` bounds as ``tournament_record``) over
 linked entrants only — their ladder opponents' rows are excluded. (Peak
 rating is the one lifetime read; everything else, ``biggest_climber``
 included, is window-scoped.)

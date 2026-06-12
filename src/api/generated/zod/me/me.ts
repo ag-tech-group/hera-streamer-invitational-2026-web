@@ -37,6 +37,7 @@ export const GetMeV1MeGetResponse = zod.object({
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "host_stream_urls": zod.array(zod.string()),
   "presentation": zod.record(zod.string(), zod.unknown()).optional(),
