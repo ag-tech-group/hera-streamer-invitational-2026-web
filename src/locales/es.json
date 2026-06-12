@@ -208,7 +208,7 @@
     "tournament": {
       "nameLabel": "Nombre",
       "startDate": "Fecha de inicio",
-      "grandFinalsDate": "Fecha de la gran final",
+      "endDate": "Fin de la carrera de ladder",
       "save": "Guardar cambios",
       "saving": "Guardando…",
       "successToast": "Torneo actualizado.",

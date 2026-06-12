@@ -61,7 +61,7 @@ export function ContextCards() {
             />
           )}
           <Countdown
-            target={tournament.data?.grandFinalsDate ?? null}
+            target={tournament.data?.endDate ?? null}
             isLoading={tournament.isPending}
             label={
               <Trans

@@ -9,6 +9,7 @@
 Age of Empires II © Microsoft Corporation. AoE2 Live Standings API was created under Microsoft's [Game Content Usage Rules](https://www.xbox.com/en-us/developers/rules) using assets from Age of Empires II and it is not endorsed by or affiliated with Microsoft.
  * OpenAPI spec version: 0.0.1
  */
+import type { TournamentReadPresentation } from './tournamentReadPresentation';
 
 /**
  * A tournament — a named roster of players tracked on one leaderboard.
@@ -26,9 +27,10 @@ export interface TournamentRead {
   name: string;
   leaderboard_id: number;
   start_date: string | null;
-  grand_finals_date: string | null;
+  end_date: string | null;
   prize_pool_cents: number | null;
   host_stream_urls: string[];
+  presentation?: TournamentReadPresentation;
   host_stream_live?: boolean;
   created_at: string;
 }

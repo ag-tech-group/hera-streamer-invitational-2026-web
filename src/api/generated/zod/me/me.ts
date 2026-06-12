@@ -36,9 +36,10 @@ export const GetMeV1MeGetResponse = zod.object({
   "name": zod.string(),
   "leaderboard_id": zod.number(),
   "start_date": zod.union([zod.iso.datetime({}),zod.null()]),
-  "grand_finals_date": zod.union([zod.iso.datetime({}),zod.null()]),
+  "end_date": zod.union([zod.iso.datetime({}),zod.null()]),
   "prize_pool_cents": zod.union([zod.number(),zod.null()]),
   "host_stream_urls": zod.array(zod.string()),
+  "presentation": zod.record(zod.string(), zod.unknown()).optional(),
   "host_stream_live": zod.boolean().default(getMeV1MeGetResponseOwnedTournamentsItemHostStreamLiveDefault),
   "created_at": zod.iso.datetime({})
 }).describe('A tournament — a named roster of players tracked on one leaderboard.\n\nConfiguration rather than polled data: a tournament\'s standings,\nmatches, and live state are served under ``\/v1\/tournaments\/{slug}\/...``.\nThe one exception is ``host_stream_live`` (#149) — a derived flag the\nrouter computes from the broadcast-live snapshot before serializing,\nso a host channel going live transitions the card within one poll\ncycle. The standings ``live`` SSE nudge already invalidates this query.'))

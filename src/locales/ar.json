@@ -216,7 +216,7 @@
     "tournament": {
       "nameLabel": "الاسم",
       "startDate": "تاريخ البدء",
-      "grandFinalsDate": "تاريخ النهائي الكبير",
+      "endDate": "نهاية سباق السلم",
       "save": "حفظ التغييرات",
       "saving": "جارٍ الحفظ…",
       "successToast": "تم تحديث البطولة.",
