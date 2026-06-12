@@ -153,10 +153,6 @@ const tournament: TournamentRead = {
   leaderboard_id: 3,
   start_date: null,
   end_date: null,
-  // Transition-state alias of end_date: still required by the generated
-  // type until the API's contract phase drops it (then regen removes it
-  // here too). Nothing reads it.
-  grand_finals_date: null,
   prize_pool_cents: null,
   host_stream_urls: [],
   created_at: "2026-05-01T00:00:00Z",

@@ -16,10 +16,9 @@ import type { TournamentUpdatePresentation } from './tournamentUpdatePresentatio
 
 Every field is optional; only the fields present in the request body
 are applied. ``start_date`` / ``end_date`` may be set to ``null`` to
-clear them (``grand_finals_date`` is ``end_date``'s deprecated alias —
-setting either sets both). ``name``, ``leaderboard_id``, and
-``presentation`` back non-nullable columns, so an explicit ``null``
-for any of them is rejected with 422.
+clear them. ``name``, ``leaderboard_id``, and ``presentation`` back
+non-nullable columns, so an explicit ``null`` for any of them is
+rejected with 422.
 
 ``presentation`` replaces the whole bag (read-modify-write, like the
 roster rows' bag) — send ``{}`` to clear it.
@@ -32,8 +31,6 @@ export interface TournamentUpdate {
   leaderboard_id?: number | null;
   start_date?: string | null;
   end_date?: string | null;
-  /** @deprecated */
-  grand_finals_date?: string | null;
   prize_pool_cents?: number | null;
   host_stream_urls?: string[] | null;
   presentation?: TournamentUpdatePresentation;
