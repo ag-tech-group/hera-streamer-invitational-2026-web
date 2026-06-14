@@ -34,12 +34,17 @@
     },
     "viewTabsAria": "Tabellenansicht",
     "lastUpdated": "Aktualisiert {{time}}",
+    "standingsFinal": "Endstand",
     "ladderRace": {
       "begins": "Ladder-Rennen <accent>beginnt</accent>",
       "ends": "Ladder-Rennen <accent>endet</accent>",
       "active": {
         "title": "Ladder-Rennen <accent>läuft</accent>",
         "body": "Die Spieler sind in 4 Teams aufgeteilt und treten an, um die höchstmögliche kombinierte Elo zu erreichen. Für die finale Wertung zählen ausschließlich die Höchst-Elos."
+      },
+      "ended": {
+        "title": "Ladder-Rennen <accent>abgeschlossen</accent>",
+        "body": "Das Ladder-Rennen ist beendet – diese Platzierungen sind endgültig."
       }
     },
     "noStandings": {

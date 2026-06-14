@@ -34,12 +34,17 @@
     },
     "viewTabsAria": "Ställningsvy",
     "lastUpdated": "Uppdaterad {{time}}",
+    "standingsFinal": "Slutställning",
     "ladderRace": {
       "begins": "Ladderrace <accent>börjar</accent>",
       "ends": "Ladderrace <accent>slutar</accent>",
       "active": {
         "title": "Ladderrace <accent>pågår</accent>",
         "body": "Spelarna är indelade i 4 lag och tävlar om att uppnå högsta möjliga sammanlagda elo. Endast topp-elo räknas för den slutliga rankingen."
+      },
+      "ended": {
+        "title": "Ladderrace <accent>avslutat</accent>",
+        "body": "Ladderracet är slut – den här placeringen är slutgiltig."
       }
     },
     "noStandings": {

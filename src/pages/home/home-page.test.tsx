@@ -311,6 +311,36 @@ describe("HomePage", () => {
     ).not.toBeInTheDocument()
   })
 
+  it("swaps the strip for the 'Ladder Race Complete' panel once the race has ended", async () => {
+    // Both dates in the past: the race is over, so the active panel and the
+    // now-elapsed end countdown give way to the completion panel, and the
+    // standings badge reads "Final" instead of ticking freshness.
+    const startDate = new Date(Date.now() - 14 * 86_400_000).toISOString()
+    const endDate = new Date(Date.now() - 86_400_000).toISOString()
+    server.use(
+      standingsHandler(standings),
+      tournamentHandler({
+        ...tournament,
+        start_date: startDate,
+        end_date: endDate,
+      })
+    )
+
+    await renderWithFileRoutes(<div />, { initialLocation: "/" })
+
+    expect(
+      await screen.findByText(fullLabel("Ladder Race Complete"))
+    ).toBeInTheDocument()
+    expect(await screen.findByText(/final standings/i)).toBeInTheDocument()
+    // The active panel and both countdowns are gone once the race is over.
+    expect(
+      screen.queryByText(fullLabel("Ladder Race Active"))
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(fullLabel("Ladder Race Ends"))
+    ).not.toBeInTheDocument()
+  })
+
   it("shows the 'Ladder Race Ends' countdown when end_date is set", async () => {
     // 30 days ahead — clearly in the future so the countdown stays rendered.
     const grandFinals = new Date(Date.now() + 30 * 86_400_000).toISOString()

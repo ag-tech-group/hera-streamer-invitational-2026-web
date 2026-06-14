@@ -34,12 +34,17 @@
     },
     "viewTabsAria": "Vue du classement",
     "lastUpdated": "Mis à jour {{time}}",
+    "standingsFinal": "Classement final",
     "ladderRace": {
       "begins": "La course au ladder <accent>commence</accent>",
       "ends": "La course au ladder <accent>se termine</accent>",
       "active": {
         "title": "La course au ladder <accent>est en cours</accent>",
         "body": "Les joueurs sont répartis en 4 équipes et s'affrontent pour atteindre l'elo combiné le plus élevé possible. Seuls les elos de pointe sont pris en compte pour le classement final."
+      },
+      "ended": {
+        "title": "La course au ladder <accent>est terminée</accent>",
+        "body": "La course au ladder est terminée — ce classement est définitif."
       }
     },
     "noStandings": {
