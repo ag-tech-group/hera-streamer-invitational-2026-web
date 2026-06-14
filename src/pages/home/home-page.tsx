@@ -6,7 +6,9 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useLiveUpdates } from "@/hooks/use-live-updates"
 import { useStandings } from "@/hooks/use-standings"
 import { useTeamStandings } from "@/hooks/use-team-standings"
+import { useTournamentPhase } from "@/hooks/use-tournament-phase"
 import { useAnalytics } from "@/lib/analytics"
+import { FinalStandingsBadge } from "@/pages/home/final-standings-badge"
 import {
   LastUpdatedBadge,
   LastUpdatedBadgeSkeleton,
@@ -110,11 +112,18 @@ export function HomePage({ view }: { view: StandingsView }) {
   const activeIsPending =
     view === "players" ? standings.isPending : teams.isPending
 
+  // Once the ladder race has ended the standings freeze (#363), so the ticking
+  // freshness badge would read as staleness — swap it for a static "Final
+  // standings" marker instead.
+  const phase = useTournamentPhase()
+
   return (
     <TournamentLayout
       view={view}
       tabsTrailing={
-        activeData ? (
+        phase === "ended" && activeData ? (
+          <FinalStandingsBadge />
+        ) : activeData ? (
           <LastUpdatedBadge lastPolledAt={activeData.lastPolledAt} />
         ) : activeIsPending ? (
           <LastUpdatedBadgeSkeleton />

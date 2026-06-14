@@ -34,12 +34,17 @@
     },
     "viewTabsAria": "عرض الترتيب",
     "lastUpdated": "تم التحديث {{time}}",
+    "standingsFinal": "الترتيب النهائي",
     "ladderRace": {
       "begins": "سباق السلّم <accent>يبدأ</accent>",
       "ends": "سباق السلّم <accent>ينتهي</accent>",
       "active": {
         "title": "سباق السلّم <accent>جارٍ</accent>",
         "body": "يُقسَّم اللاعبون إلى 4 فرق ويتنافسون لتحقيق أعلى مجموع إيلو ممكن. تُحتسب تصنيفات الذروة فقط في الترتيب النهائي."
+      },
+      "ended": {
+        "title": "سباق السلّم <accent>مكتمل</accent>",
+        "body": "انتهى سباق السلّم — هذه الترتيبات نهائية."
       }
     },
     "noStandings": {

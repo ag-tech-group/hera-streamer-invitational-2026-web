@@ -34,12 +34,17 @@
     },
     "viewTabsAria": "Standings view",
     "lastUpdated": "Updated {{time}}",
+    "standingsFinal": "Final standings",
     "ladderRace": {
       "begins": "Ladder Race <accent>Begins</accent>",
       "ends": "Ladder Race <accent>Ends</accent>",
       "active": {
         "title": "Ladder Race <accent>Active</accent>",
         "body": "Players are divided into 4 teams and will be competing to achieve the highest combined elo possible. Only Peak Elos are considered for the final rankings."
+      },
+      "ended": {
+        "title": "Ladder Race <accent>Complete</accent>",
+        "body": "The ladder race has ended — these standings are final."
       }
     },
     "noStandings": {

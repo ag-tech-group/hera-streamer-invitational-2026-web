@@ -34,12 +34,17 @@
     },
     "viewTabsAria": "Vista de clasificación",
     "lastUpdated": "Actualizado {{time}}",
+    "standingsFinal": "Clasificación final",
     "ladderRace": {
       "begins": "<accent>Comienza</accent> la Carrera de Ladder",
       "ends": "<accent>Termina</accent> la Carrera de Ladder",
       "active": {
         "title": "Carrera de Ladder <accent>en curso</accent>",
         "body": "Los jugadores se dividen en 4 equipos y compiten por alcanzar el elo combinado más alto posible. Solo se consideran los elos máximos para la clasificación final."
+      },
+      "ended": {
+        "title": "Carrera de Ladder <accent>finalizada</accent>",
+        "body": "La carrera de ladder ha terminado: esta clasificación es definitiva."
       }
     },
     "noStandings": {

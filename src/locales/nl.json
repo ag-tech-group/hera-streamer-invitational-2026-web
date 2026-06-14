@@ -34,12 +34,17 @@
     },
     "viewTabsAria": "Klassementweergave",
     "lastUpdated": "Bijgewerkt {{time}}",
+    "standingsFinal": "Eindstand",
     "ladderRace": {
       "begins": "Ladderrace <accent>begint</accent>",
       "ends": "Ladderrace <accent>eindigt</accent>",
       "active": {
         "title": "Ladderrace <accent>actief</accent>",
         "body": "De spelers zijn verdeeld over 4 teams en strijden om de hoogst mogelijke gecombineerde elo te behalen. Voor de eindstand tellen alleen de piek-elo's mee."
+      },
+      "ended": {
+        "title": "Ladderrace <accent>voltooid</accent>",
+        "body": "De ladderrace is afgelopen — deze stand is definitief."
       }
     },
     "noStandings": {
