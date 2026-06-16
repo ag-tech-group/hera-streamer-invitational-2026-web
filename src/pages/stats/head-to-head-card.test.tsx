@@ -97,6 +97,39 @@ function makeGame(opts: {
   }
 }
 
+/** A completed game with explicit winner/loser identities, so several games can
+ *  share a player — the only way to build a cross-game tie (makeGame derives its
+ *  ids from the matchId, so every makeGame player is unique). */
+function clash(
+  winner: [id: number, name: string],
+  loser: [id: number, name: string],
+  matchId: number
+): HeadToHeadGame {
+  const side = (
+    [tournamentPlayerId, name]: [number, string],
+    outcome: "win" | "loss"
+  ) => ({
+    tournamentPlayerId,
+    profileId: tournamentPlayerId * 10,
+    name,
+    civId: 1,
+    civName: "Franks",
+    civEmblemUrl: null,
+    oldRating: 1800,
+    newRating: 1810,
+    outcome,
+  })
+  return {
+    matchId,
+    mapName: "Arabia",
+    startedAt: "2026-06-03T18:00:00Z",
+    completedAt: "2026-06-03T18:20:00Z",
+    durationSeconds: 1200,
+    matchUrl: `https://www.aoe2insights.com/match/${matchId}/`,
+    entrants: [side(winner, "win"), side(loser, "loss")],
+  }
+}
+
 /** Shapes the subset of the query result the card reads. */
 function mockQuery(state: {
   data?: HeadToHeadSnapshot
@@ -156,6 +189,32 @@ describe("HeadToHeadCard", () => {
     expect(screen.getByText("1 win")).toBeInTheDocument()
     // The leader's name shows in the summary in addition to the table cell.
     expect(screen.getAllByText("TheViper")).toHaveLength(2)
+  })
+
+  it("names every tied player, comma-separated, with the standard label and one win count", () => {
+    // A rock-paper-scissors cycle: Viper, Hera, and Liereyy each finish 1–1, so
+    // all three are level on the lead.
+    mockQuery({
+      data: {
+        lastPolledAt: null,
+        games: [
+          clash([1, "TheViper"], [2, "Hera"], 1),
+          clash([2, "Hera"], [3, "Liereyy"], 2),
+          clash([3, "Liereyy"], [1, "TheViper"], 3),
+        ],
+      },
+    })
+    const { container } = render(<HeadToHeadCard />)
+    // The label stays the standard one (no "Tied for…") and the shared win
+    // count shows once.
+    expect(screen.getByText("Most head-to-head wins")).toBeInTheDocument()
+    expect(screen.queryByText(/tied for/i)).toBeNull()
+    expect(screen.getByText("1 win")).toBeInTheDocument()
+    // The summary's sheen line names all three tied players, comma-separated
+    // with no "and" conjunction (ordered by name on an all-square record).
+    const summary = container.querySelector(".head-to-head-winner")
+    expect(summary).toHaveTextContent("Hera, Liereyy, TheViper")
+    expect(summary?.textContent ?? "").not.toMatch(/\band\b/)
   })
 
   it("bolds the winner in the table and puts the sheen on the summary leader", () => {
