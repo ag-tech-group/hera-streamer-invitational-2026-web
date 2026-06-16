@@ -17,7 +17,7 @@ import { useAnalytics } from "@/lib/analytics"
 import { formatDuration, formatRelativeTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import {
-  topHeadToHeadWinner,
+  topHeadToHeadWinners,
   type HeadToHeadLeader,
 } from "@/pages/stats/head-to-head-summary"
 import type { HeadToHeadEntrant, HeadToHeadGame } from "@/types"
@@ -73,9 +73,10 @@ export function HeadToHeadCard({ id }: { id?: string }) {
   const { t } = useTranslation()
   const headToHead = useHeadToHead()
   const games = headToHead.data?.games ?? []
-  // Who has won the most head-to-heads in the loaded feed (#349) — null until
-  // the first decided game. Drives the summary card above the table.
-  const leader = topHeadToHeadWinner(games)
+  // Who has won the most head-to-heads in the loaded feed (#349) — empty until
+  // the first decided game, and more than one when the lead is tied. Drives the
+  // summary card above the table.
+  const leaders = topHeadToHeadWinners(games)
   // Sortable table over the feed; defaults to When-descending (its newest-first
   // payload order) so the default view matches the data and the header reads as
   // active.
@@ -130,7 +131,9 @@ export function HeadToHeadCard({ id }: { id?: string }) {
         </div>
       ) : (
         <>
-          {leader ? <HeadToHeadLeaderCard leader={leader} /> : null}
+          {leaders.length > 0 ? (
+            <HeadToHeadLeaderCard leaders={leaders} />
+          ) : null}
           {isMobile ? (
             <HeadToHeadMobileList games={sortedGames} now={now} />
           ) : (
@@ -208,12 +211,19 @@ export function HeadToHeadCard({ id }: { id?: string }) {
   )
 }
 
-/** Summary above the table (#349): the player with the most head-to-head wins
- *  in the loaded feed — a trophy + brand-tinted highlight (content-width, not
- *  full-bleed) matching the headline stat cards' icon language. The leader's
- *  name carries the animated brand sheen, the feature's one flourish. */
-function HeadToHeadLeaderCard({ leader }: { leader: HeadToHeadLeader }) {
-  const { t } = useTranslation()
+/** Summary above the table (#349): the player(s) with the most head-to-head
+ *  wins in the loaded feed — a trophy + brand-tinted highlight (content-width,
+ *  not full-bleed) matching the headline stat cards' icon language. When the
+ *  lead is tied, every level player is named, comma-separated. The name(s) carry
+ *  the animated brand sheen, the feature's one flourish; all tied players share
+ *  the same win count, shown once. */
+function HeadToHeadLeaderCard({ leaders }: { leaders: HeadToHeadLeader[] }) {
+  const { t, i18n } = useTranslation()
+  // All tied leaders are level on wins, so any leader's count speaks for them.
+  const names = formatLeaderNames(
+    leaders.map((leader) => leader.name),
+    i18n.language
+  )
   return (
     <div className="bg-brand/5 mb-3 flex w-fit max-w-full items-center gap-3 rounded-md px-3 py-2.5">
       <span className="bg-brand/10 text-brand flex size-10 shrink-0 items-center justify-center rounded-lg">
@@ -225,15 +235,32 @@ function HeadToHeadLeaderCard({ leader }: { leader: HeadToHeadLeader }) {
         </span>
         <span className="flex items-baseline gap-1.5">
           <span className="head-to-head-winner font-display truncate text-base tracking-wide">
-            {leader.name}
+            {names}
           </span>
           <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-            {t("stats.headToHead.winCount", { count: leader.wins })}
+            {t("stats.headToHead.winCount", { count: leaders[0].wins })}
           </span>
         </span>
       </div>
     </div>
   )
+}
+
+/**
+ * Joins the tied leaders' names into one locale-aware, comma-separated list —
+ * "A, B, C" in English, with each locale's own separators (#349; `type: "unit"`
+ * keeps the commas but drops the "and"/"or" conjunction). Falls back to
+ * comma-joining if the runtime lacks `Intl.ListFormat`.
+ */
+function formatLeaderNames(names: string[], lang: string): string {
+  try {
+    return new Intl.ListFormat(lang, {
+      style: "long",
+      type: "unit",
+    }).format(names)
+  } catch {
+    return names.join(", ")
+  }
 }
 
 /** One desktop game row: winner, loser, map, length, when, and the match link. */
