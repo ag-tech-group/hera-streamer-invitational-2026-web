@@ -44,7 +44,8 @@
       },
       "ended": {
         "title": "Ladderrace <accent>voltooid</accent>",
-        "body": "De ladderrace is afgelopen — deze stand is definitief."
+        "body": "De ladderrace is afgelopen — deze stand is definitief.",
+        "congrats": "Bedankt en gefeliciteerd aan alle spelers! GG WP!"
       }
     },
     "noStandings": {

@@ -44,7 +44,8 @@
       },
       "ended": {
         "title": "La course au ladder <accent>est terminée</accent>",
-        "body": "La course au ladder est terminée — ce classement est définitif."
+        "body": "La course au ladder est terminée — ce classement est définitif.",
+        "congrats": "Merci et bravo à tous les joueurs ! GG WP !"
       }
     },
     "noStandings": {

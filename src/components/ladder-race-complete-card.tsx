@@ -16,7 +16,8 @@ import { cn } from "@/lib/utils"
  * bracket, the playoffs schedule, qualification annotations) is host-curated
  * and ships separately from the tournament presentation bag (#363/#364). This
  * card states only what the dates already imply — the race is over and the
- * standings below are final.
+ * standings below are final — closing with a brief congratulatory sign-off to
+ * the players.
  */
 export function LadderRaceCompleteCard({ className }: { className?: string }) {
   const { t } = useTranslation()
@@ -59,6 +60,11 @@ export function LadderRaceCompleteCard({ className }: { className?: string }) {
       </p>
       <p className="text-muted-foreground text-sm leading-relaxed">
         {t("home.ladderRace.ended.body")}
+      </p>
+      {/* The one note of sentiment on an otherwise factual finished-state card:
+          a warm sign-off to the players, set a notch stronger than the body. */}
+      <p className="text-foreground text-sm font-medium">
+        {t("home.ladderRace.ended.congrats")}
       </p>
     </section>
   )

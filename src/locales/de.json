@@ -44,7 +44,8 @@
       },
       "ended": {
         "title": "Ladder-Rennen <accent>abgeschlossen</accent>",
-        "body": "Das Ladder-Rennen ist beendet – diese Platzierungen sind endgültig."
+        "body": "Das Ladder-Rennen ist beendet – diese Platzierungen sind endgültig.",
+        "congrats": "Danke und Glückwunsch an alle Spieler! GG WP!"
       }
     },
     "noStandings": {
