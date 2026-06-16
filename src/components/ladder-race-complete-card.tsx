@@ -12,12 +12,13 @@ import { cn } from "@/lib/utils"
  * finished event instead. Wears the same broadcast-card chrome as its siblings
  * so the column stays one family.
  *
- * Deliberately content-free about the playoffs: the post-race takeover (the
- * bracket, the playoffs schedule, qualification annotations) is host-curated
- * and ships separately from the tournament presentation bag (#363/#364). This
- * card states only what the dates already imply — the race is over and the
- * standings below are final — closing with a brief congratulatory sign-off to
- * the players.
+ * Beyond what the dates imply (the race is over, the standings below are
+ * final), the card closes with a thank-you to the players and a tune-in pointer
+ * to the host's main event — the latter carrying the emphasis as the card's one
+ * call to action. It still stops short of the full post-race takeover (the
+ * bracket, the playoffs schedule, qualification annotations), which is
+ * host-curated and ships separately from the tournament presentation bag
+ * (#363/#364); the main-event line is a single hand-written promo, not that.
  */
 export function LadderRaceCompleteCard({ className }: { className?: string }) {
   const { t } = useTranslation()
@@ -61,10 +62,14 @@ export function LadderRaceCompleteCard({ className }: { className?: string }) {
       <p className="text-muted-foreground text-sm leading-relaxed">
         {t("home.ladderRace.ended.body")}
       </p>
-      {/* The one note of sentiment on an otherwise factual finished-state card:
-          a warm sign-off to the players, set a notch stronger than the body. */}
-      <p className="text-foreground text-sm font-medium">
+      {/* A warm sign-off to the players (muted, like the body), then the
+          main-event tune-in as the card's call to action — the emphasis
+          (foreground + medium weight) sits on the tune-in line. */}
+      <p className="text-muted-foreground text-sm leading-relaxed">
         {t("home.ladderRace.ended.congrats")}
+      </p>
+      <p className="text-foreground text-sm font-medium">
+        {t("home.ladderRace.ended.mainEvent")}
       </p>
     </section>
   )

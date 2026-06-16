@@ -45,7 +45,8 @@
       "ended": {
         "title": "Ladder Race <accent>Complete</accent>",
         "body": "The ladder race has ended — these standings are final.",
-        "congrats": "Thank you and congrats to all the players! GG WP!"
+        "congrats": "Thank you and congrats to all the players! GG WP!",
+        "mainEvent": "Tune in to Hera's channel for the main event June 18–21."
       }
     },
     "noStandings": {
