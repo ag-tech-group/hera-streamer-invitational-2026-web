@@ -332,6 +332,11 @@ describe("HomePage", () => {
       await screen.findByText(fullLabel("Ladder Race Complete"))
     ).toBeInTheDocument()
     expect(await screen.findByText(/final standings/i)).toBeInTheDocument()
+    // The completion panel's one call to action is the grand-finals watch
+    // link (#373) — it points off-site at the broadcast VOD.
+    expect(
+      await screen.findByRole("link", { name: /grand finals/i })
+    ).toHaveAttribute("href", "https://www.youtube.com/watch?v=rVEBE7RVUTc")
     // The active panel and both countdowns are gone once the race is over.
     expect(
       screen.queryByText(fullLabel("Ladder Race Active"))

@@ -30,6 +30,10 @@ import { logger } from "@/lib/logger"
  *                          — the AoE2:DE store link in the hero tagline
  *                          (learn-about-the-game, distinct from the tournament
  *                          resource pills above). `product` is "aoe2_de".
+ * - `grandfinals.link.click` `{ source: "race_complete_card" }`
+ *                          — the grand-finals broadcast CTA on the
+ *                          ladder-race-complete card (#373); a single
+ *                          hand-placed promo link, like `product.link.click`.
  * - `player.profile.click` `{ profileId, alias, source: "standings" | "teams" }`
  *                          — player name → `presentation.profileUrl`. The
  *                          shared `PlayerName` renders on both surfaces (#350),
