@@ -375,6 +375,12 @@
     "body": "Entschuldigung, die gesuchte Seite konnte nicht gefunden werden.",
     "homeAction": "Zurück zur Startseite"
   },
+  "archive": {
+    "eyebrow": "Archiviert",
+    "adminTitle": "Admin nicht verfügbar",
+    "adminBody": "Dieses Event wurde archiviert. Die Admin-Tools sind offline, da das Turnier abgeschlossen ist.",
+    "adminUnavailable": "Nicht verfügbar – Event archiviert"
+  },
   "errorBoundary": {
     "eyebrow": "Etwas ist schiefgelaufen",
     "heading": "Fehler",

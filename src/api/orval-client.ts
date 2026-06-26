@@ -1,4 +1,6 @@
+import { fetchArchiveData } from "./archive-data"
 import { api } from "./api"
+import { ARCHIVE_MODE } from "@/lib/archive-mode"
 
 /**
  * Custom client adapter for orval that uses our configured Ky instance.
@@ -11,6 +13,19 @@ export const orvalClient = async <T>(
   url: string,
   options?: RequestInit
 ): Promise<T> => {
+  // Archive mode (#375): the live API is gone, so every read resolves from a
+  // bundled static snapshot instead. Reads are GETs (an absent method is a GET
+  // in orval's generated calls); the archive deploy has no write surface (admin
+  // is disabled), so a non-GET reaching here is unexpected and falls through to
+  // throw rather than silently hitting a dead backend.
+  if (ARCHIVE_MODE) {
+    const method = (options?.method ?? "GET").toUpperCase()
+    if (method === "GET") {
+      return fetchArchiveData<T>(url)
+    }
+    throw new Error(`${method} ${url} is unavailable in archive mode.`)
+  }
+
   // Remove leading slash if present since Ky prefixUrl handles it
   const normalizedUrl = url.startsWith("/") ? url.slice(1) : url
 

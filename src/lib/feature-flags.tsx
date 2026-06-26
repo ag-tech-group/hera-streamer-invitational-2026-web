@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createContext, useContext, useMemo } from "react"
 import { api } from "@/api/api"
+import { ARCHIVE_MODE } from "@/lib/archive-mode"
 
 type FlagMap = Record<string, boolean>
 
@@ -53,12 +54,18 @@ export function FeatureFlagProvider({
     },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
-    enabled: staticFlags === undefined,
+    // Archive mode (#375): there's no `/v1/flags` endpoint to call, so skip the
+    // query and fall back to build-time env flags only (handled in the memo).
+    enabled: staticFlags === undefined && !ARCHIVE_MODE,
   })
 
   const value = useMemo<FeatureFlagContextValue>(() => {
     if (staticFlags !== undefined) {
       return { flags: staticFlags, isLoading: false }
+    }
+    // Archive mode: env flags are the only source — the API is gone.
+    if (ARCHIVE_MODE) {
+      return { flags: getEnvFlags(), isLoading: false }
     }
     // `VITE_FEATURE_*` env vars are build-time overrides — they should beat
     // anything the API returns, not just act as a fallback when the call

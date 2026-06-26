@@ -375,6 +375,12 @@
     "body": "Tyvärr, vi kunde inte hitta sidan du letar efter.",
     "homeAction": "Gå tillbaka till startsidan"
   },
+  "archive": {
+    "eyebrow": "Arkiverad",
+    "adminTitle": "Admin ej tillgänglig",
+    "adminBody": "Det här evenemanget har arkiverats. Adminverktygen är offline nu när turneringen är avslutad.",
+    "adminUnavailable": "Ej tillgänglig — evenemang arkiverat"
+  },
   "errorBoundary": {
     "eyebrow": "Något gick fel",
     "heading": "Fel",

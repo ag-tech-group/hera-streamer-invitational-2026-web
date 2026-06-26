@@ -16,6 +16,7 @@ import {
 import { UserAvatar } from "@/components/user-avatar"
 import { activeTournament } from "@/config/tournaments"
 import { useTournament } from "@/hooks/use-tournament"
+import { ARCHIVE_MODE } from "@/lib/archive-mode"
 import { useAuth } from "@/lib/auth"
 import { AUTH_URL, loginUrl } from "@/lib/auth-config"
 
@@ -92,6 +93,28 @@ function AuthWidget() {
     avatarUrl,
     signOut,
   } = useAuth()
+
+  // Archive mode (#375): auth is offline (no `/v1/me`), so there's no account
+  // menu and signing in would be a dead end — the admin tools can't function
+  // without the backend. Show the admin entry point as a visibly-disabled
+  // button (tooltip explains why) so the surface stays discoverable; the route
+  // itself is guarded with an archived notice. The wrapper span carries the
+  // tooltip because the disabled button has `pointer-events-none`.
+  if (ARCHIVE_MODE) {
+    return (
+      <span title={t("archive.adminUnavailable")} className="inline-flex">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled
+          className="cursor-not-allowed gap-1.5"
+        >
+          <ShieldUser className="size-4" aria-hidden />
+          <span className="hidden sm:inline">{t("nav.admin")}</span>
+        </Button>
+      </span>
+    )
+  }
 
   // A neutral avatar-sized skeleton while the auth probe resolves — better
   // than an empty slot, and it sidesteps the sign-in-then-account-menu flash

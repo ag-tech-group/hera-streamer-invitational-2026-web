@@ -6,3 +6,7 @@ pnpm-lock.yaml
 # Generated files
 src/routeTree.gen.ts
 src/api/generated
+
+# Archive-mode snapshot (#375): raw API responses captured verbatim; kept
+# compact rather than prettier-expanded so the static bundle stays small.
+public/data

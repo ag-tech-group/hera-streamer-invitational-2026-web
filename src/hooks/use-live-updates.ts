@@ -13,6 +13,7 @@ import {
   getGetTournamentDetailV1TournamentsTournamentSlugGetQueryKey,
 } from "@/api/generated/hooks/tournaments/tournaments"
 import { activeTournament } from "@/config/tournaments"
+import { ARCHIVE_MODE } from "@/lib/archive-mode"
 import { logger } from "@/lib/logger"
 
 /**
@@ -67,6 +68,11 @@ export function useLiveUpdates(): void {
   const queryClient = useQueryClient()
 
   useEffect(() => {
+    // Archive mode (#375): the data is frozen and there's no `/v1/stream` to
+    // connect to — skip the EventSource entirely so no nudge connection is
+    // attempted against a backend that no longer exists.
+    if (ARCHIVE_MODE) return
+
     const tournamentSlug = activeTournament.apiTournamentSlug
     const standingsKey =
       getGetStandingsV1TournamentsTournamentSlugStandingsGetQueryKey(

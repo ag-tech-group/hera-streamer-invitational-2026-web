@@ -375,6 +375,12 @@
     "body": "Sorry, we konden de pagina die je zoekt niet vinden.",
     "homeAction": "Terug naar startpagina"
   },
+  "archive": {
+    "eyebrow": "Gearchiveerd",
+    "adminTitle": "Beheer niet beschikbaar",
+    "adminBody": "Dit evenement is gearchiveerd. De beheertools zijn offline nu het toernooi is afgelopen.",
+    "adminUnavailable": "Niet beschikbaar — evenement gearchiveerd"
+  },
   "errorBoundary": {
     "eyebrow": "Er ging iets mis",
     "heading": "Fout",

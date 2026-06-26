@@ -4,9 +4,11 @@ import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
+import { ArchivedNotice } from "@/components/archived-notice"
 import { NotFound } from "@/components/not-found"
 import { activeTournament } from "@/config/tournaments"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { ARCHIVE_MODE } from "@/lib/archive-mode"
 import { useAuth } from "@/lib/auth"
 import { loginUrl } from "@/lib/auth-config"
 import i18n from "@/lib/i18n"
@@ -67,6 +69,13 @@ export function AdminPage() {
     }
     wasAdminRef.current = isAdmin
   }, [isAdmin, isLoading, navigate])
+
+  // Archive mode (#375): the admin tools are offline with the backend scaled
+  // down. Guard the route so a bookmarked `/admin` shows the archived notice
+  // instead of mounting the admin UI and firing dead API calls. Checked after
+  // the hooks above so the rules-of-hooks hold; `ARCHIVE_MODE` is a build
+  // constant, so this whole branch is dead code in a normal build.
+  if (ARCHIVE_MODE) return <ArchivedNotice />
 
   if (isLoading) return null
   if (!isAdmin) return <NotFound />

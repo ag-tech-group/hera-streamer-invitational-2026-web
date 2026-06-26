@@ -375,6 +375,12 @@
     "body": "Lo sentimos, no pudimos encontrar la página que buscas.",
     "homeAction": "Volver al inicio"
   },
+  "archive": {
+    "eyebrow": "Archivado",
+    "adminTitle": "Admin no disponible",
+    "adminBody": "Este evento ha sido archivado. Las herramientas de administración están desconectadas ahora que el torneo ha concluido.",
+    "adminUnavailable": "No disponible: evento archivado"
+  },
   "errorBoundary": {
     "eyebrow": "Algo salió mal",
     "heading": "Error",
