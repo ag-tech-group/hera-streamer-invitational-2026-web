@@ -44,7 +44,7 @@
       },
       "ended": {
         "title": "Ladder Race <accent>Complete</accent>",
-        "body": "The ladder race has ended — these standings are final.",
+        "body": "The ladder race has ended. These standings are final.",
         "congrats": "Thank you and congrats to all the players! GG WP!",
         "grandFinals": "Watch the Grand Finals"
       }
