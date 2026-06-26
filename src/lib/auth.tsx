@@ -11,6 +11,7 @@ import {
 import { setOnUnauthorized } from "@/api/api"
 import { getMeV1MeGet } from "@/api/generated/hooks/me/me"
 import { activeTournament } from "@/config/tournaments"
+import { ARCHIVE_MODE } from "@/lib/archive-mode"
 import { AUTH_URL, getAuthMe, logoutFromAuthApi } from "@/lib/auth-config"
 import { getStored, removeStored, setStored } from "@/lib/safe-storage"
 
@@ -144,6 +145,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    // Archive mode (#375): the standings API (which serves `/v1/me`) is gone,
+    // so there's no way to establish or refresh a session — and signing in
+    // would be a dead end since admin writes are disabled. Render the public
+    // surface as an anonymous visitor without firing either identity probe.
+    if (ARCHIVE_MODE) {
+      clearAuthFields()
+      setIsLoading(false)
+      return
+    }
+
     // Boot-time probe gate (#134): skip the auth requests entirely when
     // there's no signal this browser has ever authenticated with us —
     // they'd just yield 401s that the browser logs as console errors

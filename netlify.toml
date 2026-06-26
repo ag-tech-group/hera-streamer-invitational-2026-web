@@ -127,6 +127,18 @@
   to = "/civ-emblems/:splat"
   status = 200
 
+# `public/data/*` holds the frozen read-API snapshots that archive mode serves
+# in place of the live backend (#375). Same prefix-vs-physical asymmetry as the
+# asset rules above — without this the `.json` falls through to the SPA fallback
+# and the archive fetch gets the app shell (HTML) instead of JSON, so every view
+# fails to parse its data on the prefixed production deploy. Harmless when
+# archive mode is off (nothing requests these paths). Must land before the
+# `/kings-gauntlet/*` fallback.
+[[redirects]]
+  from = "/kings-gauntlet/data/*"
+  to = "/data/:splat"
+  status = 200
+
 # Root-level files in `public/` (favicons, app icon, logo, plain-text
 # files) are referenced from the built HTML under the base prefix but live
 # at the deploy root. Enumerated rather than glob-matched because a broader

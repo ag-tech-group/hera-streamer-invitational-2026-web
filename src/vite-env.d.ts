@@ -4,6 +4,12 @@ interface ImportMetaEnv {
   readonly VITE_API_URL?: string
   readonly VITE_LOG_LEVEL?: string
   readonly VITE_TOURNAMENT_SLUG?: string
+  /**
+   * "true" serves the frozen tournament fully static from `public/data/` with
+   * no live backend — see `src/lib/archive-mode.ts`. Unset/anything else =
+   * normal live behavior.
+   */
+  readonly VITE_ARCHIVE_MODE?: string
   readonly VITE_SENTRY_DSN?: string
   readonly VITE_SENTRY_TRACES_SAMPLE_RATE?: string
   readonly VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE?: string

@@ -382,6 +382,12 @@
     "body": "Sorry, we couldn't find the page you're looking for.",
     "homeAction": "Go back home"
   },
+  "archive": {
+    "eyebrow": "Archived",
+    "adminTitle": "Admin unavailable",
+    "adminBody": "This event has been archived. The admin tools are offline now that the tournament has concluded.",
+    "adminUnavailable": "Unavailable — event archived"
+  },
   "errorBoundary": {
     "eyebrow": "Something went wrong",
     "heading": "Error",
