@@ -44,7 +44,7 @@
       },
       "ended": {
         "title": "Carrera de Ladder <accent>finalizada</accent>",
-        "body": "La carrera de ladder ha terminado: esta clasificación es definitiva.",
+        "body": "La carrera de ladder ha terminado. Esta clasificación es definitiva.",
         "congrats": "¡Gracias y felicidades a todos los jugadores! ¡GG WP!",
         "grandFinals": "Ver la gran final"
       }
