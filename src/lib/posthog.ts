@@ -1,5 +1,6 @@
 import type { AnalyticsBackend } from "@/lib/analytics"
 import { logger } from "@/lib/logger"
+import { removeStored } from "@/lib/safe-storage"
 
 /**
  * Minimal local interface for the subset of the PostHog SDK we call. Using
@@ -39,6 +40,10 @@ interface PostHogClient {
  * `feature-flags.tsx`'s `FeatureFlagProvider` can source flags from
  * `posthog.getAllFlags()` in addition to its current API/env fallback —
  * the existing `useFeatureFlag()` hook surface stays the same.
+ *
+ * **Toolbar: permanently disabled.** The PostHog toolbar (the in-page
+ * heatmap/debug overlay launched from the PostHog app) must never render
+ * on the public site — see `scrubToolbarLaunchState`.
  */
 
 // Ingestion host. Production sets VITE_POSTHOG_HOST to the first-party reverse
@@ -50,6 +55,45 @@ const DEFAULT_HOST = "https://us.i.posthog.com"
 
 const enabled = Boolean(import.meta.env.VITE_POSTHOG_KEY)
 
+// posthog-js persists toolbar-launch params under this localStorage key after
+// a `#__posthog=` visit and re-boots the toolbar from them on every later
+// visit to the origin.
+const TOOLBAR_PARAMS_KEY = "_postHogToolbarParams"
+
+// The two hash keys posthog-js treats as a toolbar launch: `#__posthog={...}`
+// ("Launch toolbar" in the PostHog app) and `#state=...` (its auth return
+// trip). The `=` is required, so plain in-page anchors (`#civ-picks`) can
+// never match.
+const TOOLBAR_LAUNCH_HASH = /[#&?](?:__posthog|state)=/
+
+/**
+ * Keep the PostHog toolbar off this site — both of its boot triggers are
+ * neutralised before the SDK can read them.
+ *
+ * The toolbar is PostHog's in-page heatmap/debug overlay, meant for project
+ * members only, and posthog-js (checked at 1.376) has no config option to
+ * turn it off. Worse, one `#__posthog=` launch persists its params to
+ * localStorage, so the toolbar re-arms on every future visit in that
+ * browser; once the launch's temporary auth token expires it renders as a
+ * stuck, unstyled "Authenticating…" box floating over the page. So: drop
+ * any persisted launch params, and strip a launch hash from the URL (with
+ * the same `replaceState` the SDK itself uses, preserving router state).
+ *
+ * Must run before `import("posthog-js")` — the SDK samples `location.hash`
+ * into a module-level constant at evaluation time, so scrubbing after the
+ * import would be too late for the URL trigger.
+ */
+export function scrubToolbarLaunchState(): void {
+  removeStored(TOOLBAR_PARAMS_KEY)
+  if (TOOLBAR_LAUNCH_HASH.test(window.location.hash)) {
+    window.history.replaceState(
+      window.history.state,
+      "",
+      window.location.pathname + window.location.search
+    )
+  }
+}
+
 let client: PostHogClient | null = null
 const pending: Array<(p: PostHogClient) => void> = []
 
@@ -57,6 +101,7 @@ export async function initPostHog(): Promise<void> {
   if (!enabled) return
   if (client) return // already initialised
   const key = import.meta.env.VITE_POSTHOG_KEY!
+  scrubToolbarLaunchState()
   // Dynamic import keeps posthog-js out of the main bundle — it lands in
   // its own async chunk that loads after first paint (#65 perf audit). The
   // chunk's stable name ("posthog-XX.js") comes from `manualChunks` in
