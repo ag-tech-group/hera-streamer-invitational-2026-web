@@ -37,10 +37,14 @@ jobs:
         run: pnpm format:check
 
       - name: Type check
-        run: pnpm tsc --noEmit
+        run: pnpm typecheck
 
       - name: Test
         run: pnpm test:run
+
+      # Type checking can't catch bundler-level failures, so build what ships.
+      - name: Build
+        run: pnpm build
 
   # Verifies that generated API types are up-to-date with the backend
   # Requires OPENAPI_URL to be set (e.g., to a staging backend)
