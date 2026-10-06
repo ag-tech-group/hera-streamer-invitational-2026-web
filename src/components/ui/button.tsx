@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
+import { Slot } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
 import { LoaderCircle } from "lucide-react"
 
@@ -53,7 +53,7 @@ function Button({
     asChild?: boolean
     loading?: boolean
   }) {
-  const Comp = asChild ? Slot : "button"
+  const Comp = asChild ? Slot.Root : "button"
   const ref = React.useRef<HTMLButtonElement>(null)
   const [savedWidth, setSavedWidth] = React.useState<number | undefined>(
     undefined
