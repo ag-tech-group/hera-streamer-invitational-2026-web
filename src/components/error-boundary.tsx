@@ -9,8 +9,9 @@ import { logger } from "@/lib/logger"
 export function ErrorBoundary({ error, reset }: ErrorComponentProps) {
   const { t } = useTranslation()
   logger.error("Uncaught error in route component", {
-    message: error.message,
-    stack: error.stack,
+    // The router types `error` as unknown: anything can be thrown.
+    message: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
   })
   // Sentry.captureException is a no-op when the SDK isn't initialized (no
   // VITE_SENTRY_DSN), so safe to call unconditionally.
